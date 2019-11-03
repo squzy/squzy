@@ -1,0 +1,2 @@
+# squzy
+Opensource monitoring system
