@@ -1,0 +1,24 @@
+version: 2.1
+orbs:
+  codecov: codecov/codecov@1.0.5
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.12
+      - image: circleci/mongo:latest
+    steps:
+      - checkout
+      - run:
+          name: Install dep
+          command: go mod download
+      - run:
+          name: Create reports directory
+          command: |
+            mkdir -p /tmp/reports
+      - run:
+          name: Run tests
+          command: |
+            go test ./... -coverprofile=c.out
+            mv c.out /tmp/reports
+      - codecov/upload:
+          file: /tmp/reports/c.out
