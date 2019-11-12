@@ -10,7 +10,7 @@ import (
 var (
 	alreadyRunError             = errors.New("SCHEDULER_ALREADY_RUN")
 	alreadyStopError            = errors.New("SCHEDULER_ALREADY_STOP")
-	intervalLessHalfSecondError = errors.New("INTERVAL_LESS_THEN_HALF_SECOND")
+	intervalLessHalfSecondError = errors.New("INTERVAL_LESS_THAN_HALF_SECOND")
 )
 
 type Scheduler interface {
