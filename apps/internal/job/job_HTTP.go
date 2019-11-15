@@ -1,4 +1,4 @@
-package job_HTTP
+package job
 
 import (
 	"errors"
@@ -43,7 +43,6 @@ func (j jobHTTP) Do() error {
 
 	if resp.StatusCode == j.statusCode {
 		return nil
-	} else {
-		return errors.New(ERROR_WRONG_STATUS)
 	}
+	return errors.New(ERROR_WRONG_STATUS)
 }
