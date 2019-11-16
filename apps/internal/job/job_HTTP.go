@@ -13,16 +13,14 @@ type jobHTTP struct {
 	statusCode int
 }
 
-
-//todo: put in const
-var (
-	TIMEOUT            time.Duration = 5
-	ERROR_WRONG_STATUS string        = "WRONG_STATUS_CODE"
+const (
+	timeout          time.Duration = 5
+	errorWrongStatus string        = "WRONG_STATUS_CODE"
 )
 
 func (j jobHTTP) Do() error {
 	client := http.Client{
-		Timeout: TIMEOUT,
+		Timeout: timeout,
 	}
 
 	req, err := http.NewRequest(j.methodType, j.url, nil)
@@ -44,5 +42,5 @@ func (j jobHTTP) Do() error {
 	if resp.StatusCode == j.statusCode {
 		return nil
 	}
-	return errors.New(ERROR_WRONG_STATUS)
+	return errors.New(errorWrongStatus)
 }
