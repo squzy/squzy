@@ -12,6 +12,9 @@ dep: .dep
 
 default: build
 
+.build
+    bazel build //apps/...
+
 .test:
 	bazel test //apps/...
 
