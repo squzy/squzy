@@ -28,6 +28,7 @@ jobs:
       - run:
           name: Run tests
           command: |
+            cat Makefile
             make test_cover
             mv c.out /tmp/reports
       - codecov/upload:
