@@ -36,19 +36,26 @@ func NewGrpcJob(service string, address string, connOptions []grpc.DialOption, c
 
 func (j *grpcJob) Do() error {
 	ctx, cancel := context.WithTimeout(context.Background(), connTimeout)
+
 	defer cancel()
+
 	conn, err := grpc.DialContext(ctx, j.address, j.connOptions...)
 
 	if err != nil {
 		return wrongConnectConfigError
 	}
+
 	defer func() {
 		_ = conn.Close()
 	}()
 
 	client := health_check.NewHealthClient(conn)
 
-	res, err := client.Check(context.Background(), &health_check.HealthCheckRequest{Service: j.service}, j.callOptions...)
+	reqCtx, cancelCtx := context.WithTimeout(context.Background(), connTimeout)
+
+	defer cancelCtx()
+
+	res, err := client.Check(reqCtx, &health_check.HealthCheckRequest{Service: j.service}, j.callOptions...)
 
 	if err != nil {
 		return connTimeoutError
