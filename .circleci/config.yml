@@ -1,11 +1,12 @@
 var_8: &install_bazel
+  environment:
+    BAZEL_VERSION: 1.1.0
   run:
     name: Install Bazel
     command: |
-      sudo tee /etc/apt/sources.list.d/bazel.list
-      curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-      sudo apt-get update
-      sudo apt-get install bazel
+      wget https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh -O bazel_installer.sh
+      chmod +x bazel_installer.sh
+      ./bazel_installer.sh --user
       bazel --version
 
 version: 2.1
