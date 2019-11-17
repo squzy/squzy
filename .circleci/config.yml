@@ -2,6 +2,8 @@ var_8: &install_bazel
   run:
     name: Install Bazel
     command: |
+      sudo tee /etc/apt/sources.list.d/bazel.list
+      curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
       sudo apt-get update
       sudo apt-get install bazel
       bazel --version
