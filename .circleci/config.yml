@@ -1,10 +1,10 @@
 var_8: &install_bazel
   run:
-    name: Initializing Bazel
+    name: Install Bazel
     command: |
-      npm install -g @bazel/bazel
-      echo "Bazel version:"
-      bazel version
+      sudo apt-get update
+      sudo apt-get install bazel
+      bazel --version
 
 version: 2.1
 orbs:
@@ -13,7 +13,6 @@ jobs:
   build:
     docker:
       - image: circleci/golang:1.12
-      - image: circleci/node:10.16
     steps:
       - *install_bazel
       - run:
