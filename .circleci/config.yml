@@ -1,6 +1,4 @@
 var_8: &install_bazel
-  environment:
-    BAZEL_VERSION: 1.1.0
   run:
     name: Install Bazel
     command: |
@@ -14,6 +12,8 @@ orbs:
   codecov: codecov/codecov@1.0.5
 jobs:
   build:
+    environment:
+      BAZEL_VERSION: 1.1.0
     docker:
       - image: circleci/golang:1.12
     steps:
