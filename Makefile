@@ -12,8 +12,11 @@ dep: .dep
 
 default: build
 
+.build:
+	bazel build //apps/...
+
 .test:
-	bazel test //apps/...:all
+	bazel test //apps/...
 
 .test_debug:
 	bazel test //apps/...:all --sandbox_debug
@@ -22,4 +25,5 @@ default: build
 	bazel run //:gazelle -- update-repos -from_file=go.mod
 
 .test_cover:
+	# bazel coverage --test_arg="-test.coverprofile=c.out" //apps/...
 	go test ./... -coverprofile=c.out
