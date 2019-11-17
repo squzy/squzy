@@ -29,8 +29,6 @@ jobs:
       - run:
           name: Run tests
           command: |
-            pwd
-            ls
             make test_cover
             mv c.out /tmp/reports
       - codecov/upload:
