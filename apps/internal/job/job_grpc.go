@@ -2,20 +2,8 @@ package job
 
 import (
 	"context"
-	"errors"
 	"google.golang.org/grpc"
 	health_check "google.golang.org/grpc/health/grpc_health_v1"
-	"time"
-)
-
-const (
-	connTimeout = time.Second * 5
-)
-
-var (
-	grpcNotServing          = errors.New("STATUS_NOT_SERVING")
-	connTimeoutError        = errors.New("CONNECTION_TIMEOUT")
-	wrongConnectConfigError = errors.New("WRONG_CONNECTION_CONFIGURATION")
 )
 
 type grpcJob struct {
