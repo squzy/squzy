@@ -4,7 +4,8 @@ go_library(
      name = "job",
      srcs = [
          "job.go",
-         "job_grpc.go"
+         "job_grpc.go",
+         "job_tcp.go"
      ],
      importpath = "squzy/apps/internal/job",
      visibility = ["//visibility:public"],
@@ -15,10 +16,11 @@ go_library(
 )
 
 go_test(
-    name = "job_grpc_test",
+    name = "job_test",
     srcs = [
         "job_test.go",
         "job_grpc_test.go",
+        "job_tcp_test.go"
     ],
     embed = [":job"],
     deps = [
