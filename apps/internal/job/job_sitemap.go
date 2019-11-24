@@ -38,9 +38,9 @@ func (j *siteMapJob) Do() error {
 		if v.Ignore {
 			continue
 		}
+		location := v.Location
 		group.Go(func() error {
-			location := v.Location
-			req, err := http.NewRequest(http.MethodGet, v.Location, nil)
+			req, err := http.NewRequest(http.MethodGet, location, nil)
 			if err != nil {
 				cancel()
 				return err
