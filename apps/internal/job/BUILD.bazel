@@ -5,11 +5,15 @@ go_library(
      srcs = [
          "job.go",
          "job_grpc.go",
-         "job_tcp.go"
+         "job_tcp.go",
+         "job_sitemap.go",
      ],
      importpath = "squzy/apps/internal/job",
      visibility = ["//visibility:public"],
      deps = [
+        "//apps/internal/httpTools:httpTools",
+        "//apps/internal/parsers:sitemap",
+        "@org_golang_x_sync//errgroup:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//health/grpc_health_v1:go_default_library"
      ]
@@ -20,10 +24,13 @@ go_test(
     srcs = [
         "job_test.go",
         "job_grpc_test.go",
-        "job_tcp_test.go"
+        "job_tcp_test.go",
+        "job_sitemap_test.go",
     ],
     embed = [":job"],
     deps = [
+        "//apps/internal/httpTools:httpTools",
+        "//apps/internal/parsers:sitemap",
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//health/grpc_health_v1:go_default_library",
         "@com_github_stretchr_testify//assert:go_default_library"
