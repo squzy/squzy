@@ -4,20 +4,27 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 type httpTool struct {
-	client http.Client
+	client *http.Client
 }
+
+const (
+	MaxIdleConnections int = 30
+	RequestTimeout     int = 10
+)
 
 var (
 	notExpectedStatusCode = errors.New("NOT_EXPECTED_STATUS_CODE")
 )
 
-func (h *httpTool) SendRequest(req *http.Request) ([]byte, error) {
+func (h *httpTool) SendRequest(req *http.Request) (int, []byte, error) {
 	resp, err := h.client.Do(req)
+
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
 	if resp != nil {
@@ -25,40 +32,49 @@ func (h *httpTool) SendRequest(req *http.Request) ([]byte, error) {
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
+
 	if err != nil {
-		return nil, err
+		return resp.StatusCode, nil, err
 	}
 
-	return data, nil
+	return resp.StatusCode, data, nil
 }
 
-func (h *httpTool) SendRequestWithStatusCode(req *http.Request, expectedCode int) ([]byte, error) {
+func (h *httpTool) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
 	resp, err := h.client.Do(req)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
 	if resp != nil {
 		defer resp.Body.Close()
 	}
+
 	if resp.StatusCode != expectedCode {
-		return nil, notExpectedStatusCode
-	}
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+		return resp.StatusCode, nil, notExpectedStatusCode
 	}
 
-	return data, nil
+	data, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		return resp.StatusCode, nil, err
+	}
+
+	return resp.StatusCode, data, nil
 }
 
 type HttpTool interface {
-	SendRequest(req *http.Request) ([]byte, error)
-	SendRequestWithStatusCode(req *http.Request, expectedCode int) ([]byte, error)
+	SendRequest(req *http.Request) (int, []byte, error)
+	SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error)
 }
 
-func New(client http.Client) HttpTool {
+func New() HttpTool {
 	return &httpTool{
-		client: client,
+		client: &http.Client{
+			Transport: &http.Transport{
+				MaxIdleConnsPerHost: MaxIdleConnections,
+			},
+			Timeout: time.Duration(RequestTimeout) * time.Second,
+		},
 	}
 }

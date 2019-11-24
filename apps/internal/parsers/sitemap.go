@@ -2,39 +2,29 @@ package parsers
 
 import (
 	"encoding/xml"
-	"net/http"
-	"squzy/apps/internal/httpTools"
 )
 
 type SiteMap struct {
-	UrlSet []SiteMapUrl `xml:"urlset"`
+	XMLName xml.Name `xml:"urlset"`
+	UrlSet []SiteMapUrl `xml:"url"`
 }
 
 type SiteMapUrl struct {
+	XMLName  xml.Name `xml:"url"`
 	Location string `xml:"loc"`
+	Ignore bool `xml:"ignore"`
 }
 
 type SiteMapParser struct {
-	httpTool httpTools.HttpTool
 }
 
-func NewSiteMapParser(httpTool httpTools.HttpTool) *SiteMapParser {
-	return &SiteMapParser{
-		httpTool: httpTool,
-	}
+func NewSiteMapParser() *SiteMapParser {
+	return &SiteMapParser{}
 }
 
-func (parser *SiteMapParser) Parse(url string) (*SiteMap, error) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	xmlBytes, err := parser.httpTool.SendRequestWithStatusCode(req, http.StatusOK)
-	if err != nil {
-		return nil, err
-	}
+func (parser *SiteMapParser) Parse(xmlBytes []byte) (*SiteMap, error) {
 	siteMap := &SiteMap{}
-	err = xml.Unmarshal(xmlBytes, siteMap)
+	err := xml.Unmarshal(xmlBytes, siteMap)
 	if err != nil {
 		return nil, err
 	}

@@ -9,6 +9,7 @@
         <lastmod>2005-01-01</lastmod>
 
         <changefreq>monthly</changefreq>
+        <ignore>true</ignore>
 
         <priority>0.8</priority>
 
