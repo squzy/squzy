@@ -50,7 +50,7 @@ func (j *siteMapJob) Do() error {
 				cancel()
 				return newSiteMapError(location, code)
 			}
-			return err
+			return nil
 		})
 	}
 	err := group.Wait()
