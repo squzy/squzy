@@ -3,12 +3,14 @@ package scheduler
 import (
 	"github.com/stretchr/testify/assert"
 	"squzy/apps/internal/config"
+	"sync"
 	"testing"
 	"time"
 )
 
 type jb struct {
 	count int
+	m sync.Mutex
 }
 
 func (j *jb) Do() error {
@@ -55,10 +57,12 @@ func TestSchl_Run(t *testing.T) {
 			j := &jb{count: 0}
 			i, _ := New(cfg, time.Second, j)
 			i.Run()
-			time.Sleep(time.Millisecond * 1500)
-			assert.Equal(t, 1, j.count)
-			time.Sleep(time.Second)
-			assert.Equal(t, 2, j.count)
+			time.AfterFunc(time.Second, func() {
+				assert.Equal(t, 1, j.count)
+			})
+			time.AfterFunc(time.Second, func() {
+				assert.Equal(t, 2, j.count)
+			})
 			i.Stop()
 		})
 	})
