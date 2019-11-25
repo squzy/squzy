@@ -36,13 +36,13 @@ func (s *siteMapError) GetLogData() *clientPb.Log {
 			Location: s.location,
 			Port:     s.port,
 			Time:     s.time,
-			Type:     clientPb.Type_Grpc,
+			Type:     clientPb.Type_SiteMap,
 		},
 	}
 }
 
 func newSiteMapError(time *timestamp.Timestamp, code clientPb.StatusCode, description string, location string, port int32) CheckError {
-	return &tcpError{
+	return &siteMapError{
 		time:        time,
 		code:        code,
 		description: description,
@@ -77,11 +77,7 @@ func (j *siteMapJob) Do() CheckError {
 		}
 		location := v.Location
 		group.Go(func() error {
-			req, err := http.NewRequest(http.MethodGet, location, nil)
-			if err != nil {
-				cancel()
-				return err
-			}
+			req, _ := http.NewRequest(http.MethodGet, location, nil)
 			code, _, err := j.httpTools.SendRequestWithStatusCode(req, http.StatusOK)
 			if err != nil {
 				cancel()

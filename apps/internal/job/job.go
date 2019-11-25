@@ -15,6 +15,7 @@ var (
 	connTimeoutError        = errors.New("CONNECTION_TIMEOUT")
 	wrongConnectConfigError = errors.New("WRONG_CONNECTION_CONFIGURATION")
 	connectionNotExistError = errors.New("CONNECTION_NOT_EXIST")
+	cantCreateRequest = errors.New("CANT_CREATE_REQUEST")
 )
 
 

@@ -26,7 +26,7 @@ func (s *tcpError) GetLogData() *clientPb.Log {
 			Location: s.location,
 			Port:     s.port,
 			Time:     s.time,
-			Type:     clientPb.Type_Grpc,
+			Type:     clientPb.Type_Tcp,
 		},
 	}
 }
