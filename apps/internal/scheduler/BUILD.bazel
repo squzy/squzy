@@ -19,6 +19,7 @@ go_test(
     ],
     embed = [":scheduler"],
     deps = [
+        "//apps/internal/job:job",
         "//apps/internal/config:config",
         "@com_github_stretchr_testify//assert:go_default_library"
     ]

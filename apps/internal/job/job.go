@@ -3,6 +3,7 @@ package job
 import (
 	"errors"
 	"time"
+	clientPb "github.com/squzy/squzy_generated/generated/logger"
 )
 
 const (
@@ -17,6 +18,10 @@ var (
 )
 
 
+type CheckError interface {
+	GetLogData() *clientPb.Log
+}
+
 type Job interface {
-	Do() error
+	Do() CheckError
 }

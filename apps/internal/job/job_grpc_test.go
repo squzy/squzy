@@ -2,6 +2,7 @@ package job
 
 import (
 	"context"
+	clientPb "github.com/squzy/squzy_generated/generated/logger"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	health_check "google.golang.org/grpc/health/grpc_health_v1"
@@ -39,7 +40,7 @@ func (s server) Watch(*health_check.HealthCheckRequest, health_check.Health_Watc
 
 func TestNewGrpcJob(t *testing.T) {
 	t.Run("Should: Should implement interface Job", func(t *testing.T) {
-		job := NewGrpcJob("test", "localhost", []grpc.DialOption{}, []grpc.CallOption{})
+		job := NewGrpcJob("test", "localhost", 9090, []grpc.DialOption{}, []grpc.CallOption{})
 		assert.Implements(t, (*Job)(nil), job)
 	})
 }
@@ -53,8 +54,8 @@ func TestGrpcJob_Do(t *testing.T) {
 			go func() {
 				_ = grpcServer.Serve(lis)
 			}()
-			job := NewGrpcJob("test", "localhost:9090", []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
-			assert.Equal(t, nil, job.Do())
+			job := NewGrpcJob("test", "localhost",9090, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
+			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
 			grpcServer.Stop()
 		})
 
@@ -65,19 +66,19 @@ func TestGrpcJob_Do(t *testing.T) {
 			go func() {
 				_ = grpcServer.Serve(lis)
 			}()
-			job := NewGrpcJob("test", "localhost:9090", []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
-			assert.Equal(t, grpcNotServing, job.Do())
+			job := NewGrpcJob("test", "localhost",9090, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
+			assert.Equal(t, grpcNotServing.Error(), job.Do().GetLogData().Description)
 			grpcServer.Stop()
 		})
 
 		t.Run("Should: Return connTimeoutError error", func(t *testing.T) {
-			job := NewGrpcJob("test", "localhost:9091", []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
-			assert.Equal(t, connTimeoutError, job.Do())
+			job := NewGrpcJob("test", "localhost",9091, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
+			assert.Equal(t, connTimeoutError.Error(), job.Do().GetLogData().Description)
 		})
 
 		t.Run("Should: Return wrongConnectConfigError error", func(t *testing.T) {
-			job := NewGrpcJob("test", "localhost:9091", []grpc.DialOption{grpc.WithInsecure(), grpc.WithBlock()}, []grpc.CallOption{})
-			assert.Equal(t, wrongConnectConfigError, job.Do())
+			job := NewGrpcJob("test", "localhost",9091, []grpc.DialOption{grpc.WithInsecure(), grpc.WithBlock()}, []grpc.CallOption{})
+			assert.Equal(t, wrongConnectConfigError.Error(), job.Do().GetLogData().Description)
 		})
 	})
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net"
 	"testing"
+	clientPb "github.com/squzy/squzy_generated/generated/logger"
 )
 
 func TestNewTcpJob(t *testing.T) {
@@ -19,7 +20,7 @@ func TestJobTcp_Do(t *testing.T) {
 			job := NewTcpJob("localhost", 10002)
 			server, _ := net.Listen("tcp", "localhost:10003")
 			defer server.Close()
-			assert.Equal(t, wrongConnectConfigError, job.Do())
+			assert.Equal(t, wrongConnectConfigError.Error(), job.Do().GetLogData().Description)
 		})
 		t.Run("Should: return nil", func(t *testing.T) {
 			job := NewTcpJob("localhost", 10003)
@@ -28,7 +29,7 @@ func TestJobTcp_Do(t *testing.T) {
 				server.Accept()
 			}()
 			defer server.Close()
-			assert.Equal(t, nil, job.Do())
+			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
 		})
 	})
 }

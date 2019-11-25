@@ -3,6 +3,7 @@ package scheduler
 import (
 	"github.com/stretchr/testify/assert"
 	"squzy/apps/internal/config"
+	"squzy/apps/internal/job"
 	"sync"
 	"testing"
 	"time"
@@ -13,7 +14,7 @@ type jb struct {
 	m sync.Mutex
 }
 
-func (j *jb) Do() error {
+func (j *jb) Do() job.CheckError {
 	j.count += 1
 	return nil
 }

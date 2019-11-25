@@ -1,10 +1,11 @@
 package job
 
 import (
+	"errors"
+	clientPb "github.com/squzy/squzy_generated/generated/logger"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"squzy/apps/internal/parsers"
-	"errors"
 	"testing"
 )
 type mockHttpTools struct {
@@ -53,7 +54,7 @@ func TestSiteMapJob_Do(t *testing.T) {
 					},
 				},
 			}, &mockHttpTools{})
-			assert.Equal(t, nil, job.Do())
+			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
 		})
 		t.Run("Because ignore url", func(t *testing.T) {
 			job := NewSiteMapJob(&parsers.SiteMap{
@@ -68,7 +69,7 @@ func TestSiteMapJob_Do(t *testing.T) {
 					},
 				},
 			}, &mockHttpToolsWithError{})
-			assert.Equal(t, nil, job.Do())
+			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
 		})
 	})
 	t.Run("Should: return error", func(t *testing.T) {
@@ -85,7 +86,7 @@ func TestSiteMapJob_Do(t *testing.T) {
 					},
 				},
 			}, &mockHttpToolsWithError{})
-			assert.IsType(t, &siteMapError{}, job.Do())
+			assert.IsType(t, clientPb.StatusCode_Error, job.Do().GetLogData().Code)
 		})
 	})
 }
