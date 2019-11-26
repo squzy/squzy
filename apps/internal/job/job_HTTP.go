@@ -7,12 +7,14 @@ import (
 	"github.com/google/uuid"
 	clientPb "github.com/squzy/squzy_generated/generated/logger"
 	"net/http"
+	"strings"
 	"time"
 )
 
 const (
 	timeout = 5 * time.Second
 	httpPort = 80
+	httpsPort = 443
 )
 
 type jobHTTP struct {
@@ -34,13 +36,17 @@ var (
 )
 
 func (e *httpError) GetLogData() *clientPb.Log {
+	port := httpPort
+	if strings.HasPrefix(e.location, "https") {
+		port = httpsPort
+	}
 	return &clientPb.Log{
 		Code:        e.code,
 		Description: e.description,
 		Meta: &clientPb.MetaData{
 			Id:       uuid.New().String(),
 			Location: e.location,
-			Port:     httpPort,
+			Port:     port,
 			Time:     e.time,
 			Type:     clientPb.Type_Http,
 		},
