@@ -2,7 +2,6 @@ package job
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 )
@@ -15,9 +14,11 @@ type jobHTTP struct {
 }
 
 const (
-	timeout          time.Duration = 5
-	errorWrongStatus string        = "WRONG_STATUS_CODE"
-	errorNoResponse string         = "No_RESPONSE_FROM_SERVER"
+	timeout = 5 * time.Second
+)
+
+var (
+	wrongStatusError = errors.New("WRONG_STATUS_CODE")
 )
 
 func (j *jobHTTP) Do() error {
@@ -38,18 +39,15 @@ func (j *jobHTTP) Do() error {
 	if err != nil {
 		return err
 	}
-	if resp == nil {
-		return errors.New(errorNoResponse)
+	if resp != nil {
+		defer resp.Body.Close()
 	}
 
-	fmt.Println(resp.StatusCode)
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode == j.statusCode {
-		return nil
+	if resp.StatusCode != j.statusCode {
+		return wrongStatusError
 	}
-	return errors.New(errorWrongStatus)
+
+	return nil
 }
 
 func NewJob(method, url string, headers map[string]string, status int) *jobHTTP {
