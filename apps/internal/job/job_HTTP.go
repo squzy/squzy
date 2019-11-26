@@ -97,7 +97,12 @@ func (j *jobHTTP) Do() CheckError {
 		)
 	}
 
-	return nil
+	return NewHttpError(
+		ptypes.TimestampNow(),
+		clientPb.StatusCode_OK,
+		"",
+		j.url,
+	)
 }
 
 func NewJob(method, url string, headers map[string]string, status int) *jobHTTP {
