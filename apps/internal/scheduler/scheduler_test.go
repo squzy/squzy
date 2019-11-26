@@ -10,10 +10,11 @@ import (
 )
 
 type storageMock struct {
-
+	count int
 }
 
-func (s storageMock) Write(id string, log job.CheckError) error {
+func (s *storageMock) Write(id string, log job.CheckError) error {
+	s.count += 1
 	return nil
 }
 
@@ -63,14 +64,22 @@ func TestSchl_Run(t *testing.T) {
 		t.Run("Should: run job every second ", func(t *testing.T) {
 			var cfg config.Config
 			j := &jb{count: 0}
-			i, _ := New(cfg, time.Second, j, &storageMock{})
+			store := &storageMock{}
+			i, _ := New(cfg, time.Second, j, store)
 			i.Run()
-			time.AfterFunc(time.Second, func() {
+			ch := make(chan bool)
+			time.AfterFunc(time.Millisecond * 1100, func() {
 				assert.Equal(t, 1, j.count)
+				assert.Equal(t, 1, store.count)
+				ch<-true
 			})
-			time.AfterFunc(time.Second, func() {
+			<-ch
+			time.AfterFunc(time.Millisecond * 1100, func() {
 				assert.Equal(t, 2, j.count)
+				assert.Equal(t, 2, store.count)
+				ch<-true
 			})
+			<-ch
 			i.Stop()
 		})
 	})
