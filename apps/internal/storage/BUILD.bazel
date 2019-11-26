@@ -6,7 +6,7 @@ go_library(
          "storage.go",
          "external_storage.go"
      ],
-     importpath = "squzy/apps/squzy/storage",
+     importpath = "squzy/apps/internal/storage",
      visibility = ["//visibility:public"],
      deps = [
         "@com_github_squzy_squzy_generated//generated/logger:go_default_library",

@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"squzy/apps/internal/config"
 	"squzy/apps/internal/job"
+	"squzy/apps/internal/storage"
 	"time"
 )
 
@@ -33,9 +34,10 @@ type schl struct {
 	interval  time.Duration
 	job       job.Job
 	id        string
+	externalStorage storage.Storage
 }
 
-func New(cfg config.Config, interval time.Duration, job job.Job) (Scheduler, error) {
+func New(cfg config.Config, interval time.Duration, job job.Job, externalStorage storage.Storage) (Scheduler, error) {
 	if interval < time.Millisecond*500 {
 		return nil, intervalLessHalfSecondError
 	}
@@ -45,6 +47,7 @@ func New(cfg config.Config, interval time.Duration, job job.Job) (Scheduler, err
 		interval:  interval,
 		isStopped: true,
 		job:       job,
+		externalStorage: externalStorage,
 	}, nil
 }
 
@@ -65,7 +68,7 @@ func (s *schl) observer() {
 		for {
 			select {
 			case <-s.ticker.C:
-				_ = s.job.Do()
+				_ = s.externalStorage.Write(s.id, s.job.Do())
 			case <-s.quitCh:
 				break loop
 			}
