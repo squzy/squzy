@@ -61,15 +61,7 @@ func (j *jobHTTP) Do() CheckError {
 		Timeout: timeout,
 	}
 
-	req, err := http.NewRequest(j.methodType, j.url, nil)
-	if err != nil {
-		return NewHttpError(
-			ptypes.TimestampNow(),
-			clientPb.StatusCode_Error,
-			err.Error(),
-			j.url,
-		)
-	}
+	req, _ := http.NewRequest(j.methodType, j.url, nil)
 
 	for name, val := range j.headers {
 		req.Header.Set(name, val)
