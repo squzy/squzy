@@ -46,7 +46,9 @@ func TestJobHTTP_Do(t *testing.T) {
 				w.WriteHeader(200)
 			}))
 			defer ts.Close()
-			j := NewJob("GET", ts.URL, nil, 200)
+			m := make(map[string]string)
+			m["Accept"] = "application/json; charset=utf-8"
+			j := NewJob("GET", ts.URL, m, 200)
 			err := j.Do()
 			except := NewHttpError(
 				ptypes.TimestampNow(),
