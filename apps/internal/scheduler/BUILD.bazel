@@ -8,6 +8,7 @@ go_library(
      deps = [
         "//apps/internal/config:config",
         "//apps/internal/job:job",
+        "@com_github_google_uuid//:go_default_library"
      ],
 
 )
@@ -21,6 +22,7 @@ go_test(
     deps = [
         "//apps/internal/job:job",
         "//apps/internal/config:config",
-        "@com_github_stretchr_testify//assert:go_default_library"
+        "@com_github_stretchr_testify//assert:go_default_library",
+        "@com_github_google_uuid//:go_default_library"
     ]
 )

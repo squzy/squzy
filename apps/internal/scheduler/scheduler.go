@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"errors"
+	"github.com/google/uuid"
 	"squzy/apps/internal/config"
 	"squzy/apps/internal/job"
 	"time"
@@ -14,6 +15,8 @@ var (
 )
 
 type Scheduler interface {
+	// Should return id
+	GetId() string
 	// Should run Scheduler every tick
 	Run() error
 	// Should stop Scheduler
@@ -29,6 +32,7 @@ type schl struct {
 	quitCh    chan bool
 	interval  time.Duration
 	job       job.Job
+	id        string
 }
 
 func New(cfg config.Config, interval time.Duration, job job.Job) (Scheduler, error) {
@@ -36,6 +40,7 @@ func New(cfg config.Config, interval time.Duration, job job.Job) (Scheduler, err
 		return nil, intervalLessHalfSecondError
 	}
 	return &schl{
+		id:        uuid.New().String(),
 		cfg:       cfg,
 		interval:  interval,
 		isStopped: true,
@@ -70,6 +75,10 @@ func (s *schl) observer() {
 
 func (s *schl) IsRun() bool {
 	return !s.isStopped
+}
+
+func (s *schl) GetId() string {
+	return s.id
 }
 
 func (s *schl) Stop() error {

@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"squzy/apps/internal/config"
 	"squzy/apps/internal/job"
@@ -118,5 +119,17 @@ func TestSchl_IsRun(t *testing.T) {
 				assert.Equal(t, false, i.IsRun())
 			})
 		})
+	})
+}
+
+func TestSchl_GetId(t *testing.T) {
+	t.Run("Should: return string(uuid) id", func(t *testing.T) {
+		var cfg config.Config
+		j := &jb{count: 0}
+		i, _ := New(cfg, time.Second, j)
+		id:= i.GetId()
+		_, err := uuid.Parse(id)
+		assert.IsType(t, "", id)
+		assert.Equal(t, nil, err)
 	})
 }

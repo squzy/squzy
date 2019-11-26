@@ -57,7 +57,7 @@ type siteMapErr struct {
 }
 
 func (sme *siteMapErr) Error() string {
-	return fmt.Sprintf("%s: was return %d", sme.location, sme.statusCode)
+	return fmt.Sprintf("%s -  was return %d", sme.location, sme.statusCode)
 }
 
 func NewSiteMapJob(siteMap *parsers.SiteMap, httpTools httpTools.HttpTool) Job {
@@ -88,7 +88,7 @@ func (j *siteMapJob) Do() CheckError {
 	}
 	err := group.Wait()
 	if err != nil {
-		location := strings.Split(err.Error(), ":")
+		location := strings.Split(err.Error(), " - ")
 		return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), location[0], 80)
 	}
 	cancel()
