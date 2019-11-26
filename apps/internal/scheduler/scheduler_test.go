@@ -1,17 +1,21 @@
 package scheduler
 
 import (
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"squzy/apps/internal/config"
+	"squzy/apps/internal/job"
+	"sync"
 	"testing"
 	"time"
 )
 
 type jb struct {
 	count int
+	m sync.Mutex
 }
 
-func (j *jb) Do() error {
+func (j *jb) Do() job.CheckError {
 	j.count += 1
 	return nil
 }
@@ -55,10 +59,12 @@ func TestSchl_Run(t *testing.T) {
 			j := &jb{count: 0}
 			i, _ := New(cfg, time.Second, j)
 			i.Run()
-			time.Sleep(time.Millisecond * 1500)
-			assert.Equal(t, 1, j.count)
-			time.Sleep(time.Second)
-			assert.Equal(t, 2, j.count)
+			time.AfterFunc(time.Second, func() {
+				assert.Equal(t, 1, j.count)
+			})
+			time.AfterFunc(time.Second, func() {
+				assert.Equal(t, 2, j.count)
+			})
 			i.Stop()
 		})
 	})
@@ -113,5 +119,17 @@ func TestSchl_IsRun(t *testing.T) {
 				assert.Equal(t, false, i.IsRun())
 			})
 		})
+	})
+}
+
+func TestSchl_GetId(t *testing.T) {
+	t.Run("Should: return string(uuid) id", func(t *testing.T) {
+		var cfg config.Config
+		j := &jb{count: 0}
+		i, _ := New(cfg, time.Second, j)
+		id:= i.GetId()
+		_, err := uuid.Parse(id)
+		assert.IsType(t, "", id)
+		assert.Equal(t, nil, err)
 	})
 }

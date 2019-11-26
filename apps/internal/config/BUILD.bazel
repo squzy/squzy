@@ -6,12 +6,13 @@ go_library(
      importpath = "squzy/apps/internal/config",
      visibility = ["//visibility:public"],
      deps = [
-
+        "@com_github_stretchr_testify//assert:go_default_library"
      ]
 )
 
 go_test(
     name = "config_test",
+    embed = [":config"],
     srcs = [
         "config_test.go",
     ],

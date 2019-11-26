@@ -1,0 +1,33 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
+
+go_library(
+    name = "squzy_go",
+    srcs = ["main.go"],
+    importpath = "squzy/apps/squzy",
+)
+
+go_binary(
+    name = "squzy_app",
+    embed = [":squzy_go"],
+)
+
+go_image(
+    name = "image",
+    binary = ":squzy_app",
+)
+
+container_image(
+    name = "squzy",
+    base = ":image",
+)
+
+container_push(
+    name = "squzy_push",
+    format = "Docker",
+    image = ":squzy",
+    registry = "docker.pkg.github.com",
+    repository = "squzy/squzy/squzy_app",
+    tag = "develop",  # don't use this on production image :)
+)

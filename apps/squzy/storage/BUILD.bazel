@@ -1,0 +1,30 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+     name = "storage",
+     srcs = [
+         "storage.go",
+         "external_storage.go"
+     ],
+     importpath = "squzy/apps/squzy/storage",
+     visibility = ["//visibility:public"],
+     deps = [
+        "@com_github_squzy_squzy_generated//generated/logger:go_default_library",
+        "//apps/internal/job:job",
+     ],
+
+)
+
+go_test(
+    name = "storage_test",
+    srcs = [
+        "external_storage_test.go"
+    ],
+    embed = [":storage"],
+    deps = [
+        "//apps/internal/job:job",
+        "@org_golang_google_grpc//:go_default_library",
+        "@com_github_squzy_squzy_generated//generated/logger:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library"
+    ]
+)

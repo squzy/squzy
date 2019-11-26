@@ -1,13 +1,24 @@
+var_8: &install_bazel
+  run:
+    name: Install Bazel
+    command: |
+      wget https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh -O bazel_installer.sh
+      chmod +x bazel_installer.sh
+      ./bazel_installer.sh --user
+      bazel --version
+
 version: 2.1
 orbs:
   codecov: codecov/codecov@1.0.5
 jobs:
   build:
+    environment:
+      BAZEL_VERSION: 1.1.0
     docker:
       - image: circleci/golang:1.12
-      - image: circleci/mongo:latest
     steps:
       - checkout
+      - *install_bazel
       - run:
           name: Install dep
           command: go mod download
@@ -18,7 +29,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            go test ./... -coverprofile=c.out
+            make test_cover
             mv c.out /tmp/reports
       - codecov/upload:
           file: /tmp/reports/c.out
