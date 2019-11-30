@@ -15,14 +15,18 @@ type SiteMapUrl struct {
 	Ignore bool `xml:"ignore"`
 }
 
-type SiteMapParser struct {
+type siteMapParser struct {
 }
 
-func NewSiteMapParser() *SiteMapParser {
-	return &SiteMapParser{}
+type SiteMapParser interface {
+	Parse(xmlBytes []byte) (*SiteMap, error)
 }
 
-func (parser *SiteMapParser) Parse(xmlBytes []byte) (*SiteMap, error) {
+func NewSiteMapParser() SiteMapParser {
+	return &siteMapParser{}
+}
+
+func (parser *siteMapParser) Parse(xmlBytes []byte) (*SiteMap, error) {
 	siteMap := &SiteMap{}
 	err := xml.Unmarshal(xmlBytes, siteMap)
 	if err != nil {

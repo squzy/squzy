@@ -1,7 +1,7 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "sitemap",
+     name = "parsers",
      srcs = ["sitemap.go"],
      importpath = "squzy/apps/internal/parsers",
      visibility = ["//visibility:public"],
@@ -11,11 +11,11 @@ go_library(
 )
 
 go_test(
-    name = "sitemap_test",
+    name = "parsers_test",
     srcs = [
         "sitemap_test.go",
     ],
-    embed = [":sitemap"],
+    embed = [":parsers"],
     deps = [
         "@com_github_stretchr_testify//assert:go_default_library"
     ],

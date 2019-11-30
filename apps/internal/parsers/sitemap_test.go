@@ -9,7 +9,7 @@ import (
 func TestNewSiteMapParser(t *testing.T) {
 	t.Run("Test: SiteMapParse create", func(t *testing.T) {
 		parser := NewSiteMapParser()
-		assert.IsType(t, &SiteMapParser{}, parser)
+		assert.IsType(t, &siteMapParser{}, parser)
 		assert.NotEqual(t, nil, parser)
 	})
 }
