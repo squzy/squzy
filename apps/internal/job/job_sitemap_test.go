@@ -2,7 +2,7 @@ package job
 
 import (
 	"errors"
-	clientPb "github.com/squzy/squzy_generated/generated/logger"
+	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"squzy/apps/internal/parsers"

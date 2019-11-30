@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
-	clientPb "github.com/squzy/squzy_generated/generated/logger"
+	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"squzy/apps/internal/job"
 	"time"
 )

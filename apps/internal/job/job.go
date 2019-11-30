@@ -3,7 +3,7 @@ package job
 import (
 	"errors"
 	"time"
-	clientPb "github.com/squzy/squzy_generated/generated/logger"
+	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 )
 
 const (

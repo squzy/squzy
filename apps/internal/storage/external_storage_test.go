@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
-	squzy_logger_v1_service "github.com/squzy/squzy_generated/generated/logger"
+	squzy_logger_v1_service "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"testing"

@@ -1,7 +1,7 @@
 package server
 
 import (
-	clientPb "github.com/squzy/squzy_generated/generated/squzy"
+	clientPb "github.com/squzy/squzy_generated/generated/server/proto/v1"
 	"context"
 	scheduler_storage "squzy/apps/internal/scheduler-storage"
 )
@@ -12,10 +12,4 @@ type server struct {
 
 func (s server) GetList(context.Context, *clientPb.GetListRequest) (*clientPb.GetListResponse, error) {
 	panic("implement me")
-}
-
-func New(schedulerStorage scheduler_storage.SchedulerStorage) clientPb.ServerServer {
-	return &server{
-		schedulerStorage: schedulerStorage,
-	}
 }

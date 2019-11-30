@@ -4,7 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net"
 	"testing"
-	clientPb "github.com/squzy/squzy_generated/generated/logger"
+	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 )
 
 func TestNewTcpJob(t *testing.T) {

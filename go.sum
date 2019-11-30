@@ -21,6 +21,9 @@ github.com/squzy/squzy_generated v1.0.2 h1:rbNQV54xda1HgyqO4HdowcBwYZXKg9Kg21oW7
 github.com/squzy/squzy_generated v1.0.2/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/squzy/squzy_generated v1.0.3 h1:l3THkzrXXySM1SElrVZP0n0ucLb42wzJV2ixEsz6GWg=
 github.com/squzy/squzy_generated v1.0.3/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.0.4/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.0.5 h1:FCvf1d2lv/+ympx+4vTIFA64tluPg9+No+pRj1QfgJU=
+github.com/squzy/squzy_generated v1.0.5/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
