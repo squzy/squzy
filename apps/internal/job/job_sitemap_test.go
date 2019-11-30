@@ -20,6 +20,52 @@ func (m mockHttpTools) SendRequestWithStatusCode(req *http.Request, expectedCode
 	return 200, nil, nil
 }
 
+type siteMapStorage struct {
+
+}
+
+type siteMapStorageIgnore struct {
+
+}
+
+func (s siteMapStorageIgnore) Get(url string) (*parsers.SiteMap, error) {
+	return &parsers.SiteMap{
+		UrlSet: []parsers.SiteMapUrl{
+			{
+				Location: "localhost",
+				Ignore:true,
+			},
+			{
+				Location: "localhost",
+				Ignore:true,
+			},
+		},
+	}, nil
+}
+
+func (s siteMapStorage) Get(url string) (*parsers.SiteMap, error) {
+	return &parsers.SiteMap{
+		UrlSet: []parsers.SiteMapUrl{
+			{
+				Location: "localhost",
+				Ignore:false,
+			},
+			{
+				Location: "localhost",
+				Ignore:false,
+			},
+		},
+	}, nil
+}
+
+type siteMapStorageError struct {
+
+}
+
+func (s siteMapStorageError) Get(url string) (*parsers.SiteMap, error) {
+	return nil, errors.New("SAFafs")
+}
+
 type mockHttpToolsWithError struct {
 
 }
@@ -34,7 +80,7 @@ func (m mockHttpToolsWithError) SendRequestWithStatusCode(req *http.Request, exp
 
 func TestNewSiteMapJob(t *testing.T) {
 	t.Run("Should: Should implement interface Job", func(t *testing.T) {
-		job := NewSiteMapJob(nil, &mockHttpTools{})
+		job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpTools{})
 		assert.Implements(t, (*Job)(nil), job)
 	})
 }
@@ -42,50 +88,21 @@ func TestNewSiteMapJob(t *testing.T) {
 func TestSiteMapJob_Do(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
 		t.Run("Because mock with 200", func(t *testing.T) {
-			job := NewSiteMapJob(&parsers.SiteMap{
-				UrlSet: []parsers.SiteMapUrl{
-					{
-						Location: "localhost",
-						Ignore:false,
-					},
-					{
-						Location: "localhost",
-						Ignore:false,
-					},
-				},
-			}, &mockHttpTools{})
+			job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpTools{})
 			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
 		})
 		t.Run("Because ignore url", func(t *testing.T) {
-			job := NewSiteMapJob(&parsers.SiteMap{
-				UrlSet: []parsers.SiteMapUrl{
-					{
-						Location: "localhost",
-						Ignore:true,
-					},
-					{
-						Location: "localhost",
-						Ignore:true,
-					},
-				},
-			}, &mockHttpToolsWithError{})
+			job := NewSiteMapJob("", &siteMapStorageIgnore{}, &mockHttpToolsWithError{})
 			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
 		})
 	})
 	t.Run("Should: return error", func(t *testing.T) {
 		t.Run("Because return 500", func(t *testing.T) {
-			job := NewSiteMapJob(&parsers.SiteMap{
-				UrlSet: []parsers.SiteMapUrl{
-					{
-						Location: "localhost",
-						Ignore:false,
-					},
-					{
-						Location: "localhost",
-						Ignore:true,
-					},
-				},
-			}, &mockHttpToolsWithError{})
+			job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpToolsWithError{})
+			assert.IsType(t, clientPb.StatusCode_Error, job.Do().GetLogData().Code)
+		})
+		t.Run("Because sitemapError", func(t *testing.T) {
+			job := NewSiteMapJob("", &siteMapStorageError{}, &mockHttpTools{})
 			assert.IsType(t, clientPb.StatusCode_Error, job.Do().GetLogData().Code)
 		})
 	})
