@@ -8,19 +8,18 @@ import (
 	scheduler_storage "squzy/apps/internal/scheduler-storage"
 	sitemap_storage "squzy/apps/internal/sitemap-storage"
 	"squzy/apps/internal/storage"
+	"squzy/apps/squzy/application"
+	"squzy/apps/squzy/config"
 	"time"
 )
-
-func init() {
-	ReadConfig()
-}
 
 func main() {
 	httpPackage := httpTools.New()
 	grpcTool := grpcTools.New()
-	application := New(
+	cfg := config.New()
+	app := application.New(
 		scheduler_storage.New(),
-		storage.NewExternalStorage(grpcTool, clientAddress, timeoutStorage, storage.GetInMemoryStorage()),
+		storage.NewExternalStorage(grpcTool, cfg.GetClientAddress(), cfg.GetStorageTimeout(), storage.GetInMemoryStorage()),
 		sitemap_storage.New(
 			time.Hour*24,
 			httpPackage,
@@ -28,5 +27,5 @@ func main() {
 		),
 		httpPackage,
 	)
-	log.Fatal(application.Run(port))
+	log.Fatal(app.Run(cfg.GetPort()))
 }

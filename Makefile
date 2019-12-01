@@ -4,7 +4,9 @@ build: .build
 
 push: .push
 
-squzy: .build_squzy
+build_squzy: .build_squzy
+
+run_squzy: .run_squzy
 
 test: .test
 
@@ -14,10 +16,10 @@ test_cover: .test_cover
 
 dep: .dep
 
-run_squzy:
-	bazel run //apps/squzy:squzy_app
-
 default: build
+
+.run_squzy:
+	bazel run //apps/squzy:squzy_app
 
 .build_squzy:
 	bazel build //apps/squzy:squzy

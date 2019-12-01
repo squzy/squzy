@@ -6,11 +6,11 @@ go_library(
     name = "squzy",
     srcs = [
         "main.go",
-        "config.go",
-        "application.go"
-        ],
+    ],
     importpath = "squzy/apps/squzy",
     deps = [
+        "//apps/squzy/application:application",
+        "//apps/squzy/config:config",
         "//apps/squzy/server:server",
         "//apps/internal/job:job",
         "//apps/internal/scheduler:scheduler",
@@ -23,29 +23,6 @@ go_library(
         "@org_golang_google_grpc//:go_default_library",
         "@com_github_squzy_squzy_generated//generated/server/proto/v1:go_default_library",
         "@com_github_squzy_squzy_generated//generated/storage/proto/v1:go_default_library",
-    ]
-)
-
-go_test(
-    name = "main_test",
-    srcs = [
-        "application_test.go",
-        "config_test.go"
-    ],
-    embed = [":squzy"],
-    deps = [
-        "//apps/squzy/server:server",
-        "//apps/internal/job:job",
-        "//apps/internal/scheduler:scheduler",
-        "//apps/internal/scheduler-storage:scheduler-storage",
-        "//apps/internal/sitemap-storage:sitemap-storage",
-        "//apps/internal/storage:storage",
-        "//apps/internal/httpTools:httpTools",
-        "//apps/internal/grpcTools:grpcTools",
-        "@org_golang_google_grpc//:go_default_library",
-        "@com_github_squzy_squzy_generated//generated/server/proto/v1:go_default_library",
-        "@com_github_squzy_squzy_generated//generated/storage/proto/v1:go_default_library",
-        "@com_github_stretchr_testify//assert:go_default_library"
     ]
 )
 
