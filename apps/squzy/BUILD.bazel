@@ -4,7 +4,11 @@ load("@io_bazel_rules_docker//container:container.bzl", "container_image", "cont
 
 go_library(
     name = "squzy",
-    srcs = ["main.go"],
+    srcs = [
+        "main.go",
+        "config.go",
+        "application.go"
+        ],
     importpath = "squzy/apps/squzy",
     deps = [
         "//apps/squzy/server:server",
@@ -24,7 +28,8 @@ go_library(
 go_test(
     name = "main_test",
     srcs = [
-        "main_test.go"
+        "application_test.go",
+        "config_test.go"
     ],
     embed = [":squzy"],
     deps = [
