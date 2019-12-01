@@ -15,14 +15,14 @@ Squzy - is a high-performance open-source monitoring system that supports
 # Usage
 
 ## API
-Squzy server implement GRPC API. 
+Squzy server implement [GRPC API](https://github.com/squzy/squzy_proto/blob/master/proto/v1/server.proto). 
 
 https://github.com/squzy/squzy_proto/blob/master/proto/v1/server.proto
 
 ## Storage
 By default squzy use stdout for logs, but can be configured by ENV.
 
-Storage should implement that API:
+Storage should implement that [API](https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto):
 
 https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto
 
@@ -36,6 +36,9 @@ https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto
 ```shell script
 docker pull docker.pkg.github.com/squzy/squzy/squzy_app:develop
 ```
+
+# Authors
+- [Iurii Panarin](https://github.com/PxyUp)
 
 # Want to help?
 Want to file a bug, contribute some code, or improve documentation? Excellent!
