@@ -6,10 +6,10 @@ go_library(
          "storage.go",
          "external_storage.go"
      ],
-     importpath = "squzy/apps/squzy/storage",
+     importpath = "squzy/apps/internal/storage",
      visibility = ["//visibility:public"],
      deps = [
-        "@com_github_squzy_squzy_generated//generated/logger:go_default_library",
+        "@com_github_squzy_squzy_generated//generated/storage/proto/v1:go_default_library",
         "//apps/internal/job:job",
      ],
 
@@ -24,7 +24,7 @@ go_test(
     deps = [
         "//apps/internal/job:job",
         "@org_golang_google_grpc//:go_default_library",
-        "@com_github_squzy_squzy_generated//generated/logger:go_default_library",
+        "@com_github_squzy_squzy_generated//generated/storage/proto/v1:go_default_library",
         "@com_github_stretchr_testify//assert:go_default_library"
     ]
 )

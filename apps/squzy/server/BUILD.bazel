@@ -1,0 +1,40 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+     name = "server",
+     srcs = [
+         "server.go",
+     ],
+     importpath = "squzy/apps/squzy/server",
+     visibility = ["//visibility:public"],
+     deps = [
+        "//apps/internal/job:job",
+        "//apps/internal/scheduler:scheduler",
+        "//apps/internal/scheduler-storage:scheduler-storage",
+        "//apps/internal/sitemap-storage:sitemap-storage",
+        "//apps/internal/storage:storage",
+        "//apps/internal/httpTools:httpTools",
+        "//apps/internal/parsers:parsers",
+        "@com_github_squzy_squzy_generated//generated/server/proto/v1:go_default_library",
+     ],
+
+)
+
+go_test(
+    name = "server_test",
+    srcs = [
+        "server_test.go"
+    ],
+    embed = [":server"],
+    deps = [
+        "//apps/internal/job:job",
+        "//apps/internal/scheduler:scheduler",
+        "//apps/internal/scheduler-storage:scheduler-storage",
+        "//apps/internal/sitemap-storage:sitemap-storage",
+        "//apps/internal/storage:storage",
+        "//apps/internal/httpTools:httpTools",
+        "@org_golang_google_grpc//:go_default_library",
+        "@com_github_squzy_squzy_generated//generated/server/proto/v1:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library"
+    ]
+)

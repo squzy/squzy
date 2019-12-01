@@ -6,17 +6,18 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
-	clientPb "github.com/squzy/squzy_generated/generated/logger"
+	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"golang.org/x/sync/errgroup"
 	"net/http"
 	"squzy/apps/internal/httpTools"
-	"squzy/apps/internal/parsers"
+	sitemap_storage "squzy/apps/internal/sitemap-storage"
 	"strings"
 )
 
 type siteMapJob struct {
-	siteMap   *parsers.SiteMap
-	httpTools httpTools.HttpTool
+	url            string
+	siteMapStorage sitemap_storage.SiteMapStorage
+	httpTools      httpTools.HttpTool
 }
 
 type siteMapError struct {
@@ -60,18 +61,22 @@ func (sme *siteMapErr) Error() string {
 	return fmt.Sprintf("%s -  was return %d", sme.location, sme.statusCode)
 }
 
-func NewSiteMapJob(siteMap *parsers.SiteMap, httpTools httpTools.HttpTool) Job {
+func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool) Job {
 	return &siteMapJob{
-		siteMap:   siteMap,
-		httpTools: httpTools,
+		url:            url,
+		siteMapStorage: siteMapStorage,
+		httpTools:      httpTools,
 	}
 }
 
 func (j *siteMapJob) Do() CheckError {
 	ctx, cancel := context.WithCancel(context.Background())
 	group, _ := errgroup.WithContext(ctx)
-
-	for _, v := range j.siteMap.UrlSet {
+	siteMap, err := j.siteMapStorage.Get(j.url)
+	if err != nil {
+		return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
+	}
+	for _, v := range siteMap.UrlSet {
 		if v.Ignore {
 			continue
 		}
@@ -86,7 +91,7 @@ func (j *siteMapJob) Do() CheckError {
 			return nil
 		})
 	}
-	err := group.Wait()
+	err = group.Wait()
 	if err != nil {
 		location := strings.Split(err.Error(), " - ")
 		return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), location[0], 80)

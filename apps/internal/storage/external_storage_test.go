@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
-	squzy_logger_v1_service "github.com/squzy/squzy_generated/generated/logger"
+	squzy_logger_v1_service "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"testing"
@@ -66,5 +66,12 @@ func TestExternalStorage_Write(t *testing.T) {
 	t.Run("Should: return storageNotSaveLog", func(t *testing.T) {
 		s := NewExternalStorage(&client_mock_error_not_save{})
 		assert.Equal(t, storageNotSaveLog, s.Write("", &mock{}))
+	})
+}
+
+func TestMemory_Write(t *testing.T) {
+	t.Run("Memory storage", func(t *testing.T) {
+		s := GetInMemoryStorage()
+		assert.Implements(t, (*Storage)(nil), s)
 	})
 }
