@@ -18,9 +18,6 @@ jobs:
 
     - name: Get dependencies
       run: go mod download
-
-    - name: Build
-      run: go build -v .
     
     - name: Test
       uses: ngalaiko/bazel-action/1.2.1@master
