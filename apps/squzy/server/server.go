@@ -63,7 +63,6 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 	case *serverPb.AddSchedulerRequest_TcpCheck:
 		tcpCheck := check.TcpCheck
 		schld, err := scheduler.New(
-			nil,
 			time.Second*time.Duration(interval),
 			job.NewTcpJob(tcpCheck.Host, tcpCheck.Port),
 			s.externalStorage,
@@ -81,7 +80,6 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 	case *serverPb.AddSchedulerRequest_SitemapCheck:
 		siteMapCheck := check.SitemapCheck
 		schld, err := scheduler.New(
-			nil,
 			time.Second*time.Duration(interval),
 			job.NewSiteMapJob(siteMapCheck.Url, s.siteMapStorage, s.httpTools),
 			s.externalStorage,

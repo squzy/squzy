@@ -3,7 +3,6 @@ package scheduler
 import (
 	"errors"
 	"github.com/google/uuid"
-	"squzy/apps/internal/config"
 	"squzy/apps/internal/job"
 	"squzy/apps/internal/storage"
 	"time"
@@ -27,7 +26,6 @@ type Scheduler interface {
 }
 
 type schl struct {
-	cfg       config.Config
 	ticker    *time.Ticker
 	isStopped bool
 	quitCh    chan bool
@@ -37,13 +35,12 @@ type schl struct {
 	externalStorage storage.Storage
 }
 
-func New(cfg config.Config, interval time.Duration, job job.Job, externalStorage storage.Storage) (Scheduler, error) {
+func New(interval time.Duration, job job.Job, externalStorage storage.Storage) (Scheduler, error) {
 	if interval < time.Millisecond*500 {
 		return nil, intervalLessHalfSecondError
 	}
 	return &schl{
 		id:        uuid.New().String(),
-		cfg:       cfg,
 		interval:  interval,
 		isStopped: true,
 		job:       job,

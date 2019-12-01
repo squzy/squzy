@@ -6,7 +6,6 @@ go_library(
      importpath = "squzy/apps/internal/scheduler",
      visibility = ["//visibility:public"],
      deps = [
-        "//apps/internal/config:config",
         "//apps/internal/job:job",
         "//apps/internal/storage:storage",
         "@com_github_google_uuid//:go_default_library"
@@ -22,7 +21,6 @@ go_test(
     embed = [":scheduler"],
     deps = [
         "//apps/internal/job:job",
-        "//apps/internal/config:config",
         "@com_github_stretchr_testify//assert:go_default_library",
         "@com_github_google_uuid//:go_default_library"
     ]
