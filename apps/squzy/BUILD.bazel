@@ -1,26 +1,50 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
 load("@io_bazel_rules_docker//go:image.bzl", "go_image")
 load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 
 go_library(
-    name = "squzy_go",
+    name = "squzy",
     srcs = ["main.go"],
     importpath = "squzy/apps/squzy",
     deps = [
+        "//apps/squzy/server:server",
         "//apps/internal/job:job",
-                "//apps/internal/scheduler:scheduler",
-                "//apps/internal/scheduler-storage:scheduler-storage",
-                "//apps/internal/sitemap-storage:sitemap-storage",
-                "//apps/internal/storage:storage",
-                "//apps/internal/httpTools:httpTools",
-                "//apps/internal/parsers:parsers",
-                "@com_github_squzy_squzy_generated//generated/server/proto/v1:go_default_library",
+        "//apps/internal/scheduler:scheduler",
+        "//apps/internal/scheduler-storage:scheduler-storage",
+        "//apps/internal/sitemap-storage:sitemap-storage",
+        "//apps/internal/storage:storage",
+        "//apps/internal/httpTools:httpTools",
+        "//apps/internal/parsers:parsers",
+        "@org_golang_google_grpc//:go_default_library",
+        "@com_github_squzy_squzy_generated//generated/server/proto/v1:go_default_library",
+        "@com_github_squzy_squzy_generated//generated/storage/proto/v1:go_default_library",
+    ]
+)
+
+go_test(
+    name = "main_test",
+    srcs = [
+        "main_test.go"
+    ],
+    embed = [":squzy"],
+    deps = [
+        "//apps/squzy/server:server",
+        "//apps/internal/job:job",
+        "//apps/internal/scheduler:scheduler",
+        "//apps/internal/scheduler-storage:scheduler-storage",
+        "//apps/internal/sitemap-storage:sitemap-storage",
+        "//apps/internal/storage:storage",
+        "//apps/internal/httpTools:httpTools",
+        "@org_golang_google_grpc//:go_default_library",
+        "@com_github_squzy_squzy_generated//generated/server/proto/v1:go_default_library",
+        "@com_github_squzy_squzy_generated//generated/storage/proto/v1:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library"
     ]
 )
 
 go_binary(
     name = "squzy_app",
-    embed = [":squzy_go"],
+    embed = [":squzy"],
 )
 
 go_image(
@@ -29,14 +53,14 @@ go_image(
 )
 
 container_image(
-    name = "squzy",
+    name = "squzy_image",
     base = ":image",
 )
 
 container_push(
     name = "squzy_push",
     format = "Docker",
-    image = ":squzy",
+    image = ":squzy_image",
     registry = "docker.pkg.github.com",
     repository = "squzy/squzy/squzy_app",
     tag = "develop",  # don't use this on production image :)
