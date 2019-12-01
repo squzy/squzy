@@ -22,7 +22,7 @@ func (s schedulerMock) Stop() error {
 }
 
 func (s schedulerMock) IsRun() bool {
-	panic("implement me")
+	return true
 }
 
 func TestNew(t *testing.T) {
@@ -87,5 +87,15 @@ func TestStorage_Remove(t *testing.T) {
 		assert.Equal(t, nil, err)
 		err = s.Remove("1")
 		assert.Equal(t, nil, err)
+	})
+}
+
+func TestStorage_GetList(t *testing.T) {
+	t.Run("Should: return map with element", func(t *testing.T) {
+		s := New()
+		_ = s.Set(&schedulerMock{})
+		assert.Equal(t, map[string]bool{
+			"1": true,
+		}, s.GetList())
 	})
 }

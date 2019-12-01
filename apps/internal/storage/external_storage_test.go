@@ -68,3 +68,10 @@ func TestExternalStorage_Write(t *testing.T) {
 		assert.Equal(t, storageNotSaveLog, s.Write("", &mock{}))
 	})
 }
+
+func TestMemory_Write(t *testing.T) {
+	t.Run("Memory storage", func(t *testing.T) {
+		s := GetInMemoryStorage()
+		assert.Implements(t, (*Storage)(nil), s)
+	})
+}
