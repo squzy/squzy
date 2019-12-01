@@ -208,6 +208,24 @@ func TestServer_AddScheduler(t *testing.T) {
 			})
 			assert.Equal(t, nil, err)
 		})
+		t.Run("Because: correct grpc", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_GrpcCheck{
+					GrpcCheck: &serverPb.GrpcCheck{
+						Service: "",
+						Host:                 "wefewf",
+						Port:                 23,
+					}},
+			})
+			assert.Equal(t, nil, err)
+		})
 		t.Run("Because: correct sitemap", func(t *testing.T) {
 			s := New(
 				&mockSchedulerStorage{},
@@ -237,6 +255,24 @@ func TestServer_AddScheduler(t *testing.T) {
 				Interval:             0,
 				Check:                &serverPb.AddSchedulerRequest_TcpCheck{
 					TcpCheck: &serverPb.TcpCheck{
+						Host:                 "wefewf",
+						Port:                 23,
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: not correct timeout grpc", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             0,
+				Check:                &serverPb.AddSchedulerRequest_GrpcCheck{
+					GrpcCheck: &serverPb.GrpcCheck{
+						Service: "",
 						Host:                 "wefewf",
 						Port:                 23,
 					}},
@@ -288,6 +324,22 @@ func TestServer_AddScheduler(t *testing.T) {
 				Check:                &serverPb.AddSchedulerRequest_SitemapCheck{
 					SitemapCheck: &serverPb.SiteMapCheck{
 						Url:"",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: grpc alreadyExistId", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorageError{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_GrpcCheck{
+					GrpcCheck: &serverPb.GrpcCheck{
+						Port: 8080,
 					}},
 			})
 			assert.NotEqual(t, nil, err)

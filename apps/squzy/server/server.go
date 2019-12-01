@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	serverPb "github.com/squzy/squzy_generated/generated/server/proto/v1"
+	"google.golang.org/grpc"
 	"squzy/apps/internal/httpTools"
 	"squzy/apps/internal/job"
 	"squzy/apps/internal/scheduler"
@@ -82,6 +83,23 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		schld, err := scheduler.New(
 			time.Second*time.Duration(interval),
 			job.NewSiteMapJob(siteMapCheck.Url, s.siteMapStorage, s.httpTools),
+			s.externalStorage,
+		)
+		if err != nil {
+			return nil, err
+		}
+		err = s.schedulerStorage.Set(schld)
+		if err != nil {
+			return nil, err
+		}
+		return &serverPb.AddSchedulerResponse{
+			Id: schld.GetId(),
+		}, nil
+	case *serverPb.AddSchedulerRequest_GrpcCheck:
+		grcpCheck := check.GrpcCheck
+		schld, err := scheduler.New(
+			time.Second*time.Duration(interval),
+			job.NewGrpcJob(grcpCheck.Service, grcpCheck.Host, grcpCheck.Port, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{}),
 			s.externalStorage,
 		)
 		if err != nil {
