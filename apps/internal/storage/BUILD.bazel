@@ -9,6 +9,8 @@ go_library(
      importpath = "squzy/apps/internal/storage",
      visibility = ["//visibility:public"],
      deps = [
+        "//apps/internal/grpcTools:grpcTools",
+        "@org_golang_google_grpc//:go_default_library",
         "@com_github_squzy_squzy_generated//generated/storage/proto/v1:go_default_library",
         "//apps/internal/job:job",
      ],
@@ -23,6 +25,7 @@ go_test(
     embed = [":storage"],
     deps = [
         "//apps/internal/job:job",
+        "//apps/internal/grpcTools:grpcTools",
         "@org_golang_google_grpc//:go_default_library",
         "@com_github_squzy_squzy_generated//generated/storage/proto/v1:go_default_library",
         "@com_github_stretchr_testify//assert:go_default_library"
