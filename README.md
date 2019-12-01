@@ -26,7 +26,7 @@ Storage should implement that [API](https://github.com/squzy/squzy_proto/blob/ma
 
 https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto
 
-###Environment variables
+## Environment variables
 - PORT(8080) - on with port run squzy
 - STORAGE_HOST - log storage host(example *localhost:9090*)
 - STORAGE_TIMEOUT - timeout for connect to log storage
