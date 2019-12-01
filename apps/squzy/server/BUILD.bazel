@@ -15,6 +15,7 @@ go_library(
         "//apps/internal/storage:storage",
         "//apps/internal/httpTools:httpTools",
         "//apps/internal/parsers:parsers",
+        "@org_golang_google_grpc//:go_default_library",
         "@com_github_squzy_squzy_generated//generated/server/proto/v1:go_default_library",
      ],
 
