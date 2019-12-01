@@ -97,7 +97,9 @@ func TestExternalStorage_Write(t *testing.T) {
 		lis, _ := net.Listen("tcp", fmt.Sprintf(":%d", 12122))
 		grpcServer := grpc.NewServer()
 		squzy_logger_v1_service.RegisterLoggerServer(grpcServer, &server{})
-		go grpcServer.Serve(lis)
+		go func() {
+			_ = grpcServer.Serve(lis)
+		}()
 		s := NewExternalStorage(grpcTools.New(), "localhost:12122", time.Second * 2, &mockStorage{})
 		assert.Equal(t, nil, s.Write("", &mock{}))
 	})
@@ -105,7 +107,9 @@ func TestExternalStorage_Write(t *testing.T) {
 		lis, _ := net.Listen("tcp", fmt.Sprintf(":%d", 12123))
 		grpcServer := grpc.NewServer()
 		squzy_logger_v1_service.RegisterLoggerServer(grpcServer, &serverError{})
-		go grpcServer.Serve(lis)
+		go func() {
+			_ = grpcServer.Serve(lis)
+		}()
 		s := NewExternalStorage(grpcTools.New(), "localhost:12123", time.Second * 2, &mockStorage{})
 		assert.Equal(t, storageNotSaveLog, s.Write("", &mock{}))
 	})
@@ -113,7 +117,9 @@ func TestExternalStorage_Write(t *testing.T) {
 		lis, _ := net.Listen("tcp", fmt.Sprintf(":%d", 12124))
 		grpcServer := grpc.NewServer()
 		squzy_logger_v1_service.RegisterLoggerServer(grpcServer, &serverErrorThrow{})
-		go grpcServer.Serve(lis)
+		go func() {
+			_ = grpcServer.Serve(lis)
+		}()
 		s := NewExternalStorage(grpcTools.New(), "localhost:12124", time.Second * 2, &mockStorage{})
 		assert.Equal(t, connectionExternalStorageError, s.Write("", &mock{}))
 	})

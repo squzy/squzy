@@ -24,7 +24,7 @@ type storage struct {
 	mutex sync.RWMutex
 }
 
-func (s storage) GetList() map[string]bool {
+func (s *storage) GetList() map[string]bool {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	statusMap := make(map[string]bool)
@@ -34,7 +34,7 @@ func (s storage) GetList() map[string]bool {
 	return statusMap
 }
 
-func (s storage) Get(id string) (scheduler.Scheduler, error) {
+func (s *storage) Get(id string) (scheduler.Scheduler, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	value, exist := s.kv[id]
@@ -44,7 +44,7 @@ func (s storage) Get(id string) (scheduler.Scheduler, error) {
 	return value, nil
 }
 
-func (s storage) Set(schl scheduler.Scheduler) (error) {
+func (s *storage) Set(schl scheduler.Scheduler) (error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	id := schl.GetId()
@@ -57,7 +57,7 @@ func (s storage) Set(schl scheduler.Scheduler) (error) {
 	return nil
 }
 
-func (s storage) Remove(id string) (error) {
+func (s *storage) Remove(id string) (error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	_, exist := s.kv[id]

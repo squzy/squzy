@@ -26,7 +26,7 @@ func TestJobTcp_Do(t *testing.T) {
 			job := NewTcpJob("localhost", 10003)
 			server, _ := net.Listen("tcp", "localhost:10003")
 			go func() {
-				server.Accept()
+				_, _ = server.Accept()
 			}()
 			defer server.Close()
 			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)

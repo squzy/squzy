@@ -47,21 +47,21 @@ func TestSchl_Run(t *testing.T) {
 			i, _ := New(time.Second, j, &storageMock{})
 			err := i.Run()
 			assert.Equal(t, nil, err)
-			i.Stop()
+			_ = i.Stop()
 		})
 		t.Run("Should: run with 'alreadyRunError' error", func(t *testing.T) {
 			j := &jb{count: 0}
 			i, _ := New(time.Second, j, &storageMock{})
-			i.Run()
+			_ = i.Run()
 			err := i.Run()
 			assert.Equal(t, alreadyRunError, err)
-			i.Stop()
+			_ = i.Stop()
 		})
 		t.Run("Should: run job every second ", func(t *testing.T) {
 			j := &jb{count: 0}
 			store := &storageMock{}
 			i, _ := New(time.Second, j, store)
-			i.Run()
+			_ = i.Run()
 			ch := make(chan bool)
 			time.AfterFunc(time.Millisecond * 1100, func() {
 				assert.Equal(t, 1, j.count)
@@ -75,7 +75,7 @@ func TestSchl_Run(t *testing.T) {
 				ch<-true
 			})
 			<-ch
-			i.Stop()
+			_ = i.Stop()
 		})
 	})
 }
@@ -92,8 +92,8 @@ func TestSchl_Stop(t *testing.T) {
 		t.Run("Should: stop with 'alreadyStopError' error", func(t *testing.T) {
 			j := &jb{count: 0}
 			i, _ := New(time.Second, j, &storageMock{})
-			i.Run()
-			i.Stop()
+			_ = i.Run()
+			_ = i.Stop()
 			err := i.Stop()
 			assert.Equal(t, alreadyStopError, err)
 		})
@@ -119,8 +119,8 @@ func TestSchl_IsRun(t *testing.T) {
 			t.Run("Suite: after stop", func(t *testing.T) {
 				j := &jb{count: 0}
 				i, _ := New(time.Second, j, &storageMock{})
-				i.Run()
-				i.Stop()
+				_ = i.Run()
+				_ = i.Stop()
 				assert.Equal(t, false, i.IsRun())
 			})
 		})

@@ -70,12 +70,12 @@ func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, ht
 }
 
 func (j *siteMapJob) Do() CheckError {
-	ctx, cancel := context.WithCancel(context.Background())
-	group, _ := errgroup.WithContext(ctx)
 	siteMap, err := j.siteMapStorage.Get(j.url)
 	if err != nil {
 		return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
 	}
+	ctx, cancel := context.WithCancel(context.Background()) //nolint
+	group, _ := errgroup.WithContext(ctx)
 	for _, v := range siteMap.UrlSet {
 		if v.Ignore {
 			continue
@@ -94,7 +94,7 @@ func (j *siteMapJob) Do() CheckError {
 	err = group.Wait()
 	if err != nil {
 		location := strings.Split(err.Error(), " - ")
-		return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), location[0], 80)
+		return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), location[0], 80) //nolint
 	}
 	cancel()
 	return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_OK, "", "", 0)

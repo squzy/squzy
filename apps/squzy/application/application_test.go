@@ -21,7 +21,7 @@ func TestApp_Run(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
 		app := New(nil, nil, nil, nil)
 		go func() {
-			app.Run(11111)
+			_ = app.Run(11111)
 		}()
 		_, err := net.Dial("tcp", "localhost:11111")
 		assert.Equal(t, nil, err)

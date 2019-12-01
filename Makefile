@@ -16,7 +16,12 @@ test_cover: .test_cover
 
 dep: .dep
 
+lint: .lint
+
 default: build
+
+.lint:
+	golangci-lint run
 
 .run_squzy:
 	bazel run //apps/squzy:squzy_app

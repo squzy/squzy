@@ -78,7 +78,7 @@ func TestStorage_Get(t *testing.T) {
 		sm, err := s.Get("evrerver")
 		assert.Equal(t, nil, err)
 		assert.NotEqual(t, sm, err)
-		sm2, err := s.Get("evrerver")
+		sm2, _ := s.Get("evrerver")
 		assert.Equal(t, sm, sm2)
 	})
 }

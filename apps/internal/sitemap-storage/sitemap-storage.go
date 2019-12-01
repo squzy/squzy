@@ -25,7 +25,7 @@ type StorageItem struct {
 	siteMap  *parsers.SiteMap
 }
 
-func (s storage) Get(url string) (*parsers.SiteMap, error) {
+func (s *storage) Get(url string) (*parsers.SiteMap, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	value, exist := s.kv[url]
