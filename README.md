@@ -33,6 +33,12 @@ https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto
 
 ## Docker
 
+Docker Hub
+```shell script
+docker pull squzy/squzy_app:develop
+```
+
+GitHub
 ```shell script
 docker pull docker.pkg.github.com/squzy/squzy/squzy_app:develop
 ```

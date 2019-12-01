@@ -4,6 +4,8 @@ build: .build
 
 push: .push
 
+push_hub: .push_hub
+
 build_squzy: .build_squzy
 
 run_squzy: .run_squzy
@@ -31,6 +33,9 @@ default: build
 
 .push:
 	bazel run //apps/squzy:squzy_push
+
+.push_hub:
+	bazel run //apps/squzy:squzy_push_hub
 
 .build:
 	bazel build //apps/...
