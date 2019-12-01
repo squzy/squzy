@@ -1,6 +1,7 @@
 package storage
 
 import (
+	logger "log"
 	"squzy/apps/internal/job"
 )
 
@@ -12,6 +13,7 @@ type memory struct {
 }
 
 func (m memory) Write(id string, log job.CheckError) error {
+	logger.Println(id, log.GetLogData())
 	return nil
 }
 
