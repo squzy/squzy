@@ -4,7 +4,7 @@
 
 ## About
 
-Squzy - is a high-performance open-source monitoring system that supports
+Squzy - is a high-performance open-source monitoring system written in Golang with [Bazel](https://bazel.build/) and love.
 
 **System Health Checks Capabilities**
 1) HTTP/HTTPS
