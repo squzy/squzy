@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	ASF string
 	port           int32
 	clientAddress  string
 	timeoutStorage time.Duration

@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+func init() {
+	ReadConfig()
+}
+
 func main() {
 	httpPackage := httpTools.New()
 	grpcTool := grpcTools.New()

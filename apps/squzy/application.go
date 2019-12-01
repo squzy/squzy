@@ -34,7 +34,6 @@ func New(
 }
 
 func (s *app) Run(port int32) error {
-	ReadConfig()
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		return err

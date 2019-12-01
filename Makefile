@@ -14,6 +14,9 @@ test_cover: .test_cover
 
 dep: .dep
 
+run_squzy:
+	bazel run //apps/squzy:squzy_app
+
 default: build
 
 .build_squzy:
