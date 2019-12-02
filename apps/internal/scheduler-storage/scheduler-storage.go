@@ -16,6 +16,7 @@ type SchedulerStorage interface {
 	Get(string) (scheduler.Scheduler, error)
 	Set(scheduler.Scheduler) (error)
 	Remove(string) (error)
+	GetList() map[string]bool
 }
 
 type storage struct {
@@ -23,7 +24,17 @@ type storage struct {
 	mutex sync.RWMutex
 }
 
-func (s storage) Get(id string) (scheduler.Scheduler, error) {
+func (s *storage) GetList() map[string]bool {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	statusMap := make(map[string]bool)
+	for _, schl := range s.kv {
+		statusMap[schl.GetId()] = schl.IsRun()
+	}
+	return statusMap
+}
+
+func (s *storage) Get(id string) (scheduler.Scheduler, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	value, exist := s.kv[id]
@@ -33,7 +44,7 @@ func (s storage) Get(id string) (scheduler.Scheduler, error) {
 	return value, nil
 }
 
-func (s storage) Set(schl scheduler.Scheduler) (error) {
+func (s *storage) Set(schl scheduler.Scheduler) (error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	id := schl.GetId()
@@ -46,7 +57,7 @@ func (s storage) Set(schl scheduler.Scheduler) (error) {
 	return nil
 }
 
-func (s storage) Remove(id string) (error) {
+func (s *storage) Remove(id string) (error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	_, exist := s.kv[id]

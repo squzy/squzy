@@ -5,7 +5,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
-	clientPb "github.com/squzy/squzy_generated/generated/logger"
+	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"net"
 )
 

@@ -2,7 +2,7 @@ package job
 
 import (
 	"context"
-	clientPb "github.com/squzy/squzy_generated/generated/logger"
+	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	health_check "google.golang.org/grpc/health/grpc_health_v1"

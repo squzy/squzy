@@ -2,8 +2,8 @@ package job
 
 import (
 	"errors"
-	clientPb "github.com/squzy/squzy_generated/generated/logger"
 	"time"
+	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 )
 
 const (
@@ -14,8 +14,6 @@ var (
 	grpcNotServing          = errors.New("STATUS_NOT_SERVING")
 	connTimeoutError        = errors.New("CONNECTION_TIMEOUT")
 	wrongConnectConfigError = errors.New("WRONG_CONNECTION_CONFIGURATION")
-	connectionNotExistError = errors.New("CONNECTION_NOT_EXIST")
-	cantCreateRequest       = errors.New("CANT_CREATE_REQUEST")
 )
 
 type CheckError interface {

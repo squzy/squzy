@@ -4,7 +4,11 @@ build: .build
 
 push: .push
 
-squzy: .build_squzy
+push_hub: .push_hub
+
+build_squzy: .build_squzy
+
+run_squzy: .run_squzy
 
 test: .test
 
@@ -14,13 +18,24 @@ test_cover: .test_cover
 
 dep: .dep
 
+lint: .lint
+
 default: build
+
+.lint:
+	golangci-lint run
+
+.run_squzy:
+	bazel run //apps/squzy:squzy_app
 
 .build_squzy:
 	bazel build //apps/squzy:squzy
 
 .push:
 	bazel run //apps/squzy:squzy_push
+
+.push_hub:
+	bazel run //apps/squzy:squzy_push_hub
 
 .build:
 	bazel build //apps/...

@@ -9,6 +9,7 @@ import (
 
 type httpTool struct {
 	client *http.Client
+	count int
 }
 
 const (
@@ -21,6 +22,7 @@ var (
 )
 
 func (h *httpTool) SendRequest(req *http.Request) (int, []byte, error) {
+	h.count += 1
 	resp, err := h.client.Do(req)
 
 	if err != nil {
@@ -41,6 +43,7 @@ func (h *httpTool) SendRequest(req *http.Request) (int, []byte, error) {
 }
 
 func (h *httpTool) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
+	h.count += 1
 	resp, err := h.client.Do(req)
 	if err != nil {
 		return 0, nil, err
@@ -76,5 +79,6 @@ func New() HttpTool {
 			},
 			Timeout: time.Duration(RequestTimeout) * time.Second,
 		},
+		count: 0,
 	}
 }

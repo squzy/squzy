@@ -1,7 +1,31 @@
 package main
 
-import "fmt"
+import (
+	"log"
+	"squzy/apps/internal/grpcTools"
+	"squzy/apps/internal/httpTools"
+	"squzy/apps/internal/parsers"
+	scheduler_storage "squzy/apps/internal/scheduler-storage"
+	sitemap_storage "squzy/apps/internal/sitemap-storage"
+	"squzy/apps/internal/storage"
+	"squzy/apps/squzy/application"
+	"squzy/apps/squzy/config"
+	"time"
+)
 
 func main() {
-	fmt.Println("Squzy-pizze")
+	httpPackage := httpTools.New()
+	grpcTool := grpcTools.New()
+	cfg := config.New()
+	app := application.New(
+		scheduler_storage.New(),
+		storage.NewExternalStorage(grpcTool, cfg.GetClientAddress(), cfg.GetStorageTimeout(), storage.GetInMemoryStorage()),
+		sitemap_storage.New(
+			time.Hour*24,
+			httpPackage,
+			parsers.NewSiteMapParser(),
+		),
+		httpPackage,
+	)
+	log.Fatal(app.Run(cfg.GetPort()))
 }

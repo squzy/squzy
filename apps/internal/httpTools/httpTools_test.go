@@ -7,13 +7,6 @@ import (
 	"testing"
 )
 
-type ClientMock struct {
-}
-
-func (c ClientMock) Do(req *http.Request) (*http.Response, error) {
-	return &http.Response{}, nil
-}
-
 func TestNew(t *testing.T) {
 	t.Run("Test: Create new", func(t *testing.T) {
 		j := New()
@@ -28,7 +21,7 @@ func TestHttpTool_SendRequest(t *testing.T) {
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 
-			w.Write(bytes)
+			_, _ = w.Write(bytes)
 		}))
 		defer ts.Close()
 		j := New()
@@ -51,7 +44,7 @@ func TestHttpTool_SendRequestWithStatusCode(t *testing.T) {
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 
-			w.Write(bytes)
+			_, _ = w.Write(bytes)
 		}))
 		defer ts.Close()
 		j := New()
@@ -71,7 +64,7 @@ func TestHttpTool_SendRequestWithStatusCode(t *testing.T) {
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(201)
 
-			w.Write(bytes)
+			_, _ = w.Write(bytes)
 		}))
 		j := New()
 		req, _ := http.NewRequest(http.MethodGet, ts.URL, nil)
