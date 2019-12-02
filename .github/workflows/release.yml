@@ -32,7 +32,7 @@ jobs:
 
       - uses: actions/checkout@v1
       - name: Login to DockerHub Registry
-        run: echo ${{ secrets.SQUZY_TOKEN }} | docker login -u squzy --password-stdin
+        run: echo ${{ secrets.DOCKER_TOKEN }} | docker login -u squzy --password-stdin
 
       - name: Push docker
         uses: ngalaiko/bazel-action/1.2.1@master
