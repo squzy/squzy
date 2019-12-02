@@ -30,8 +30,8 @@ jobs:
         with:
           args: test --define tag="" //apps/...
 
+      - uses: actions/checkout@v1
       - name: Login to DockerHub Registry
-        uses: actions/checkout@v1
         run: echo ${{ secrets.SQUZY_TOKEN }} | docker login -u squzy --password-stdin
 
       - name: Push docker
