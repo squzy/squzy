@@ -2,8 +2,10 @@ package httpTools
 
 import (
 	"github.com/stretchr/testify/assert"
+	"math"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -30,6 +32,18 @@ func TestHttpTool_SendRequest(t *testing.T) {
 		assert.Equal(t, http.StatusOK, code)
 		assert.Equal(t, body, bytes)
 	})
+	t.Run("Test: Should return because of body", func(t *testing.T) {
+		bytes := []byte(strings.Repeat("hello", math.MaxInt8))
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Length", "1")
+			w.WriteHeader(200)
+			_, _ = w.Write(bytes)
+		}))
+		j := New()
+		req, _ := http.NewRequest(http.MethodGet, ts.URL, nil)
+		_, _, err := j.SendRequest(req)
+		assert.NotEqual(t, nil, err)
+	})
 	t.Run("Test: Should return error", func(t *testing.T) {
 		j := New()
 		req, _ := http.NewRequest(http.MethodGet, "ts.URL", nil)
@@ -55,6 +69,19 @@ func TestHttpTool_SendRequestWithStatusCode(t *testing.T) {
 	t.Run("Test: Should return error", func(t *testing.T) {
 		j := New()
 		req, _ := http.NewRequest(http.MethodGet, "ts.URL", nil)
+		_, _, err := j.SendRequestWithStatusCode(req, 200)
+		assert.NotEqual(t, nil, err)
+	})
+
+	t.Run("Test: Should return because of body", func(t *testing.T) {
+		bytes := []byte(strings.Repeat("hello", math.MaxInt8))
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Length", "1")
+			w.WriteHeader(200)
+			_, _ = w.Write(bytes)
+		}))
+		j := New()
+		req, _ := http.NewRequest(http.MethodGet, ts.URL, nil)
 		_, _, err := j.SendRequestWithStatusCode(req, 200)
 		assert.NotEqual(t, nil, err)
 	})
