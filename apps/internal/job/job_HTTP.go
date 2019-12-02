@@ -46,7 +46,7 @@ func (e *httpError) GetLogData() *clientPb.Log {
 		Meta: &clientPb.MetaData{
 			Id:       uuid.New().String(),
 			Location: e.location,
-			Port:     port,
+			Port:     int32(port),
 			Time:     e.time,
 			Type:     clientPb.Type_Http,
 		},
