@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	timeout = 5 * time.Second
-	httpPort = 80
+	timeout   = 5 * time.Second
+	httpPort  = 80
 	httpsPort = 443
 )
 
@@ -23,6 +23,7 @@ type jobHTTP struct {
 	url        string
 	headers    map[string]string
 	statusCode int
+	httpTool   httpTools.HttpTool
 }
 
 type httpError struct {
@@ -64,15 +65,13 @@ func NewHttpError(time *timestamp.Timestamp, code clientPb.StatusCode, descripti
 }
 
 func (j *jobHTTP) Do() CheckError {
-	httpTool := httpTools.New()
-
 	req, _ := http.NewRequest(j.methodType, j.url, nil)
 
 	for name, val := range j.headers {
 		req.Header.Set(name, val)
 	}
 
-	statuscode, _, err := httpTool.SendRequest(req)
+	statuscode, _, err := j.httpTool.SendRequest(req)
 	if err != nil {
 		return NewHttpError(
 			ptypes.TimestampNow(),
@@ -99,11 +98,12 @@ func (j *jobHTTP) Do() CheckError {
 	)
 }
 
-func NewJob(method, url string, headers map[string]string, status int) *jobHTTP {
+func NewJob(method, url string, headers map[string]string, status int, httpTool httpTools.HttpTool) *jobHTTP {
 	return &jobHTTP{
 		methodType: method,
 		url:        url,
 		headers:    headers,
 		statusCode: status,
+		httpTool:   httpTool,
 	}
 }
