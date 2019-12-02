@@ -1,4 +1,4 @@
-name: Go
+name: Release
 on:
   push:
     tags:
@@ -30,13 +30,13 @@ jobs:
           args: test //apps/...
 
       - name: Log in to registry
-          uses: azure/docker-login@v1
-          with:
-            loginServer: index.docker.io
-            username: squzy
-            password: ${{ secrets.SQUZY_TOKEN }}
+        uses: azure/docker-login@v1
+        with:
+          loginServer: index.docker.io
+          username: squzy
+          password: ${{ secrets.SQUZY_TOKEN }}
 
       - name: Push docker
-          uses: ngalaiko/bazel-action/1.2.1@master
-          with:
-            args: bazel run --define tag=$RELEASE_VERSION //apps/squzy:squzy_push_hub_ci
+        uses: ngalaiko/bazel-action/1.2.1@master
+        with:
+          args: bazel run --define tag=$RELEASE_VERSION //apps/squzy:squzy_push_hub_ci
