@@ -1,0 +1,42 @@
+name: Go
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+
+      - name: Set env
+        run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
+
+      - name: Get dependencies
+        run: go mod download
+
+      - name: Test
+        uses: ngalaiko/bazel-action/1.2.1@master
+        with:
+          args: test //apps/...
+
+      - name: Log in to registry
+          uses: azure/docker-login@v1
+          with:
+            loginServer: index.docker.io
+            username: squzy
+            password: ${{ secrets.SQUZY_TOKEN }}
+
+      - name: Push docker
+          uses: ngalaiko/bazel-action/1.2.1@master
+          with:
+            args: bazel run --define tag=$RELEASE_VERSION //apps/squzy:squzy_push_hub_ci
