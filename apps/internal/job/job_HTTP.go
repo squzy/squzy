@@ -5,8 +5,9 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
-	clientPb "github.com/squzy/squzy_generated/generated/logger"
+	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"net/http"
+	"squzy/apps/internal/httpTools"
 	"strings"
 	"time"
 )
@@ -63,9 +64,7 @@ func NewHttpError(time *timestamp.Timestamp, code clientPb.StatusCode, descripti
 }
 
 func (j *jobHTTP) Do() CheckError {
-	client := &http.Client{
-		Timeout: timeout,
-	}
+	httpTool := httpTools.New()
 
 	req, _ := http.NewRequest(j.methodType, j.url, nil)
 
@@ -73,7 +72,7 @@ func (j *jobHTTP) Do() CheckError {
 		req.Header.Set(name, val)
 	}
 
-	resp, err := client.Do(req)
+	statuscode, _, err := httpTool.SendRequest(req)
 	if err != nil {
 		return NewHttpError(
 			ptypes.TimestampNow(),
@@ -82,11 +81,8 @@ func (j *jobHTTP) Do() CheckError {
 			j.url,
 		)
 	}
-	if resp != nil {
-		defer resp.Body.Close()
-	}
 
-	if resp.StatusCode != j.statusCode {
+	if statuscode != j.statusCode {
 		return NewHttpError(
 			ptypes.TimestampNow(),
 			clientPb.StatusCode_Error,
