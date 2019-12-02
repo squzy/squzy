@@ -12,7 +12,7 @@ type Storage interface {
 type memory struct {
 }
 
-func (m memory) Write(id string, log job.CheckError) error {
+func (m *memory) Write(id string, log job.CheckError) error {
 	logger.Println(id, log.GetLogData())
 	return nil
 }
