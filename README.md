@@ -45,6 +45,7 @@ docker pull docker.pkg.github.com/squzy/squzy/squzy_app:develop
 
 # Authors
 - [Iurii Panarin](https://github.com/PxyUp)
+- [Nikita Kharitonov](https://github.com/DreamAndDrum)
 
 # Want to help?
 Want to file a bug, contribute some code, or improve documentation? Excellent!
