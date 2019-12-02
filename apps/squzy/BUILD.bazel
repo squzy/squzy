@@ -47,7 +47,6 @@ container_push(
     image = ":squzy_image",
     registry = "docker.pkg.github.com",
     repository = "squzy/squzy/squzy_app",
-    tag = "develop",  # don't use this on production image :)
 )
 
 container_push(
@@ -56,5 +55,4 @@ container_push(
     image = ":squzy_image",
     registry = "index.docker.io",
     repository = "squzy/squzy_app",
-    tag = "develop",  # don't use this on production image :)
 )
