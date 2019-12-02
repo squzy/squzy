@@ -16,7 +16,6 @@ var (
 	wrongConnectConfigError = errors.New("WRONG_CONNECTION_CONFIGURATION")
 )
 
-
 type CheckError interface {
 	GetLogData() *clientPb.Log
 }
