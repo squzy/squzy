@@ -39,4 +39,4 @@ jobs:
       - name: Push docker
         uses: ngalaiko/bazel-action/1.2.1@master
         with:
-          args: bazel run --define tag=$RELEASE_VERSION //apps/squzy:squzy_push_hub_ci
+          args: run --define tag=$RELEASE_VERSION //apps/squzy:squzy_push_hub_ci
