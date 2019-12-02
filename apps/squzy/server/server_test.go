@@ -208,6 +208,21 @@ func TestServer_AddScheduler(t *testing.T) {
 			})
 			assert.Equal(t, nil, err)
 		})
+		t.Run("Because: correct http", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_HttpCheck{
+					HttpCheck: &serverPb.HttpCheck{},
+				},
+			})
+			assert.Equal(t, nil, err)
+		})
 		t.Run("Because: correct grpc", func(t *testing.T) {
 			s := New(
 				&mockSchedulerStorage{},
@@ -261,6 +276,21 @@ func TestServer_AddScheduler(t *testing.T) {
 			})
 			assert.NotEqual(t, nil, err)
 		})
+		t.Run("Because: not correct timeout http", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             0,
+				Check:                &serverPb.AddSchedulerRequest_HttpCheck{
+					HttpCheck: &serverPb.HttpCheck{},
+				},
+			})
+			assert.NotEqual(t, nil, err)
+		})
 		t.Run("Because: not correct timeout grpc", func(t *testing.T) {
 			s := New(
 				&mockSchedulerStorage{},
@@ -309,6 +339,21 @@ func TestServer_AddScheduler(t *testing.T) {
 					Host:                 "wefewf",
 					Port:                 23,
 				}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: http alreadyExistId", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorageError{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_HttpCheck{
+					HttpCheck: &serverPb.HttpCheck{
+					}},
 			})
 			assert.NotEqual(t, nil, err)
 		})

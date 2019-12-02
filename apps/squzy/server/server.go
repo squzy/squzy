@@ -112,6 +112,23 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		return &serverPb.AddSchedulerResponse{
 			Id: schld.GetId(),
 		}, nil
+	case *serverPb.AddSchedulerRequest_HttpCheck:
+		httpCheck := check.HttpCheck
+		schld, err := scheduler.New(
+			time.Second*time.Duration(interval),
+			job.NewHttpJob(httpCheck.Method, httpCheck.Url, httpCheck.Headers, httpCheck.StatusCode, s.httpTools),
+			s.externalStorage,
+		)
+		if err != nil {
+			return nil, err
+		}
+		err = s.schedulerStorage.Set(schld)
+		if err != nil {
+			return nil, err
+		}
+		return &serverPb.AddSchedulerResponse{
+			Id: schld.GetId(),
+		}, nil
 	default:
 		return &serverPb.AddSchedulerResponse{
 			Id: "",

@@ -4,6 +4,7 @@ go_library(
      name = "job",
      srcs = [
          "job.go",
+         "job_http.go",
          "job_grpc.go",
          "job_tcp.go",
          "job_sitemap.go",
@@ -28,6 +29,7 @@ go_test(
     name = "job_test",
     srcs = [
         "job_test.go",
+        "job_http_test.go",
         "job_grpc_test.go",
         "job_tcp_test.go",
         "job_sitemap_test.go",

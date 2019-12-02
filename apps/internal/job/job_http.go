@@ -1,7 +1,6 @@
 package job
 
 import (
-	"errors"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
@@ -9,21 +8,19 @@ import (
 	"net/http"
 	"squzy/apps/internal/httpTools"
 	"strings"
-	"time"
 )
 
 const (
-	timeout   = 5 * time.Second
-	httpPort  = 80
-	httpsPort = 443
+	httpPort  = int32(80)
+	httpsPort = int32(443)
 )
 
 type jobHTTP struct {
-	methodType string
-	url        string
-	headers    map[string]string
-	statusCode int
-	httpTool   httpTools.HttpTool
+	methodType     string
+	url            string
+	headers        map[string]string
+	expectedStatus int32
+	httpTool       httpTools.HttpTool
 }
 
 type httpError struct {
@@ -32,10 +29,6 @@ type httpError struct {
 	description string
 	location    string
 }
-
-var (
-	wrongStatusError = errors.New("WRONG_STATUS_CODE")
-)
 
 func (e *httpError) GetLogData() *clientPb.Log {
 	port := httpPort
@@ -48,14 +41,14 @@ func (e *httpError) GetLogData() *clientPb.Log {
 		Meta: &clientPb.MetaData{
 			Id:       uuid.New().String(),
 			Location: e.location,
-			Port:     int32(port),
+			Port:     port,
 			Time:     e.time,
 			Type:     clientPb.Type_Http,
 		},
 	}
 }
 
-func NewHttpError(time *timestamp.Timestamp, code clientPb.StatusCode, description string, location string) CheckError {
+func newHttpError(time *timestamp.Timestamp, code clientPb.StatusCode, description string, location string) CheckError {
 	return &httpError{
 		time:        time,
 		code:        code,
@@ -71,9 +64,10 @@ func (j *jobHTTP) Do() CheckError {
 		req.Header.Set(name, val)
 	}
 
-	statuscode, _, err := j.httpTool.SendRequest(req)
+	_, _, err := j.httpTool.SendRequestWithStatusCode(req, int(j.expectedStatus))
+
 	if err != nil {
-		return NewHttpError(
+		return newHttpError(
 			ptypes.TimestampNow(),
 			clientPb.StatusCode_Error,
 			err.Error(),
@@ -81,16 +75,7 @@ func (j *jobHTTP) Do() CheckError {
 		)
 	}
 
-	if statuscode != j.statusCode {
-		return NewHttpError(
-			ptypes.TimestampNow(),
-			clientPb.StatusCode_Error,
-			wrongStatusError.Error(),
-			j.url,
-		)
-	}
-
-	return NewHttpError(
+	return newHttpError(
 		ptypes.TimestampNow(),
 		clientPb.StatusCode_OK,
 		"",
@@ -98,12 +83,12 @@ func (j *jobHTTP) Do() CheckError {
 	)
 }
 
-func NewJob(method, url string, headers map[string]string, status int, httpTool httpTools.HttpTool) *jobHTTP {
+func NewHttpJob(method, url string, headers map[string]string, expectedStatus int32, httpTool httpTools.HttpTool) *jobHTTP {
 	return &jobHTTP{
-		methodType: method,
-		url:        url,
-		headers:    headers,
-		statusCode: status,
-		httpTool:   httpTool,
+		methodType:     method,
+		url:            url,
+		headers:        headers,
+		expectedStatus: expectedStatus,
+		httpTool:       httpTool,
 	}
 }

@@ -1,62 +1,64 @@
 package job
 
 import (
-	"github.com/golang/protobuf/ptypes"
+	"errors"
+	storagePb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	"net/http/httptest"
 	"testing"
-	clientPb "github.com/squzy/squzy_generated/generated/logger"
 )
 
+type httpToolsMock struct {
+}
+
+type httpToolsMockError struct {
+}
+
+func (h httpToolsMockError) SendRequest(req *http.Request) (int, []byte, error) {
+	panic("implement me")
+}
+
+func (h httpToolsMockError) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
+	return 0, nil, errors.New("safsaf")
+}
+
+func (h httpToolsMock) SendRequest(req *http.Request) (int, []byte, error) {
+	panic("implement me")
+}
+
+func (h httpToolsMock) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
+	return 0, nil, nil
+}
+
+func TestNewHttpJob(t *testing.T) {
+	t.Run("Should: implement interface", func(t *testing.T) {
+		s := NewHttpJob(http.MethodGet, "", map[string]string{}, http.StatusOK, &httpToolsMock{})
+		assert.Implements(t, (*Job)(nil), s)
+	})
+
+}
+
 func TestJobHTTP_Do(t *testing.T) {
-	t.Run("Test: JobHTTP.Do()", func(t *testing.T) {
-		expectStatus := http.StatusOK
-
-		t.Run("Should: error client.Do incorrect ", func(t *testing.T) {
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(expectStatus)
-			}))
-			defer ts.Close()
-			j := NewJob("", "", nil, 0)
-			err := j.Do()
-			assert.NotEqual(t, nil, err)
-		})
-
-		t.Run("Should: throw error incorrect ", func(t *testing.T) {
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(200)
-			}))
-			defer ts.Close()
-			j := NewJob("GET", ts.URL, nil, 0)
-			err := j.Do()
-			except := NewHttpError(
-				ptypes.TimestampNow(),
-				clientPb.StatusCode_Error,
-				wrongStatusError.Error(),
-				j.url,
-			)
-			assert.Equal(t, except.GetLogData().Code, err.GetLogData().Code)
-			assert.Equal(t, except.GetLogData().Description, err.GetLogData().Description)
-		})
-
-
-		t.Run("Should: throw error incorrect ", func(t *testing.T) {
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(200)
-			}))
-			defer ts.Close()
-			m := make(map[string]string)
-			m["Accept"] = "application/json; charset=utf-8"
-			j := NewJob("GET", ts.URL, m, 200)
-			err := j.Do()
-			except := NewHttpError(
-				ptypes.TimestampNow(),
-				clientPb.StatusCode_OK,
-				"",
-				j.url,
-			)
-			assert.Equal(t, except.GetLogData().Code, err.GetLogData().Code)
-		})
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := NewHttpJob(http.MethodGet, "", map[string]string{}, http.StatusOK, &httpToolsMock{})
+		assert.Equal(t, storagePb.StatusCode_OK, s.Do().GetLogData().Code)
+	})
+	t.Run("Should: not return error with headers", func(t *testing.T) {
+		s := NewHttpJob(http.MethodGet, "", map[string]string{
+			"test": "asf",
+		}, http.StatusOK, &httpToolsMock{})
+		assert.Equal(t, storagePb.StatusCode_OK, s.Do().GetLogData().Code)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := NewHttpJob(http.MethodGet, "", map[string]string{}, http.StatusOK, &httpToolsMockError{})
+		assert.Equal(t, storagePb.StatusCode_Error, s.Do().GetLogData().Code)
+	})
+	t.Run("Should: return error port 80", func(t *testing.T) {
+		s := NewHttpJob(http.MethodGet, "http://google.ru", map[string]string{}, http.StatusOK, &httpToolsMockError{})
+		assert.Equal(t, int32(80), s.Do().GetLogData().Meta.Port)
+	})
+	t.Run("Should: return error port 80", func(t *testing.T) {
+		s := NewHttpJob(http.MethodGet, "https://google.ru", map[string]string{}, http.StatusOK, &httpToolsMockError{})
+		assert.Equal(t, int32(443), s.Do().GetLogData().Meta.Port)
 	})
 }
