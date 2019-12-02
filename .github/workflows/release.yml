@@ -30,12 +30,9 @@ jobs:
         with:
           args: test --define tag="" //apps/...
 
-      - name: Log in to registry
-        uses: azure/docker-login@v1
-        with:
-          loginServer: index.docker.io
-          username: squzy
-          password: ${{ secrets.SQUZY_TOKEN }}
+      - name: Login to DockerHub Registry
+        uses: actions/checkout@v1
+        run: echo ${{ secrets.SQUZY_TOKEN }} | docker login -u squzy --password-stdin
 
       - name: Push docker
         uses: ngalaiko/bazel-action/1.2.1@master
