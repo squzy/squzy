@@ -1,5 +1,8 @@
 name: Build
-on: [push]
+on:
+  push:
+    tags-ignore:
+      - 'v*.*.*'
 jobs:
 
   build:
@@ -22,4 +25,4 @@ jobs:
     - name: Test
       uses: ngalaiko/bazel-action/1.2.1@master
       with:
-        args: test //apps/...
+        args: test --define tag="" //apps/...

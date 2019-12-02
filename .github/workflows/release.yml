@@ -27,7 +27,7 @@ jobs:
       - name: Test
         uses: ngalaiko/bazel-action/1.2.1@master
         with:
-          args: test //apps/...
+          args: test --define tag="" //apps/...
 
       - name: Log in to registry
         uses: azure/docker-login@v1

@@ -41,10 +41,10 @@ default: build
 	bazel build //apps/...
 
 .test:
-	bazel test //apps/...
+	bazel test --define tag="" //apps/...
 
 .test_debug:
-	bazel test //apps/...:all --sandbox_debug
+	bazel test --define tag="" //apps/...:all --sandbox_debug
 
 .dep:
 	bazel run //:gazelle -- update-repos -from_file=go.mod
