@@ -37,5 +37,6 @@ jobs:
           wget https://github.com/bazelbuild/bazel/releases/download/1.1.0/bazel-1.1.0-installer-linux-x86_64.sh -O bazel_installer.sh
           chmod +x bazel_installer.sh
           ./bazel_installer.sh --user
+          export PATH="$PATH:$HOME/bin"
           bazel --version
           bazel run --define tag=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy:squzy_push_hub_ci
