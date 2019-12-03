@@ -64,5 +64,5 @@ container_push(
     image = ":squzy_image",
     registry = "index.docker.io",
     repository = "squzy/squzy_app",
-    tag = "$(tag)"
+    tag = "v1.0.0"
 )
