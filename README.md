@@ -35,12 +35,7 @@ https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto
 
 Docker Hub
 ```shell script
-docker pull squzy/squzy_app:develop
-```
-
-GitHub
-```shell script
-docker pull docker.pkg.github.com/squzy/squzy/squzy_app:develop
+docker pull squzy/squzy_app:v1.0.0
 ```
 
 # Authors
