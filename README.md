@@ -19,6 +19,67 @@ Squzy server implement [GRPC API](https://github.com/squzy/squzy_proto/blob/mast
 
 https://github.com/squzy/squzy_proto/blob/master/proto/v1/server.proto
 
+## Examples of call from [BloomRPC](https://github.com/uw-labs/bloomrpc)
+
+### Http/Https check:
+
+Usually that check used for monitoring web sites
+
+```shell script
+{
+  "interval": 10, - 10 second interval
+  "http_check": {
+    "method": "GET", - method GET/POST/PUT/DELETE/HEAD
+    "url": "https://google.com", - url which should call
+    "headers": { - headers
+    },
+    "statusCode": 200 - expected statusCode
+  }
+}
+```
+
+### Tcp check:
+
+Check good use for monitoring open ports or not
+
+```shell script
+{
+  "interval": 10, - 10 second interval
+  "tcp_check": {
+    "host": "localhost", - host
+    "port": 6345 - port
+  },
+}
+```
+
+### SiteMap check:
+
+That check good usage when you have critical URL in sitemap, if any of URL throw error check will be failed
+
+```shell script
+{
+  "interval": 10,
+  "sitemap_check": {
+    "url": "https://www.sitemaps.org/sitemap.xml" - url of sitemap (https://www.sitemaps.org/sitemap.xml)
+  },
+}
+```
+
+### GRPC check:
+
+Check better to use for internal testing of API services
+
+```shell script
+{
+  "interval": 10,
+  "grpc_check": {
+    "service": "Check", - service name
+    "host": "localhost", - host
+    "port": 9090 - port
+  },
+}
+```
+
 ## Storage
 By default squzy use stdout for logs, but can be configured by ENV.
 
