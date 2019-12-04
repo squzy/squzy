@@ -31,7 +31,8 @@ Usually that check used for monitoring web sites
   "http_check": {
     "method": "GET", - method GET/POST/PUT/DELETE/HEAD
     "url": "https://google.com", - url which should call
-    "headers": { - headers
+    "headers": {
+      "custom": "yes",
     },
     "statusCode": 200 - expected statusCode
   }
@@ -97,6 +98,12 @@ https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto
 Docker Hub
 ```shell script
 docker pull squzy/squzy_app:v1.0.0
+```
+
+### Run locally with docker:
+
+```shell script
+docker run -p 8080:8080 squzy/squzy_app:v1.0.0
 ```
 
 # Authors
