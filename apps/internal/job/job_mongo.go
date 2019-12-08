@@ -8,6 +8,11 @@ import (
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"time"
+)
+
+var (
+	timeout = time.Second * 5
 )
 
 type jobMongo struct {
@@ -49,7 +54,9 @@ func (m *mongoError) GetLogData() *clientPb.Log {
 
 func (j *jobMongo) Do() CheckError {
 	clientOptions := options.Client().ApplyURI(j.url)
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		return newMongoError(ptypes.TimestampNow(), clientPb.StatusCode_Error, mongoConnectionError.Error(), j.url)
 	}
