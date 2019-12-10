@@ -1,6 +1,7 @@
 # Squzy - opensource monitoring system
 [![codecov](https://codecov.io/gh/squzy/squzy/branch/develop/graph/badge.svg)](https://codecov.io/gh/squzy/squzy)
 [![GolangCI](https://golangci.com/badges/github.com/squzy/golangci-lint.svg)](https://golangci.com)
+[![Join the chat at https://gitter.im/squzyio/community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/squzyio/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## About
 
