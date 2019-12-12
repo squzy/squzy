@@ -14,6 +14,10 @@ const (
 	cpuInterval = time.Millisecond * 500
 )
 
+type Agent interface {
+	GetStat() *agentPb.GetStatsResponse
+}
+
 type agent struct {
 }
 
@@ -22,7 +26,11 @@ func New() *agent {
 }
 
 func (a *agent) GetStat() *agentPb.GetStatsResponse {
-	response := &agentPb.GetStatsResponse{}
+	response := &agentPb.GetStatsResponse{
+		CpuInfo:    &agentPb.CpuInfo{},
+		MemoryInfo: &agentPb.MemoryInfo{},
+		DiskInfo:   &agentPb.DiskInfo{},
+	}
 
 	var wg sync.WaitGroup
 
@@ -32,9 +40,10 @@ func (a *agent) GetStat() *agentPb.GetStatsResponse {
 		defer wg.Done()
 		cpuStat, err := cpu.Percent(cpuInterval, true)
 
-		if err == nil || cpuStat == nil {
+		if err != nil || cpuStat == nil {
 			return
 		}
+
 		for _, stat := range cpuStat {
 			response.CpuInfo.Cpus = append(response.CpuInfo.Cpus, &agentPb.CpuInfo_CPU{
 				Load: stat,
@@ -47,10 +56,9 @@ func (a *agent) GetStat() *agentPb.GetStatsResponse {
 		defer wg.Done()
 		swapMemoryStat, err := mem.SwapMemory()
 
-		if err == nil || swapMemoryStat == nil {
+		if err != nil || swapMemoryStat == nil {
 			return
 		}
-
 		response.MemoryInfo.Swap = &agentPb.MemoryInfo_Memory{
 			Total:       swapMemoryStat.Total,
 			Used:        swapMemoryStat.Used,
@@ -65,7 +73,7 @@ func (a *agent) GetStat() *agentPb.GetStatsResponse {
 		defer wg.Done()
 		memoryStat, err := mem.VirtualMemory()
 
-		if err == nil || memoryStat == nil {
+		if err != nil || memoryStat == nil {
 			return
 		}
 
@@ -85,7 +93,7 @@ func (a *agent) GetStat() *agentPb.GetStatsResponse {
 
 		disks, err := disk.Partitions(false)
 
-		if err == nil || disks == nil {
+		if err != nil || disks == nil {
 			return
 		}
 		diskStat := make(map[string]*agentPb.DiskInfo_Disk)
@@ -111,7 +119,7 @@ func (a *agent) GetStat() *agentPb.GetStatsResponse {
 		defer wg.Done()
 
 		netStat, err := net.IOCounters(false)
-		if err == nil || netStat == nil || len(netStat) == 0 {
+		if err != nil || netStat == nil || len(netStat) == 0 {
 			return
 		}
 

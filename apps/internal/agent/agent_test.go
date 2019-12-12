@@ -10,6 +10,7 @@ func TestNew(t *testing.T) {
 	t.Run("Should: create new agent", func(t *testing.T) {
 		a := New()
 		assert.IsType(t, &agent{}, a)
+		assert.Implements(t, (*Agent)(nil), a)
 	})
 }
 
