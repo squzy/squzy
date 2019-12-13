@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	agentPb "github.com/squzy/squzy_generated/generated/agent/proto/v1"
 	"google.golang.org/grpc"
@@ -24,7 +23,7 @@ type application struct {
 func (a *application) Run() error {
 	conn, err := a.grpcTools.GetConnection(a.config.GetSquzyServer(), a.config.GetSquzyServerTimeout(), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		return errors.New(fmt.Sprintf("Can't connect to squzy server %s", a.config.GetSquzyServer()))
+		return fmt.Errorf("Can't connect to squzy server %s", a.config.GetSquzyServer())
 	}
 	a.client = agentPb.NewAgentServerClient(conn)
 	stream, _ := a.client.Register(context.Background())

@@ -44,7 +44,7 @@ type serverSuccess struct {
 }
 
 func (s serverSuccess) Register(rq agentPb.AgentServer_RegisterServer) error {
-	rq.Send(&agentPb.RegisterResponse{
+	_ = rq.Send(&agentPb.RegisterResponse{
 		Id: "asfsaf",
 	})
 	res, _ := rq.Recv()
@@ -65,13 +65,6 @@ func (c configSecondMock) GetSquzyServerTimeout() time.Duration {
 }
 
 type grpcToolsMock struct {
-}
-
-type grpcToolsErrorMock struct {
-}
-
-func (g grpcToolsErrorMock) GetConnection(address string, timeout time.Duration, option ...grpc.DialOption) (*grpc.ClientConn, error) {
-	return nil, errors.New("asfaf")
 }
 
 func (g grpcToolsMock) GetConnection(address string, timeout time.Duration, option ...grpc.DialOption) (*grpc.ClientConn, error) {
@@ -157,7 +150,7 @@ func TestApplication_Run(t *testing.T) {
 			ch: msgChan,
 		})
 		go func() {
-			grpcServer.Serve(lis)
+			_ = grpcServer.Serve(lis)
 		}()
 		ch := make(chan *agentPb.SendStat)
 
