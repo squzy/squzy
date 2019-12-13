@@ -19,18 +19,18 @@ type mockLessSecond struct {
 
 }
 
-func (m mockLessSecond) GetStat() *squzy_agents_v1_agent.SendStat {
+func (m mockLessSecond) GetStat() *squzy_agents_v1_agent.SendStatRequest {
 	time.Sleep(time.Millisecond * 500)
-	return &squzy_agents_v1_agent.SendStat{}
+	return &squzy_agents_v1_agent.SendStatRequest{}
 }
 
-func (m mockMoreSecond) GetStat() *squzy_agents_v1_agent.SendStat {
+func (m mockMoreSecond) GetStat() *squzy_agents_v1_agent.SendStatRequest {
 	time.Sleep(time.Second * 2)
-	return &squzy_agents_v1_agent.SendStat{}
+	return &squzy_agents_v1_agent.SendStatRequest{}
 }
 
-func (m mock) GetStat() *squzy_agents_v1_agent.SendStat {
-	return &squzy_agents_v1_agent.SendStat{}
+func (m mock) GetStat() *squzy_agents_v1_agent.SendStatRequest {
+	return &squzy_agents_v1_agent.SendStatRequest{}
 }
 
 func TestNew(t *testing.T) {
@@ -50,9 +50,9 @@ func TestExecutor_Execute(t *testing.T) {
 		a, _ := New(&mock{}, time.Second)
 		channel := a.Execute()
 		value := <-channel
-		assert.EqualValues(t,  &squzy_agents_v1_agent.SendStat{}, value)
+		assert.EqualValues(t,  &squzy_agents_v1_agent.SendStatRequest{}, value)
 		value2 := <-channel
-		assert.EqualValues(t,  &squzy_agents_v1_agent.SendStat{}, value2)
+		assert.EqualValues(t,  &squzy_agents_v1_agent.SendStatRequest{}, value2)
 	})
 	t.Run("Should: not get value, if job execute more that inteval", func(t *testing.T) {
 		a, _ := New(&mockMoreSecond{}, time.Second)
@@ -69,7 +69,7 @@ func TestExecutor_Execute(t *testing.T) {
 		channel := a.Execute()
 		select {
 		case value := <-channel:
-			assert.EqualValues(t, &squzy_agents_v1_agent.SendStat{}, value)
+			assert.EqualValues(t, &squzy_agents_v1_agent.SendStatRequest{}, value)
 		case <-time.After(time.Second):
 			assert.FailNow(t, "Job execute less than second")
 		}

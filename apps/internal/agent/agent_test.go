@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/shirou/gopsutil/disk"
-	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
 	agentPb "github.com/squzy/squzy_generated/generated/agent/proto/v1"
@@ -26,8 +25,6 @@ func TestNew(t *testing.T) {
 		}, func(s string) (stat *disk.UsageStat, err error) {
 			return nil, nil
 		}, func(b bool) (stat []net.IOCountersStat, err error) {
-			return nil, nil
-		}, func() (stat *host.InfoStat, err error) {
 			return nil, nil
 		}, func() *timestamp.Timestamp {
 			return &timestamp.Timestamp{}
@@ -51,12 +48,10 @@ func TestAgent_GetStat(t *testing.T) {
 			return nil, nil
 		}, func(b bool) (stat []net.IOCountersStat, err error) {
 			return nil, nil
-		}, func() (stat *host.InfoStat, err error) {
-			return nil, nil
 		}, func() *timestamp.Timestamp {
 			return &timestamp.Timestamp{}
 		})
-		assert.IsType(t, &agentPb.SendStat{}, a.GetStat())
+		assert.IsType(t, &agentPb.SendStatRequest{}, a.GetStat())
 	})
 	t.Run("Should: return cpu info", func(t *testing.T) {
 		a := New(func(duration time.Duration, b bool) (float64s []float64, err error) {
@@ -70,8 +65,6 @@ func TestAgent_GetStat(t *testing.T) {
 		}, func(s string) (stat *disk.UsageStat, err error) {
 			return nil, nil
 		}, func(b bool) (stat []net.IOCountersStat, err error) {
-			return nil, nil
-		}, func() (stat *host.InfoStat, err error) {
 			return nil, nil
 		}, func() *timestamp.Timestamp {
 			return &timestamp.Timestamp{}
@@ -95,8 +88,6 @@ func TestAgent_GetStat(t *testing.T) {
 			return nil, nil
 		}, func(b bool) (stat []net.IOCountersStat, err error) {
 			return nil, nil
-		}, func() (stat *host.InfoStat, err error) {
-			return nil, nil
 		}, func() *timestamp.Timestamp {
 			return &timestamp.Timestamp{}
 		})
@@ -116,8 +107,6 @@ func TestAgent_GetStat(t *testing.T) {
 		}, func(s string) (stat *disk.UsageStat, err error) {
 			return nil, nil
 		}, func(b bool) (stat []net.IOCountersStat, err error) {
-			return nil, nil
-		}, func() (stat *host.InfoStat, err error) {
 			return nil, nil
 		}, func() *timestamp.Timestamp {
 			return &timestamp.Timestamp{}
@@ -140,8 +129,6 @@ func TestAgent_GetStat(t *testing.T) {
 				Used: 6,
 			}, nil
 		}, func(b bool) (stat []net.IOCountersStat, err error) {
-			return nil, nil
-		}, func() (stat *host.InfoStat, err error) {
 			return nil, nil
 		}, func() *timestamp.Timestamp {
 			return &timestamp.Timestamp{}
@@ -167,32 +154,10 @@ func TestAgent_GetStat(t *testing.T) {
 					BytesRecv: 5,
 				},
 			}, nil
-		}, func() (stat *host.InfoStat, err error) {
-			return nil, nil
-		}, func() *timestamp.Timestamp {
+		},func() *timestamp.Timestamp {
 			return &timestamp.Timestamp{}
 		})
 		assert.EqualValues(t, &agentPb.NetInfo{BytesRecv: 5}, a.GetStat().NetInfo)
-	})
-	t.Run("Should: return host stat", func(t *testing.T) {
-		a := New(func(duration time.Duration, b bool) (float64s []float64, err error) {
-			return nil, nil
-		}, func() (stat *mem.SwapMemoryStat, err error) {
-			return nil, nil
-		}, func() (stat *mem.VirtualMemoryStat, err error) {
-			return nil, nil
-		}, func(b bool) (stats []disk.PartitionStat, err error) {
-			return nil, nil
-		}, func(s string) (stat *disk.UsageStat, err error) {
-			return nil, nil
-		}, func(b bool) (stat []net.IOCountersStat, err error) {
-			return nil, nil
-		}, func() (stat *host.InfoStat, err error) {
-			return &host.InfoStat{Hostname: "trata"}, nil
-		}, func() *timestamp.Timestamp {
-			return &timestamp.Timestamp{}
-		})
-		assert.EqualValues(t, &agentPb.HostInfo{HostName: "trata", PlatformInfo: &agentPb.PlatformInfo{}}, a.GetStat().HostInfo)
 	})
 	t.Run("Should: fill default value if throw error", func(t *testing.T) {
 		errValue := errors.New("test")
@@ -208,18 +173,13 @@ func TestAgent_GetStat(t *testing.T) {
 			return nil, errValue
 		}, func(b bool) (stat []net.IOCountersStat, err error) {
 			return nil, errValue
-		}, func() (stat *host.InfoStat, err error) {
-			return nil, errValue
 		}, func() *timestamp.Timestamp {
 			return &timestamp.Timestamp{}
 		})
-		assert.EqualValues(t, &agentPb.SendStat{
+		assert.EqualValues(t, &agentPb.SendStatRequest{
 			CpuInfo:    &agentPb.CpuInfo{},
 			MemoryInfo: &agentPb.MemoryInfo{},
 			DiskInfo:   &agentPb.DiskInfo{},
-			HostInfo: &agentPb.HostInfo{
-				PlatformInfo: &agentPb.PlatformInfo{},
-			},
 			Time: &timestamp.Timestamp{},
 		}, a.GetStat())
 	})
@@ -237,19 +197,14 @@ func TestAgent_GetStat(t *testing.T) {
 			return nil, errValue
 		}, func(b bool) (stat []net.IOCountersStat, err error) {
 			return nil, errValue
-		}, func() (stat *host.InfoStat, err error) {
-			return nil, nil
 		}, func() *timestamp.Timestamp {
 			return &timestamp.Timestamp{}
 		})
-		assert.Equal(t, &agentPb.SendStat{
+		assert.Equal(t, &agentPb.SendStatRequest{
 			CpuInfo:    &agentPb.CpuInfo{},
 			MemoryInfo: &agentPb.MemoryInfo{},
 			DiskInfo: &agentPb.DiskInfo{
 				Disks: make(map[string]*agentPb.DiskInfo_Disk),
-			},
-			HostInfo: &agentPb.HostInfo{
-				PlatformInfo: &agentPb.PlatformInfo{},
 			},
 			Time: &timestamp.Timestamp{},
 		}, a.GetStat())

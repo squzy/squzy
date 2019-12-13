@@ -8,13 +8,13 @@ import (
 )
 
 type AgentExecutor interface {
-	Execute() chan *agentPb.SendStat
+	Execute() chan *agentPb.SendStatRequest
 }
 
 type executor struct {
 	agent       agent.Agent
 	interval    time.Duration
-	statChan    chan *agentPb.SendStat
+	statChan    chan *agentPb.SendStatRequest
 	executeChan chan bool
 }
 
@@ -26,10 +26,10 @@ var (
 	intervalLessHalfSecondError = errors.New("INTERVAL_LESS_THAN_HALF_SECOND")
 )
 
-func (e *executor) Execute() chan *agentPb.SendStat {
+func (e *executor) Execute() chan *agentPb.SendStatRequest {
 	go func() {
 		for range e.executeChan {
-			c := make(chan *agentPb.SendStat, 1)
+			c := make(chan *agentPb.SendStatRequest, 1)
 			go func() {
 				c <- e.agent.GetStat()
 			}()
@@ -57,7 +57,7 @@ func New(agent agent.Agent, interval time.Duration) (AgentExecutor, error) {
 	return &executor{
 		agent:       agent,
 		interval:    interval,
-		statChan:    make(chan *agentPb.SendStat, 1),
+		statChan:    make(chan *agentPb.SendStatRequest, 1),
 		executeChan: make(chan bool, 1),
 	}, nil
 }

@@ -3,7 +3,6 @@ package agent
 import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/shirou/gopsutil/disk"
-	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
 	agentPb "github.com/squzy/squzy_generated/generated/agent/proto/v1"
@@ -16,7 +15,7 @@ const (
 )
 
 type Agent interface {
-	GetStat() *agentPb.SendStat
+	GetStat() *agentPb.SendStatRequest
 }
 
 type agent struct {
@@ -26,7 +25,6 @@ type agent struct {
 	diskStatFn          func(bool) ([]disk.PartitionStat, error)
 	diskUsageFn         func(string) (*disk.UsageStat, error)
 	netStatFn           func(bool) ([]net.IOCountersStat, error)
-	hostStatFn          func() (*host.InfoStat, error)
 	timeFn              func() *timestamp.Timestamp
 }
 
@@ -37,7 +35,6 @@ func New(
 	diskStatFn func(bool) ([]disk.PartitionStat, error),
 	diskUsageFn func(string) (*disk.UsageStat, error),
 	netStatFn func(bool) ([]net.IOCountersStat, error),
-	hostStatFn func() (*host.InfoStat, error),
 	timeFn func() *timestamp.Timestamp,
 ) *agent {
 	return &agent{
@@ -47,19 +44,15 @@ func New(
 		diskStatFn:          diskStatFn,
 		diskUsageFn:         diskUsageFn,
 		netStatFn:           netStatFn,
-		hostStatFn:          hostStatFn,
 		timeFn:              timeFn,
 	}
 }
 
-func (a *agent) GetStat() *agentPb.SendStat {
-	response := &agentPb.SendStat{
+func (a *agent) GetStat() *agentPb.SendStatRequest {
+	response := &agentPb.SendStatRequest{
 		CpuInfo:    &agentPb.CpuInfo{},
 		MemoryInfo: &agentPb.MemoryInfo{},
 		DiskInfo:   &agentPb.DiskInfo{},
-		HostInfo: &agentPb.HostInfo{
-			PlatformInfo: &agentPb.PlatformInfo{},
-		},
 	}
 
 	var wg sync.WaitGroup
@@ -163,26 +156,6 @@ func (a *agent) GetStat() *agentPb.SendStat {
 			ErrOut:      stat.Errout,
 			DropIn:      stat.Dropin,
 			DropOut:     stat.Dropout,
-		}
-	}()
-
-	wg.Add(1)
-
-	go func() {
-		defer wg.Done()
-		hostStat, err := a.hostStatFn()
-		if err != nil || hostStat == nil {
-			return
-		}
-
-		response.HostInfo = &agentPb.HostInfo{
-			HostName: hostStat.Hostname,
-			Os:       hostStat.OS,
-			PlatformInfo: &agentPb.PlatformInfo{
-				Name:    hostStat.Platform,
-				Family:  hostStat.PlatformFamily,
-				Version: hostStat.PlatformVersion,
-			},
 		}
 	}()
 

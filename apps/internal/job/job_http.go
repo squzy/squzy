@@ -7,12 +7,6 @@ import (
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"net/http"
 	"squzy/apps/internal/httpTools"
-	"strings"
-)
-
-const (
-	httpPort  = int32(80)
-	httpsPort = int32(443)
 )
 
 type jobHTTP struct {
@@ -31,17 +25,13 @@ type httpError struct {
 }
 
 func (e *httpError) GetLogData() *clientPb.Log {
-	port := httpPort
-	if strings.HasPrefix(e.location, "https") {
-		port = httpsPort
-	}
 	return &clientPb.Log{
 		Code:        e.code,
 		Description: e.description,
 		Meta: &clientPb.MetaData{
 			Id:       uuid.New().String(),
 			Location: e.location,
-			Port:     port,
+			Port:     GetPortByUrl(e.location),
 			Time:     e.time,
 			Type:     clientPb.Type_Http,
 		},

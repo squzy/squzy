@@ -25,7 +25,6 @@ func main() {
 			disk.Partitions,
 			disk.Usage,
 			net.IOCounters,
-			host.Info,
 			ptypes.TimestampNow,
 		),
 		cfg.GetExecutionTimeout(),
@@ -37,11 +36,11 @@ func main() {
 		executor,
 		grpcTools.New(),
 		cfg,
+		host.Info,
+		application.NewStream,
 	)
 	err = a.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
-	quit := make(chan bool, 1)
-	<-quit
 }
