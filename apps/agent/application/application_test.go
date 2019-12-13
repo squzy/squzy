@@ -256,6 +256,7 @@ func TestApplication_Run(t *testing.T) {
 		go func() {
 			_ = grpcServer.Serve(lis)
 		}()
+		time.Sleep(time.Second)
 		ch := make(chan *agentPb.SendStatRequest)
 
 		a := New(&executorMock{
@@ -266,6 +267,7 @@ func TestApplication_Run(t *testing.T) {
 		go func() {
 			a.Run()
 		}()
+		time.Sleep(time.Second)
 		ch <- &agentPb.SendStatRequest{
 			CpuInfo: &agentPb.CpuInfo{Cpus: []*agentPb.CpuInfo_CPU{{
 				Load: 5,
