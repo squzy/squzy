@@ -17,7 +17,6 @@ go_test(
         "grpcTools_test.go",
     ],
     deps = [
-        "@org_golang_google_grpc//:go_default_library",
         "@com_github_stretchr_testify//assert:go_default_library"
     ]
 )

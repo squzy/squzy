@@ -20,7 +20,5 @@ go_test(
     embed = [":sitemap-storage"],
     deps = [
         "@com_github_stretchr_testify//assert:go_default_library",
-        "//apps/internal/parsers:parsers",
-        "//apps/internal/httpTools:httpTools",
     ]
 )

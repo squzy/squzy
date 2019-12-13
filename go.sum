@@ -40,6 +40,14 @@ github.com/squzy/squzy_generated v1.0.11-0.20191211220849-19c78393cded h1:SVKZrr
 github.com/squzy/squzy_generated v1.0.11-0.20191211220849-19c78393cded/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/squzy/squzy_generated v1.0.11-0.20191211222026-bbd0bf2edfcc h1:iSPiW1w4jx5kZEqSUiAr/IT1fRcRlD3Q1KPhJiMA2Go=
 github.com/squzy/squzy_generated v1.0.11-0.20191211222026-bbd0bf2edfcc/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.0.11-0.20191212165536-de9231992b05 h1:Uq+IZtsYXR1q+9ZseBJCjQVe4wcO76ukN8RU3v2auoQ=
+github.com/squzy/squzy_generated v1.0.11-0.20191212165536-de9231992b05/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.0.11-0.20191212201126-1ce753f39f06 h1:ohaOmiMLAm4CxUrPuDRdz7ovnAt3OcVGhRWDdoU7NvM=
+github.com/squzy/squzy_generated v1.0.11-0.20191212201126-1ce753f39f06/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.0.11-0.20191212221942-5669282c6c08 h1:m5Iur/8V68ZA7CNwHR+7ypW/Kfpq80AhTekKWQSx/1U=
+github.com/squzy/squzy_generated v1.0.11-0.20191212221942-5669282c6c08/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.0.11-0.20191213003555-dc9f4fee8250 h1:gbXTNdT2f/RxEqD+bKrO4PadInGhEuJN2/xb3ab1aZM=
+github.com/squzy/squzy_generated v1.0.11-0.20191213003555-dc9f4fee8250/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=

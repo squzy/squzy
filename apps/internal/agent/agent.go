@@ -1,8 +1,9 @@
 package agent
 
 import (
-	"github.com/shirou/gopsutil/cpu"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
 	agentPb "github.com/squzy/squzy_generated/generated/agent/proto/v1"
@@ -15,21 +16,50 @@ const (
 )
 
 type Agent interface {
-	GetStat() *agentPb.GetStatsResponse
+	GetStat() *agentPb.SendStat
 }
 
 type agent struct {
+	cpuStatFn           func(time.Duration, bool) ([]float64, error)
+	swapMemoryStatFn    func() (*mem.SwapMemoryStat, error)
+	virtualMemoryStatFn func() (*mem.VirtualMemoryStat, error)
+	diskStatFn          func(bool) ([]disk.PartitionStat, error)
+	diskUsageFn         func(string) (*disk.UsageStat, error)
+	netStatFn           func(bool) ([]net.IOCountersStat, error)
+	hostStatFn          func() (*host.InfoStat, error)
+	timeFn              func() *timestamp.Timestamp
 }
 
-func New() *agent {
-	return &agent{}
+func New(
+	cpuStatFn func(time.Duration, bool) ([]float64, error),
+	swapMemoryStatFn func() (*mem.SwapMemoryStat, error),
+	virtualMemoryStatFn func() (*mem.VirtualMemoryStat, error),
+	diskStatFn func(bool) ([]disk.PartitionStat, error),
+	diskUsageFn func(string) (*disk.UsageStat, error),
+	netStatFn func(bool) ([]net.IOCountersStat, error),
+	hostStatFn func() (*host.InfoStat, error),
+	timeFn func() *timestamp.Timestamp,
+) *agent {
+	return &agent{
+		cpuStatFn:           cpuStatFn,
+		swapMemoryStatFn:    swapMemoryStatFn,
+		virtualMemoryStatFn: virtualMemoryStatFn,
+		diskStatFn:          diskStatFn,
+		diskUsageFn:         diskUsageFn,
+		netStatFn:           netStatFn,
+		hostStatFn:          hostStatFn,
+		timeFn:              timeFn,
+	}
 }
 
-func (a *agent) GetStat() *agentPb.GetStatsResponse {
-	response := &agentPb.GetStatsResponse{
+func (a *agent) GetStat() *agentPb.SendStat {
+	response := &agentPb.SendStat{
 		CpuInfo:    &agentPb.CpuInfo{},
 		MemoryInfo: &agentPb.MemoryInfo{},
 		DiskInfo:   &agentPb.DiskInfo{},
+		HostInfo: &agentPb.HostInfo{
+			PlatformInfo: &agentPb.PlatformInfo{},
+		},
 	}
 
 	var wg sync.WaitGroup
@@ -38,7 +68,7 @@ func (a *agent) GetStat() *agentPb.GetStatsResponse {
 
 	go func() {
 		defer wg.Done()
-		cpuStat, err := cpu.Percent(cpuInterval, true)
+		cpuStat, err := a.cpuStatFn(cpuInterval, true)
 
 		if err != nil || cpuStat == nil {
 			return
@@ -54,7 +84,7 @@ func (a *agent) GetStat() *agentPb.GetStatsResponse {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		swapMemoryStat, err := mem.SwapMemory()
+		swapMemoryStat, err := a.swapMemoryStatFn()
 
 		if err != nil || swapMemoryStat == nil {
 			return
@@ -71,7 +101,7 @@ func (a *agent) GetStat() *agentPb.GetStatsResponse {
 
 	go func() {
 		defer wg.Done()
-		memoryStat, err := mem.VirtualMemory()
+		memoryStat, err := a.virtualMemoryStatFn()
 
 		if err != nil || memoryStat == nil {
 			return
@@ -91,14 +121,14 @@ func (a *agent) GetStat() *agentPb.GetStatsResponse {
 	go func() {
 		defer wg.Done()
 
-		disks, err := disk.Partitions(false)
+		disks, err := a.diskStatFn(false)
 
 		if err != nil || disks == nil {
 			return
 		}
 		diskStat := make(map[string]*agentPb.DiskInfo_Disk)
 		for _, d := range disks {
-			diskInfo, err := disk.Usage(d.Mountpoint)
+			diskInfo, err := a.diskUsageFn(d.Mountpoint)
 			if err != nil {
 				continue
 			}
@@ -118,7 +148,7 @@ func (a *agent) GetStat() *agentPb.GetStatsResponse {
 	go func() {
 		defer wg.Done()
 
-		netStat, err := net.IOCounters(false)
+		netStat, err := a.netStatFn(false)
 		if err != nil || netStat == nil || len(netStat) == 0 {
 			return
 		}
@@ -136,7 +166,29 @@ func (a *agent) GetStat() *agentPb.GetStatsResponse {
 		}
 	}()
 
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+		hostStat, err := a.hostStatFn()
+		if err != nil || hostStat == nil {
+			return
+		}
+
+		response.HostInfo = &agentPb.HostInfo{
+			HostName: hostStat.Hostname,
+			Os:       hostStat.OS,
+			PlatformInfo: &agentPb.PlatformInfo{
+				Name:    hostStat.Platform,
+				Family:  hostStat.PlatformFamily,
+				Version: hostStat.PlatformVersion,
+			},
+		}
+	}()
+
 	wg.Wait()
+
+	response.Time = a.timeFn()
 
 	return response
 }

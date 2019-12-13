@@ -6,7 +6,7 @@ require (
 	github.com/golang/protobuf v1.3.2
 	github.com/google/uuid v1.1.1
 	github.com/shirou/gopsutil v2.19.11+incompatible
-	github.com/squzy/squzy_generated v1.0.11-0.20191211222026-bbd0bf2edfcc
+	github.com/squzy/squzy_generated v1.0.11-0.20191213003555-dc9f4fee8250
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
