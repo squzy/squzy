@@ -288,8 +288,8 @@ go_repository(
 go_repository(
     name = "com_github_squzy_squzy_generated",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:gbXTNdT2f/RxEqD+bKrO4PadInGhEuJN2/xb3ab1aZM=",
-    version = "v1.0.11-0.20191213003555-dc9f4fee8250",
+    sum = "h1:o82cqJB8oKG6djkp6OtPXkFrCK+KJ6P1u6/pKo93vp0=",
+    version = "v1.2.0",
 )
 
 go_repository(
@@ -297,4 +297,25 @@ go_repository(
     importpath = "github.com/shirou/gopsutil",
     sum = "h1:lJHR0foqAjI4exXqWsU3DbH7bX1xvdhGdnXTIARA9W4=",
     version = "v2.19.11+incompatible",
+)
+
+go_repository(
+    name = "com_github_go_ole_go_ole",
+    importpath = "github.com/go-ole/go-ole",
+    sum = "h1:nNBDSCOigTSiarFpYE9J/KtEA1IOW4CNeqT9TQDqCxI=",
+    version = "v1.2.4",
+)
+
+go_repository(
+    name = "com_github_shirou_w32",
+    importpath = "github.com/shirou/w32",
+    sum = "h1:udFKJ0aHUL60LboW/A+DfgoHVedieIzIXE8uylPue0U=",
+    version = "v0.0.0-20160930032740-bb4de0191aa4",
+)
+
+go_repository(
+    name = "com_github_stackexchange_wmi",
+    importpath = "github.com/StackExchange/wmi",
+    sum = "h1:G0m3OIz70MZUWq3EgK3CesDbo8upS2Vm9/P3FtgI+Jk=",
+    version = "v0.0.0-20190523213315-cbe66965904d",
 )
