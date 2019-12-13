@@ -37,6 +37,7 @@ func NewExternalStorage(grpcTools grpcTools.GrpcTool, address string, timeout ti
 
 func (s *externalStorage) Write(id string, log job.CheckError) error {
 	req := &storagePb.SendLogMessageRequest{
+		SchedulerId: id,
 		Log: log.GetLogData(),
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), loggerConnTimeout)

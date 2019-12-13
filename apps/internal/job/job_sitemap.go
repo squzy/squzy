@@ -53,12 +53,13 @@ func newSiteMapError(time *timestamp.Timestamp, code clientPb.StatusCode, descri
 }
 
 type siteMapErr struct {
-	location   string
-	statusCode int
+	location      string
+	statusCode    int
+	internalError error
 }
 
 func (sme *siteMapErr) Error() string {
-	return fmt.Sprintf("%s -  was return %d", sme.location, sme.statusCode)
+	return fmt.Sprintf("%s -  was return %d, fullError - %s", sme.location, sme.statusCode, sme.internalError.Error())
 }
 
 func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool) Job {
@@ -86,7 +87,7 @@ func (j *siteMapJob) Do() CheckError {
 			code, _, err := j.httpTools.SendRequestWithStatusCode(req, http.StatusOK)
 			if err != nil {
 				cancel()
-				return newSiteMapErr(location, code)
+				return newSiteMapErr(location, code, err)
 			}
 			return nil
 		})
@@ -94,15 +95,20 @@ func (j *siteMapJob) Do() CheckError {
 	err = group.Wait()
 	if err != nil {
 		location := strings.Split(err.Error(), " - ")
-		return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), location[0], 80) //nolint
+		var url string
+		if len(location) > 0 {
+			url = location[0]
+		}
+		return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), url, 80) //nolint
 	}
 	cancel()
 	return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_OK, "", "", 0)
 }
 
-func newSiteMapErr(location string, code int) error {
+func newSiteMapErr(location string, code int, error error) error {
 	return &siteMapErr{
-		location:   location,
-		statusCode: code,
+		location:      location,
+		statusCode:    code,
+		internalError: error,
 	}
 }

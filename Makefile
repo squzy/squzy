@@ -2,6 +2,10 @@ clean: .clean
 
 build: .build
 
+build_agent: .build_agent
+
+run_agent: .run_agent
+
 push: .push
 
 push_hub: .push_hub
@@ -42,6 +46,12 @@ default: build
 
 .test:
 	bazel test --define tag="" //apps/...
+
+.build_agent:
+	bazel build //apps/agent:agent
+
+.run_agent:
+	bazel run //apps/agent:squzy_agent_app
 
 .test_debug:
 	bazel test --define tag="" //apps/...:all --sandbox_debug

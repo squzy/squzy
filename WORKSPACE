@@ -203,8 +203,8 @@ go_repository(
 go_repository(
     name = "org_golang_google_genproto",
     importpath = "google.golang.org/genproto",
-    sum = "h1:51D++eCgOHufw5VfDE9Uzqyyc+OyQIjb9hkYy9LN5Fk=",
-    version = "v0.0.0-20191115221424-83cc0476cb11",
+    sum = "h1:naitw5DILWPQvG0oG04mR9jF8fmKpRdW3E3zzKA4D0Y=",
+    version = "v0.0.0-20191206224255-0243a4be9c8f",
 )
 
 go_repository(
@@ -239,8 +239,8 @@ go_repository(
 go_repository(
     name = "org_golang_x_net",
     importpath = "golang.org/x/net",
-    sum = "h1:Vq85/r8R9IdcUHmZ0/nQlUg1v15rzvQ2sHdnZAj/x7s=",
-    version = "v0.0.0-20191125084936-ffdde1057850",
+    sum = "h1:efeOvDhwQ29Dj3SdAV/MJf8oukgn+8D8WgaCaRMchF8=",
+    version = "v0.0.0-20191209160850-c0dbc17a3553",
 )
 
 go_repository(
@@ -260,8 +260,8 @@ go_repository(
 go_repository(
     name = "org_golang_x_sys",
     importpath = "golang.org/x/sys",
-    sum = "h1:N7DeIrjYszNmSW409R3frPPwglRwMkXSBzwVbkOjLLA=",
-    version = "v0.0.0-20191120155948-bd437916bb0e",
+    sum = "h1:gSbV7h1NRL2G1xTg/owz62CST1oJBmxy4QpMMregXVQ=",
+    version = "v0.0.0-20191210023423-ac6580df4449",
 )
 
 go_repository(
@@ -288,6 +288,34 @@ go_repository(
 go_repository(
     name = "com_github_squzy_squzy_generated",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:V16BYLTOQD49D4ei5e+RK6vbAlm2335D+15jojMEtWI=",
-    version = "v1.0.10",
+    sum = "h1:o82cqJB8oKG6djkp6OtPXkFrCK+KJ6P1u6/pKo93vp0=",
+    version = "v1.2.0",
+)
+
+go_repository(
+    name = "com_github_shirou_gopsutil",
+    importpath = "github.com/shirou/gopsutil",
+    sum = "h1:lJHR0foqAjI4exXqWsU3DbH7bX1xvdhGdnXTIARA9W4=",
+    version = "v2.19.11+incompatible",
+)
+
+go_repository(
+    name = "com_github_go_ole_go_ole",
+    importpath = "github.com/go-ole/go-ole",
+    sum = "h1:nNBDSCOigTSiarFpYE9J/KtEA1IOW4CNeqT9TQDqCxI=",
+    version = "v1.2.4",
+)
+
+go_repository(
+    name = "com_github_shirou_w32",
+    importpath = "github.com/shirou/w32",
+    sum = "h1:udFKJ0aHUL60LboW/A+DfgoHVedieIzIXE8uylPue0U=",
+    version = "v0.0.0-20160930032740-bb4de0191aa4",
+)
+
+go_repository(
+    name = "com_github_stackexchange_wmi",
+    importpath = "github.com/StackExchange/wmi",
+    sum = "h1:G0m3OIz70MZUWq3EgK3CesDbo8upS2Vm9/P3FtgI+Jk=",
+    version = "v0.0.0-20190523213315-cbe66965904d",
 )
