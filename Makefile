@@ -48,7 +48,8 @@ default: build
 	bazel test --define tag="" //apps/...
 
 .build_agent:
-	bazel build //apps/agent:agent
+	./build.bash apps/agent/main.go squzy_agent_$(version)
+	# bazel build //apps/agent:agent
 
 .run_agent:
 	bazel run //apps/agent:squzy_agent_app
