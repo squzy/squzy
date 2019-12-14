@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func TestMongoJob_Do(t *testing.T) {
-	t.Run("Test: mongoJob", func(t *testing.T) {
+func TestPostgresJob_Do(t *testing.T) {
+	t.Run("Test: postgresDbJob", func(t *testing.T) {
 		t.Run("Should: return error connecting", func(t *testing.T) {
-			j := NewMongoJob("")
+			j := NewPosgresDbJob("", 0, "", "", "")
 			err := j.Do()
 			expected := clientPb.StatusCode_Error
 			actual := err.GetLogData().Code

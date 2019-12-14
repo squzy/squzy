@@ -15,12 +15,12 @@ var (
 	timeout = time.Second * 5
 )
 
-type jobMongo struct {
+type mongoJob struct {
 	url string
 }
 
 func NewMongoJob(url string) Job {
-	return &jobMongo{
+	return &mongoJob{
 		url: url,
 	}
 }
@@ -40,6 +40,7 @@ func newMongoError(time *timestamp.Timestamp, code clientPb.StatusCode, descript
 		location:    location,
 	}
 }
+
 func (m *mongoError) GetLogData() *clientPb.Log {
 	return &clientPb.Log{
 		Code:                 m.code,
@@ -52,7 +53,7 @@ func (m *mongoError) GetLogData() *clientPb.Log {
 	}
 }
 
-func (j *jobMongo) Do() CheckError {
+func (j *mongoJob) Do() CheckError {
 	clientOptions := options.Client().ApplyURI(j.url)
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()

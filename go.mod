@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/go-stack/stack v1.8.0 // indirect
+	github.com/gocql/gocql v0.0.0-20191126110522-1982a06ad6b9
 	github.com/golang/protobuf v1.3.2
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.1.1

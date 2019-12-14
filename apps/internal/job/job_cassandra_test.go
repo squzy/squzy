@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func TestMongoJob_Do(t *testing.T) {
-	t.Run("Test: mongoJob", func(t *testing.T) {
+func TestCassandraJob_Do(t *testing.T) {
+	t.Run("Test: cassandraJob", func(t *testing.T) {
 		t.Run("Should: return error connecting", func(t *testing.T) {
-			j := NewMongoJob("")
+			j := NewCassandraJob("", "", "")
 			err := j.Do()
 			expected := clientPb.StatusCode_Error
 			actual := err.GetLogData().Code
