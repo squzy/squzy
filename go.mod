@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/shirou/gopsutil v2.19.11+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
-	github.com/squzy/squzy_generated v1.2.2
+	github.com/squzy/squzy_generated v1.2.3-0.20191215220926-e0079beed9f6
 	github.com/stretchr/testify v1.4.0
 	github.com/tidwall/pretty v1.0.0 // indirect
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
