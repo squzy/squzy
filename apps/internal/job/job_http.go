@@ -5,7 +5,6 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
-	"net/http"
 	"squzy/apps/internal/httpTools"
 )
 
@@ -48,11 +47,7 @@ func newHttpError(time *timestamp.Timestamp, code clientPb.StatusCode, descripti
 }
 
 func (j *jobHTTP) Do() CheckError {
-	req, _ := http.NewRequest(j.methodType, j.url, nil)
-
-	for name, val := range j.headers {
-		req.Header.Set(name, val)
-	}
+	req := j.httpTool.CreateRequest(j.methodType, j.url, &j.headers)
 
 	_, _, err := j.httpTool.SendRequestWithStatusCode(req, int(j.expectedStatus))
 

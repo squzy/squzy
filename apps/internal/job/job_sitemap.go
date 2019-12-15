@@ -83,7 +83,7 @@ func (j *siteMapJob) Do() CheckError {
 		}
 		location := v.Location
 		group.Go(func() error {
-			req, _ := http.NewRequest(http.MethodGet, location, nil)
+			req := j.httpTools.CreateRequest(http.MethodGet, location, nil)
 			code, _, err := j.httpTools.SendRequestWithStatusCode(req, http.StatusOK)
 			if err != nil {
 				cancel()

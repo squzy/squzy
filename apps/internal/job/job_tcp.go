@@ -25,10 +25,10 @@ func (s *tcpError) GetLogData() *clientPb.Log {
 			Id:       uuid.New().String(),
 			Location: s.location,
 			Port:     s.port,
-			Time:     s.time,
-			Type:     clientPb.Type_Tcp,
-		},
-	}
+				Time:     s.time,
+				Type:     clientPb.Type_Tcp,
+			},
+		}
 }
 
 func newTcpError(time *timestamp.Timestamp, code clientPb.StatusCode, description string, location string, port int32) CheckError {

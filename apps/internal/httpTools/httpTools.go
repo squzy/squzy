@@ -2,13 +2,12 @@ package httpTools
 
 import (
 	"errors"
-	"io/ioutil"
-	"net/http"
+	"github.com/valyala/fasthttp"
 	"time"
 )
 
 type httpTool struct {
-	client *http.Client
+	client *fasthttp.Client
 }
 
 const (
@@ -20,61 +19,63 @@ var (
 	notExpectedStatusCode = errors.New("NOT_EXPECTED_STATUS_CODE")
 )
 
-func (h *httpTool) SendRequest(req *http.Request) (int, []byte, error) {
-	resp, err := h.client.Do(req)
-
-	if err != nil {
-		return 0, nil, err
+func (h *httpTool) CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request {
+	req := fasthttp.AcquireRequest()
+	req.SetRequestURI(url)
+	req.Header.SetMethod(method)
+	if headers == nil {
+		return req
 	}
-
-	if resp != nil {
-		defer resp.Body.Close()
+	for k, v := range *headers {
+		req.Header.Set(k, v)
 	}
-
-	data, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		return resp.StatusCode, nil, err
-	}
-
-	return resp.StatusCode, data, nil
+	return req
 }
 
-func (h *httpTool) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
-	resp, err := h.client.Do(req)
-	if err != nil {
-		return 0, nil, err
-	}
+func (h *httpTool) SendRequest(req *fasthttp.Request) (int, []byte, error) {
+	return h.sendReq(req, false, 0)
+}
 
-	if resp != nil {
-		defer resp.Body.Close()
-	}
-
-	if resp.StatusCode != expectedCode {
-		return resp.StatusCode, nil, notExpectedStatusCode
-	}
-
-	data, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		return resp.StatusCode, nil, err
-	}
-
-	return resp.StatusCode, data, nil
+func (h *httpTool) SendRequestWithStatusCode(req *fasthttp.Request, expectedCode int) (int, []byte, error) {
+	return h.sendReq(req, true, expectedCode)
 }
 
 type HttpTool interface {
-	SendRequest(req *http.Request) (int, []byte, error)
-	SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error)
+	SendRequest(req *fasthttp.Request) (int, []byte, error)
+	SendRequestWithStatusCode(req *fasthttp.Request, expectedCode int) (int, []byte, error)
+	CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request
+}
+
+func (h *httpTool) sendReq(req *fasthttp.Request, checkCode bool, statusCode int) (int, []byte, error) {
+	resp := fasthttp.AcquireResponse()
+	defer fasthttp.ReleaseRequest(req)
+	defer fasthttp.ReleaseResponse(resp)
+	err := h.client.Do(req, resp)
+
+	if err != nil {
+		return 0, nil, err
+	}
+
+	if checkCode {
+		if statusCode != resp.StatusCode() {
+			return resp.StatusCode(), nil, notExpectedStatusCode
+		}
+		return resp.StatusCode(), resp.Body(), notExpectedStatusCode
+	}
+
+	bodyBytes := resp.Body()
+	return resp.StatusCode(), bodyBytes, nil
 }
 
 func New() HttpTool {
 	return &httpTool{
-		client: &http.Client{
-			Transport: &http.Transport{
-				MaxIdleConnsPerHost: MaxIdleConnections,
-			},
-			Timeout: time.Duration(RequestTimeout) * time.Second,
+		client: &fasthttp.Client{
+			ReadTimeout:                   time.Duration(RequestTimeout) * time.Second,
+			DisableHeaderNamesNormalizing: true,
+			MaxIdleConnDuration:           time.Duration(MaxIdleConnections) * time.Second,
+			MaxConnsPerHost:               10000,
+			ReadBufferSize:                4096,
+			NoDefaultUserAgentHeader:      true,
 		},
 	}
 }
