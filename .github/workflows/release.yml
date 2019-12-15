@@ -1,0 +1,45 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+
+      - name: Set env
+        id: set_env
+        run: echo ::set-output name=RELEASE_VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+
+      - name: Get dependencies
+        run: go mod download
+
+      - name: Test
+        uses: ngalaiko/bazel-action/1.2.1@master
+        with:
+          args: test --define tag="" //apps/...
+
+      - uses: actions/checkout@v1
+      - name: Login to DockerHub Registry
+        run: |
+          echo ${{ secrets.DOCKER_TOKEN }} | docker login -u squzy --password-stdin
+          wget https://github.com/bazelbuild/bazel/releases/download/1.1.0/bazel-1.1.0-installer-linux-x86_64.sh -O bazel_installer.sh
+          chmod +x bazel_installer.sh
+          ./bazel_installer.sh --user
+          export PATH="$PATH:$HOME/bin"
+          bazel --version
+          bazel run --define tag=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy:squzy_push_hub_ci
+          make build_agent version=${{ steps.set_env.outputs.RELEASE_VERSION }}
+          ./scripts/git_release.sh github_api_token=${{ secrets.GITHUB_RELEASE }} owner=squzy repo=squzy tag=${{ steps.set_env.outputs.RELEASE_VERSION }} filename=./bin/squzy_agent_${{ steps.set_env.outputs.RELEASE_VERSION }}-darwin-amd64
+          ./scripts/git_release.sh github_api_token=${{ secrets.GITHUB_RELEASE }} owner=squzy repo=squzy tag=${{ steps.set_env.outputs.RELEASE_VERSION }} filename=./bin/squzy_agent_${{ steps.set_env.outputs.RELEASE_VERSION }}-windows-amd64.exe

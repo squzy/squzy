@@ -2,6 +2,10 @@ clean: .clean
 
 build: .build
 
+build_agent: .build_agent
+
+run_agent: .run_agent
+
 push: .push
 
 push_hub: .push_hub
@@ -41,10 +45,17 @@ default: build
 	bazel build //apps/...
 
 .test:
-	bazel test //apps/...
+	bazel test --define tag="" //apps/...
+
+.build_agent:
+	./build.bash apps/agent/main.go squzy_agent_$(version)
+	# bazel build //apps/agent:agent
+
+.run_agent:
+	bazel run //apps/agent:squzy_agent_app
 
 .test_debug:
-	bazel test //apps/...:all --sandbox_debug
+	bazel test --define tag="" //apps/...:all --sandbox_debug
 
 .dep:
 	bazel run //:gazelle -- update-repos -from_file=go.mod

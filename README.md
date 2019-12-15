@@ -1,6 +1,7 @@
 # Squzy - opensource monitoring system
 [![codecov](https://codecov.io/gh/squzy/squzy/branch/develop/graph/badge.svg)](https://codecov.io/gh/squzy/squzy)
 [![GolangCI](https://golangci.com/badges/github.com/squzy/golangci-lint.svg)](https://golangci.com)
+[![Join the chat at https://gitter.im/squzyio/community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/squzyio/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## About
 
@@ -19,6 +20,68 @@ Squzy server implement [GRPC API](https://github.com/squzy/squzy_proto/blob/mast
 
 https://github.com/squzy/squzy_proto/blob/master/proto/v1/server.proto
 
+## Examples of call from [BloomRPC](https://github.com/uw-labs/bloomrpc)
+
+### Http/Https check:
+
+Usually that check used for monitoring web sites
+
+```shell script
+{
+  "interval": 10, - 10 second interval
+  "http_check": {
+    "method": "GET", - method GET/POST/PUT/DELETE/HEAD
+    "url": "https://google.com", - url which should call
+    "headers": {
+      "custom": "yes",
+    },
+    "statusCode": 200 - expected statusCode
+  }
+}
+```
+
+### Tcp check:
+
+Check good use for monitoring open ports or not
+
+```shell script
+{
+  "interval": 10, - 10 second interval
+  "tcp_check": {
+    "host": "localhost", - host
+    "port": 6345 - port
+  },
+}
+```
+
+### SiteMap check:
+
+That check good usage when you have critical URL in sitemap, if any of URL throw error check will be failed
+
+```shell script
+{
+  "interval": 10,
+  "sitemap_check": {
+    "url": "https://www.sitemaps.org/sitemap.xml" - url of sitemap (https://www.sitemaps.org/sitemap.xml)
+  },
+}
+```
+
+### GRPC check:
+
+Check better to use for internal testing of API services
+
+```shell script
+{
+  "interval": 10,
+  "grpc_check": {
+    "service": "Check", - service name
+    "host": "localhost", - host
+    "port": 9090 - port
+  },
+}
+```
+
 ## Storage
 By default squzy use stdout for logs, but can be configured by ENV.
 
@@ -35,16 +98,18 @@ https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto
 
 Docker Hub
 ```shell script
-docker pull squzy/squzy_app:develop
+docker pull squzy/squzy_app:v1.0.0
 ```
 
-GitHub
+### Run locally with docker:
+
 ```shell script
-docker pull docker.pkg.github.com/squzy/squzy/squzy_app:develop
+docker run -p 8080:8080 squzy/squzy_app:v1.0.0
 ```
 
 # Authors
 - [Iurii Panarin](https://github.com/PxyUp)
+- [Nikita Kharitonov](https://github.com/DreamAndDrum)
 
 # Want to help?
 Want to file a bug, contribute some code, or improve documentation? Excellent!
