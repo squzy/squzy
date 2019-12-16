@@ -13,6 +13,10 @@ type mockHttpTools struct {
 	
 }
 
+func (m mockHttpTools) GetWithRedirects(url string) (int, []byte, error) {
+	return 200, nil, nil
+}
+
 func (m mockHttpTools) CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request {
 	return fasthttp.AcquireRequest()
 }
@@ -73,6 +77,10 @@ func (s siteMapStorageError) Get(url string) (*parsers.SiteMap, error) {
 
 type mockHttpToolsWithError struct {
 
+}
+
+func (m mockHttpToolsWithError) GetWithRedirects(url string) (int, []byte, error) {
+	return 500, nil, errors.New("Wrong code")
 }
 
 func (m mockHttpToolsWithError) CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request {

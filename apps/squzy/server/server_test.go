@@ -140,6 +140,10 @@ type mockHttpTools struct {
 
 }
 
+func (m mockHttpTools) GetWithRedirects(url string) (int, []byte, error) {
+	panic("implement me")
+}
+
 func (m mockHttpTools) CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request {
 	panic("implement me")
 }

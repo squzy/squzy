@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"golang.org/x/sync/errgroup"
-	"net/http"
 	"squzy/apps/internal/httpTools"
 	sitemap_storage "squzy/apps/internal/sitemap-storage"
 	"strings"
@@ -87,8 +86,7 @@ func (j *siteMapJob) Do() CheckError {
 		}
 		location := v.Location
 		group.Go(func() error {
-			req := j.httpTools.CreateRequest(http.MethodGet, location, nil)
-			code, _, err := j.httpTools.SendRequestWithStatusCode(req, http.StatusOK)
+			code, _, err := j.httpTools.GetWithRedirects(location)
 			if err != nil {
 				cancel()
 				return newSiteMapErr(location, code, err)
