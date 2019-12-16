@@ -49,8 +49,7 @@ type HttpTool interface {
 }
 
 func (h *httpTool) GetWithRedirects(url string) (int, []byte, error) {
-	dist := []byte{}
-	return h.client.Get(dist, url)
+	return h.client.Get(nil, url)
 }
 
 func (h *httpTool) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
