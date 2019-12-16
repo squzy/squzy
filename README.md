@@ -58,6 +58,8 @@ Check good use for monitoring open ports or not
 
 **Supports redirects!**
 
+**Every route should return 200**
+
 That check good usage when you have critical URL in sitemap, if any of URL throw error check will be failed
 
 ```shell script
