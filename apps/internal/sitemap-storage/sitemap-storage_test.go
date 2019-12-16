@@ -13,6 +13,10 @@ type mockHttp struct {
 
 }
 
+func (m mockHttp) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
+	return 200, nil, nil
+}
+
 func (m mockHttp) GetWithRedirects(url string) (int, []byte, error) {
 	return 200, nil, nil
 }
@@ -48,6 +52,10 @@ func (m mockSiteMapParser) Parse(xmlBytes []byte) (*parsers.SiteMap, error) {
 
 type mockHttpError struct {
 
+}
+
+func (m mockHttpError) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
+	return 0, nil, errors.New("ascss")
 }
 
 func (m mockHttpError) GetWithRedirects(url string) (int, []byte, error) {

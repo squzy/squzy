@@ -12,6 +12,10 @@ import (
 type httpToolsMock struct {
 }
 
+func (h httpToolsMock) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
+	panic("implement me")
+}
+
 func (h httpToolsMock) GetWithRedirects(url string) (int, []byte, error) {
 	panic("implement me")
 }
@@ -21,6 +25,10 @@ func (h httpToolsMock) CreateRequest(method string, url string, headers *map[str
 }
 
 type httpToolsMockError struct {
+}
+
+func (h httpToolsMockError) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
+	panic("implement me")
 }
 
 func (h httpToolsMockError) GetWithRedirects(url string) (int, []byte, error) {

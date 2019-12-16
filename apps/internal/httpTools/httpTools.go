@@ -42,6 +42,7 @@ func (h *httpTool) SendRequestWithStatusCode(req *fasthttp.Request, expectedCode
 
 type HttpTool interface {
 	GetWithRedirects(url string) (int, []byte, error)
+	GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error)
 	SendRequest(req *fasthttp.Request) (int, []byte, error)
 	SendRequestWithStatusCode(req *fasthttp.Request, expectedCode int) (int, []byte, error)
 	CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request
@@ -50,6 +51,17 @@ type HttpTool interface {
 func (h *httpTool) GetWithRedirects(url string) (int, []byte, error) {
 	dist := []byte{}
 	return h.client.Get(dist, url)
+}
+
+func (h *httpTool) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
+	code, body, err := h.GetWithRedirects(url)
+	if err != nil {
+		return code, nil, err
+	}
+	if code != expectedCode {
+		return code, nil, notExpectedStatusCode
+	}
+	return code, body, nil
 }
 
 func (h *httpTool) sendReq(req *fasthttp.Request, checkCode bool, statusCode int) (int, []byte, error) {

@@ -53,6 +53,45 @@ func TestHttpTool_GetWithRedirects(t *testing.T) {
 	})
 }
 
+func TestHttpTool_GetWithRedirectsWithStatusCode(t *testing.T) {
+	t.Run("Test: Should not return error", func(t *testing.T) {
+		bytes := []byte("Hello, client")
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+
+			_, _ = w.Write(bytes)
+		}))
+		defer ts.Close()
+		j := New()
+		code, body, err := j.GetWithRedirectsWithStatusCode(ts.URL, 200)
+		assert.Equal(t, http.StatusOK, code)
+		assert.Equal(t, nil, err)
+		assert.Equal(t, bytes, body)
+	})
+	t.Run("Test: Should return error because of body", func(t *testing.T) {
+		bytes := []byte(strings.Repeat("hello", math.MaxInt8))
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Length", "1")
+			w.WriteHeader(200)
+			_, _ = w.Write(bytes)
+		}))
+		j := New()
+		_, _, err := j.GetWithRedirectsWithStatusCode(ts.URL, 200)
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Test: Should return notExpectedStatusCode", func(t *testing.T) {
+		bytes := []byte("Hello, client")
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(201)
+
+			_, _ = w.Write(bytes)
+		}))
+		j := New()
+		_, _, err := j.GetWithRedirectsWithStatusCode(ts.URL, 200)
+		assert.Equal(t, notExpectedStatusCode, err)
+	})
+}
+
 func TestHttpTool_SendRequest(t *testing.T) {
 	t.Run("Test: Should not return error", func(t *testing.T) {
 		bytes := []byte("Hello, client")
