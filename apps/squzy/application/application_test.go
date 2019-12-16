@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net"
 	"testing"
+	"time"
 )
 
 func TestNew(t *testing.T) {
@@ -23,6 +24,7 @@ func TestApp_Run(t *testing.T) {
 		go func() {
 			_ = app.Run(11111)
 		}()
+		time.Sleep(time.Second)
 		_, err := net.Dial("tcp", "localhost:11111")
 		assert.Equal(t, nil, err)
 	})

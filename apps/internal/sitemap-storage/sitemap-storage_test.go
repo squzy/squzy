@@ -1,23 +1,35 @@
 package sitemap_storage
 
 import (
-	"github.com/stretchr/testify/assert"
-	"net/http"
-	"squzy/apps/internal/parsers"
 	"errors"
-	"time"
+	"github.com/stretchr/testify/assert"
+	"github.com/valyala/fasthttp"
+	"squzy/apps/internal/parsers"
 	"testing"
+	"time"
 )
 
 type mockHttp struct {
 
 }
 
-func (m mockHttp) SendRequest(req *http.Request) (int, []byte, error) {
+func (m mockHttp) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
 	return 200, nil, nil
 }
 
-func (m mockHttp) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
+func (m mockHttp) GetWithRedirects(url string) (int, []byte, error) {
+	return 200, nil, nil
+}
+
+func (m mockHttp) CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request {
+	return nil
+}
+
+func (m mockHttp) SendRequest(req *fasthttp.Request) (int, []byte, error) {
+	return 200, nil, nil
+}
+
+func (m mockHttp) SendRequestWithStatusCode(req *fasthttp.Request, expectedCode int) (int, []byte, error) {
 	return 200, nil, nil
 }
 
@@ -37,15 +49,28 @@ func (m mockSiteMapParser) Parse(xmlBytes []byte) (*parsers.SiteMap, error) {
 	return &parsers.SiteMap{}, nil
 }
 
+
 type mockHttpError struct {
 
 }
 
-func (m mockHttpError) SendRequest(req *http.Request) (int, []byte, error) {
+func (m mockHttpError) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
 	return 0, nil, errors.New("ascss")
 }
 
-func (m mockHttpError) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
+func (m mockHttpError) GetWithRedirects(url string) (int, []byte, error) {
+	return 0, nil, errors.New("ascss")
+}
+
+func (m mockHttpError) CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request {
+	return nil
+}
+
+func (m mockHttpError) SendRequest(req *fasthttp.Request) (int, []byte, error) {
+	return 0, nil, errors.New("ascss")
+}
+
+func (m mockHttpError) SendRequestWithStatusCode(req *fasthttp.Request, expectedCode int) (int, []byte, error) {
 	return 0, nil, errors.New("ascss")
 }
 

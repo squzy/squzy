@@ -4,19 +4,32 @@ import (
 	"errors"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"github.com/stretchr/testify/assert"
-	"net/http"
+	"github.com/valyala/fasthttp"
 	"squzy/apps/internal/parsers"
 	"testing"
 )
+
 type mockHttpTools struct {
 	
 }
 
-func (m mockHttpTools) SendRequest(req *http.Request) (int, []byte, error) {
+func (m mockHttpTools) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
 	return 200, nil, nil
 }
 
-func (m mockHttpTools) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
+func (m mockHttpTools) GetWithRedirects(url string) (int, []byte, error) {
+	return 200, nil, nil
+}
+
+func (m mockHttpTools) CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request {
+	return fasthttp.AcquireRequest()
+}
+
+func (m mockHttpTools) SendRequest(req *fasthttp.Request) (int, []byte, error) {
+	return 200, nil, nil
+}
+
+func (m mockHttpTools) SendRequestWithStatusCode(req *fasthttp.Request, expectedCode int) (int, []byte, error) {
 	return 200, nil, nil
 }
 
@@ -70,11 +83,23 @@ type mockHttpToolsWithError struct {
 
 }
 
-func (m mockHttpToolsWithError) SendRequest(req *http.Request) (int, []byte, error) {
+func (m mockHttpToolsWithError) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
 	return 500, nil, errors.New("Wrong code")
 }
 
-func (m mockHttpToolsWithError) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
+func (m mockHttpToolsWithError) GetWithRedirects(url string) (int, []byte, error) {
+	return 500, nil, errors.New("Wrong code")
+}
+
+func (m mockHttpToolsWithError) CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request {
+	return fasthttp.AcquireRequest()
+}
+
+func (m mockHttpToolsWithError) SendRequest(req *fasthttp.Request) (int, []byte, error) {
+	return 500, nil, errors.New("Wrong code")
+}
+
+func (m mockHttpToolsWithError) SendRequestWithStatusCode(req *fasthttp.Request, expectedCode int) (int, []byte, error) {
 	return 500, nil, errors.New("Wrong code")
 }
 

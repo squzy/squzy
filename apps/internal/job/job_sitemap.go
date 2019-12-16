@@ -21,7 +21,8 @@ type siteMapJob struct {
 }
 
 type siteMapError struct {
-	time        *timestamp.Timestamp
+	startTime   *timestamp.Timestamp
+	endTime     *timestamp.Timestamp
 	code        clientPb.StatusCode
 	description string
 	location    string
@@ -33,18 +34,20 @@ func (s *siteMapError) GetLogData() *clientPb.Log {
 		Code:        s.code,
 		Description: s.description,
 		Meta: &clientPb.MetaData{
-			Id:       uuid.New().String(),
-			Location: s.location,
-			Port:     s.port,
-			Time:     s.time,
-			Type:     clientPb.Type_SiteMap,
+			Id:        uuid.New().String(),
+			Location:  s.location,
+			Port:      s.port,
+			StartTime: s.startTime,
+			EndTime:   s.endTime,
+			Type:      clientPb.Type_SiteMap,
 		},
 	}
 }
 
-func newSiteMapError(time *timestamp.Timestamp, code clientPb.StatusCode, description string, location string, port int32) CheckError {
+func newSiteMapError(startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code clientPb.StatusCode, description string, location string, port int32) CheckError {
 	return &siteMapError{
-		time:        time,
+		startTime:   startTime,
+		endTime:     endTime,
 		code:        code,
 		description: description,
 		location:    location,
@@ -71,9 +74,10 @@ func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, ht
 }
 
 func (j *siteMapJob) Do() CheckError {
+	startTime := ptypes.TimestampNow()
 	siteMap, err := j.siteMapStorage.Get(j.url)
 	if err != nil {
-		return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
+		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
 	}
 	ctx, cancel := context.WithCancel(context.Background()) //nolint
 	group, _ := errgroup.WithContext(ctx)
@@ -83,8 +87,7 @@ func (j *siteMapJob) Do() CheckError {
 		}
 		location := v.Location
 		group.Go(func() error {
-			req, _ := http.NewRequest(http.MethodGet, location, nil)
-			code, _, err := j.httpTools.SendRequestWithStatusCode(req, http.StatusOK)
+			code, _, err := j.httpTools.GetWithRedirectsWithStatusCode(location, http.StatusOK)
 			if err != nil {
 				cancel()
 				return newSiteMapErr(location, code, err)
@@ -99,10 +102,10 @@ func (j *siteMapJob) Do() CheckError {
 		if len(location) > 0 {
 			url = location[0]
 		}
-		return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), url, GetPortByUrl(url)) //nolint
+		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), url, GetPortByUrl(url)) //nolint
 	}
 	cancel()
-	return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_OK, "", "", 0)
+	return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", "", 0)
 }
 
 func newSiteMapErr(location string, code int, error error) error {
