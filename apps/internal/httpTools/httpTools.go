@@ -60,7 +60,7 @@ func (h *httpTool) sendReq(req *fasthttp.Request, checkCode bool, statusCode int
 		if statusCode != resp.StatusCode() {
 			return resp.StatusCode(), nil, notExpectedStatusCode
 		}
-		return resp.StatusCode(), resp.Body(), notExpectedStatusCode
+		return resp.StatusCode(), resp.Body(), nil
 	}
 
 	bodyBytes := resp.Body()

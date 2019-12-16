@@ -17,7 +17,8 @@ type jobHTTP struct {
 }
 
 type httpError struct {
-	time        *timestamp.Timestamp
+	startTime   *timestamp.Timestamp
+	endTime     *timestamp.Timestamp
 	code        clientPb.StatusCode
 	description string
 	location    string
@@ -28,18 +29,20 @@ func (e *httpError) GetLogData() *clientPb.Log {
 		Code:        e.code,
 		Description: e.description,
 		Meta: &clientPb.MetaData{
-			Id:       uuid.New().String(),
-			Location: e.location,
-			Port:     GetPortByUrl(e.location),
-			Time:     e.time,
-			Type:     clientPb.Type_Http,
+			Id:        uuid.New().String(),
+			Location:  e.location,
+			Port:      GetPortByUrl(e.location),
+			StartTime: e.startTime,
+			EndTime:   e.endTime,
+			Type:      clientPb.Type_Http,
 		},
 	}
 }
 
-func newHttpError(time *timestamp.Timestamp, code clientPb.StatusCode, description string, location string) CheckError {
+func newHttpError(startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code clientPb.StatusCode, description string, location string) CheckError {
 	return &httpError{
-		time:        time,
+		startTime:   startTime,
+		endTime:     endTime,
 		code:        code,
 		description: description,
 		location:    location,
@@ -47,12 +50,14 @@ func newHttpError(time *timestamp.Timestamp, code clientPb.StatusCode, descripti
 }
 
 func (j *jobHTTP) Do() CheckError {
+	startTime := ptypes.TimestampNow()
 	req := j.httpTool.CreateRequest(j.methodType, j.url, &j.headers)
 
 	_, _, err := j.httpTool.SendRequestWithStatusCode(req, int(j.expectedStatus))
 
 	if err != nil {
 		return newHttpError(
+			startTime,
 			ptypes.TimestampNow(),
 			clientPb.StatusCode_Error,
 			err.Error(),
@@ -61,6 +66,7 @@ func (j *jobHTTP) Do() CheckError {
 	}
 
 	return newHttpError(
+		startTime,
 		ptypes.TimestampNow(),
 		clientPb.StatusCode_OK,
 		"",
