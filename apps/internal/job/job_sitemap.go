@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"squzy/apps/internal/httpTools"
 	sitemap_storage "squzy/apps/internal/sitemap-storage"
-	"strings"
 )
 
 type siteMapJob struct {
@@ -55,16 +54,6 @@ func newSiteMapError(startTime *timestamp.Timestamp, endTime *timestamp.Timestam
 	}
 }
 
-type siteMapErr struct {
-	location      string
-	statusCode    int
-	internalError error
-}
-
-func (sme *siteMapErr) Error() string {
-	return fmt.Sprintf("StatusCode %d, fullError - %s", sme.statusCode, sme.internalError.Error())
-}
-
 func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool) Job {
 	return &siteMapJob{
 		url:            url,
@@ -79,6 +68,8 @@ func (j *siteMapJob) Do() CheckError {
 	if err != nil {
 		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
 	}
+	var errLocation string
+	var errCode int
 	ctx, cancel := context.WithCancel(context.Background()) //nolint
 	group, _ := errgroup.WithContext(ctx)
 	for _, v := range siteMap.UrlSet {
@@ -91,28 +82,17 @@ func (j *siteMapJob) Do() CheckError {
 			code, _, err := j.httpTools.SendRequestWithStatusCode(rq, http.StatusOK)
 			if err != nil {
 				cancel()
-				return newSiteMapErr(location, code, err)
+				errLocation = location
+				errCode = code
+				return err
 			}
 			return nil
 		})
 	}
 	err = group.Wait()
 	if err != nil {
-		location := strings.Split(err.Error(), " - ")
-		var url string
-		if len(location) > 0 {
-			url = location[0]
-		}
-		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), url, GetPortByUrl(url)) //nolint
+		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, fmt.Sprintf("StatusCode: %d, ExpectedStatusCode: %d, Description: %s", errCode, http.StatusOK, err.Error()), errLocation, GetPortByUrl(errLocation)) //nolint
 	}
 	cancel()
 	return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", "", 0)
-}
-
-func newSiteMapErr(location string, code int, error error) error {
-	return &siteMapErr{
-		location:      location,
-		statusCode:    code,
-		internalError: error,
-	}
 }
