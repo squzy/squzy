@@ -2,8 +2,10 @@ package httpTools
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"squzy/apps/internal/helpers"
 	"time"
 )
 
@@ -13,12 +15,24 @@ type httpTool struct {
 
 const (
 	MaxIdleConnections        int = 30
-	MaxIdleConnectionsPerHost     = 30
+	MaxIdleConnectionsPerHost int = 30
 	RequestTimeout            int = 10
 )
 
 var (
-	notExpectedStatusCode = errors.New("NOT_EXPECTED_STATUS_CODE")
+	notExpectedStatusCode   = errors.New("NOT_EXPECTED_STATUS_CODE")
+	notExpectedStatusCodeFn = func(url string, statusCode int, expectedStatusCode int) error {
+		return errors.New(
+			fmt.Sprintf(
+				"ErrCode: %s, Location: %s, StatusCoe: %d, ExpectedStatusCode: %d, Port: %d",
+				notExpectedStatusCode,
+				url,
+				statusCode,
+				expectedStatusCode,
+				helpers.GetPortByUrl(url),
+			),
+		)
+	}
 )
 
 func (h *httpTool) CreateRequest(method string, url string, headers *map[string]string) *http.Request {
@@ -65,7 +79,7 @@ func (h *httpTool) sendReq(req *http.Request, checkCode bool, statusCode int) (i
 
 	if checkCode {
 		if statusCode != resp.StatusCode {
-			return resp.StatusCode, nil, notExpectedStatusCode
+			return resp.StatusCode, nil, notExpectedStatusCodeFn(req.URL.String(), resp.StatusCode, statusCode)
 		}
 		return resp.StatusCode, data, nil
 	}

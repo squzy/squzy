@@ -2,13 +2,13 @@ package job
 
 import (
 	"context"
-	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"golang.org/x/sync/errgroup"
 	"net/http"
+	"squzy/apps/internal/helpers"
 	"squzy/apps/internal/httpTools"
 	sitemap_storage "squzy/apps/internal/sitemap-storage"
 )
@@ -68,10 +68,8 @@ func (j *siteMapJob) Do() CheckError {
 	if err != nil {
 		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
 	}
-	var errLocation string
-	var errCode int
-	ctx, cancel := context.WithCancel(context.Background()) //nolint
-	group, _ := errgroup.WithContext(ctx)
+
+	group, _ := errgroup.WithContext(context.Background())
 	for _, v := range siteMap.UrlSet {
 		if v.Ignore {
 			continue
@@ -79,11 +77,8 @@ func (j *siteMapJob) Do() CheckError {
 		location := v.Location
 		group.Go(func() error {
 			rq, _ := http.NewRequest(http.MethodGet, location, nil)
-			code, _, err := j.httpTools.SendRequestWithStatusCode(rq, http.StatusOK)
+			_, _, err := j.httpTools.SendRequestWithStatusCode(rq, http.StatusOK)
 			if err != nil {
-				cancel()
-				errLocation = location
-				errCode = code
 				return err
 			}
 			return nil
@@ -91,8 +86,7 @@ func (j *siteMapJob) Do() CheckError {
 	}
 	err = group.Wait()
 	if err != nil {
-		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, fmt.Sprintf("StatusCode: %d, ExpectedStatusCode: %d, Description: %s", errCode, http.StatusOK, err.Error()), errLocation, GetPortByUrl(errLocation)) //nolint
+		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, helpers.GetPortByUrl(j.url)) //nolint
 	}
-	cancel()
 	return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", "", 0)
 }

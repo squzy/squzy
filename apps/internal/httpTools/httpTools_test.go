@@ -102,7 +102,7 @@ func TestHttpTool_SendRequestWithStatusCode(t *testing.T) {
 		j := New()
 		req  := newRequest(http.MethodGet, ts.URL, nil)
 		_, _, err := j.SendRequestWithStatusCode(req, 200)
-		assert.Equal(t, notExpectedStatusCode, err)
+		assert.Equal(t, notExpectedStatusCodeFn(ts.URL, 201, 200), err)
 	})
 }
 

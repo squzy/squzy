@@ -5,6 +5,7 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
+	"squzy/apps/internal/helpers"
 	"squzy/apps/internal/httpTools"
 )
 
@@ -31,7 +32,7 @@ func (e *httpError) GetLogData() *clientPb.Log {
 		Meta: &clientPb.MetaData{
 			Id:        uuid.New().String(),
 			Location:  e.location,
-			Port:      GetPortByUrl(e.location),
+			Port:      helpers.GetPortByUrl(e.location),
 			StartTime: e.startTime,
 			EndTime:   e.endTime,
 			Type:      clientPb.Type_Http,
