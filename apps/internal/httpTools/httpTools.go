@@ -2,27 +2,27 @@ package httpTools
 
 import (
 	"errors"
-	"github.com/valyala/fasthttp"
+	"io/ioutil"
+	"net/http"
 	"time"
 )
 
 type httpTool struct {
-	client *fasthttp.Client
+	client *http.Client
 }
 
 const (
-	MaxIdleConnections int = 30
-	RequestTimeout     int = 10
+	MaxIdleConnections        int = 30
+	MaxIdleConnectionsPerHost     = 30
+	RequestTimeout            int = 10
 )
 
 var (
 	notExpectedStatusCode = errors.New("NOT_EXPECTED_STATUS_CODE")
 )
 
-func (h *httpTool) CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request {
-	req := fasthttp.AcquireRequest()
-	req.SetRequestURI(url)
-	req.Header.SetMethod(method)
+func (h *httpTool) CreateRequest(method string, url string, headers *map[string]string) *http.Request {
+	req, _ := http.NewRequest(method, url, nil)
 	if headers == nil {
 		return req
 	}
@@ -32,67 +32,55 @@ func (h *httpTool) CreateRequest(method string, url string, headers *map[string]
 	return req
 }
 
-func (h *httpTool) SendRequest(req *fasthttp.Request) (int, []byte, error) {
+func (h *httpTool) SendRequest(req *http.Request) (int, []byte, error) {
 	return h.sendReq(req, false, 0)
 }
 
-func (h *httpTool) SendRequestWithStatusCode(req *fasthttp.Request, expectedCode int) (int, []byte, error) {
+func (h *httpTool) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
 	return h.sendReq(req, true, expectedCode)
 }
 
 type HttpTool interface {
-	GetWithRedirects(url string) (int, []byte, error)
-	GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error)
-	SendRequest(req *fasthttp.Request) (int, []byte, error)
-	SendRequestWithStatusCode(req *fasthttp.Request, expectedCode int) (int, []byte, error)
-	CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request
+	SendRequest(req *http.Request) (int, []byte, error)
+	SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error)
+	CreateRequest(method string, url string, headers *map[string]string) *http.Request
 }
 
-func (h *httpTool) GetWithRedirects(url string) (int, []byte, error) {
-	return h.client.Get(nil, url)
-}
-
-func (h *httpTool) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
-	code, body, err := h.GetWithRedirects(url)
-	if err != nil {
-		return code, nil, err
-	}
-	if code != expectedCode {
-		return code, nil, notExpectedStatusCode
-	}
-	return code, body, nil
-}
-
-func (h *httpTool) sendReq(req *fasthttp.Request, checkCode bool, statusCode int) (int, []byte, error) {
-	resp := fasthttp.AcquireResponse()
-	defer fasthttp.ReleaseRequest(req)
-	defer fasthttp.ReleaseResponse(resp)
-	err := h.client.Do(req, resp)
+func (h *httpTool) sendReq(req *http.Request, checkCode bool, statusCode int) (int, []byte, error) {
+	resp, err := h.client.Do(req)
 
 	if err != nil {
 		return 0, nil, err
 	}
 
-	if checkCode {
-		if statusCode != resp.StatusCode() {
-			return resp.StatusCode(), nil, notExpectedStatusCode
-		}
-		return resp.StatusCode(), resp.Body(), nil
+	if resp != nil {
+		defer resp.Body.Close()
 	}
 
-	bodyBytes := resp.Body()
-	return resp.StatusCode(), bodyBytes, nil
+	data, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		return resp.StatusCode, nil, err
+	}
+
+	if checkCode {
+		if statusCode != resp.StatusCode {
+			return resp.StatusCode, nil, notExpectedStatusCode
+		}
+		return resp.StatusCode, data, nil
+	}
+
+	return resp.StatusCode, data, nil
 }
 
 func New() HttpTool {
 	return &httpTool{
-		client: &fasthttp.Client{
-			ReadTimeout:                   time.Duration(RequestTimeout) * time.Second,
-			DisableHeaderNamesNormalizing: true,
-			MaxIdleConnDuration:           time.Duration(MaxIdleConnections) * time.Second,
-			MaxConnsPerHost:               10000,
-			ReadBufferSize:                4096,
-			NoDefaultUserAgentHeader:      true,
+		client: &http.Client{
+			Transport: &http.Transport{
+				MaxIdleConnsPerHost: MaxIdleConnectionsPerHost,
+				MaxIdleConns:        MaxIdleConnections,
+			},
+			Timeout: time.Duration(RequestTimeout) * time.Second,
 		},
 	}
 }

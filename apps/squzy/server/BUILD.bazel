@@ -29,6 +29,5 @@ go_test(
     embed = [":server"],
     deps = [
         "@com_github_stretchr_testify//assert:go_default_library",
-        "@com_github_valyala_fasthttp//:go_default_library"
     ]
 )

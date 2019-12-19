@@ -65,11 +65,11 @@ func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, ht
 func (j *siteMapJob) Do() CheckError {
 	startTime := ptypes.TimestampNow()
 	siteMap, err := j.siteMapStorage.Get(j.url)
-	var errLocation string
-	var errCode int
 	if err != nil {
 		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
 	}
+	var errLocation string
+	var errCode int
 	ctx, cancel := context.WithCancel(context.Background()) //nolint
 	group, _ := errgroup.WithContext(ctx)
 	for _, v := range siteMap.UrlSet {
@@ -78,7 +78,8 @@ func (j *siteMapJob) Do() CheckError {
 		}
 		location := v.Location
 		group.Go(func() error {
-			code, _, err := j.httpTools.GetWithRedirectsWithStatusCode(location, http.StatusOK)
+			rq, _ := http.NewRequest(http.MethodGet, location, nil)
+			code, _, err := j.httpTools.SendRequestWithStatusCode(rq, http.StatusOK)
 			if err != nil {
 				cancel()
 				errLocation = location
@@ -90,7 +91,7 @@ func (j *siteMapJob) Do() CheckError {
 	}
 	err = group.Wait()
 	if err != nil {
-		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, fmt.Sprintf("StatusCode: %d, Description: %s", errCode, err.Error()), errLocation, GetPortByUrl(errLocation)) //nolint
+		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, fmt.Sprintf("StatusCode: %d, ExpectedStatusCode: %d, Description: %s", errCode, http.StatusOK, err.Error()), errLocation, GetPortByUrl(errLocation)) //nolint
 	}
 	cancel()
 	return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", "", 0)
