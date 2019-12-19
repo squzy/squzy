@@ -103,7 +103,7 @@ https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto
 
 Docker Hub
 ```shell script
-docker pull squzy/squzy_app:v1.0.0
+docker pull squzy/squzy_app:v1.1.4
 ```
 
 ### Run locally with docker:
