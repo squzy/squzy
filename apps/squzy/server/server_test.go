@@ -5,7 +5,7 @@ import (
 	"errors"
 	serverPb "github.com/squzy/squzy_generated/generated/server/proto/v1"
 	"github.com/stretchr/testify/assert"
-	"github.com/valyala/fasthttp"
+	"net/http"
 	"squzy/apps/internal/job"
 	"squzy/apps/internal/parsers"
 	"squzy/apps/internal/scheduler"
@@ -148,15 +148,15 @@ func (m mockHttpTools) GetWithRedirects(url string) (int, []byte, error) {
 	panic("implement me")
 }
 
-func (m mockHttpTools) CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request {
+func (m mockHttpTools) CreateRequest(method string, url string, headers *map[string]string) *http.Request {
 	panic("implement me")
 }
 
-func (m mockHttpTools) SendRequest(req *fasthttp.Request) (int, []byte, error) {
+func (m mockHttpTools) SendRequest(req *http.Request) (int, []byte, error) {
 	panic("implement me")
 }
 
-func (m mockHttpTools) SendRequestWithStatusCode(req *fasthttp.Request, expectedCode int) (int, []byte, error) {
+func (m mockHttpTools) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
 	panic("implement me")
 }
 

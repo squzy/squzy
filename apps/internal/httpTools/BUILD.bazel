@@ -6,7 +6,6 @@ go_library(
      importpath = "squzy/apps/internal/httpTools",
      visibility = ["//visibility:public"],
      deps = [
-         "@com_github_valyala_fasthttp//:go_default_library"
      ],
 
 )
