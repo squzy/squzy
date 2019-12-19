@@ -62,7 +62,7 @@ type siteMapErr struct {
 }
 
 func (sme *siteMapErr) Error() string {
-	return fmt.Sprintf("%s -  was return statusCode %d, fullError - %s", sme.location, sme.statusCode, sme.internalError.Error())
+	return fmt.Sprintf("StatusCode %d, fullError - %s", sme.statusCode, sme.internalError.Error())
 }
 
 func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool) Job {
@@ -87,7 +87,8 @@ func (j *siteMapJob) Do() CheckError {
 		}
 		location := v.Location
 		group.Go(func() error {
-			code, _, err := j.httpTools.GetWithRedirectsWithStatusCode(location, http.StatusOK)
+			rq, _ := http.NewRequest(http.MethodGet, location, nil)
+			code, _, err := j.httpTools.SendRequestWithStatusCode(rq, http.StatusOK)
 			if err != nil {
 				cancel()
 				return newSiteMapErr(location, code, err)

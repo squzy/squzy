@@ -4,7 +4,7 @@ import (
 	"errors"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"github.com/stretchr/testify/assert"
-	"github.com/valyala/fasthttp"
+	"net/http"
 	"squzy/apps/internal/parsers"
 	"testing"
 )
@@ -13,23 +13,16 @@ type mockHttpTools struct {
 	
 }
 
-func (m mockHttpTools) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
+func (m mockHttpTools) CreateRequest(method string, url string, headers *map[string]string) *http.Request {
+	rq, _ := http.NewRequest(method, url, nil)
+	return rq
+}
+
+func (m mockHttpTools) SendRequest(req *http.Request) (int, []byte, error) {
 	return 200, nil, nil
 }
 
-func (m mockHttpTools) GetWithRedirects(url string) (int, []byte, error) {
-	return 200, nil, nil
-}
-
-func (m mockHttpTools) CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request {
-	return fasthttp.AcquireRequest()
-}
-
-func (m mockHttpTools) SendRequest(req *fasthttp.Request) (int, []byte, error) {
-	return 200, nil, nil
-}
-
-func (m mockHttpTools) SendRequestWithStatusCode(req *fasthttp.Request, expectedCode int) (int, []byte, error) {
+func (m mockHttpTools) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
 	return 200, nil, nil
 }
 
@@ -91,15 +84,16 @@ func (m mockHttpToolsWithError) GetWithRedirects(url string) (int, []byte, error
 	return 500, nil, errors.New("Wrong code")
 }
 
-func (m mockHttpToolsWithError) CreateRequest(method string, url string, headers *map[string]string) *fasthttp.Request {
-	return fasthttp.AcquireRequest()
+func (m mockHttpToolsWithError) CreateRequest(method string, url string, headers *map[string]string) *http.Request {
+	rq, _ := http.NewRequest(method, url, nil)
+	return rq
 }
 
-func (m mockHttpToolsWithError) SendRequest(req *fasthttp.Request) (int, []byte, error) {
+func (m mockHttpToolsWithError) SendRequest(req *http.Request) (int, []byte, error) {
 	return 500, nil, errors.New("Wrong code")
 }
 
-func (m mockHttpToolsWithError) SendRequestWithStatusCode(req *fasthttp.Request, expectedCode int) (int, []byte, error) {
+func (m mockHttpToolsWithError) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
 	return 500, nil, errors.New("Wrong code")
 }
 
