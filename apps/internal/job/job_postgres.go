@@ -1,7 +1,6 @@
 package job
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
@@ -15,6 +14,7 @@ type postgresJob struct {
 	user     string
 	password string
 	dbname   string
+	mysql    mysqlConnectorI
 }
 
 func NewPosgresDbJob(host string, port int32, user, password, dbname string) Job {
@@ -24,6 +24,7 @@ func NewPosgresDbJob(host string, port int32, user, password, dbname string) Job
 		user:     user,
 		password: password,
 		dbname:   dbname,
+		mysql:    &mysqlConnector{},
 	}
 }
 
@@ -61,7 +62,7 @@ func (m *postgresError) GetLogData() *clientPb.Log {
 func (j *postgresJob) Do() CheckError {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		j.host, j.port, j.user, j.password, j.dbname)
-	db, err := sql.Open("postgres", psqlInfo)
+	db, err := j.mysql.open("postgres", psqlInfo)
 	if err != nil {
 		return newPostgresError(ptypes.TimestampNow(), clientPb.StatusCode_Error, postgresConnectionError.Error(), j.host, j.port)
 	}

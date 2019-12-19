@@ -15,6 +15,7 @@ type mysqlJob struct {
 	user     string
 	password string
 	dbname   string
+	mysql    mysqlConnectorI
 }
 
 func NewMysqlJob(host string, port int32, user, password, dbname string) Job {
@@ -24,6 +25,7 @@ func NewMysqlJob(host string, port int32, user, password, dbname string) Job {
 		user:     user,
 		password: password,
 		dbname:   dbname,
+		mysql:    &mysqlConnector{},
 	}
 }
 
@@ -61,7 +63,7 @@ func (m *mysqlError) GetLogData() *clientPb.Log {
 func (j *mysqlJob) Do() CheckError {
 	psqlInfo := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
 		j.user, j.password, j.host, j.port, j.dbname)
-	db, err := sql.Open("mysql", psqlInfo)
+	db, err := j.mysql.open("mysql", psqlInfo)
 	if err != nil {
 		return newSqlError(ptypes.TimestampNow(), clientPb.StatusCode_Error, mysqlConnectionError.Error(), j.host, j.port)
 	}
@@ -73,4 +75,15 @@ func (j *mysqlJob) Do() CheckError {
 	}
 
 	return newSqlError(ptypes.TimestampNow(), clientPb.StatusCode_OK, "", j.host, j.port)
+}
+
+type mysqlConnectorI interface {
+	open(string, string) (*sql.DB, error)
+}
+
+type mysqlConnector struct {
+}
+
+func (mysqlConnector) open(name, info string) (*sql.DB, error) {
+	return sql.Open(name, info)
 }

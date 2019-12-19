@@ -15,5 +15,14 @@ func TestPostgresJob_Do(t *testing.T) {
 			actual := err.GetLogData().Code
 			assert.EqualValues(t, expected, actual)
 		})
+		t.Run("Should: return no error", func(t *testing.T) {
+			j := postgresJob{
+				mysql:    &sqlMockConnectOk{},
+			}
+			err := j.Do()
+			expected := clientPb.StatusCode_OK
+			actual := err.GetLogData().Code
+			assert.EqualValues(t, expected, actual)
+		})
 	})
 }
