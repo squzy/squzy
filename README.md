@@ -102,6 +102,7 @@ https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto
 ## Docker
 
 Docker Hub
+
 ```shell script
 docker pull squzy/squzy_app:v1.1.5
 ```
