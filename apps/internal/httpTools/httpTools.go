@@ -24,7 +24,7 @@ var (
 	notExpectedStatusCodeFn = func(url string, statusCode int, expectedStatusCode int) error {
 		return errors.New(
 			fmt.Sprintf(
-				"ErrCode: %s, Location: %s, StatusCoe: %d, ExpectedStatusCode: %d, Port: %d",
+				"ErrCode: %s, Location: %s, StatusCode: %d, ExpectedStatusCode: %d, Port: %d",
 				notExpectedStatusCode,
 				url,
 				statusCode,
