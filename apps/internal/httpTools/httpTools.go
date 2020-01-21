@@ -20,6 +20,7 @@ const (
 )
 
 var (
+	Version                 = "version"
 	notExpectedStatusCode   = errors.New("NOT_EXPECTED_STATUS_CODE")
 	notExpectedStatusCodeFn = func(url string, statusCode int, expectedStatusCode int) error {
 		return errors.New(
@@ -61,6 +62,7 @@ type HttpTool interface {
 }
 
 func (h *httpTool) sendReq(req *http.Request, checkCode bool, statusCode int) (int, []byte, error) {
+	req.Header.Set("user-agent", "Squzy-monitoring " + Version)
 	resp, err := h.client.Do(req)
 
 	if err != nil {

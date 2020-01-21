@@ -8,7 +8,7 @@ go_library(
      deps = [
          "//apps/internal/helpers:helpers",
      ],
-
+     x_defs = {"Version": "1.16"},
 )
 
 go_test(
@@ -19,5 +19,6 @@ go_test(
     embed = [":httpTools"],
     deps = [
         "@com_github_stretchr_testify//assert:go_default_library"
-    ]
+    ],
+    x_defs = {"Version": "1.16"},
 )

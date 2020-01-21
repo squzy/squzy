@@ -82,7 +82,7 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		siteMapCheck := check.SitemapCheck
 		schld, err := scheduler.New(
 			time.Second*time.Duration(interval),
-			job.NewSiteMapJob(siteMapCheck.Url, s.siteMapStorage, s.httpTools),
+			job.NewSiteMapJob(siteMapCheck.Url, s.siteMapStorage, s.httpTools, int64(siteMapCheck.MaxWorkers)),
 			s.externalStorage,
 		)
 		if err != nil {

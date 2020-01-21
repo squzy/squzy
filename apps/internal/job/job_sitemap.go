@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"golang.org/x/sync/errgroup"
+	"golang.org/x/sync/semaphore"
 	"net/http"
 	"squzy/apps/internal/helpers"
 	"squzy/apps/internal/httpTools"
@@ -15,6 +16,7 @@ import (
 
 type siteMapJob struct {
 	url            string
+	maxWorkers     int64
 	siteMapStorage sitemap_storage.SiteMapStorage
 	httpTools      httpTools.HttpTool
 }
@@ -54,9 +56,10 @@ func newSiteMapError(startTime *timestamp.Timestamp, endTime *timestamp.Timestam
 	}
 }
 
-func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool) Job {
+func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, maxWorkers int64) Job {
 	return &siteMapJob{
 		url:            url,
+		maxWorkers:     maxWorkers,
 		siteMapStorage: siteMapStorage,
 		httpTools:      httpTools,
 	}
@@ -69,13 +72,22 @@ func (j *siteMapJob) Do() CheckError {
 		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
 	}
 
-	group, _ := errgroup.WithContext(context.Background())
+	sem := semaphore.NewWeighted(j.maxWorkers)
+
+	group, ctx := errgroup.WithContext(context.Background())
 	for _, v := range siteMap.UrlSet {
 		if v.Ignore {
 			continue
 		}
 		location := v.Location
+
+		err := sem.Acquire(ctx, 1)
+		if err != nil {
+			//TODO: err check
+			continue
+		}
 		group.Go(func() error {
+			defer sem.Release(1)
 			rq, _ := http.NewRequest(http.MethodGet, location, nil)
 			_, _, err := j.httpTools.SendRequestWithStatusCode(rq, http.StatusOK)
 			if err != nil {

@@ -99,7 +99,7 @@ func (m mockHttpToolsWithError) SendRequestWithStatusCode(req *http.Request, exp
 
 func TestNewSiteMapJob(t *testing.T) {
 	t.Run("Should: Should implement interface Job", func(t *testing.T) {
-		job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpTools{})
+		job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpTools{}, 5)
 		assert.Implements(t, (*Job)(nil), job)
 	})
 }
@@ -107,21 +107,21 @@ func TestNewSiteMapJob(t *testing.T) {
 func TestSiteMapJob_Do(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
 		t.Run("Because mock with 200", func(t *testing.T) {
-			job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpTools{})
+			job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpTools{}, 5)
 			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
 		})
 		t.Run("Because ignore url", func(t *testing.T) {
-			job := NewSiteMapJob("", &siteMapStorageIgnore{}, &mockHttpToolsWithError{})
+			job := NewSiteMapJob("", &siteMapStorageIgnore{}, &mockHttpToolsWithError{}, 5)
 			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
 		})
 	})
 	t.Run("Should: return error", func(t *testing.T) {
 		t.Run("Because return 500", func(t *testing.T) {
-			job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpToolsWithError{})
+			job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpToolsWithError{}, 5)
 			assert.IsType(t, clientPb.StatusCode_Error, job.Do().GetLogData().Code)
 		})
 		t.Run("Because sitemapError", func(t *testing.T) {
-			job := NewSiteMapJob("", &siteMapStorageError{}, &mockHttpTools{})
+			job := NewSiteMapJob("", &siteMapStorageError{}, &mockHttpTools{}, 5)
 			assert.IsType(t, clientPb.StatusCode_Error, job.Do().GetLogData().Code)
 		})
 	})
