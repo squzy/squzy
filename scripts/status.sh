@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-echo VERSION $GITHUB_REF | cut -d / -f 3
+# shellcheck disable=SC2046
+echo VERSION $($GITHUB_REF | cut -d / -f 3)
