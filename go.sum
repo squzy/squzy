@@ -28,6 +28,8 @@ github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 h1:udFKJ0aHUL60LboW/A+D
 github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4/go.mod h1:qsXQc7+bwAM3Q1u/4XEfrquwF8Lw7D7y5cD8CuHnfIc=
 github.com/squzy/squzy_generated v1.2.3 h1:leOY+Y3fRsaKhyF+W5vwWwKWw8rs7e1MGuHxJbYVe6Y=
 github.com/squzy/squzy_generated v1.2.3/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.2.4-0.20191219214558-e6ec6388eb4a h1:sjRG4cEl24ftq6Urw8Dg2g9qV2fXxCpyIb85zrBx3XE=
+github.com/squzy/squzy_generated v1.2.4-0.20191219214558-e6ec6388eb4a/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
