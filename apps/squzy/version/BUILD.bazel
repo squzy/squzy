@@ -5,7 +5,6 @@ go_library(
      srcs = ["version.go"],
     importpath = "squzy/apps/squzy/version",
      visibility = ["//visibility:public"],
-     x_defs = {"Version": "1.16"},
 )
 
 go_test(
@@ -17,5 +16,4 @@ go_test(
     deps = [
         "@com_github_stretchr_testify//assert:go_default_library"
     ],
-    x_defs = {"Version": "1.16"},
 )

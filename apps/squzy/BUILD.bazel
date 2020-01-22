@@ -29,6 +29,7 @@ go_library(
 go_binary(
     name = "squzy_app",
     embed = [":squzy"],
+    x_defs = {"squzy/apps/squzy/version.Version": "1.16"},
 )
 
 go_image(

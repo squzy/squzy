@@ -1,9 +1,15 @@
 package version
 
+import "fmt"
+
 var (
-	V = "version"
+	Version = "version"
 )
 
-func Version() string {
-	return V
+func init() {
+	fmt.Println(Version)
+}
+
+func GetVersion() string {
+	return Version
 }

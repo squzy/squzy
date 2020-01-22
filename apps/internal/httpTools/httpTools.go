@@ -92,13 +92,13 @@ func (h *httpTool) sendReq(req *http.Request, checkCode bool, statusCode int) (i
 
 func New() HttpTool {
 	return &httpTool{
-		userAgent: "Squzy-monitoring "+version.Version(),
+		userAgent: "Squzy-monitoring_" + version.GetVersion(),
 		client: &http.Client{
-		Transport: &http.Transport{
-		MaxIdleConnsPerHost: MaxIdleConnectionsPerHost,
-		MaxIdleConns:        MaxIdleConnections,
-	},
-		Timeout: time.Duration(RequestTimeout) * time.Second,
-	},
+			Transport: &http.Transport{
+				MaxIdleConnsPerHost: MaxIdleConnectionsPerHost,
+				MaxIdleConns:        MaxIdleConnections,
+			},
+			Timeout: time.Duration(RequestTimeout) * time.Second,
+		},
 	}
 }
