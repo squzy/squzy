@@ -45,7 +45,7 @@ default: build
 	bazel build //apps/...
 
 .test:
-	bazel test --define tag="" //apps/...
+	bazel test --define version="local" //apps/...
 
 .build_agent:
 	./build.bash apps/agent/main.go squzy_agent_$(version)
@@ -55,7 +55,7 @@ default: build
 	bazel run //apps/agent:squzy_agent_app
 
 .test_debug:
-	bazel test --define tag="" //apps/...:all --sandbox_debug
+	bazel test --define version="local" //apps/...:all --sandbox_debug
 
 .dep:
 	bazel run //:gazelle -- update-repos -from_file=go.mod

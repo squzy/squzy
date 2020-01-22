@@ -19,7 +19,6 @@ type server struct {
 	externalStorage  storage.Storage
 	siteMapStorage   sitemap_storage.SiteMapStorage
 	httpTools        httpTools.HttpTool
-
 }
 
 func (s server) RemoveScheduler(ctx context.Context, rq *serverPb.RemoveSchedulerRequest) (*serverPb.RemoveSchedulerResponse, error) {
@@ -84,7 +83,7 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		siteMapCheck := check.SitemapCheck
 		schld, err := scheduler.New(
 			time.Second*time.Duration(interval),
-			job.NewSiteMapJob(siteMapCheck.Url, s.siteMapStorage, s.httpTools, semaphore.NewSemaphore, siteMapCheck.MaxWorkers),
+			job.NewSiteMapJob(siteMapCheck.Url, s.siteMapStorage, s.httpTools, semaphore.NewSemaphore, siteMapCheck.Concurrency),
 			s.externalStorage,
 		)
 		if err != nil {

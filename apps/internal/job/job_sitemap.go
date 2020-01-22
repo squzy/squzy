@@ -16,7 +16,7 @@ import (
 
 type siteMapJob struct {
 	url              string
-	maxWorkers       int
+	concurrency      int32
 	siteMapStorage   sitemap_storage.SiteMapStorage
 	httpTools        httpTools.HttpTool
 	semaphoreFactory func(n int) semaphore.Semaphore
@@ -57,13 +57,13 @@ func newSiteMapError(startTime *timestamp.Timestamp, endTime *timestamp.Timestam
 	}
 }
 
-func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, factoryFn func(n int) semaphore.Semaphore, maxWorkers int32) Job {
+func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, semaphoreFactoryFn func(n int) semaphore.Semaphore, concurrency int32) Job {
 	return &siteMapJob{
 		url:              url,
-		maxWorkers:       int(maxWorkers),
+		concurrency:      concurrency,
 		siteMapStorage:   siteMapStorage,
 		httpTools:        httpTools,
-		semaphoreFactory: factoryFn,
+		semaphoreFactory: semaphoreFactoryFn,
 	}
 }
 
@@ -74,10 +74,13 @@ func (j *siteMapJob) Do() CheckError {
 		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
 	}
 
-	sem := j.semaphoreFactory(j.maxWorkers)
-	if j.maxWorkers <= 0 {
-		sem = semaphore.NewSemaphore(len(siteMap.UrlSet))
+	concurrency := int(j.concurrency)
+
+	if concurrency <= 0 {
+		concurrency = len(siteMap.UrlSet)
 	}
+
+	sem := semaphore.NewSemaphore(concurrency)
 
 	group, ctx := errgroup.WithContext(context.Background())
 	for _, v := range siteMap.UrlSet {

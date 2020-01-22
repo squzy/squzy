@@ -11,6 +11,7 @@ go_library(
     deps = [
         "//apps/squzy/application:application",
         "//apps/squzy/config:config",
+        "//apps/squzy/version:version",
         "//apps/squzy/server:server",
         "//apps/internal/job:job",
         "//apps/internal/scheduler:scheduler",

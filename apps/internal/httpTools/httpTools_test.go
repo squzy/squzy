@@ -12,7 +12,7 @@ import (
 
 func TestNew(t *testing.T) {
 	t.Run("Test: Create new", func(t *testing.T) {
-		j := New()
+		j := New("veriosn")
 		assert.IsType(t, &httpTool{}, j)
 		assert.NotEqual(t, nil, j)
 	})
@@ -32,7 +32,7 @@ func TestHttpTool_SendRequest(t *testing.T) {
 			_, _ = w.Write(bytes)
 		}))
 		defer ts.Close()
-		j := New()
+		j := New("")
 		req := newRequest(http.MethodGet, ts.URL, nil)
 		code, body, _ := j.SendRequest(req)
 		assert.Equal(t, http.StatusOK, code)
@@ -45,13 +45,13 @@ func TestHttpTool_SendRequest(t *testing.T) {
 			w.WriteHeader(200)
 			_, _ = w.Write(bytes)
 		}))
-		j := New()
+		j := New("veriosn")
 		req := newRequest(http.MethodGet, ts.URL, nil)
 		_, _, err := j.SendRequest(req)
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Test: Should return error", func(t *testing.T) {
-		j := New()
+		j := New("veriosn")
 		req := newRequest (http.MethodGet, "ts.URL", nil)
 		_, _, err := j.SendRequest(req)
 		assert.NotEqual(t, nil, err)
@@ -67,13 +67,13 @@ func TestHttpTool_SendRequestWithStatusCode(t *testing.T) {
 			_, _ = w.Write(bytes)
 		}))
 		defer ts.Close()
-		j := New()
+		j := New("")
 		req := newRequest(http.MethodGet, ts.URL, nil)
 		_, body, _ := j.SendRequestWithStatusCode(req, http.StatusOK)
 		assert.Equal(t, body, bytes)
 	})
 	t.Run("Test: Should return error", func(t *testing.T) {
-		j := New()
+		j := New("")
 		req := newRequest(http.MethodGet, "ts.URL", nil)
 		_, _, err := j.SendRequestWithStatusCode(req, 200)
 		assert.NotEqual(t, nil, err)
@@ -86,7 +86,7 @@ func TestHttpTool_SendRequestWithStatusCode(t *testing.T) {
 			w.WriteHeader(200)
 			_, _ = w.Write(bytes)
 		}))
-		j := New()
+		j := New("")
 		req := newRequest(http.MethodGet, ts.URL, nil)
 		_, _, err := j.SendRequestWithStatusCode(req, 200)
 		assert.NotEqual(t, nil, err)
@@ -99,7 +99,7 @@ func TestHttpTool_SendRequestWithStatusCode(t *testing.T) {
 
 			_, _ = w.Write(bytes)
 		}))
-		j := New()
+		j := New("veriosn")
 		req  := newRequest(http.MethodGet, ts.URL, nil)
 		_, _, err := j.SendRequestWithStatusCode(req, 200)
 		assert.Equal(t, notExpectedStatusCodeFn(ts.URL, 201, 200), err)
@@ -108,7 +108,7 @@ func TestHttpTool_SendRequestWithStatusCode(t *testing.T) {
 
 func TestHttpTool_CreateRequest(t *testing.T) {
 	t.Run("Should: create request with header, url and method", func(t *testing.T) {
-		h := New()
+		h := New("veriosn")
 		m := map[string]string{
 			"trata": "trata",
 		}
@@ -117,7 +117,7 @@ func TestHttpTool_CreateRequest(t *testing.T) {
 		assert.Equal(t, http.MethodGet, rq.Method)
 	})
 	t.Run("Should: create request without headers", func(t *testing.T) {
-		h := New()
+		h := New("veriosn")
 		rq := h.CreateRequest(http.MethodGet, "http://test.ru", nil)
 		assert.Equal(t,"http://test.ru", rq.URL.String())
 		assert.Equal(t, http.MethodGet, rq.Method)

@@ -7,7 +7,6 @@ go_library(
      visibility = ["//visibility:public"],
      deps = [
          "//apps/internal/helpers:helpers",
-         "//apps/squzy/version:version",
      ],
 )
 

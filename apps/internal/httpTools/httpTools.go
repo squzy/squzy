@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"squzy/apps/internal/helpers"
-	"squzy/apps/squzy/version"
 	"time"
 )
 
@@ -19,7 +18,7 @@ const (
 	MaxIdleConnections        int = 30
 	MaxIdleConnectionsPerHost int = 30
 	RequestTimeout            int = 10
-	userAgentPrefix               = "Squzy-monitoring_"
+	userAgentPrefix               = "Squzy_monitoring"
 )
 
 var (
@@ -93,9 +92,9 @@ func (h *httpTool) sendReq(req *http.Request, checkCode bool, statusCode int) (i
 	return resp.StatusCode, data, nil
 }
 
-func New() HttpTool {
+func New(userAgentVersion string) HttpTool {
 	return &httpTool{
-		userAgent: userAgentPrefix + version.GetVersion(),
+		userAgent: fmt.Sprintf("%s_%s", userAgentPrefix, userAgentVersion),
 		client: &http.Client{
 			Transport: &http.Transport{
 				MaxIdleConnsPerHost: MaxIdleConnectionsPerHost,

@@ -1,13 +1,16 @@
 package version
 
-import "fmt"
-
-var (
-	Version = "version"
+import (
+	"fmt"
+	"log"
 )
 
-func init() {
-	fmt.Println(Version)
+var (
+	Version = "local"
+)
+
+func init(){
+	log.Println(fmt.Sprintf("Version: %s", GetVersion()))
 }
 
 func GetVersion() string {
