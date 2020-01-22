@@ -107,7 +107,7 @@ func TestNewSiteMapJob(t *testing.T) {
 func TestSiteMapJob_Do(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
 		t.Run("Because mock with 200", func(t *testing.T) {
-			job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpTools{}, 5)
+			job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpTools{}, -1)
 			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
 		})
 		t.Run("Because ignore url", func(t *testing.T) {

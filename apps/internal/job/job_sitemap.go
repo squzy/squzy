@@ -73,6 +73,9 @@ func (j *siteMapJob) Do() CheckError {
 	}
 
 	sem := semaphore.NewWeighted(j.maxWorkers)
+	if j.maxWorkers <= 0 {
+		sem = semaphore.NewWeighted(int64(len(siteMap.UrlSet)))
+	}
 
 	group, ctx := errgroup.WithContext(context.Background())
 	for _, v := range siteMap.UrlSet {
@@ -83,8 +86,7 @@ func (j *siteMapJob) Do() CheckError {
 
 		err := sem.Acquire(ctx, 1)
 		if err != nil {
-			//TODO: err check
-			continue
+			return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, helpers.GetPortByUrl(j.url))
 		}
 		group.Go(func() error {
 			defer sem.Release(1)
