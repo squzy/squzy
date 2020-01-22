@@ -11,6 +11,7 @@ go_library(
         "//apps/internal/job:job",
         "//apps/internal/scheduler:scheduler",
         "//apps/internal/scheduler-storage:scheduler-storage",
+        "//apps/internal/semaphore:semaphore",
         "//apps/internal/sitemap-storage:sitemap-storage",
         "//apps/internal/storage:storage",
         "//apps/internal/httpTools:httpTools",
