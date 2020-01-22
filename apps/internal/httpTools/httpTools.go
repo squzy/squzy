@@ -11,7 +11,8 @@ import (
 )
 
 type httpTool struct {
-	client *http.Client
+	userAgent string
+	client    *http.Client
 }
 
 const (
@@ -21,7 +22,6 @@ const (
 )
 
 var (
-	Version                 = "version"
 	notExpectedStatusCode   = errors.New("NOT_EXPECTED_STATUS_CODE")
 	notExpectedStatusCodeFn = func(url string, statusCode int, expectedStatusCode int) error {
 		return errors.New(
@@ -63,7 +63,7 @@ type HttpTool interface {
 }
 
 func (h *httpTool) sendReq(req *http.Request, checkCode bool, statusCode int) (int, []byte, error) {
-	req.Header.Set("user-agent", "Squzy-monitoring " + version.Version())
+	req.Header.Set("user-agent", h.userAgent)
 	resp, err := h.client.Do(req)
 
 	if err != nil {
@@ -92,12 +92,13 @@ func (h *httpTool) sendReq(req *http.Request, checkCode bool, statusCode int) (i
 
 func New() HttpTool {
 	return &httpTool{
+		userAgent: "Squzy-monitoring "+version.Version(),
 		client: &http.Client{
-			Transport: &http.Transport{
-				MaxIdleConnsPerHost: MaxIdleConnectionsPerHost,
-				MaxIdleConns:        MaxIdleConnections,
-			},
-			Timeout: time.Duration(RequestTimeout) * time.Second,
-		},
+		Transport: &http.Transport{
+		MaxIdleConnsPerHost: MaxIdleConnectionsPerHost,
+		MaxIdleConns:        MaxIdleConnections,
+	},
+		Timeout: time.Duration(RequestTimeout) * time.Second,
+	},
 	}
 }
