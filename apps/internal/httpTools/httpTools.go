@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"squzy/apps/internal/helpers"
+	"squzy/apps/squzy/version"
 	"time"
 )
 
@@ -62,7 +63,7 @@ type HttpTool interface {
 }
 
 func (h *httpTool) sendReq(req *http.Request, checkCode bool, statusCode int) (int, []byte, error) {
-	req.Header.Set("user-agent", "Squzy-monitoring " + Version)
+	req.Header.Set("user-agent", "Squzy-monitoring " + version.Version())
 	resp, err := h.client.Do(req)
 
 	if err != nil {
