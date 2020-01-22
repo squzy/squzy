@@ -29,7 +29,7 @@ go_library(
 go_binary(
     name = "squzy_app",
     embed = [":squzy"],
-    x_defs = {"squzy/apps/squzy/version.Version": "1.16"},
+    x_defs = {"squzy/apps/squzy/version.Version": "{VERSION}"},
 )
 
 go_image(
@@ -56,7 +56,7 @@ container_push(
     image = ":squzy_image",
     registry = "index.docker.io",
     repository = "squzy/squzy_app",
-    tag = "$(tag)"
+    tag = "$(version)"
 )
 
 container_push(
@@ -65,5 +65,5 @@ container_push(
     image = ":squzy_image",
     registry = "index.docker.io",
     repository = "squzy/squzy_app",
-    tag = "$(tag)"
+    tag = "$(version)"
 )
