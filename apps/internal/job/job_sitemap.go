@@ -2,6 +2,7 @@ package job
 
 import (
 	"context"
+	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
@@ -76,11 +77,13 @@ func (j *siteMapJob) Do() CheckError {
 
 	concurrency := int(j.concurrency)
 
-	if concurrency <= 0 {
+	count := len(siteMap.UrlSet)
+
+	if concurrency <= 0 || concurrency > count {
 		concurrency = len(siteMap.UrlSet)
 	}
 
-	sem := semaphore.NewSemaphore(concurrency)
+	sem := j.semaphoreFactory(concurrency)
 
 	group, ctx := errgroup.WithContext(context.Background())
 	for _, v := range siteMap.UrlSet {
@@ -90,9 +93,12 @@ func (j *siteMapJob) Do() CheckError {
 		location := v.Location
 
 		err := sem.Acquire(ctx)
+		fmt.Println(err)
+
 		if err != nil {
 			return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, helpers.GetPortByUrl(j.url))
 		}
+
 		group.Go(func() error {
 			defer sem.Release()
 			rq, _ := http.NewRequest(http.MethodGet, location, nil)
