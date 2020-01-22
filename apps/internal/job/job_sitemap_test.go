@@ -1,11 +1,13 @@
 package job
 
 import (
+	"context"
 	"errors"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"squzy/apps/internal/parsers"
+	"squzy/apps/internal/semaphore"
 	"testing"
 )
 
@@ -99,29 +101,45 @@ func (m mockHttpToolsWithError) SendRequestWithStatusCode(req *http.Request, exp
 
 func TestNewSiteMapJob(t *testing.T) {
 	t.Run("Should: Should implement interface Job", func(t *testing.T) {
-		job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpTools{}, 5)
+		job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpTools{}, semaphore.NewSemaphore, 5)
 		assert.Implements(t, (*Job)(nil), job)
 	})
+}
+
+type mockErrorSemaphore struct {
+}
+
+func (*mockErrorSemaphore) Acquire(ctx context.Context) error {
+	return errors.New("Acquire error")
+}
+func (*mockErrorSemaphore) Release() {}
+
+func ErrorSemaphore(i int) semaphore.Semaphore {
+	return &mockErrorSemaphore{}
 }
 
 func TestSiteMapJob_Do(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
 		t.Run("Because mock with 200", func(t *testing.T) {
-			job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpTools{}, -1)
+			job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpTools{}, semaphore.NewSemaphore, -1)
 			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
 		})
 		t.Run("Because ignore url", func(t *testing.T) {
-			job := NewSiteMapJob("", &siteMapStorageIgnore{}, &mockHttpToolsWithError{}, 5)
+			job := NewSiteMapJob("", &siteMapStorageIgnore{}, &mockHttpToolsWithError{}, semaphore.NewSemaphore, 5)
 			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
 		})
 	})
 	t.Run("Should: return error", func(t *testing.T) {
+		t.Run("Return aquired error", func(t *testing.T) {
+			job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpToolsWithError{}, ErrorSemaphore, 5)
+			assert.IsType(t, clientPb.StatusCode_Error, job.Do().GetLogData().Code)
+		})
 		t.Run("Because return 500", func(t *testing.T) {
-			job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpToolsWithError{}, 5)
+			job := NewSiteMapJob("", &siteMapStorage{}, &mockHttpToolsWithError{}, semaphore.NewSemaphore, 5)
 			assert.IsType(t, clientPb.StatusCode_Error, job.Do().GetLogData().Code)
 		})
 		t.Run("Because sitemapError", func(t *testing.T) {
-			job := NewSiteMapJob("", &siteMapStorageError{}, &mockHttpTools{}, 5)
+			job := NewSiteMapJob("", &siteMapStorageError{}, &mockHttpTools{}, semaphore.NewSemaphore, 5)
 			assert.IsType(t, clientPb.StatusCode_Error, job.Do().GetLogData().Code)
 		})
 	})

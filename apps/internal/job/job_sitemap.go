@@ -7,18 +7,19 @@ import (
 	"github.com/google/uuid"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"golang.org/x/sync/errgroup"
-	"golang.org/x/sync/semaphore"
 	"net/http"
 	"squzy/apps/internal/helpers"
 	"squzy/apps/internal/httpTools"
+	"squzy/apps/internal/semaphore"
 	sitemap_storage "squzy/apps/internal/sitemap-storage"
 )
 
 type siteMapJob struct {
-	url            string
-	maxWorkers     int64
-	siteMapStorage sitemap_storage.SiteMapStorage
-	httpTools      httpTools.HttpTool
+	url              string
+	maxWorkers       int
+	siteMapStorage   sitemap_storage.SiteMapStorage
+	httpTools        httpTools.HttpTool
+	semaphoreFactory func(n int) semaphore.Semaphore
 }
 
 type siteMapError struct {
@@ -56,12 +57,13 @@ func newSiteMapError(startTime *timestamp.Timestamp, endTime *timestamp.Timestam
 	}
 }
 
-func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, maxWorkers int64) Job {
+func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, factoryFn func(n int) semaphore.Semaphore, maxWorkers int32) Job {
 	return &siteMapJob{
-		url:            url,
-		maxWorkers:     maxWorkers,
-		siteMapStorage: siteMapStorage,
-		httpTools:      httpTools,
+		url:              url,
+		maxWorkers:       int(maxWorkers),
+		siteMapStorage:   siteMapStorage,
+		httpTools:        httpTools,
+		semaphoreFactory: factoryFn,
 	}
 }
 
@@ -72,9 +74,9 @@ func (j *siteMapJob) Do() CheckError {
 		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
 	}
 
-	sem := semaphore.NewWeighted(j.maxWorkers)
+	sem := j.semaphoreFactory(j.maxWorkers)
 	if j.maxWorkers <= 0 {
-		sem = semaphore.NewWeighted(int64(len(siteMap.UrlSet)))
+		sem = semaphore.NewSemaphore(len(siteMap.UrlSet))
 	}
 
 	group, ctx := errgroup.WithContext(context.Background())
@@ -84,12 +86,12 @@ func (j *siteMapJob) Do() CheckError {
 		}
 		location := v.Location
 
-		err := sem.Acquire(ctx, 1)
+		err := sem.Acquire(ctx)
 		if err != nil {
 			return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, helpers.GetPortByUrl(j.url))
 		}
 		group.Go(func() error {
-			defer sem.Release(1)
+			defer sem.Release()
 			rq, _ := http.NewRequest(http.MethodGet, location, nil)
 			_, _, err := j.httpTools.SendRequestWithStatusCode(rq, http.StatusOK)
 			if err != nil {
