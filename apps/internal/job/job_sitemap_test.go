@@ -75,6 +75,17 @@ func (s siteMapStorageError) Get(url string) (*parsers.SiteMap, error) {
 	return nil, errors.New("SAFafs")
 }
 
+type siteMapStorageEmptyIgnore struct {
+
+}
+
+func (s siteMapStorageEmptyIgnore) Get(url string) (*parsers.SiteMap, error) {
+	return &parsers.SiteMap{
+		UrlSet: []parsers.SiteMapUrl{
+		},
+	}, nil
+}
+
 type mockHttpToolsWithError struct {
 
 }
@@ -132,6 +143,10 @@ func TestSiteMapJob_Do(t *testing.T) {
 		})
 		t.Run("Because ignore url", func(t *testing.T) {
 			job := NewSiteMapJob("", &siteMapStorageIgnore{}, &mockHttpToolsWithError{}, successFactory, 5)
+			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
+		})
+		t.Run("Because: empty sitemap", func(t *testing.T) {
+			job := NewSiteMapJob("", &siteMapStorageEmptyIgnore{}, &mockHttpToolsWithError{}, successFactory, 5)
 			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
 		})
 	})

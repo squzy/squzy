@@ -75,9 +75,13 @@ func (j *siteMapJob) Do() CheckError {
 		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
 	}
 
-	concurrency := int(j.concurrency)
-
 	count := len(siteMap.UrlSet)
+
+	if count == 0 {
+		return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", "", 0)
+	}
+
+	concurrency := int(j.concurrency)
 
 	if concurrency <= 0 || concurrency > count {
 		concurrency = len(siteMap.UrlSet)
