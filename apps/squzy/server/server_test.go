@@ -9,6 +9,7 @@ import (
 	"squzy/apps/internal/job"
 	"squzy/apps/internal/parsers"
 	"squzy/apps/internal/scheduler"
+	"squzy/apps/internal/semaphore"
 	"testing"
 )
 
@@ -183,6 +184,9 @@ func TestNew(t *testing.T) {
 			&mockExternalStorage{},
 			&mockSiteMapStorage{},
 			&mockHttpTools{},
+			func(i int) semaphore.Semaphore {
+				return semaphore.NewSemaphore(i)
+			},
 		)
 		assert.Implements(t, (*serverPb.ServerServer)(nil), s)
 	})
@@ -196,6 +200,9 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             0,
@@ -209,6 +216,9 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -226,6 +236,9 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -241,6 +254,9 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -259,6 +275,9 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -277,6 +296,9 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             0,
@@ -294,6 +316,9 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             0,
@@ -309,6 +334,9 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             0,
@@ -327,6 +355,9 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             0,
@@ -343,6 +374,9 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -360,6 +394,9 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -375,6 +412,9 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -391,6 +431,9 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -412,6 +455,9 @@ func TestServer_RemoveScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.RemoveScheduler(context.Background(), &serverPb.RemoveSchedulerRequest{
 				Id: "",
@@ -426,6 +472,9 @@ func TestServer_RemoveScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.RemoveScheduler(context.Background(), &serverPb.RemoveSchedulerRequest{
 				Id: "",
@@ -443,6 +492,9 @@ func TestServer_RunScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.RunScheduler(context.Background(), &serverPb.RunSchedulerRequest{
 				Id: "",
@@ -457,6 +509,9 @@ func TestServer_RunScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.RunScheduler(context.Background(), &serverPb.RunSchedulerRequest{
 				Id: "",
@@ -469,6 +524,9 @@ func TestServer_RunScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.RunScheduler(context.Background(), &serverPb.RunSchedulerRequest{
 				Id: "",
@@ -486,6 +544,9 @@ func TestServer_StopScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.StopScheduler(context.Background(), &serverPb.StopSchedulerRequest{
 				Id: "",
@@ -500,6 +561,9 @@ func TestServer_StopScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.StopScheduler(context.Background(), &serverPb.StopSchedulerRequest{
 				Id: "",
@@ -512,6 +576,9 @@ func TestServer_StopScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
 			)
 			_, err := s.StopScheduler(context.Background(), &serverPb.StopSchedulerRequest{
 				Id: "",
@@ -528,6 +595,9 @@ func TestServer_GetList(t *testing.T) {
 			&mockExternalStorage{},
 			&mockSiteMapStorage{},
 			&mockHttpTools{},
+			func(i int) semaphore.Semaphore {
+				return semaphore.NewSemaphore(i)
+			},
 		)
 		resp, err := s.GetList(context.Background(), &serverPb.GetListRequest{}, )
 		assert.Equal(t, nil, err)
@@ -544,6 +614,9 @@ func TestServer_GetList(t *testing.T) {
 			&mockExternalStorage{},
 			&mockSiteMapStorage{},
 			&mockHttpTools{},
+			func(i int) semaphore.Semaphore {
+				return semaphore.NewSemaphore(i)
+			},
 		)
 		resp, err := s.GetList(context.Background(), &serverPb.GetListRequest{}, )
 		assert.Equal(t, nil, err)

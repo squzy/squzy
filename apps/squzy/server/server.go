@@ -15,6 +15,7 @@ import (
 )
 
 type server struct {
+	semaphoreFactory semaphore.SemaphoreFactory
 	schedulerStorage scheduler_storage.SchedulerStorage
 	externalStorage  storage.Storage
 	siteMapStorage   sitemap_storage.SiteMapStorage
@@ -83,7 +84,7 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		siteMapCheck := check.SitemapCheck
 		schld, err := scheduler.New(
 			time.Second*time.Duration(interval),
-			job.NewSiteMapJob(siteMapCheck.Url, s.siteMapStorage, s.httpTools, semaphore.NewSemaphore, siteMapCheck.Concurrency),
+			job.NewSiteMapJob(siteMapCheck.Url, s.siteMapStorage, s.httpTools, s.semaphoreFactory, siteMapCheck.Concurrency),
 			s.externalStorage,
 		)
 		if err != nil {
@@ -160,11 +161,13 @@ func New(
 	externalStorage storage.Storage,
 	siteMapStorage sitemap_storage.SiteMapStorage,
 	httpTools httpTools.HttpTool,
+	semaphoreFactory semaphore.SemaphoreFactory,
 ) serverPb.ServerServer {
 	return &server{
 		schedulerStorage: schedulerStorage,
 		externalStorage:  externalStorage,
 		siteMapStorage:   siteMapStorage,
 		httpTools:        httpTools,
+		semaphoreFactory: semaphoreFactory,
 	}
 }
