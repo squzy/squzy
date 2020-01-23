@@ -2,10 +2,6 @@ package job
 
 import (
 	"errors"
-<<<<<<< HEAD
-	"strings"
-=======
->>>>>>> 915448d3e73ccc5636b68a5e6f9d0fe14490899a
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"time"
 )

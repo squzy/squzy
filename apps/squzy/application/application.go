@@ -1,6 +1,7 @@
 package application
 
 import (
+	"database/sql"
 	"fmt"
 	serverPb "github.com/squzy/squzy_generated/generated/server/proto/v1"
 	"google.golang.org/grpc"
@@ -13,10 +14,11 @@ import (
 )
 
 type app struct {
-	schedulerStorage scheduler_storage.SchedulerStorage
-	externalStorage  storage.Storage
-	siteMapStorage   sitemap_storage.SiteMapStorage
-	tool             httpTools.HttpTool
+	schedulerStorage      scheduler_storage.SchedulerStorage
+	externalStorage       storage.Storage
+	siteMapStorage        sitemap_storage.SiteMapStorage
+	tool                  httpTools.HttpTool
+	mySqlPing             func(*sql.DB) error
 }
 
 func New(
@@ -24,12 +26,14 @@ func New(
 	externalStorage storage.Storage,
 	siteMapStorage sitemap_storage.SiteMapStorage,
 	tool httpTools.HttpTool,
+	mySqlPing func(*sql.DB) error,
 ) *app {
 	return &app{
 		schedulerStorage,
 		externalStorage,
 		siteMapStorage,
 		tool,
+		mySqlPing,
 	}
 }
 
@@ -46,6 +50,7 @@ func (s *app) Run(port int32) error {
 			s.externalStorage,
 			s.siteMapStorage,
 			s.tool,
+			s.mySqlPing,
 		),
 	)
 	return grpcServer.Serve(lis)

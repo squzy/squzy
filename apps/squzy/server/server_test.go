@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	serverPb "github.com/squzy/squzy_generated/generated/server/proto/v1"
 	"github.com/stretchr/testify/assert"
@@ -183,6 +184,7 @@ func TestNew(t *testing.T) {
 			&mockExternalStorage{},
 			&mockSiteMapStorage{},
 			&mockHttpTools{},
+			func(db *sql.DB) error { return nil},
 		)
 		assert.Implements(t, (*serverPb.ServerServer)(nil), s)
 	})
@@ -196,6 +198,7 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             0,
@@ -209,6 +212,7 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -226,6 +230,7 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -241,6 +246,7 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -259,12 +265,91 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
 				Check:                &serverPb.AddSchedulerRequest_SitemapCheck{
 					SitemapCheck: &serverPb.SiteMapCheck{
 						Url: "",
+					}},
+			})
+			assert.Equal(t, nil, err)
+		})
+		t.Run("Because: correct mongo", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_MongoCheck{
+					MongoCheck: &serverPb.MongoCheck{
+						Url: "",
+					}},
+			})
+			assert.Equal(t, nil, err)
+		})
+		t.Run("Because: correct mySql", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_MysqlCheck{
+					MysqlCheck: &serverPb.MysqlCheck{
+						DbName:   "",
+						Host:     "",
+						Port:     0,
+						User:     "",
+						Password: "",
+					}},
+			})
+			assert.Equal(t, nil, err)
+		})
+		t.Run("Because: correct postgres", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_PostgresCheck{
+					PostgresCheck: &serverPb.PostgresCheck{
+						DbName:               "",
+						Host:                 "",
+						Port:                 0,
+						User:                 "",
+						Password:             "",
+					}},
+			})
+			assert.Equal(t, nil, err)
+		})
+		t.Run("Because: correct cassandra", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_CassandraCheck{
+					CassandraCheck: &serverPb.CassandraCheck{
+						Cluster:              "",
+						User:                 "",
+						Password:             "",
 					}},
 			})
 			assert.Equal(t, nil, err)
@@ -277,6 +362,7 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             0,
@@ -294,6 +380,7 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             0,
@@ -309,6 +396,7 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             0,
@@ -327,6 +415,7 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             0,
@@ -337,12 +426,91 @@ func TestServer_AddScheduler(t *testing.T) {
 			})
 			assert.NotEqual(t, nil, err)
 		})
+		t.Run("Because: not correct timeout mongo", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             0,
+				Check:                &serverPb.AddSchedulerRequest_MongoCheck{
+					MongoCheck: &serverPb.MongoCheck{
+						Url: "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: not correct timeout mySql", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             0,
+				Check:                &serverPb.AddSchedulerRequest_MysqlCheck{
+					MysqlCheck: &serverPb.MysqlCheck{
+						DbName:               "",
+						Host:                 "",
+						Port:                 0,
+						User:                 "",
+						Password:             "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: not correct timeout postgres", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             0,
+				Check:                &serverPb.AddSchedulerRequest_PostgresCheck{
+					PostgresCheck: &serverPb.PostgresCheck{
+						DbName:               "",
+						Host:                 "",
+						Port:                 0,
+						User:                 "",
+						Password:             "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: not correct timeout cassandra", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             0,
+				Check:                &serverPb.AddSchedulerRequest_CassandraCheck{
+					CassandraCheck: &serverPb.CassandraCheck{
+						Cluster:              "",
+						User:                 "",
+						Password:             "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
 		t.Run("Because: tcp alreadyExistId", func(t *testing.T) {
 			s := New(
 				&mockSchedulerStorageError{},
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -360,6 +528,7 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -375,6 +544,7 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
@@ -391,12 +561,91 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
 				Interval:             1,
 				Check:                &serverPb.AddSchedulerRequest_GrpcCheck{
 					GrpcCheck: &serverPb.GrpcCheck{
 						Port: 8080,
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: mongo alreadyExistId", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorageError{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_MongoCheck{
+					MongoCheck: &serverPb.MongoCheck{
+						Url:                  "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: mySql alreadyExistId", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorageError{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_MysqlCheck{
+					MysqlCheck: &serverPb.MysqlCheck{
+						DbName:               "",
+						Host:                 "",
+						Port:                 0,
+						User:                 "",
+						Password:             "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: postgres alreadyExistId", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorageError{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_PostgresCheck{
+					PostgresCheck: &serverPb.PostgresCheck{
+						DbName:               "",
+						Host:                 "",
+						Port:                 0,
+						User:                 "",
+						Password:             "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: cassandra alreadyExistId", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorageError{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_CassandraCheck{
+					CassandraCheck: &serverPb.CassandraCheck{
+						Cluster:              "",
+						User:                 "",
+						Password:             "",
 					}},
 			})
 			assert.NotEqual(t, nil, err)
@@ -412,6 +661,7 @@ func TestServer_RemoveScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.RemoveScheduler(context.Background(), &serverPb.RemoveSchedulerRequest{
 				Id: "",
@@ -426,6 +676,7 @@ func TestServer_RemoveScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.RemoveScheduler(context.Background(), &serverPb.RemoveSchedulerRequest{
 				Id: "",
@@ -443,6 +694,7 @@ func TestServer_RunScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.RunScheduler(context.Background(), &serverPb.RunSchedulerRequest{
 				Id: "",
@@ -457,6 +709,7 @@ func TestServer_RunScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.RunScheduler(context.Background(), &serverPb.RunSchedulerRequest{
 				Id: "",
@@ -469,6 +722,7 @@ func TestServer_RunScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.RunScheduler(context.Background(), &serverPb.RunSchedulerRequest{
 				Id: "",
@@ -486,6 +740,7 @@ func TestServer_StopScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.StopScheduler(context.Background(), &serverPb.StopSchedulerRequest{
 				Id: "",
@@ -500,6 +755,7 @@ func TestServer_StopScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.StopScheduler(context.Background(), &serverPb.StopSchedulerRequest{
 				Id: "",
@@ -512,6 +768,7 @@ func TestServer_StopScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil},
 			)
 			_, err := s.StopScheduler(context.Background(), &serverPb.StopSchedulerRequest{
 				Id: "",
@@ -528,6 +785,7 @@ func TestServer_GetList(t *testing.T) {
 			&mockExternalStorage{},
 			&mockSiteMapStorage{},
 			&mockHttpTools{},
+			func(db *sql.DB) error { return nil},
 		)
 		resp, err := s.GetList(context.Background(), &serverPb.GetListRequest{}, )
 		assert.Equal(t, nil, err)
@@ -544,6 +802,7 @@ func TestServer_GetList(t *testing.T) {
 			&mockExternalStorage{},
 			&mockSiteMapStorage{},
 			&mockHttpTools{},
+			func(db *sql.DB) error { return nil},
 		)
 		resp, err := s.GetList(context.Background(), &serverPb.GetListRequest{}, )
 		assert.Equal(t, nil, err)

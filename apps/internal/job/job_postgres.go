@@ -1,6 +1,7 @@
 package job
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
@@ -9,22 +10,28 @@ import (
 )
 
 type postgresJob struct {
-	host     string
-	port     int32
-	user     string
-	password string
-	dbname   string
-	mysql    mysqlConnectorI
+	host         string
+	port         int32
+	user         string
+	password     string
+	dbname       string
+	postgresOpen func(string, string) (*sql.DB, error)
+	postgresPing func(*sql.DB) error
 }
 
-func NewPosgresDbJob(host string, port int32, user, password, dbname string) Job {
+func NewPosgresDbJob(
+	host string,
+	port int32,
+	user, password, dbname string,
+	mySqlPing func(*sql.DB) error) Job {
 	return &postgresJob{
-		host:     host,
-		port:     port,
-		user:     user,
-		password: password,
-		dbname:   dbname,
-		mysql:    &mysqlConnector{},
+		host:         host,
+		port:         port,
+		user:         user,
+		password:     password,
+		dbname:       dbname,
+		postgresOpen: sql.Open,
+		postgresPing: mySqlPing,
 	}
 }
 
@@ -53,7 +60,6 @@ func (m *postgresError) GetLogData() *clientPb.Log {
 		Meta: &clientPb.MetaData{
 			Id:       uuid.New().String(),
 			Location: m.location,
-			Time:     m.time,
 			Port:     m.port,
 		},
 	}
@@ -62,13 +68,13 @@ func (m *postgresError) GetLogData() *clientPb.Log {
 func (j *postgresJob) Do() CheckError {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		j.host, j.port, j.user, j.password, j.dbname)
-	db, err := j.mysql.open("postgres", psqlInfo)
+	db, err := j.postgresOpen("postgres", psqlInfo)
 	if err != nil {
 		return newPostgresError(ptypes.TimestampNow(), clientPb.StatusCode_Error, postgresConnectionError.Error(), j.host, j.port)
 	}
 	defer db.Close()
 
-	err = db.Ping()
+	err = j.postgresPing(db)
 	if err != nil {
 		return newPostgresError(ptypes.TimestampNow(), clientPb.StatusCode_Error, postgresPingError.Error(), j.host, j.port)
 	}

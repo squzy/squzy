@@ -5,22 +5,22 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
-	"time"
-
-	"github.com/gocql/gocql"
+	"squzy/apps/internal/cassandraTools"
 )
 
 type cassandraJob struct {
-	cluster  string
-	user     string
-	password string
+	cluster        string
+	user           string
+	password       string
+	cassandraTools cassandraTools.CassandraTools
 }
 
 func NewCassandraJob(cluster, user, password string) Job {
 	return &cassandraJob{
-		cluster:  cluster,
-		user:     user,
-		password: password,
+		cluster:        cluster,
+		user:           user,
+		password:       password,
+		cassandraTools: cassandraTools.NewCassandraTools(cluster, user, password),
 	}
 }
 
@@ -47,24 +47,18 @@ func (m *cassandraError) GetLogData() *clientPb.Log {
 		Meta: &clientPb.MetaData{
 			Id:       uuid.New().String(),
 			Location: m.cluster,
-			Time:     m.time,
 		},
 	}
 }
 
 func (j *cassandraJob) Do() CheckError {
-	cluster := gocql.NewCluster(j.cluster, j.cluster, j.cluster)
-	cluster.Consistency = gocql.Quorum
-	cluster.ProtoVersion = 4
-	cluster.ConnectTimeout = time.Second * 10
-	cluster.Authenticator = gocql.PasswordAuthenticator{Username: j.user, Password: j.password}
-	session, err := cluster.CreateSession()
+	session, err := j.cassandraTools.CreateSession()
 	if err != nil {
 		return newCassandraError(ptypes.TimestampNow(), clientPb.StatusCode_Error, postgresConnectionError.Error(), j.cluster)
 	}
-	defer session.Close()
+	defer j.cassandraTools.Close(session)
 
-	err = session.ExecuteBatch(session.NewBatch(gocql.UnloggedBatch)) //TODO: check correctness
+	err = j.cassandraTools.ExecuteBatch(session, j.cassandraTools.NewBatch(session)) //TODO: check correctness
 	if err != nil {
 		return newCassandraError(ptypes.TimestampNow(), clientPb.StatusCode_Error, postgresPingError.Error(), j.cluster)
 	}

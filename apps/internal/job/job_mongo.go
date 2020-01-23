@@ -54,7 +54,6 @@ func (m *mongoError) GetLogData() *clientPb.Log {
 		Meta: &clientPb.MetaData{
 			Id:       uuid.New().String(),
 			Location: m.location,
-			Time:     m.time,
 		},
 	}
 }

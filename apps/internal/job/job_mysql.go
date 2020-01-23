@@ -10,22 +10,28 @@ import (
 )
 
 type mysqlJob struct {
-	host     string
-	port     int32
-	user     string
-	password string
-	dbname   string
-	mysql    mysqlConnectorI
+	host      string
+	port      int32
+	user      string
+	password  string
+	dbname    string
+	mySqlOpen func(string, string) (*sql.DB, error)
+	mySqlPing func(*sql.DB) error
 }
 
-func NewMysqlJob(host string, port int32, user, password, dbname string) Job {
+func NewMysqlJob(
+	host string,
+	port int32,
+	user, password, dbname string,
+	mySqlPing func(*sql.DB) error) Job {
 	return &mysqlJob{
-		host:     host,
-		port:     port,
-		user:     user,
-		password: password,
-		dbname:   dbname,
-		mysql:    &mysqlConnector{},
+		host:      host,
+		port:      port,
+		user:      user,
+		password:  password,
+		dbname:    dbname,
+		mySqlOpen: sql.Open,
+		mySqlPing: mySqlPing,
 	}
 }
 
@@ -54,36 +60,24 @@ func (m *mysqlError) GetLogData() *clientPb.Log {
 		Meta: &clientPb.MetaData{
 			Id:       uuid.New().String(),
 			Location: m.location,
-			Time:     m.time,
 			Port:     m.port,
 		},
 	}
 }
 
 func (j *mysqlJob) Do() CheckError {
-	psqlInfo := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
+	sqlInfo := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
 		j.user, j.password, j.host, j.port, j.dbname)
-	db, err := j.mysql.open("mysql", psqlInfo)
+	db, err := j.mySqlOpen("mysql", sqlInfo)
 	if err != nil {
 		return newSqlError(ptypes.TimestampNow(), clientPb.StatusCode_Error, mysqlConnectionError.Error(), j.host, j.port)
 	}
 	defer db.Close()
 
-	err = db.Ping()
+	err = j.mySqlPing(db)
 	if err != nil {
 		return newSqlError(ptypes.TimestampNow(), clientPb.StatusCode_Error, mysqlPingError.Error(), j.host, j.port)
 	}
 
 	return newSqlError(ptypes.TimestampNow(), clientPb.StatusCode_OK, "", j.host, j.port)
-}
-
-type mysqlConnectorI interface {
-	open(string, string) (*sql.DB, error)
-}
-
-type mysqlConnector struct {
-}
-
-func (mysqlConnector) open(name, info string) (*sql.DB, error) {
-	return sql.Open(name, info)
 }

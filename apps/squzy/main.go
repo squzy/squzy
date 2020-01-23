@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"squzy/apps/internal/grpcTools"
 	"squzy/apps/internal/httpTools"
@@ -27,6 +28,9 @@ func main() {
 			parsers.NewSiteMapParser(),
 		),
 		httpPackage,
+		func(db *sql.DB) error {
+			return db.Ping()
+		},
 	)
 	log.Fatal(app.Run(cfg.GetPort()))
 }

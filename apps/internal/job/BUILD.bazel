@@ -8,6 +8,10 @@ go_library(
          "job_grpc.go",
          "job_tcp.go",
          "job_sitemap.go",
+         "job_mongo.go",
+         "job_mysql.go",
+         "job_postgres.go",
+         "job_cassandra.go",
      ],
      importpath = "squzy/apps/internal/job",
      visibility = ["//visibility:public"],
@@ -21,10 +25,12 @@ go_library(
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//metadata:go_default_library",
         "@org_golang_google_grpc//health/grpc_health_v1:go_default_library",
+        "@com_github_gocql_gocql//:go_default_library",
         "@com_github_squzy_squzy_generated//generated/storage/proto/v1:go_default_library",
         "@com_github_golang_protobuf//ptypes:go_default_library",
         "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
         "@com_github_google_uuid//:go_default_library",
+        "@org_mongodb_go_mongo_driver//:go_default_library"
      ]
 )
 

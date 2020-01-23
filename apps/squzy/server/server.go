@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	serverPb "github.com/squzy/squzy_generated/generated/server/proto/v1"
 	"google.golang.org/grpc"
 	"squzy/apps/internal/httpTools"
@@ -15,10 +16,11 @@ import (
 )
 
 type server struct {
-	schedulerStorage scheduler_storage.SchedulerStorage
-	externalStorage  storage.Storage
-	siteMapStorage   sitemap_storage.SiteMapStorage
-	httpTools        httpTools.HttpTool
+	schedulerStorage      scheduler_storage.SchedulerStorage
+	externalStorage       storage.Storage
+	siteMapStorage        sitemap_storage.SiteMapStorage
+	httpTools             httpTools.HttpTool
+	mySqlPing             func(db *sql.DB) error
 }
 
 func (s server) RemoveScheduler(ctx context.Context, rq *serverPb.RemoveSchedulerRequest) (*serverPb.RemoveSchedulerResponse, error) {
@@ -151,7 +153,13 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		postgresCheck := check.PostgresCheck
 		schld, err := scheduler.New(
 			time.Second*time.Duration(interval),
-			job.NewPosgresDbJob(postgresCheck.Host, postgresCheck.Port, postgresCheck.User, postgresCheck.Password, postgresCheck.DbName),
+			job.NewPosgresDbJob(
+				postgresCheck.Host,
+				postgresCheck.Port,
+				postgresCheck.User,
+				postgresCheck.Password,
+				postgresCheck.DbName,
+				s.mySqlPing),
 			s.externalStorage,
 		)
 		if err != nil {
@@ -168,7 +176,10 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		cassandraCheck := check.CassandraCheck
 		schld, err := scheduler.New(
 			time.Second*time.Duration(interval),
-			job.NewCassandraJob(cassandraCheck.Cluster, cassandraCheck.User, cassandraCheck.Password),
+			job.NewCassandraJob(
+				cassandraCheck.Cluster,
+				cassandraCheck.User,
+				cassandraCheck.Password),
 			s.externalStorage,
 		)
 		if err != nil {
@@ -185,7 +196,13 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		mysqlCheck := check.MysqlCheck
 		schld, err := scheduler.New(
 			time.Second*time.Duration(interval),
-			job.NewMysqlJob(mysqlCheck.Host, mysqlCheck.Port, mysqlCheck.User, mysqlCheck.Password, mysqlCheck.DbName),
+			job.NewMysqlJob(
+				mysqlCheck.Host,
+				mysqlCheck.Port,
+				mysqlCheck.User,
+				mysqlCheck.Password,
+				mysqlCheck.DbName,
+				s.mySqlPing),
 			s.externalStorage,
 		)
 		if err != nil {
@@ -228,11 +245,13 @@ func New(
 	externalStorage storage.Storage,
 	siteMapStorage sitemap_storage.SiteMapStorage,
 	httpTools httpTools.HttpTool,
+	mySqlPing func(db *sql.DB) error,
 ) serverPb.ServerServer {
 	return &server{
-		schedulerStorage: schedulerStorage,
-		externalStorage:  externalStorage,
-		siteMapStorage:   siteMapStorage,
-		httpTools:        httpTools,
+		schedulerStorage:      schedulerStorage,
+		externalStorage:       externalStorage,
+		siteMapStorage:        siteMapStorage,
+		httpTools:             httpTools,
+		mySqlPing:             mySqlPing,
 	}
 }
