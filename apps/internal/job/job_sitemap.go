@@ -2,7 +2,6 @@ package job
 
 import (
 	"context"
-	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
@@ -91,25 +90,28 @@ func (j *siteMapJob) Do() CheckError {
 
 	group, ctx := errgroup.WithContext(context.Background())
 	for _, v := range siteMap.UrlSet {
+
 		if v.Ignore {
 			continue
 		}
 		location := v.Location
 
-		err := sem.Acquire(ctx)
-		fmt.Println(err)
-
-		if err != nil {
-			return newSiteMapError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, helpers.GetPortByUrl(j.url))
-		}
-
 		group.Go(func() error {
-			defer sem.Release()
-			rq, _ := http.NewRequest(http.MethodGet, location, nil)
-			_, _, err := j.httpTools.SendRequestWithStatusCode(rq, http.StatusOK)
+			err := sem.Acquire(ctx)
+
 			if err != nil {
 				return err
 			}
+
+			defer sem.Release()
+
+			rq, _ := http.NewRequest(http.MethodGet, location, nil)
+			_, _, err = j.httpTools.SendRequestWithStatusCode(rq, http.StatusOK)
+
+			if err != nil {
+				return err
+			}
+
 			return nil
 		})
 	}
