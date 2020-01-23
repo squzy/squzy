@@ -28,7 +28,7 @@ jobs:
       - name: Test
         uses: ngalaiko/bazel-action/1.2.1@master
         with:
-          args: test --define tag="" //apps/...
+          args: test --define version="" //apps/...
 
       - uses: actions/checkout@v1
       - name: Login to DockerHub Registry
@@ -39,7 +39,8 @@ jobs:
           ./bazel_installer.sh --user
           export PATH="$PATH:$HOME/bin"
           bazel --version
-          bazel run --define tag=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy:squzy_push_hub_ci
+          export SQUZY_VERSION=${{ steps.set_env.outputs.RELEASE_VERSION }}
+          bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy:squzy_push_hub_ci
           make build_agent version=${{ steps.set_env.outputs.RELEASE_VERSION }}
           ./scripts/git_release.sh github_api_token=${{ secrets.GITHUB_RELEASE }} owner=squzy repo=squzy tag=${{ steps.set_env.outputs.RELEASE_VERSION }} filename=./bin/squzy_agent_${{ steps.set_env.outputs.RELEASE_VERSION }}-darwin-amd64
           ./scripts/git_release.sh github_api_token=${{ secrets.GITHUB_RELEASE }} owner=squzy repo=squzy tag=${{ steps.set_env.outputs.RELEASE_VERSION }} filename=./bin/squzy_agent_${{ steps.set_env.outputs.RELEASE_VERSION }}-windows-amd64.exe

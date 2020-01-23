@@ -288,8 +288,8 @@ go_repository(
 go_repository(
     name = "com_github_squzy_squzy_generated",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:1NEB1VKYt2T3sQiWw3GCdaMe2CuNLzVmjZUmlG8P/Zg=",
-    version = "v1.2.2",
+    sum = "h1:7FU6JJDf1Mv8W7bJRRl0HqfDimYEU0K5k/Gubtbh7VU=",
+    version = "v1.2.4",
 )
 
 go_repository(
@@ -318,4 +318,39 @@ go_repository(
     importpath = "github.com/StackExchange/wmi",
     sum = "h1:G0m3OIz70MZUWq3EgK3CesDbo8upS2Vm9/P3FtgI+Jk=",
     version = "v0.0.0-20190523213315-cbe66965904d",
+)
+
+go_repository(
+    name = "com_github_klauspost_compress",
+    importpath = "github.com/klauspost/compress",
+    sum = "h1:Bx0qjetmNjdFXASH02NSAREKpiaDwkO1DRZ3dV2KCcs=",
+    version = "v1.8.2",
+)
+
+go_repository(
+    name = "com_github_klauspost_cpuid",
+    importpath = "github.com/klauspost/cpuid",
+    sum = "h1:vJi+O/nMdFt0vqm8NZBI6wzALWdA2X+egi0ogNyrC/w=",
+    version = "v1.2.1",
+)
+
+go_repository(
+    name = "com_github_valyala_bytebufferpool",
+    importpath = "github.com/valyala/bytebufferpool",
+    sum = "h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=",
+    version = "v1.0.0",
+)
+
+go_repository(
+    name = "com_github_valyala_fasthttp",
+    importpath = "github.com/valyala/fasthttp",
+    sum = "h1:uWF8lgKmeaIewWVPwi4GRq2P6+R46IgYZdxWtM+GtEY=",
+    version = "v1.6.0",
+)
+
+go_repository(
+    name = "com_github_valyala_tcplisten",
+    importpath = "github.com/valyala/tcplisten",
+    sum = "h1:0R4NLDRDZX6JcmhJgXi5E4b8Wg84ihbmUKp/GvSPEzc=",
+    version = "v0.0.0-20161114210144-ceec8f93295a",
 )

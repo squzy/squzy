@@ -1,16 +1,28 @@
 package sitemap_storage
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"squzy/apps/internal/parsers"
-	"errors"
-	"time"
 	"testing"
+	"time"
 )
 
 type mockHttp struct {
 
+}
+
+func (m mockHttp) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
+	return 200, nil, nil
+}
+
+func (m mockHttp) GetWithRedirects(url string) (int, []byte, error) {
+	return 200, nil, nil
+}
+
+func (m mockHttp) CreateRequest(method string, url string, headers *map[string]string, log string) *http.Request {
+	return nil
 }
 
 func (m mockHttp) SendRequest(req *http.Request) (int, []byte, error) {
@@ -37,8 +49,21 @@ func (m mockSiteMapParser) Parse(xmlBytes []byte) (*parsers.SiteMap, error) {
 	return &parsers.SiteMap{}, nil
 }
 
+
 type mockHttpError struct {
 
+}
+
+func (m mockHttpError) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
+	return 0, nil, errors.New("ascss")
+}
+
+func (m mockHttpError) GetWithRedirects(url string) (int, []byte, error) {
+	return 0, nil, errors.New("ascss")
+}
+
+func (m mockHttpError) CreateRequest(method string, url string, headers *map[string]string, log string) *http.Request {
+	return nil
 }
 
 func (m mockHttpError) SendRequest(req *http.Request) (int, []byte, error) {

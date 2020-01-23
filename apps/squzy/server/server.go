@@ -8,6 +8,7 @@ import (
 	"squzy/apps/internal/job"
 	"squzy/apps/internal/scheduler"
 	scheduler_storage "squzy/apps/internal/scheduler-storage"
+	"squzy/apps/internal/semaphore"
 	sitemap_storage "squzy/apps/internal/sitemap-storage"
 	"squzy/apps/internal/storage"
 	"time"
@@ -82,7 +83,7 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		siteMapCheck := check.SitemapCheck
 		schld, err := scheduler.New(
 			time.Second*time.Duration(interval),
-			job.NewSiteMapJob(siteMapCheck.Url, s.siteMapStorage, s.httpTools),
+			job.NewSiteMapJob(siteMapCheck.Url, s.siteMapStorage, s.httpTools, semaphore.NewSemaphore, siteMapCheck.Concurrency),
 			s.externalStorage,
 		)
 		if err != nil {

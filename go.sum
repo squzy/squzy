@@ -36,15 +36,8 @@ github.com/shirou/gopsutil v2.19.11+incompatible h1:lJHR0foqAjI4exXqWsU3DbH7bX1x
 github.com/shirou/gopsutil v2.19.11+incompatible/go.mod h1:5b4v6he4MtMOwMlS0TUMTu2PcXUg8+E1lC7eC3UO/RA=
 github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 h1:udFKJ0aHUL60LboW/A+DfgoHVedieIzIXE8uylPue0U=
 github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4/go.mod h1:qsXQc7+bwAM3Q1u/4XEfrquwF8Lw7D7y5cD8CuHnfIc=
-github.com/squzy/squzy_generated v1.2.0 h1:o82cqJB8oKG6djkp6OtPXkFrCK+KJ6P1u6/pKo93vp0=
-github.com/squzy/squzy_generated v1.2.0/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
-github.com/squzy/squzy_generated v1.2.1/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
-github.com/squzy/squzy_generated v1.2.2 h1:1NEB1VKYt2T3sQiWw3GCdaMe2CuNLzVmjZUmlG8P/Zg=
-github.com/squzy/squzy_generated v1.2.2/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
-github.com/squzy/squzy_generated v1.2.3-0.20191215215910-400232d88ffe h1:cG/6dwbgJ/ygKomW/yCsWfB7tKC3c55ELKjI7eIEgq4=
-github.com/squzy/squzy_generated v1.2.3-0.20191215215910-400232d88ffe/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
-github.com/squzy/squzy_generated v1.2.3-0.20191215220926-e0079beed9f6 h1:LtRC3B5G3+41BBmxVVMVsx+Kt0eSRhRqaah9w6gMB04=
-github.com/squzy/squzy_generated v1.2.3-0.20191215220926-e0079beed9f6/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.2.4 h1:7FU6JJDf1Mv8W7bJRRl0HqfDimYEU0K5k/Gubtbh7VU=
+github.com/squzy/squzy_generated v1.2.4/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=

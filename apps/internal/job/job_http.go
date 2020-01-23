@@ -5,7 +5,7 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
-	"net/http"
+	"squzy/apps/internal/helpers"
 	"squzy/apps/internal/httpTools"
 )
 
@@ -18,7 +18,9 @@ type jobHTTP struct {
 }
 
 type httpError struct {
-	time        *timestamp.Timestamp
+	logId       string
+	startTime   *timestamp.Timestamp
+	endTime     *timestamp.Timestamp
 	code        clientPb.StatusCode
 	description string
 	location    string
@@ -29,18 +31,21 @@ func (e *httpError) GetLogData() *clientPb.Log {
 		Code:        e.code,
 		Description: e.description,
 		Meta: &clientPb.MetaData{
-			Id:       uuid.New().String(),
-			Location: e.location,
-			Port:     GetPortByUrl(e.location),
-			Time:     e.time,
-			Type:     clientPb.Type_Http,
+			Id:        e.logId,
+			Location:  e.location,
+			Port:      helpers.GetPortByUrl(e.location),
+			StartTime: e.startTime,
+			EndTime:   e.endTime,
+			Type:      clientPb.Type_Http,
 		},
 	}
 }
 
-func newHttpError(time *timestamp.Timestamp, code clientPb.StatusCode, description string, location string) CheckError {
+func newHttpError(logId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code clientPb.StatusCode, description string, location string) CheckError {
 	return &httpError{
-		time:        time,
+		logId:       logId,
+		startTime:   startTime,
+		endTime:     endTime,
 		code:        code,
 		description: description,
 		location:    location,
@@ -48,16 +53,16 @@ func newHttpError(time *timestamp.Timestamp, code clientPb.StatusCode, descripti
 }
 
 func (j *jobHTTP) Do() CheckError {
-	req, _ := http.NewRequest(j.methodType, j.url, nil)
-
-	for name, val := range j.headers {
-		req.Header.Set(name, val)
-	}
+	logId := uuid.New().String()
+	startTime := ptypes.TimestampNow()
+	req := j.httpTool.CreateRequest(j.methodType, j.url, &j.headers, logId)
 
 	_, _, err := j.httpTool.SendRequestWithStatusCode(req, int(j.expectedStatus))
 
 	if err != nil {
 		return newHttpError(
+			logId,
+			startTime,
 			ptypes.TimestampNow(),
 			clientPb.StatusCode_Error,
 			err.Error(),
@@ -66,6 +71,8 @@ func (j *jobHTTP) Do() CheckError {
 	}
 
 	return newHttpError(
+		logId,
+		startTime,
 		ptypes.TimestampNow(),
 		clientPb.StatusCode_OK,
 		"",

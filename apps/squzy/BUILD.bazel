@@ -11,6 +11,7 @@ go_library(
     deps = [
         "//apps/squzy/application:application",
         "//apps/squzy/config:config",
+        "//apps/squzy/version:version",
         "//apps/squzy/server:server",
         "//apps/internal/job:job",
         "//apps/internal/scheduler:scheduler",
@@ -29,6 +30,7 @@ go_library(
 go_binary(
     name = "squzy_app",
     embed = [":squzy"],
+    x_defs = {"squzy/apps/squzy/version.Version": "{VERSION}"},
 )
 
 go_image(
@@ -55,7 +57,7 @@ container_push(
     image = ":squzy_image",
     registry = "index.docker.io",
     repository = "squzy/squzy_app",
-    tag = "$(tag)"
+    tag = "$(version)"
 )
 
 container_push(
@@ -64,5 +66,5 @@ container_push(
     image = ":squzy_image",
     registry = "index.docker.io",
     repository = "squzy/squzy_app",
-    tag = "$(tag)"
+    tag = "$(version)"
 )

@@ -2,10 +2,12 @@ package job
 
 import (
 	"context"
+	"errors"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	health_check "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/metadata"
 	"net"
 	"testing"
 )
@@ -18,7 +20,7 @@ type errorServer struct {
 
 }
 
-func (e errorServer) Check(context.Context, *health_check.HealthCheckRequest) (*health_check.HealthCheckResponse, error) {
+func (e errorServer) Check(ctx context.Context, r *health_check.HealthCheckRequest) (*health_check.HealthCheckResponse, error) {
 	return &health_check.HealthCheckResponse{
 		Status: health_check.HealthCheckResponse_NOT_SERVING,
 	}, nil
@@ -28,7 +30,17 @@ func (e errorServer) Watch(*health_check.HealthCheckRequest, health_check.Health
 	panic("implement me")
 }
 
-func (s server) Check(context.Context, *health_check.HealthCheckRequest) (*health_check.HealthCheckResponse, error) {
+func (s server) Check(ctx context.Context,e *health_check.HealthCheckRequest) (*health_check.HealthCheckResponse, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+
+	// metadata should present
+	if ok != true {
+		return nil, errors.New("Metadata not present")
+	}
+
+	if md.Get(logMetaData)[0] == "" {
+		return nil, errors.New("Metadata not present")
+	}
 	return &health_check.HealthCheckResponse{
 		Status: health_check.HealthCheckResponse_SERVING,
 	}, nil

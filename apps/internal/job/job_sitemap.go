@@ -2,26 +2,30 @@ package job
 
 import (
 	"context"
-	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"golang.org/x/sync/errgroup"
 	"net/http"
+	"squzy/apps/internal/helpers"
 	"squzy/apps/internal/httpTools"
+	"squzy/apps/internal/semaphore"
 	sitemap_storage "squzy/apps/internal/sitemap-storage"
-	"strings"
 )
 
 type siteMapJob struct {
-	url            string
-	siteMapStorage sitemap_storage.SiteMapStorage
-	httpTools      httpTools.HttpTool
+	url              string
+	concurrency      int32
+	siteMapStorage   sitemap_storage.SiteMapStorage
+	httpTools        httpTools.HttpTool
+	semaphoreFactory func(n int) semaphore.Semaphore
 }
 
 type siteMapError struct {
-	time        *timestamp.Timestamp
+	logId       string
+	startTime   *timestamp.Timestamp
+	endTime     *timestamp.Timestamp
 	code        clientPb.StatusCode
 	description string
 	location    string
@@ -33,18 +37,21 @@ func (s *siteMapError) GetLogData() *clientPb.Log {
 		Code:        s.code,
 		Description: s.description,
 		Meta: &clientPb.MetaData{
-			Id:       uuid.New().String(),
-			Location: s.location,
-			Port:     s.port,
-			Time:     s.time,
-			Type:     clientPb.Type_SiteMap,
+			Id:        s.logId,
+			Location:  s.location,
+			Port:      s.port,
+			StartTime: s.startTime,
+			EndTime:   s.endTime,
+			Type:      clientPb.Type_SiteMap,
 		},
 	}
 }
 
-func newSiteMapError(time *timestamp.Timestamp, code clientPb.StatusCode, description string, location string, port int32) CheckError {
+func newSiteMapError(logId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code clientPb.StatusCode, description string, location string, port int32) CheckError {
 	return &siteMapError{
-		time:        time,
+		logId:       logId,
+		startTime:   startTime,
+		endTime:     endTime,
 		code:        code,
 		description: description,
 		location:    location,
@@ -52,63 +59,68 @@ func newSiteMapError(time *timestamp.Timestamp, code clientPb.StatusCode, descri
 	}
 }
 
-type siteMapErr struct {
-	location      string
-	statusCode    int
-	internalError error
-}
-
-func (sme *siteMapErr) Error() string {
-	return fmt.Sprintf("%s -  was return statusCode %d, fullError - %s", sme.location, sme.statusCode, sme.internalError.Error())
-}
-
-func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool) Job {
+func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, semaphoreFactoryFn func(n int) semaphore.Semaphore, concurrency int32) Job {
 	return &siteMapJob{
-		url:            url,
-		siteMapStorage: siteMapStorage,
-		httpTools:      httpTools,
+		url:              url,
+		concurrency:      concurrency,
+		siteMapStorage:   siteMapStorage,
+		httpTools:        httpTools,
+		semaphoreFactory: semaphoreFactoryFn,
 	}
 }
 
 func (j *siteMapJob) Do() CheckError {
+	logId := uuid.New().String()
+	startTime := ptypes.TimestampNow()
 	siteMap, err := j.siteMapStorage.Get(j.url)
 	if err != nil {
-		return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
+		return newSiteMapError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
 	}
-	ctx, cancel := context.WithCancel(context.Background()) //nolint
-	group, _ := errgroup.WithContext(ctx)
+
+	count := len(siteMap.UrlSet)
+
+	if count == 0 {
+		return newSiteMapError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", "", 0)
+	}
+
+	concurrency := int(j.concurrency)
+
+	if concurrency <= 0 || concurrency > count {
+		concurrency = len(siteMap.UrlSet)
+	}
+
+	sem := j.semaphoreFactory(concurrency)
+
+	group, ctx := errgroup.WithContext(context.Background())
 	for _, v := range siteMap.UrlSet {
+
 		if v.Ignore {
 			continue
 		}
 		location := v.Location
+
 		group.Go(func() error {
-			req, _ := http.NewRequest(http.MethodGet, location, nil)
-			code, _, err := j.httpTools.SendRequestWithStatusCode(req, http.StatusOK)
+			err := sem.Acquire(ctx)
+
 			if err != nil {
-				cancel()
-				return newSiteMapErr(location, code, err)
+				return err
 			}
+
+			defer sem.Release()
+
+			rq := j.httpTools.CreateRequest(http.MethodGet, location, nil, logId)
+			_, _, err = j.httpTools.SendRequestWithStatusCode(rq, http.StatusOK)
+
+			if err != nil {
+				return err
+			}
+
 			return nil
 		})
 	}
 	err = group.Wait()
 	if err != nil {
-		location := strings.Split(err.Error(), " - ")
-		var url string
-		if len(location) > 0 {
-			url = location[0]
-		}
-		return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), url, GetPortByUrl(url)) //nolint
+		return newSiteMapError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, helpers.GetPortByUrl(j.url)) //nolint
 	}
-	cancel()
-	return newSiteMapError(ptypes.TimestampNow(), clientPb.StatusCode_OK, "", "", 0)
-}
-
-func newSiteMapErr(location string, code int, error error) error {
-	return &siteMapErr{
-		location:      location,
-		statusCode:    code,
-		internalError: error,
-	}
+	return newSiteMapError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", "", 0)
 }

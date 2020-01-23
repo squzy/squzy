@@ -140,6 +140,18 @@ type mockHttpTools struct {
 
 }
 
+func (m mockHttpTools) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
+	panic("implement me")
+}
+
+func (m mockHttpTools) GetWithRedirects(url string) (int, []byte, error) {
+	panic("implement me")
+}
+
+func (m mockHttpTools) CreateRequest(method string, url string, headers *map[string]string, log string) *http.Request {
+	panic("implement me")
+}
+
 func (m mockHttpTools) SendRequest(req *http.Request) (int, []byte, error) {
 	panic("implement me")
 }

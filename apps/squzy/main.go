@@ -10,11 +10,12 @@ import (
 	"squzy/apps/internal/storage"
 	"squzy/apps/squzy/application"
 	"squzy/apps/squzy/config"
+	"squzy/apps/squzy/version"
 	"time"
 )
 
 func main() {
-	httpPackage := httpTools.New()
+	httpPackage := httpTools.New(version.GetVersion())
 	grpcTool := grpcTools.New()
 	cfg := config.New()
 	app := application.New(

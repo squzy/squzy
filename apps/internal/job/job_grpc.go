@@ -9,6 +9,11 @@ import (
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"google.golang.org/grpc"
 	health_check "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/metadata"
+)
+
+const (
+	logMetaData = "Squzy_log_id"
 )
 
 type grpcJob struct {
@@ -30,7 +35,9 @@ func NewGrpcJob(service string, host string, port int32, connOptions []grpc.Dial
 }
 
 type grpcError struct {
-	time        *timestamp.Timestamp
+	logId       string
+	startTime   *timestamp.Timestamp
+	endTime     *timestamp.Timestamp
 	code        clientPb.StatusCode
 	description string
 	location    string
@@ -42,18 +49,21 @@ func (s *grpcError) GetLogData() *clientPb.Log {
 		Code:        s.code,
 		Description: s.description,
 		Meta: &clientPb.MetaData{
-			Id:       uuid.New().String(),
-			Location: s.location,
-			Port:     s.port,
-			Time:     s.time,
-			Type:     clientPb.Type_Grpc,
+			Id:        s.logId,
+			Location:  s.location,
+			Port:      s.port,
+			StartTime: s.startTime,
+			EndTime:   s.endTime,
+			Type:      clientPb.Type_Grpc,
 		},
 	}
 }
 
-func newGrpcError(time *timestamp.Timestamp, code clientPb.StatusCode, description string, location string, port int32) CheckError {
+func newGrpcError(logId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code clientPb.StatusCode, description string, location string, port int32) CheckError {
 	return &grpcError{
-		time:        time,
+		logId:       logId,
+		startTime:   startTime,
+		endTime:     endTime,
 		code:        code,
 		description: description,
 		location:    location,
@@ -62,6 +72,9 @@ func newGrpcError(time *timestamp.Timestamp, code clientPb.StatusCode, descripti
 }
 
 func (j *grpcJob) Do() CheckError {
+	logId := uuid.New().String()
+	startTime := ptypes.TimestampNow()
+
 	ctx, cancel := context.WithTimeout(context.Background(), connTimeout)
 
 	defer cancel()
@@ -69,7 +82,7 @@ func (j *grpcJob) Do() CheckError {
 	conn, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%d", j.host, j.port), j.connOptions...)
 
 	if err != nil {
-		return newGrpcError(ptypes.TimestampNow(), clientPb.StatusCode_Error, wrongConnectConfigError.Error(), j.host, j.port)
+		return newGrpcError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, wrongConnectConfigError.Error(), j.host, j.port)
 	}
 
 	defer func() {
@@ -78,18 +91,22 @@ func (j *grpcJob) Do() CheckError {
 
 	client := health_check.NewHealthClient(conn)
 
-	reqCtx, cancelCtx := context.WithTimeout(context.Background(), connTimeout)
+	md := metadata.New(map[string]string{
+		logMetaData: logId,
+	})
+
+	reqCtx, cancelCtx := context.WithTimeout(metadata.NewOutgoingContext(context.Background(), md), connTimeout)
 
 	defer cancelCtx()
 
 	res, err := client.Check(reqCtx, &health_check.HealthCheckRequest{Service: j.service}, j.callOptions...)
 
 	if err != nil {
-		return newGrpcError(ptypes.TimestampNow(), clientPb.StatusCode_Error, connTimeoutError.Error(), j.host, j.port)
+		return newGrpcError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, connTimeoutError.Error(), j.host, j.port)
 	}
 
 	if res.Status != health_check.HealthCheckResponse_SERVING {
-		return newGrpcError(ptypes.TimestampNow(), clientPb.StatusCode_Error, grpcNotServing.Error(), j.host, j.port)
+		return newGrpcError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, grpcNotServing.Error(), j.host, j.port)
 	}
-	return newGrpcError(ptypes.TimestampNow(), clientPb.StatusCode_OK, "", j.host, j.port)
+	return newGrpcError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", j.host, j.port)
 }

@@ -11,6 +11,7 @@ go_library(
         "//apps/internal/job:job",
         "//apps/internal/scheduler:scheduler",
         "//apps/internal/scheduler-storage:scheduler-storage",
+        "//apps/internal/semaphore:semaphore",
         "//apps/internal/sitemap-storage:sitemap-storage",
         "//apps/internal/storage:storage",
         "//apps/internal/httpTools:httpTools",
@@ -28,6 +29,6 @@ go_test(
     ],
     embed = [":server"],
     deps = [
-        "@com_github_stretchr_testify//assert:go_default_library"
+        "@com_github_stretchr_testify//assert:go_default_library",
     ]
 )

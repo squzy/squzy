@@ -265,7 +265,7 @@ func TestApplication_Run(t *testing.T) {
 			return &host.InfoStat{}, nil
 		}, NewStream)
 		go func() {
-			a.Run()
+			_ = a.Run()
 		}()
 		time.Sleep(time.Second)
 		ch <- &agentPb.SendStatRequest{
@@ -277,7 +277,7 @@ func TestApplication_Run(t *testing.T) {
 		assert.EqualValues(t, []*agentPb.CpuInfo_CPU{{
 			Load: 5,
 		}}, value.CpuInfo.Cpus)
-		syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+		_ = syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 		time.Sleep(time.Second * 2)
 		assert.Equal(t, 1, s.count)
 	})

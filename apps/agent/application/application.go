@@ -64,6 +64,7 @@ func (a *application) Run() error {
 
 	go func() {
 		for stat := range a.executor.Execute() {
+			stat.Id = a.id
 			// what we should do if squzy server cant get msg
 			_ = stream.Send(stat)
 		}
