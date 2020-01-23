@@ -10,13 +10,15 @@ import (
 )
 
 type httpTool struct {
-	client *http.Client
+	userAgent string
+	client    *http.Client
 }
 
 const (
 	MaxIdleConnections        int = 30
 	MaxIdleConnectionsPerHost int = 30
 	RequestTimeout            int = 10
+	userAgentPrefix               = "Squzy_monitoring"
 )
 
 var (
@@ -61,6 +63,9 @@ type HttpTool interface {
 }
 
 func (h *httpTool) sendReq(req *http.Request, checkCode bool, statusCode int) (int, []byte, error) {
+
+	req.Header.Set("User-Agent", h.userAgent)
+
 	resp, err := h.client.Do(req)
 
 	if err != nil {
@@ -87,8 +92,9 @@ func (h *httpTool) sendReq(req *http.Request, checkCode bool, statusCode int) (i
 	return resp.StatusCode, data, nil
 }
 
-func New() HttpTool {
+func New(userAgentVersion string) HttpTool {
 	return &httpTool{
+		userAgent: fmt.Sprintf("%s_%s", userAgentPrefix, userAgentVersion),
 		client: &http.Client{
 			Transport: &http.Transport{
 				MaxIdleConnsPerHost: MaxIdleConnectionsPerHost,
