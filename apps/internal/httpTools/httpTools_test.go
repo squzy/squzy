@@ -112,14 +112,26 @@ func TestHttpTool_CreateRequest(t *testing.T) {
 		m := map[string]string{
 			"trata": "trata",
 		}
-		rq := h.CreateRequest(http.MethodGet, "http://test.ru", &m)
+		rq := h.CreateRequest(http.MethodGet, "http://test.ru", &m, "23")
 		assert.Equal(t,"http://test.ru", rq.URL.String())
 		assert.Equal(t, http.MethodGet, rq.Method)
 	})
 	t.Run("Should: create request without headers", func(t *testing.T) {
 		h := New("veriosn")
-		rq := h.CreateRequest(http.MethodGet, "http://test.ru", nil)
+		rq := h.CreateRequest(http.MethodGet, "http://test.ru", nil, "")
 		assert.Equal(t,"http://test.ru", rq.URL.String())
 		assert.Equal(t, http.MethodGet, rq.Method)
+	})
+	t.Run("Should: create log header if present", func(t *testing.T) {
+		h := New("veriosn")
+		rq := h.CreateRequest(http.MethodGet, "http://test.ru", nil, "12")
+		assert.Equal(t,"http://test.ru", rq.URL.String())
+		assert.Equal(t, rq.Header.Get(logHeader), "12")
+	})
+	t.Run("Should: create with user agent", func(t *testing.T) {
+		h := New("version")
+		rq := h.CreateRequest(http.MethodGet, "http://test.ru", nil, "12")
+		assert.Equal(t,"http://test.ru", rq.URL.String())
+		assert.Equal(t, rq.Header.Get(userAgentHeaderKey), getUserAgent("version"))
 	})
 }

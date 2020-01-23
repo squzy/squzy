@@ -19,6 +19,8 @@ const (
 	MaxIdleConnectionsPerHost int = 30
 	RequestTimeout            int = 10
 	userAgentPrefix               = "Squzy_monitoring"
+	logHeader                     = "Squzy_log_id"
+	userAgentHeaderKey            = "User-Agent"
 )
 
 var (
@@ -37,14 +39,23 @@ var (
 	}
 )
 
-func (h *httpTool) CreateRequest(method string, url string, headers *map[string]string) *http.Request {
+func (h *httpTool) CreateRequest(method string, url string, headers *map[string]string, logId string) *http.Request {
 	req, _ := http.NewRequest(method, url, nil)
+
+	// Set user agent
+	req.Header.Set(userAgentHeaderKey, h.userAgent)
+
+	if logId != "" {
+		req.Header.Set(logHeader, logId)
+	}
+
 	if headers == nil {
 		return req
 	}
 	for k, v := range *headers {
 		req.Header.Set(k, v)
 	}
+
 	return req
 }
 
@@ -59,13 +70,10 @@ func (h *httpTool) SendRequestWithStatusCode(req *http.Request, expectedCode int
 type HttpTool interface {
 	SendRequest(req *http.Request) (int, []byte, error)
 	SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error)
-	CreateRequest(method string, url string, headers *map[string]string) *http.Request
+	CreateRequest(method string, url string, headers *map[string]string, logId string) *http.Request
 }
 
 func (h *httpTool) sendReq(req *http.Request, checkCode bool, statusCode int) (int, []byte, error) {
-
-	req.Header.Set("User-Agent", h.userAgent)
-
 	resp, err := h.client.Do(req)
 
 	if err != nil {
@@ -92,9 +100,13 @@ func (h *httpTool) sendReq(req *http.Request, checkCode bool, statusCode int) (i
 	return resp.StatusCode, data, nil
 }
 
+func getUserAgent(version string) string {
+	return fmt.Sprintf("%s_%s", userAgentPrefix, version)
+}
+
 func New(userAgentVersion string) HttpTool {
 	return &httpTool{
-		userAgent: fmt.Sprintf("%s_%s", userAgentPrefix, userAgentVersion),
+		userAgent: getUserAgent(userAgentVersion),
 		client: &http.Client{
 			Transport: &http.Transport{
 				MaxIdleConnsPerHost: MaxIdleConnectionsPerHost,

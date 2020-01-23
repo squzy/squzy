@@ -32,7 +32,7 @@ func (s *storage) Get(url string) (*parsers.SiteMap, error) {
 	if exist && time.Now().Before(value.deadline) {
 		return value.siteMap, nil
 	}
-	req := s.httpTools.CreateRequest(http.MethodGet, url, nil)
+	req := s.httpTools.CreateRequest(http.MethodGet, url, nil, "")
 	_, resp, err := s.httpTools.SendRequestWithStatusCode(req, http.StatusOK)
 	if err != nil {
 		return nil, err

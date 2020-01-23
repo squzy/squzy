@@ -21,7 +21,7 @@ func (m mockHttp) GetWithRedirects(url string) (int, []byte, error) {
 	return 200, nil, nil
 }
 
-func (m mockHttp) CreateRequest(method string, url string, headers *map[string]string) *http.Request {
+func (m mockHttp) CreateRequest(method string, url string, headers *map[string]string, log string) *http.Request {
 	return nil
 }
 
@@ -62,7 +62,7 @@ func (m mockHttpError) GetWithRedirects(url string) (int, []byte, error) {
 	return 0, nil, errors.New("ascss")
 }
 
-func (m mockHttpError) CreateRequest(method string, url string, headers *map[string]string) *http.Request {
+func (m mockHttpError) CreateRequest(method string, url string, headers *map[string]string, log string) *http.Request {
 	return nil
 }
 

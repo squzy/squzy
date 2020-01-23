@@ -16,7 +16,7 @@ type mockHttpTools struct {
 	
 }
 
-func (m mockHttpTools) CreateRequest(method string, url string, headers *map[string]string) *http.Request {
+func (m mockHttpTools) CreateRequest(method string, url string, headers *map[string]string, log string) *http.Request {
 	rq, _ := http.NewRequest(method, url, nil)
 	return rq
 }
@@ -98,7 +98,7 @@ func (m mockHttpToolsWithError) GetWithRedirects(url string) (int, []byte, error
 	return 500, nil, errors.New("Wrong code")
 }
 
-func (m mockHttpToolsWithError) CreateRequest(method string, url string, headers *map[string]string) *http.Request {
+func (m mockHttpToolsWithError) CreateRequest(method string, url string, headers *map[string]string, log string) *http.Request {
 	rq, _ := http.NewRequest(method, url, nil)
 	return rq
 }

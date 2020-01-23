@@ -18,6 +18,7 @@ type jobHTTP struct {
 }
 
 type httpError struct {
+	logId       string
 	startTime   *timestamp.Timestamp
 	endTime     *timestamp.Timestamp
 	code        clientPb.StatusCode
@@ -30,7 +31,7 @@ func (e *httpError) GetLogData() *clientPb.Log {
 		Code:        e.code,
 		Description: e.description,
 		Meta: &clientPb.MetaData{
-			Id:        uuid.New().String(),
+			Id:        e.logId,
 			Location:  e.location,
 			Port:      helpers.GetPortByUrl(e.location),
 			StartTime: e.startTime,
@@ -40,8 +41,9 @@ func (e *httpError) GetLogData() *clientPb.Log {
 	}
 }
 
-func newHttpError(startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code clientPb.StatusCode, description string, location string) CheckError {
+func newHttpError(logId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code clientPb.StatusCode, description string, location string) CheckError {
 	return &httpError{
+		logId:       logId,
 		startTime:   startTime,
 		endTime:     endTime,
 		code:        code,
@@ -51,13 +53,15 @@ func newHttpError(startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, 
 }
 
 func (j *jobHTTP) Do() CheckError {
+	logId := uuid.New().String()
 	startTime := ptypes.TimestampNow()
-	req := j.httpTool.CreateRequest(j.methodType, j.url, &j.headers)
+	req := j.httpTool.CreateRequest(j.methodType, j.url, &j.headers, logId)
 
 	_, _, err := j.httpTool.SendRequestWithStatusCode(req, int(j.expectedStatus))
 
 	if err != nil {
 		return newHttpError(
+			logId,
 			startTime,
 			ptypes.TimestampNow(),
 			clientPb.StatusCode_Error,
@@ -67,6 +71,7 @@ func (j *jobHTTP) Do() CheckError {
 	}
 
 	return newHttpError(
+		logId,
 		startTime,
 		ptypes.TimestampNow(),
 		clientPb.StatusCode_OK,
