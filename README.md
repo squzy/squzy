@@ -67,9 +67,9 @@ That check good usage when you have critical URL in sitemap, if any of URL throw
 {
   "interval": 10,
   "sitemap_check": {
-    "url": "https://www.sitemaps.org/sitemap.xml" - url of sitemap (https://www.sitemaps.org/sitemap.xml)
+    "url": "https://www.sitemaps.org/sitemap.xml", - url of sitemap (https://www.sitemaps.org/sitemap.xml)
     "concurrency": 5 - parallel 5 request  
-    },
+  },
 }
 ```
 
