@@ -41,5 +41,5 @@ jobs:
           bazel --version
           bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy:squzy_push_hub_ci
           make build_agent version=${{ steps.set_env.outputs.RELEASE_VERSION }}
-          ./scripts/git_release.sh github_api_token=${{ secrets.GITHUB_RELEASE }} owner=squzy repo=squzy version=${{ steps.set_env.outputs.RELEASE_VERSION }} filename=./bin/squzy_agent_${{ steps.set_env.outputs.RELEASE_VERSION }}-darwin-amd64
-          ./scripts/git_release.sh github_api_token=${{ secrets.GITHUB_RELEASE }} owner=squzy repo=squzy version=${{ steps.set_env.outputs.RELEASE_VERSION }} filename=./bin/squzy_agent_${{ steps.set_env.outputs.RELEASE_VERSION }}-windows-amd64.exe
+          ./scripts/git_release.sh github_api_token=${{ secrets.GITHUB_RELEASE }} owner=squzy repo=squzy tag=${{ steps.set_env.outputs.RELEASE_VERSION }} filename=./bin/squzy_agent_${{ steps.set_env.outputs.RELEASE_VERSION }}-darwin-amd64
+          ./scripts/git_release.sh github_api_token=${{ secrets.GITHUB_RELEASE }} owner=squzy repo=squzy tag=${{ steps.set_env.outputs.RELEASE_VERSION }} filename=./bin/squzy_agent_${{ steps.set_env.outputs.RELEASE_VERSION }}-windows-amd64.exe
