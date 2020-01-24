@@ -102,6 +102,8 @@ https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto
 
 ## Docker
 
+For current develop branch use tag: **latest**
+
 Docker Hub
 
 ```shell script
