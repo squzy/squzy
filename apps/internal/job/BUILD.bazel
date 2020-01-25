@@ -21,6 +21,7 @@ go_library(
         "//apps/internal/parsers:parsers",
         "//apps/internal/helpers:helpers",
         "//apps/internal/semaphore:semaphore",
+        "//apps/internal/cassandraTools:cassandraTools",
         "@org_golang_x_sync//errgroup:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//metadata:go_default_library",
@@ -30,7 +31,9 @@ go_library(
         "@com_github_golang_protobuf//ptypes:go_default_library",
         "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
         "@com_github_google_uuid//:go_default_library",
-        "@org_mongodb_go_mongo_driver//:go_default_library"
+        "@org_mongodb_go_mongo_driver//mongo:go_default_library",
+        "@org_mongodb_go_mongo_driver//mongo/options:go_default_library",
+        "@org_mongodb_go_mongo_driver//mongo/readpref:go_default_library",
      ]
 )
 
@@ -42,9 +45,16 @@ go_test(
         "job_grpc_test.go",
         "job_tcp_test.go",
         "job_sitemap_test.go",
+         "job_mongo_test.go",
+         "job_mysql_test.go",
+         "job_postgres_test.go",
+         "job_cassandra_test.go",
     ],
     embed = [":job"],
     deps = [
         "@com_github_stretchr_testify//assert:go_default_library",
+        "@org_mongodb_go_mongo_driver//mongo:go_default_library",
+        "@org_mongodb_go_mongo_driver//mongo/options:go_default_library",
+        "@org_mongodb_go_mongo_driver//mongo/readpref:go_default_library",
     ]
 )
