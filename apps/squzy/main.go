@@ -1,6 +1,7 @@
 package main
 
 import (
+	"google.golang.org/grpc"
 	"log"
 	"squzy/apps/internal/grpcTools"
 	"squzy/apps/internal/httpTools"
@@ -21,7 +22,7 @@ func main() {
 	cfg := config.New()
 	app := application.New(
 		scheduler_storage.New(),
-		storage.NewExternalStorage(grpcTool, cfg.GetClientAddress(), cfg.GetStorageTimeout(), storage.GetInMemoryStorage()),
+		storage.NewExternalStorage(grpcTool, cfg.GetClientAddress(), cfg.GetStorageTimeout(), storage.GetInMemoryStorage(), grpc.WithInsecure()),
 		sitemap_storage.New(
 			time.Hour*24,
 			httpPackage,
