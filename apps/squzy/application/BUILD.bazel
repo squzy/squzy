@@ -14,6 +14,7 @@ go_library(
         "//apps/internal/scheduler-storage:scheduler-storage",
         "//apps/internal/sitemap-storage:sitemap-storage",
         "//apps/internal/storage:storage",
+        "//apps/internal/semaphore:semaphore",
         "//apps/internal/httpTools:httpTools",
         "//apps/internal/grpcTools:grpcTools",
         "//apps/internal/parsers:parsers",

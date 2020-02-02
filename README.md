@@ -102,16 +102,18 @@ https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto
 
 ## Docker
 
+For current develop branch use tag: **latest**
+
 Docker Hub
 
 ```shell script
-docker pull squzy/squzy_app:v1.1.6
+docker pull squzy/squzy_app:v1.1.8
 ```
 
 ### Run locally with docker:
 
 ```shell script
-docker run -p 8080:8080 squzy/squzy_app:v1.0.0
+docker run -p 8080:8080 squzy/squzy_app:v1.1.8
 ```
 
 # Authors

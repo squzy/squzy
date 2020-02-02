@@ -16,11 +16,12 @@ import (
 )
 
 type server struct {
-	schedulerStorage      scheduler_storage.SchedulerStorage
-	externalStorage       storage.Storage
-	siteMapStorage        sitemap_storage.SiteMapStorage
-	httpTools             httpTools.HttpTool
-	mySqlPing             func(db *sql.DB) error
+	schedulerStorage scheduler_storage.SchedulerStorage
+	externalStorage  storage.Storage
+	siteMapStorage   sitemap_storage.SiteMapStorage
+	httpTools        httpTools.HttpTool
+	mySqlPing        func(db *sql.DB) error
+	semaphoreFactory semaphore.SemaphoreFactory
 }
 
 func (s server) RemoveScheduler(ctx context.Context, rq *serverPb.RemoveSchedulerRequest) (*serverPb.RemoveSchedulerResponse, error) {
@@ -85,7 +86,7 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		siteMapCheck := check.SitemapCheck
 		schld, err := scheduler.New(
 			time.Second*time.Duration(interval),
-			job.NewSiteMapJob(siteMapCheck.Url, s.siteMapStorage, s.httpTools, semaphore.NewSemaphore, siteMapCheck.Concurrency),
+			job.NewSiteMapJob(siteMapCheck.Url, s.siteMapStorage, s.httpTools, s.semaphoreFactory, siteMapCheck.Concurrency),
 			s.externalStorage,
 		)
 		if err != nil {
@@ -246,12 +247,14 @@ func New(
 	siteMapStorage sitemap_storage.SiteMapStorage,
 	httpTools httpTools.HttpTool,
 	mySqlPing func(db *sql.DB) error,
+	semaphoreFactory semaphore.SemaphoreFactory,
 ) serverPb.ServerServer {
 	return &server{
-		schedulerStorage:      schedulerStorage,
-		externalStorage:       externalStorage,
-		siteMapStorage:        siteMapStorage,
-		httpTools:             httpTools,
-		mySqlPing:             mySqlPing,
+		schedulerStorage: schedulerStorage,
+		externalStorage:  externalStorage,
+		siteMapStorage:   siteMapStorage,
+		httpTools:        httpTools,
+		mySqlPing:        mySqlPing,
+		semaphoreFactory: semaphoreFactory,
 	}
 }

@@ -8,17 +8,19 @@ import (
 	"net"
 	"squzy/apps/internal/httpTools"
 	scheduler_storage "squzy/apps/internal/scheduler-storage"
+	"squzy/apps/internal/semaphore"
 	sitemap_storage "squzy/apps/internal/sitemap-storage"
 	"squzy/apps/internal/storage"
 	"squzy/apps/squzy/server"
 )
 
 type app struct {
-	schedulerStorage      scheduler_storage.SchedulerStorage
-	externalStorage       storage.Storage
-	siteMapStorage        sitemap_storage.SiteMapStorage
-	tool                  httpTools.HttpTool
-	mySqlPing             func(*sql.DB) error
+	schedulerStorage scheduler_storage.SchedulerStorage
+	externalStorage  storage.Storage
+	siteMapStorage   sitemap_storage.SiteMapStorage
+	tool             httpTools.HttpTool
+	mySqlPing        func(*sql.DB) error
+	semaphoreFactory semaphore.SemaphoreFactory
 }
 
 func New(
@@ -27,6 +29,7 @@ func New(
 	siteMapStorage sitemap_storage.SiteMapStorage,
 	tool httpTools.HttpTool,
 	mySqlPing func(*sql.DB) error,
+	semaphoreFactory semaphore.SemaphoreFactory,
 ) *app {
 	return &app{
 		schedulerStorage,
@@ -34,6 +37,7 @@ func New(
 		siteMapStorage,
 		tool,
 		mySqlPing,
+		semaphoreFactory,
 	}
 }
 
@@ -51,6 +55,7 @@ func (s *app) Run(port int32) error {
 			s.siteMapStorage,
 			s.tool,
 			s.mySqlPing,
+			s.semaphoreFactory,
 		),
 	)
 	return grpcServer.Serve(lis)

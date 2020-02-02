@@ -13,7 +13,9 @@ import (
 )
 
 type externalStorage struct {
-	client storagePb.LoggerClient
+	client   storagePb.LoggerClient
+	fallback Storage
+	address  string
 }
 
 const (
@@ -25,25 +27,33 @@ var (
 	storageNotSaveLog              = errors.New("EXTERNAL_STORAGE_NOT_SAVE_LOG")
 )
 
-func NewExternalStorage(grpcTools grpcTools.GrpcTool, address string, timeout time.Duration, fallBack Storage) Storage {
-	conn, err := grpcTools.GetConnection(address, timeout, grpc.WithInsecure(), grpc.WithBlock())
+func NewExternalStorage(grpcTools grpcTools.GrpcTool, address string, timeout time.Duration, fallBack Storage, options ...grpc.DialOption) Storage {
+	conn, err := grpcTools.GetConnection(address, timeout, options...)
 	if err != nil {
 		log.Println("Will wrote to in memory storage")
 		return fallBack
 	}
 	log.Println(fmt.Sprintf("Will send log to client %s", address))
-	return &externalStorage{client: storagePb.NewLoggerClient(conn)}
+	return &externalStorage{
+		client:   storagePb.NewLoggerClient(conn),
+		fallback: fallBack,
+		address:  address,
+	}
 }
 
-func (s *externalStorage) Write(id string, log job.CheckError) error {
+func (s *externalStorage) Write(id string, checkerLog job.CheckError) error {
 	req := &storagePb.SendLogMessageRequest{
 		SchedulerId: id,
-		Log: log.GetLogData(),
+		Log:         checkerLog.GetLogData(),
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), loggerConnTimeout)
 	defer cancel()
 	res, err := s.client.SendLogMessage(ctx, req)
 	if err != nil {
+		if s.fallback != nil {
+			log.Println(fmt.Sprintf("Cant connect to %s will use fallback to std", s.address))
+			_ = s.fallback.Write(id, checkerLog)
+		}
 		return connectionExternalStorageError
 	}
 	if !res.Success {
