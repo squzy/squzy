@@ -36,16 +36,20 @@ func NewMysqlJob(
 }
 
 type mysqlError struct {
-	time        *timestamp.Timestamp
+	logId       string
+	startTime   *timestamp.Timestamp
+	endTime     *timestamp.Timestamp
 	code        clientPb.StatusCode
 	description string
 	location    string
 	port        int32
 }
 
-func newSqlError(time *timestamp.Timestamp, code clientPb.StatusCode, description, location string, port int32) CheckError {
+func newSqlError(logId string, startTime, endTime *timestamp.Timestamp, code clientPb.StatusCode, description, location string, port int32) CheckError {
 	return &mysqlError{
-		time:        time,
+		logId:       logId,
+		startTime:   startTime,
+		endTime:     endTime,
 		code:        code,
 		description: description,
 		location:    location,
@@ -66,18 +70,21 @@ func (m *mysqlError) GetLogData() *clientPb.Log {
 }
 
 func (j *mysqlJob) Do() CheckError {
+	logId := uuid.New().String()
+	startTime := ptypes.TimestampNow()
+
 	sqlInfo := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
 		j.user, j.password, j.host, j.port, j.dbname)
 	db, err := j.mySqlOpen("mysql", sqlInfo)
 	if err != nil {
-		return newSqlError(ptypes.TimestampNow(), clientPb.StatusCode_Error, mysqlConnectionError.Error(), j.host, j.port)
+		return newSqlError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, mysqlConnectionError.Error(), j.host, j.port)
 	}
 	defer db.Close()
 
 	err = j.mySqlPing(db)
 	if err != nil {
-		return newSqlError(ptypes.TimestampNow(), clientPb.StatusCode_Error, mysqlPingError.Error(), j.host, j.port)
+		return newSqlError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, mysqlPingError.Error(), j.host, j.port)
 	}
 
-	return newSqlError(ptypes.TimestampNow(), clientPb.StatusCode_OK, "", j.host, j.port)
+	return newSqlError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", j.host, j.port)
 }

@@ -32,15 +32,19 @@ func NewMongoJob(url string) Job {
 }
 
 type mongoError struct {
-	time        *timestamp.Timestamp
+	logId       string
+	startTime   *timestamp.Timestamp
+	endTime     *timestamp.Timestamp
 	code        clientPb.StatusCode
 	description string
 	location    string
 }
 
-func newMongoError(time *timestamp.Timestamp, code clientPb.StatusCode, description string, location string) CheckError {
+func newMongoError(logId string, startTime, endTime *timestamp.Timestamp, code clientPb.StatusCode, description string, location string) CheckError {
 	return &mongoError{
-		time:        time,
+		logId:       logId,
+		startTime:   startTime,
+		endTime:     endTime,
 		code:        code,
 		description: description,
 		location:    location,
@@ -59,21 +63,24 @@ func (m *mongoError) GetLogData() *clientPb.Log {
 }
 
 func (j *mongoJob) Do() CheckError {
+	logId := uuid.New().String()
+	startTime := ptypes.TimestampNow()
+
 	clientOptions := options.Client().ApplyURI(j.url)
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	client, err := j.mongo.connect(ctx, clientOptions)
 	if err != nil {
-		return newMongoError(ptypes.TimestampNow(), clientPb.StatusCode_Error, mongoConnectionError.Error(), j.url)
+		return newMongoError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, mongoConnectionError.Error(), j.url)
 	}
 
 	fmt.Println(client)
 	err = j.ping.ping(client, context.TODO(), nil)
 	if err != nil {
-		return newMongoError(ptypes.TimestampNow(), clientPb.StatusCode_Error, mongoPingError.Error(), j.url)
+		return newMongoError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, mongoPingError.Error(), j.url)
 	}
 
-	return newMongoError(ptypes.TimestampNow(), clientPb.StatusCode_OK, "", j.url)
+	return newMongoError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", j.url)
 }
 
 type mongoConnectorI interface {

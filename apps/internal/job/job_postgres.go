@@ -36,16 +36,20 @@ func NewPosgresDbJob(
 }
 
 type postgresError struct {
-	time        *timestamp.Timestamp
+	logId       string
+	startTime   *timestamp.Timestamp
+	endTime     *timestamp.Timestamp
 	code        clientPb.StatusCode
 	description string
 	location    string
 	port        int32
 }
 
-func newPostgresError(time *timestamp.Timestamp, code clientPb.StatusCode, description, location string, port int32) CheckError {
+func newPostgresError(logId string, startTime, endTime *timestamp.Timestamp, code clientPb.StatusCode, description, location string, port int32) CheckError {
 	return &postgresError{
-		time:        time,
+		logId:       logId,
+		startTime:   startTime,
+		endTime:     endTime,
 		code:        code,
 		description: description,
 		location:    location,
@@ -66,18 +70,21 @@ func (m *postgresError) GetLogData() *clientPb.Log {
 }
 
 func (j *postgresJob) Do() CheckError {
+	logId := uuid.New().String()
+	startTime := ptypes.TimestampNow()
+
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		j.host, j.port, j.user, j.password, j.dbname)
 	db, err := j.postgresOpen("postgres", psqlInfo)
 	if err != nil {
-		return newPostgresError(ptypes.TimestampNow(), clientPb.StatusCode_Error, postgresConnectionError.Error(), j.host, j.port)
+		return newPostgresError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, postgresConnectionError.Error(), j.host, j.port)
 	}
 	defer db.Close()
 
 	err = j.postgresPing(db)
 	if err != nil {
-		return newPostgresError(ptypes.TimestampNow(), clientPb.StatusCode_Error, postgresPingError.Error(), j.host, j.port)
+		return newPostgresError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, postgresPingError.Error(), j.host, j.port)
 	}
 
-	return newPostgresError(ptypes.TimestampNow(), clientPb.StatusCode_OK, "", j.host, j.port)
+	return newPostgresError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", j.host, j.port)
 }
