@@ -65,7 +65,11 @@ func (s *storage) Remove(id string) (error) {
 		return storageKeyNotExistError
 	}
 	// make sure that observer stop before delete
-	_ = s.kv[id].Stop()
+	err := s.kv[id].Stop()
+	if err != nil {
+		// @TODO here we should add log to StdERR because that we should handle on monitoring side
+		return err
+	}
 	delete(s.kv, id)
 	return nil
 }
