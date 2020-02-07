@@ -1,9 +1,30 @@
 package scheduler_storage
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
+
+type schedulerStopErrorMock struct {
+
+}
+
+func (s schedulerStopErrorMock) GetId() string {
+	return "1"
+}
+
+func (s schedulerStopErrorMock) Run() error {
+	panic("implement me")
+}
+
+func (s schedulerStopErrorMock) Stop() error {
+	return errors.New("no")
+}
+
+func (s schedulerStopErrorMock) IsRun() bool {
+	panic("implement me")
+}
 
 type schedulerMock struct {
 
@@ -87,6 +108,13 @@ func TestStorage_Remove(t *testing.T) {
 		assert.Equal(t, nil, err)
 		err = s.Remove("1")
 		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return error if cant stop observer", func(t *testing.T) {
+		s := New()
+		err := s.Set(&schedulerStopErrorMock{})
+		assert.Equal(t, nil, err)
+		err = s.Remove("1")
+		assert.NotEqual(t, nil, err)
 	})
 }
 
