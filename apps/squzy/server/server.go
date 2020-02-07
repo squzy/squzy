@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	serverPb "github.com/squzy/squzy_generated/generated/server/proto/v1"
 	"google.golang.org/grpc"
 	"squzy/apps/internal/httpTools"
@@ -15,11 +16,12 @@ import (
 )
 
 type server struct {
-	semaphoreFactory semaphore.SemaphoreFactory
 	schedulerStorage scheduler_storage.SchedulerStorage
 	externalStorage  storage.Storage
 	siteMapStorage   sitemap_storage.SiteMapStorage
 	httpTools        httpTools.HttpTool
+	mySqlPing        func(db *sql.DB) error
+	semaphoreFactory semaphore.SemaphoreFactory
 }
 
 func (s server) RemoveScheduler(ctx context.Context, rq *serverPb.RemoveSchedulerRequest) (*serverPb.RemoveSchedulerResponse, error) {
@@ -131,6 +133,89 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		return &serverPb.AddSchedulerResponse{
 			Id: schld.GetId(),
 		}, nil
+	case *serverPb.AddSchedulerRequest_MongoCheck:
+		mongoCheck := check.MongoCheck
+		schld, err := scheduler.New(
+			time.Second*time.Duration(interval),
+			job.NewMongoJob(mongoCheck.Url),
+			s.externalStorage,
+		)
+		if err != nil {
+			return nil, err
+		}
+		err = s.schedulerStorage.Set(schld)
+		if err != nil {
+			return nil, err
+		}
+		return &serverPb.AddSchedulerResponse{
+			Id: schld.GetId(),
+		}, nil
+	case *serverPb.AddSchedulerRequest_PostgresCheck:
+		postgresCheck := check.PostgresCheck
+		schld, err := scheduler.New(
+			time.Second*time.Duration(interval),
+			job.NewPosgresDbJob(
+				postgresCheck.Host,
+				postgresCheck.Port,
+				postgresCheck.User,
+				postgresCheck.Password,
+				postgresCheck.DbName,
+				s.mySqlPing),
+			s.externalStorage,
+		)
+		if err != nil {
+			return nil, err
+		}
+		err = s.schedulerStorage.Set(schld)
+		if err != nil {
+			return nil, err
+		}
+		return &serverPb.AddSchedulerResponse{
+			Id: schld.GetId(),
+		}, nil
+	case *serverPb.AddSchedulerRequest_CassandraCheck:
+		cassandraCheck := check.CassandraCheck
+		schld, err := scheduler.New(
+			time.Second*time.Duration(interval),
+			job.NewCassandraJob(
+				cassandraCheck.Cluster,
+				cassandraCheck.User,
+				cassandraCheck.Password),
+			s.externalStorage,
+		)
+		if err != nil {
+			return nil, err
+		}
+		err = s.schedulerStorage.Set(schld)
+		if err != nil {
+			return nil, err
+		}
+		return &serverPb.AddSchedulerResponse{
+			Id: schld.GetId(),
+		}, nil
+	case *serverPb.AddSchedulerRequest_MysqlCheck:
+		mysqlCheck := check.MysqlCheck
+		schld, err := scheduler.New(
+			time.Second*time.Duration(interval),
+			job.NewMysqlJob(
+				mysqlCheck.Host,
+				mysqlCheck.Port,
+				mysqlCheck.User,
+				mysqlCheck.Password,
+				mysqlCheck.DbName,
+				s.mySqlPing),
+			s.externalStorage,
+		)
+		if err != nil {
+			return nil, err
+		}
+		err = s.schedulerStorage.Set(schld)
+		if err != nil {
+			return nil, err
+		}
+		return &serverPb.AddSchedulerResponse{
+			Id: schld.GetId(),
+		}, nil
 	default:
 		return &serverPb.AddSchedulerResponse{
 			Id: "",
@@ -161,6 +246,7 @@ func New(
 	externalStorage storage.Storage,
 	siteMapStorage sitemap_storage.SiteMapStorage,
 	httpTools httpTools.HttpTool,
+	mySqlPing func(db *sql.DB) error,
 	semaphoreFactory semaphore.SemaphoreFactory,
 ) serverPb.ServerServer {
 	return &server{
@@ -168,6 +254,7 @@ func New(
 		externalStorage:  externalStorage,
 		siteMapStorage:   siteMapStorage,
 		httpTools:        httpTools,
+		mySqlPing:        mySqlPing,
 		semaphoreFactory: semaphoreFactory,
 	}
 }

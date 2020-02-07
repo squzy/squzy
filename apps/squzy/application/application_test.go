@@ -10,8 +10,8 @@ import (
 
 func TestNew(t *testing.T) {
 	t.Run("Should: Create new application", func(t *testing.T) {
-		app := New(nil, nil, nil, nil, func(i int) semaphore.Semaphore {
-			return  semaphore.NewSemaphore(i)
+		app := New(nil, nil, nil, nil, nil, func(i int) semaphore.Semaphore {
+			return semaphore.NewSemaphore(i)
 		})
 		assert.NotEqual(t, nil, app)
 	})
@@ -19,14 +19,20 @@ func TestNew(t *testing.T) {
 
 func TestApp_Run(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		app := New(nil, nil, nil, nil, func(i int) semaphore.Semaphore {
-			return  semaphore.NewSemaphore(i)
+		app := New(nil, nil, nil, nil, nil, func(i int) semaphore.Semaphore {
+			return semaphore.NewSemaphore(i)
 		})
 		assert.NotEqual(t, nil, app.Run(1244214))
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
-		app := New(nil, nil, nil, nil, func(i int) semaphore.Semaphore {
-			return  semaphore.NewSemaphore(i)
+		app := New(nil, nil, nil, nil, nil, func(i int) semaphore.Semaphore {
+			return semaphore.NewSemaphore(i)
+		})
+		assert.NotEqual(t, nil, app.Run(1244214))
+	})
+	t.Run("Should: not return error", func(t *testing.T) {
+		app := New(nil, nil, nil, nil, nil, func(i int) semaphore.Semaphore {
+			return semaphore.NewSemaphore(i)
 		})
 		go func() {
 			_ = app.Run(11111)

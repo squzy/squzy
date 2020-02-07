@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	serverPb "github.com/squzy/squzy_generated/generated/server/proto/v1"
 	"github.com/stretchr/testify/assert"
@@ -14,15 +15,12 @@ import (
 )
 
 type mockSchedulerStorageError struct {
-
 }
 
 type mockSchedulerError struct {
-
 }
 
 type mockSchedulerStorageGetError struct {
-
 }
 
 func (m mockSchedulerStorageGetError) Get(string) (scheduler.Scheduler, error) {
@@ -74,11 +72,9 @@ func (m mockSchedulerStorageError) GetList() map[string]bool {
 }
 
 type mockSchedulerStorage struct {
-
 }
 
 type schedulerMock struct {
-
 }
 
 func (s schedulerMock) GetId() string {
@@ -98,7 +94,6 @@ func (s schedulerMock) IsRun() bool {
 }
 
 type mockSchedulerStorageRunned struct {
-
 }
 
 func (m mockSchedulerStorageRunned) Get(string) (scheduler.Scheduler, error) {
@@ -138,7 +133,6 @@ func (m mockSchedulerStorage) GetList() map[string]bool {
 }
 
 type mockHttpTools struct {
-
 }
 
 func (m mockHttpTools) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
@@ -162,7 +156,6 @@ func (m mockHttpTools) SendRequestWithStatusCode(req *http.Request, expectedCode
 }
 
 type mockSiteMapStorage struct {
-
 }
 
 func (m mockSiteMapStorage) Get(url string) (*parsers.SiteMap, error) {
@@ -170,7 +163,6 @@ func (m mockSiteMapStorage) Get(url string) (*parsers.SiteMap, error) {
 }
 
 type mockExternalStorage struct {
-
 }
 
 func (m mockExternalStorage) Write(id string, log job.CheckError) error {
@@ -184,6 +176,7 @@ func TestNew(t *testing.T) {
 			&mockExternalStorage{},
 			&mockSiteMapStorage{},
 			&mockHttpTools{},
+			func(db *sql.DB) error { return nil },
 			func(i int) semaphore.Semaphore {
 				return semaphore.NewSemaphore(i)
 			},
@@ -200,13 +193,14 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             0,
-				Check:                nil,
+				Interval: 0,
+				Check:    nil,
 			})
 			assert.Equal(t, nil, err)
 		})
@@ -216,17 +210,18 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_TcpCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_TcpCheck{
 					TcpCheck: &serverPb.TcpCheck{
-					Host:                 "wefewf",
-					Port:                 23,
-				}},
+						Host: "wefewf",
+						Port: 23,
+					}},
 			})
 			assert.Equal(t, nil, err)
 		})
@@ -236,13 +231,14 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_HttpCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_HttpCheck{
 					HttpCheck: &serverPb.HttpCheck{},
 				},
 			})
@@ -254,17 +250,18 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_GrpcCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_GrpcCheck{
 					GrpcCheck: &serverPb.GrpcCheck{
 						Service: "",
-						Host:                 "wefewf",
-						Port:                 23,
+						Host:    "wefewf",
+						Port:    23,
 					}},
 			})
 			assert.Equal(t, nil, err)
@@ -275,15 +272,106 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_SitemapCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_SitemapCheck{
 					SitemapCheck: &serverPb.SiteMapCheck{
 						Url: "",
+					}},
+			})
+			assert.Equal(t, nil, err)
+		})
+		t.Run("Because: correct mongo", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_MongoCheck{
+					MongoCheck: &serverPb.MongoCheck{
+						Url: "",
+					}},
+			})
+			assert.Equal(t, nil, err)
+		})
+		t.Run("Because: correct mySql", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_MysqlCheck{
+					MysqlCheck: &serverPb.MysqlCheck{
+						DbName:   "",
+						Host:     "",
+						Port:     0,
+						User:     "",
+						Password: "",
+					}},
+			})
+			assert.Equal(t, nil, err)
+		})
+		t.Run("Because: correct postgres", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_PostgresCheck{
+					PostgresCheck: &serverPb.PostgresCheck{
+						DbName:   "",
+						Host:     "",
+						Port:     0,
+						User:     "",
+						Password: "",
+					}},
+			})
+			assert.Equal(t, nil, err)
+		})
+		t.Run("Because: correct cassandra", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_CassandraCheck{
+					CassandraCheck: &serverPb.CassandraCheck{
+						Cluster:  "",
+						User:     "",
+						Password: "",
 					}},
 			})
 			assert.Equal(t, nil, err)
@@ -296,16 +384,17 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             0,
-				Check:                &serverPb.AddSchedulerRequest_TcpCheck{
+				Interval: 0,
+				Check: &serverPb.AddSchedulerRequest_TcpCheck{
 					TcpCheck: &serverPb.TcpCheck{
-						Host:                 "wefewf",
-						Port:                 23,
+						Host: "wefewf",
+						Port: 23,
 					}},
 			})
 			assert.NotEqual(t, nil, err)
@@ -316,13 +405,14 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             0,
-				Check:                &serverPb.AddSchedulerRequest_HttpCheck{
+				Interval: 0,
+				Check: &serverPb.AddSchedulerRequest_HttpCheck{
 					HttpCheck: &serverPb.HttpCheck{},
 				},
 			})
@@ -334,17 +424,18 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             0,
-				Check:                &serverPb.AddSchedulerRequest_GrpcCheck{
+				Interval: 0,
+				Check: &serverPb.AddSchedulerRequest_GrpcCheck{
 					GrpcCheck: &serverPb.GrpcCheck{
 						Service: "",
-						Host:                 "wefewf",
-						Port:                 23,
+						Host:    "wefewf",
+						Port:    23,
 					}},
 			})
 			assert.NotEqual(t, nil, err)
@@ -355,15 +446,106 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             0,
-				Check:                &serverPb.AddSchedulerRequest_SitemapCheck{
+				Interval: 0,
+				Check: &serverPb.AddSchedulerRequest_SitemapCheck{
 					SitemapCheck: &serverPb.SiteMapCheck{
 						Url: "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: not correct timeout mongo", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval: 0,
+				Check: &serverPb.AddSchedulerRequest_MongoCheck{
+					MongoCheck: &serverPb.MongoCheck{
+						Url: "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: not correct timeout mySql", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval: 0,
+				Check: &serverPb.AddSchedulerRequest_MysqlCheck{
+					MysqlCheck: &serverPb.MysqlCheck{
+						DbName:   "",
+						Host:     "",
+						Port:     0,
+						User:     "",
+						Password: "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: not correct timeout postgres", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval: 0,
+				Check: &serverPb.AddSchedulerRequest_PostgresCheck{
+					PostgresCheck: &serverPb.PostgresCheck{
+						DbName:   "",
+						Host:     "",
+						Port:     0,
+						User:     "",
+						Password: "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: not correct timeout cassandra", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval: 0,
+				Check: &serverPb.AddSchedulerRequest_CassandraCheck{
+					CassandraCheck: &serverPb.CassandraCheck{
+						Cluster:  "",
+						User:     "",
+						Password: "",
 					}},
 			})
 			assert.NotEqual(t, nil, err)
@@ -374,17 +556,18 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_TcpCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_TcpCheck{
 					TcpCheck: &serverPb.TcpCheck{
-					Host:                 "wefewf",
-					Port:                 23,
-				}},
+						Host: "wefewf",
+						Port: 23,
+					}},
 			})
 			assert.NotEqual(t, nil, err)
 		})
@@ -394,13 +577,14 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_HttpCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_HttpCheck{
 					HttpCheck: &serverPb.HttpCheck{
 					}},
 			})
@@ -412,15 +596,16 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_SitemapCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_SitemapCheck{
 					SitemapCheck: &serverPb.SiteMapCheck{
-						Url:"",
+						Url: "",
 					}},
 			})
 			assert.NotEqual(t, nil, err)
@@ -431,15 +616,106 @@ func TestServer_AddScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_GrpcCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_GrpcCheck{
 					GrpcCheck: &serverPb.GrpcCheck{
 						Port: 8080,
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: mongo alreadyExistId", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorageError{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_MongoCheck{
+					MongoCheck: &serverPb.MongoCheck{
+						Url: "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: mySql alreadyExistId", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorageError{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_MysqlCheck{
+					MysqlCheck: &serverPb.MysqlCheck{
+						DbName:   "",
+						Host:     "",
+						Port:     0,
+						User:     "",
+						Password: "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: postgres alreadyExistId", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorageError{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_PostgresCheck{
+					PostgresCheck: &serverPb.PostgresCheck{
+						DbName:   "",
+						Host:     "",
+						Port:     0,
+						User:     "",
+						Password: "",
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: cassandra alreadyExistId", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorageError{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_CassandraCheck{
+					CassandraCheck: &serverPb.CassandraCheck{
+						Cluster:  "",
+						User:     "",
+						Password: "",
 					}},
 			})
 			assert.NotEqual(t, nil, err)
@@ -455,6 +731,7 @@ func TestServer_RemoveScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
@@ -472,6 +749,7 @@ func TestServer_RemoveScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
@@ -492,6 +770,7 @@ func TestServer_RunScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
@@ -509,6 +788,7 @@ func TestServer_RunScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
@@ -524,6 +804,7 @@ func TestServer_RunScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
@@ -544,6 +825,7 @@ func TestServer_StopScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
@@ -561,6 +843,7 @@ func TestServer_StopScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
@@ -576,6 +859,7 @@ func TestServer_StopScheduler(t *testing.T) {
 				&mockExternalStorage{},
 				&mockSiteMapStorage{},
 				&mockHttpTools{},
+				func(db *sql.DB) error { return nil },
 				func(i int) semaphore.Semaphore {
 					return semaphore.NewSemaphore(i)
 				},
@@ -595,6 +879,7 @@ func TestServer_GetList(t *testing.T) {
 			&mockExternalStorage{},
 			&mockSiteMapStorage{},
 			&mockHttpTools{},
+			func(db *sql.DB) error { return nil },
 			func(i int) semaphore.Semaphore {
 				return semaphore.NewSemaphore(i)
 			},
@@ -603,7 +888,7 @@ func TestServer_GetList(t *testing.T) {
 		assert.Equal(t, nil, err)
 		assert.EqualValues(t, []*serverPb.SchedulerListItem{
 			{
-				Id: "1",
+				Id:     "1",
 				Status: serverPb.Status_STOPPED,
 			},
 		}, resp.List)
@@ -614,6 +899,7 @@ func TestServer_GetList(t *testing.T) {
 			&mockExternalStorage{},
 			&mockSiteMapStorage{},
 			&mockHttpTools{},
+			func(db *sql.DB) error { return nil },
 			func(i int) semaphore.Semaphore {
 				return semaphore.NewSemaphore(i)
 			},
@@ -622,7 +908,7 @@ func TestServer_GetList(t *testing.T) {
 		assert.Equal(t, nil, err)
 		assert.EqualValues(t, []*serverPb.SchedulerListItem{
 			{
-				Id: "1",
+				Id:     "1",
 				Status: serverPb.Status_RUNNED,
 			},
 		}, resp.List)

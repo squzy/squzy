@@ -1,6 +1,7 @@
 package application
 
 import (
+	"database/sql"
 	"fmt"
 	serverPb "github.com/squzy/squzy_generated/generated/server/proto/v1"
 	"google.golang.org/grpc"
@@ -18,6 +19,7 @@ type app struct {
 	externalStorage  storage.Storage
 	siteMapStorage   sitemap_storage.SiteMapStorage
 	tool             httpTools.HttpTool
+	mySqlPing        func(*sql.DB) error
 	semaphoreFactory semaphore.SemaphoreFactory
 }
 
@@ -26,6 +28,7 @@ func New(
 	externalStorage storage.Storage,
 	siteMapStorage sitemap_storage.SiteMapStorage,
 	tool httpTools.HttpTool,
+	mySqlPing func(*sql.DB) error,
 	semaphoreFactory semaphore.SemaphoreFactory,
 ) *app {
 	return &app{
@@ -33,6 +36,7 @@ func New(
 		externalStorage,
 		siteMapStorage,
 		tool,
+		mySqlPing,
 		semaphoreFactory,
 	}
 }
@@ -50,6 +54,7 @@ func (s *app) Run(port int32) error {
 			s.externalStorage,
 			s.siteMapStorage,
 			s.tool,
+			s.mySqlPing,
 			s.semaphoreFactory,
 		),
 	)

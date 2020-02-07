@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"google.golang.org/grpc"
 	"log"
 	"squzy/apps/internal/grpcTools"
@@ -29,6 +30,9 @@ func main() {
 			parsers.NewSiteMapParser(),
 		),
 		httpPackage,
+		func(db *sql.DB) error {
+			return db.Ping()
+		},
 		semaphore.NewSemaphore,
 	)
 	log.Fatal(app.Run(cfg.GetPort()))
