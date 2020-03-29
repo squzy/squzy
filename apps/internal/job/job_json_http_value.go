@@ -42,7 +42,7 @@ func (e *jsonHttpError) GetLogData() *clientPb.Log {
 			Port:      helpers.GetPortByUrl(e.location),
 			StartTime: e.startTime,
 			EndTime:   e.endTime,
-			Type:      clientPb.Type_JsonHttpValue,
+			Type:      clientPb.Type_HttpJsonValue,
 		},
 		Value: e.value,
 	}

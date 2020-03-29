@@ -40,6 +40,8 @@ github.com/squzy/squzy_generated v1.2.8 h1:aC5zfHiQal7NbvKgOVbTJW1nmX5JpjvwYK871
 github.com/squzy/squzy_generated v1.2.8/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/squzy/squzy_generated v1.2.9 h1:Es2agGPJ2jvYK87uM0bUsRH5O/+CAkrHEmHRPZ1db7k=
 github.com/squzy/squzy_generated v1.2.9/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.3.0 h1:UV2FtvYLu0vXaN+EaWAL7zk9LBOybp93NDNG6NbCEjU=
+github.com/squzy/squzy_generated v1.3.0/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
