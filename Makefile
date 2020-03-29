@@ -4,6 +4,8 @@ build: .build
 
 build_agent: .build_agent
 
+build_bin_squzy: .build_bin_squzy
+
 run_agent: .run_agent
 
 push: .push
@@ -50,6 +52,9 @@ default: build
 .build_agent:
 	./build.bash apps/agent/main.go squzy_agent_$(version)
 	# bazel build //apps/agent:agent
+
+.build_bin_squzy:
+	./build.bash apps/squzy/main.go squzy_$(version)
 
 .run_agent:
 	bazel run //apps/agent:squzy_agent_app
