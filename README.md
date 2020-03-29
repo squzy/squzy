@@ -13,6 +13,7 @@ Squzy - is a high-performance open-source monitoring system written in Golang wi
 2) TCP
 3) GRPC - https://github.com/grpc/grpc/blob/master/doc/health-checking.md
 4) SiteMap.xml - https://www.sitemaps.org/protocol.html
+5) Value from http response by selectors(https://github.com/tidwall/gjson)
 
 # Usage
 
@@ -88,6 +89,33 @@ Check better to use for internal testing of API services
 }
 ```
 
+### Value monitoring from Http json response (v1.3.0+)
+
+Monitoring specific value from http request by json selector
+
+Valid selectors you can find here: https://github.com/tidwall/gjson
+
+```shell script
+{
+  "interval": 10,
+  "http_json_value": {
+      "method": "Hello", - method
+      "url": "Hello", - url
+      "headers": { - headers
+        "Hello": "Hello"
+      },
+      "selectors": [
+        {
+          "type": 0, - type of value bool/number/time/string/any
+          "path": "Hello" - select from gjson
+        }
+      ] - support multiple value monitoring from single request
+    }
+}
+```
+
+
+
 ## Storage
 By default squzy use stdout for logs, but can be configured by ENV.
 
@@ -107,13 +135,13 @@ For current develop branch use tag: **latest**
 Docker Hub
 
 ```shell script
-docker pull squzy/squzy_app:v1.1.8
+docker pull squzy/squzy_app:v1.3.0
 ```
 
 ### Run locally with docker:
 
 ```shell script
-docker run -p 8080:8080 squzy/squzy_app:v1.1.8
+docker run -p 8080:8080 squzy/squzy_app:v1.3.0
 ```
 
 # Authors
