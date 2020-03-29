@@ -248,6 +248,24 @@ func TestServer_AddScheduler(t *testing.T) {
 			})
 			assert.Equal(t, nil, err)
 		})
+		t.Run("Because: correct httpJsonValue", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_HttpJsonValue{
+					HttpJsonValue: &serverPb.HttpJsonValueCheck{},
+				},
+			})
+			assert.Equal(t, nil, err)
+		})
 		t.Run("Because: correct grpc", func(t *testing.T) {
 			s := New(
 				&mockSchedulerStorage{},
@@ -368,6 +386,24 @@ func TestServer_AddScheduler(t *testing.T) {
 			})
 			assert.NotEqual(t, nil, err)
 		})
+		t.Run("Because: not correct timeout httpJsonValue", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorage{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             0,
+				Check:                &serverPb.AddSchedulerRequest_HttpJsonValue{
+					HttpJsonValue: &serverPb.HttpJsonValueCheck{},
+				},
+			})
+			assert.NotEqual(t, nil, err)
+		})
 		t.Run("Because: tcp alreadyExistId", func(t *testing.T) {
 			s := New(
 				&mockSchedulerStorageError{},
@@ -402,6 +438,24 @@ func TestServer_AddScheduler(t *testing.T) {
 				Interval:             1,
 				Check:                &serverPb.AddSchedulerRequest_HttpCheck{
 					HttpCheck: &serverPb.HttpCheck{
+					}},
+			})
+			assert.NotEqual(t, nil, err)
+		})
+		t.Run("Because: httpJsonValue alreadyExistId", func(t *testing.T) {
+			s := New(
+				&mockSchedulerStorageError{},
+				&mockExternalStorage{},
+				&mockSiteMapStorage{},
+				&mockHttpTools{},
+				func(i int) semaphore.Semaphore {
+					return semaphore.NewSemaphore(i)
+				},
+			)
+			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
+				Interval:             1,
+				Check:                &serverPb.AddSchedulerRequest_HttpJsonValue{
+					HttpJsonValue: &serverPb.HttpJsonValueCheck{
 					}},
 			})
 			assert.NotEqual(t, nil, err)
