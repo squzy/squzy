@@ -10,7 +10,7 @@ if [[ -z "$package" ]]; then
 fi
 package_split=(${package//\// })
 
-platforms=("windows/amd64" "windows/386" "darwin/amd64")
+platforms=("windows/amd64" "windows/386" "darwin/amd64" "linux/arm64")
 
 for platform in "${platforms[@]}"
 do
