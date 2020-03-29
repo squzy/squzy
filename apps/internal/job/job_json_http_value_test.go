@@ -56,7 +56,7 @@ func TestJsonHttpValueJob_Do(t *testing.T) {
 		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, &mockError{}, nil)
 		assert.Equal(t, storagePb.StatusCode_Error, s.Do().GetLogData().Code)
 	})
-	t.Run("Should: parse single string value", func(t *testing.T) {
+	t.Run("Should: return error because value not exist", func(t *testing.T) {
 		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, &mockSuccess{}, []*httpPb.HttpJsonValueCheck_Selectors{
 			{
 				Type: httpPb.HttpJsonValueCheck_String,
