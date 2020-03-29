@@ -95,12 +95,18 @@ Monitoring specific value from http request by json selector
 
 Valid selectors you can find here: https://github.com/tidwall/gjson
 
+Support type: https://github.com/squzy/squzy_proto/blob/master/proto/v1/server.proto#L84
+    
+
 ```shell script
 {
   "interval": 10,
   "http_json_value": {
       "method": "GET",
       "url": "https://api.exchangeratesapi.io/latest?base=USD",
+      "headers": {
+        "custom": "yes",
+      },
       "selectors": [
         {
           "type": 4,

@@ -19,7 +19,7 @@ type mockSuccess struct {
 }
 
 func (m mockSuccess) SendRequest(req *http.Request) (int, []byte, error) {
-	return 0, []byte(`{"name":"John", "age":31, "city":"New York", "success": true, "time": "2012-04-23T18:25:43.511Z"}`), nil
+	return 0, []byte(`{"name":"John", "age":31, "city":"New York", "success": true, "time": "2012-04-23T18:25:43.511Z", "raw": {"name":"ahha"}}`), nil
 }
 
 func (m mockSuccess) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
@@ -55,6 +55,17 @@ func TestJsonHttpValueJob_Do(t *testing.T) {
 	t.Run("Should: return error on http request", func(t *testing.T) {
 		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, &mockError{}, nil)
 		assert.Equal(t, storagePb.StatusCode_Error, s.Do().GetLogData().Code)
+	})
+	t.Run("Should: parse single string value", func(t *testing.T) {
+		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, &mockSuccess{}, []*httpPb.HttpJsonValueCheck_Selectors{
+			{
+				Type: httpPb.HttpJsonValueCheck_String,
+				Path: "asfasf",
+			},
+		})
+		res := s.Do()
+		assert.Equal(t, storagePb.StatusCode_Error, res.GetLogData().Code)
+		assert.Equal(t, "", res.GetLogData().Value.GetStringValue())
 	})
 	t.Run("Should: not return error because selectors is missing", func(t *testing.T) {
 		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, &mockSuccess{}, nil)
@@ -103,6 +114,17 @@ func TestJsonHttpValueJob_Do(t *testing.T) {
 		res := s.Do()
 		assert.Equal(t, storagePb.StatusCode_OK, res.GetLogData().Code)
 		assert.Equal(t, "31", res.GetLogData().Value.GetStringValue())
+	})
+	t.Run("Should: parse single raw value", func(t *testing.T) {
+		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, &mockSuccess{}, []*httpPb.HttpJsonValueCheck_Selectors{
+			{
+				Type: httpPb.HttpJsonValueCheck_Raw,
+				Path: "raw",
+			},
+		})
+		res := s.Do()
+		assert.Equal(t, storagePb.StatusCode_OK, res.GetLogData().Code)
+		assert.Equal(t, `{"name":"ahha"}`, res.GetLogData().Value.GetStringValue())
 	})
 	t.Run("Should: parse single time value", func(t *testing.T) {
 		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, &mockSuccess{}, []*httpPb.HttpJsonValueCheck_Selectors{

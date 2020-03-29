@@ -1,6 +1,7 @@
 package job
 
 import (
+	"errors"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	structType "github.com/golang/protobuf/ptypes/struct"
@@ -31,6 +32,12 @@ type jsonHttpError struct {
 	location    string
 	value       *structType.Value
 }
+
+var (
+	valueNotExistErrorFn = func(path string) error {
+		return errors.New(fmt.Sprintf("Value by path=`%s` not exist", path))
+	}
+)
 
 func (e *jsonHttpError) GetLogData() *clientPb.Log {
 	return &clientPb.Log{
@@ -85,6 +92,17 @@ func (j *jsonHttpValueJob) Do() CheckError {
 
 	for _, value := range j.selectors {
 		res := gjson.Get(jsonString, value.Path)
+		if !res.Exists() {
+			return newJsonHttpError(
+				logId,
+				startTime,
+				ptypes.TimestampNow(),
+				clientPb.StatusCode_Error,
+				valueNotExistErrorFn(value.Path).Error(),
+				j.url,
+				nil,
+			)
+		}
 		switch value.Type {
 		case httpPb.HttpJsonValueCheck_String:
 			results = append(results, &structType.Value{
@@ -114,6 +132,12 @@ func (j *jsonHttpValueJob) Do() CheckError {
 			results = append(results, &structType.Value{
 				Kind: &structType.Value_StringValue{
 					StringValue: fmt.Sprintf("%v", res.Value()),
+				},
+			})
+		case httpPb.HttpJsonValueCheck_Raw:
+			results = append(results, &structType.Value{
+				Kind: &structType.Value_StringValue{
+					StringValue: res.Raw,
 				},
 			})
 		}
