@@ -19,7 +19,7 @@ type jsonHttpValueJob struct {
 	url       string
 	headers   map[string]string
 	httpTool  httpTools.HttpTool
-	selectors []httpPb.HttpJsonValueCheck_Selectors
+	selectors []*httpPb.HttpJsonValueCheck_Selectors
 }
 
 type jsonHttpError struct {
@@ -53,7 +53,7 @@ func (j *jsonHttpValueJob) Do() CheckError {
 	startTime := ptypes.TimestampNow()
 	req := j.httpTool.CreateRequest(j.method, j.url, &j.headers, logId)
 
-	_, data, err := j.httpTool.SendRequest(req, )
+	_, data, err := j.httpTool.SendRequest(req)
 
 	if err != nil {
 		return newJsonHttpError(
@@ -160,7 +160,7 @@ func newJsonHttpError(logId string, startTime *timestamp.Timestamp, endTime *tim
 	}
 }
 
-func NewJsonHttpValueJob(method, url string, headers map[string]string, httpTool httpTools.HttpTool, selectors []httpPb.HttpJsonValueCheck_Selectors) *jsonHttpValueJob {
+func NewJsonHttpValueJob(method, url string, headers map[string]string, httpTool httpTools.HttpTool, selectors []*httpPb.HttpJsonValueCheck_Selectors) *jsonHttpValueJob {
 	return &jsonHttpValueJob{
 		method:    method,
 		url:       url,

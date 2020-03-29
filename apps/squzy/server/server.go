@@ -131,6 +131,24 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		return &serverPb.AddSchedulerResponse{
 			Id: schld.GetId(),
 		}, nil
+
+	case *serverPb.AddSchedulerRequest_HttpJsonValue:
+		httpJsonValueCheck := check.HttpJsonValue
+		schld, err := scheduler.New(
+			time.Second*time.Duration(interval),
+			job.NewJsonHttpValueJob(httpJsonValueCheck.Method, httpJsonValueCheck.Url, httpJsonValueCheck.Headers, s.httpTools, httpJsonValueCheck.Selectors),
+			s.externalStorage,
+		)
+		if err != nil {
+			return nil, err
+		}
+		err = s.schedulerStorage.Set(schld)
+		if err != nil {
+			return nil, err
+		}
+		return &serverPb.AddSchedulerResponse{
+			Id: schld.GetId(),
+		}, nil
 	default:
 		return &serverPb.AddSchedulerResponse{
 			Id: "",

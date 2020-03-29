@@ -288,8 +288,8 @@ go_repository(
 go_repository(
     name = "com_github_squzy_squzy_generated",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:7FU6JJDf1Mv8W7bJRRl0HqfDimYEU0K5k/Gubtbh7VU=",
-    version = "v1.2.4",
+    sum = "h1:aC5zfHiQal7NbvKgOVbTJW1nmX5JpjvwYK871J/KIxM=",
+    version = "v1.2.8",
 )
 
 go_repository(
@@ -353,4 +353,25 @@ go_repository(
     importpath = "github.com/valyala/tcplisten",
     sum = "h1:0R4NLDRDZX6JcmhJgXi5E4b8Wg84ihbmUKp/GvSPEzc=",
     version = "v0.0.0-20161114210144-ceec8f93295a",
+)
+
+go_repository(
+    name = "com_github_tidwall_gjson",
+    importpath = "github.com/tidwall/gjson",
+    sum = "h1:9VEQWz6LLMUsUl6PueE49ir4Ka6CzLymOAZDxpFsTDc=",
+    version = "v1.6.0",
+)
+
+go_repository(
+    name = "com_github_tidwall_match",
+    importpath = "github.com/tidwall/match",
+    sum = "h1:PnKP62LPNxHKTwvHHZZzdOAOCtsJTjo6dZLCwpKm5xc=",
+    version = "v1.0.1",
+)
+
+go_repository(
+    name = "com_github_tidwall_pretty",
+    importpath = "github.com/tidwall/pretty",
+    sum = "h1:HsD+QiTn7sK6flMKIvNmpqz1qrpP3Ps6jOKIKMooyg4=",
+    version = "v1.0.0",
 )

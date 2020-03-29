@@ -8,6 +8,7 @@ go_library(
          "job_grpc.go",
          "job_tcp.go",
          "job_sitemap.go",
+         "job_json_http_value.go",
      ],
      importpath = "squzy/apps/internal/job",
      visibility = ["//visibility:public"],
@@ -22,9 +23,12 @@ go_library(
         "@org_golang_google_grpc//metadata:go_default_library",
         "@org_golang_google_grpc//health/grpc_health_v1:go_default_library",
         "@com_github_squzy_squzy_generated//generated/storage/proto/v1:go_default_library",
+        "@com_github_squzy_squzy_generated//generated/server/proto/v1:go_default_library",
         "@com_github_golang_protobuf//ptypes:go_default_library",
         "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
+        "@com_github_golang_protobuf//ptypes/struct:go_default_library",
         "@com_github_google_uuid//:go_default_library",
+        "@com_github_tidwall_gjson//:go_default_library"
      ]
 )
 
@@ -36,6 +40,7 @@ go_test(
         "job_grpc_test.go",
         "job_tcp_test.go",
         "job_sitemap_test.go",
+        "job_json_http_value_test.go",
     ],
     embed = [":job"],
     deps = [
