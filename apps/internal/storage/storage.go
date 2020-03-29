@@ -36,8 +36,9 @@ func (m *memory) Write(id string, log job.CheckError) error {
 
 	if logData.Code == storagePb.StatusCode_OK {
 		m.infoLogger.Println(fmt.Sprintf(
-			"SchedulerId: %s, LogId: %s, Status: Ok, Type: %s, startTime: %s, endTime: %s, duration: %s",
+			"SchedulerId: %s, Value: %s, LogId: %s, Status: Ok, Type: %s, startTime: %s, endTime: %s, duration: %s",
 			id,
+			logData.Value.GetStringValue(),
 			logData.Meta.Id,
 			logData.Meta.Type.String(),
 			startTime.Format(time.RFC3339),

@@ -99,17 +99,14 @@ Valid selectors you can find here: https://github.com/tidwall/gjson
 {
   "interval": 10,
   "http_json_value": {
-      "method": "Hello", - method
-      "url": "Hello", - url
-      "headers": { - headers
-        "Hello": "Hello"
-      },
+      "method": "GET",
+      "url": "https://api.exchangeratesapi.io/latest?base=USD",
       "selectors": [
         {
-          "type": 0, - type of value bool/number/time/string/any
-          "path": "Hello" - select from gjson
+          "type": 4,
+          "path": "rates.RUB"
         }
-      ] - support multiple value monitoring from single request
+      ]
     }
 }
 ```
