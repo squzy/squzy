@@ -15,7 +15,7 @@ jobs:
     environment:
       BAZEL_VERSION: 1.1.0
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/golang:1.14.1
     steps:
       - checkout
       - *install_bazel
