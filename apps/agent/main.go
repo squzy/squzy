@@ -13,6 +13,7 @@ import (
 	"squzy/apps/internal/agent"
 	agent_executor "squzy/apps/internal/agent-executor"
 	"squzy/apps/internal/grpcTools"
+    _ "squzy/apps/agent/version"
 )
 
 func main() {

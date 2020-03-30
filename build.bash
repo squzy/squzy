@@ -2,13 +2,13 @@
 
 rm -rf bin
 
-package=$1
+package_path=$1
 package_name=$2
-if [[ -z "$package" ]]; then
+version_inject=$3
+if [[ -z "$package_path" ]]; then
   echo "usage: $0 <package-name>"
   exit 1
 fi
-package_split=(${package//\// })
 
 platforms=("windows/amd64" "windows/386" "darwin/amd64" "linux/arm64")
 
@@ -21,8 +21,8 @@ do
     if [ $GOOS = "windows" ]; then
         output_name+='.exe'
     fi
-
-    env GOOS=$GOOS GOARCH=$GOARCH go build -o $output_name $package
+    echo "-X $package_path/version.Version=$version_inject"
+    env GOOS=$GOOS GOARCH=$GOARCH go build -o $output_name -ldflags "-X squzy/apps/$package_path/version.Version=$version_inject"  apps/$package_path/main.go
     if [ $? -ne 0 ]; then
         echo 'An error has occurred! Aborting the script execution...'
         exit 1

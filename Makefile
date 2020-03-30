@@ -50,11 +50,10 @@ default: build
 	bazel test --define version="local" //apps/...
 
 .build_agent:
-	./build.bash apps/agent/main.go squzy_agent_$(version)
-	# bazel build //apps/agent:agent
+	./build.bash agent squzy_agent_$(version) $(version)
 
 .build_bin_squzy:
-	./build.bash apps/squzy/main.go squzy_$(version)
+	./build.bash squzy squzy_$(version) $(version)
 
 .run_agent:
 	bazel run //apps/agent:squzy_agent_app
