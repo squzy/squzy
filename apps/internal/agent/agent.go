@@ -53,6 +53,7 @@ func (a *agent) GetStat() *agentPb.SendStatRequest {
 		CpuInfo:    &agentPb.CpuInfo{},
 		MemoryInfo: &agentPb.MemoryInfo{},
 		DiskInfo:   &agentPb.DiskInfo{},
+		NetInfo: &agentPb.NetInfo{},
 	}
 
 	var wg sync.WaitGroup
@@ -140,23 +141,30 @@ func (a *agent) GetStat() *agentPb.SendStatRequest {
 
 	go func() {
 		defer wg.Done()
+		// take stat separate
+		nets, err := a.netStatFn(true)
 
-		netStat, err := a.netStatFn(false)
-		if err != nil || netStat == nil || len(netStat) == 0 {
+		if err != nil || nets == nil || len(nets) == 0 {
 			return
 		}
 
-		stat := netStat[0]
-		response.NetInfo = &agentPb.NetInfo{
-			BytesSent:   stat.BytesSent,
-			BytesRecv:   stat.BytesRecv,
-			PacketsSent: stat.PacketsSent,
-			PacketsRecv: stat.PacketsRecv,
-			ErrIn:       stat.Errin,
-			ErrOut:      stat.Errout,
-			DropIn:      stat.Dropin,
-			DropOut:     stat.Dropout,
+		netStat := make(map[string]*agentPb.NetInfo_Interface)
+
+		for _, netInterface := range nets {
+
+			netStat[netInterface.Name] = &agentPb.NetInfo_Interface{
+				BytesSent:   netInterface.BytesSent,
+				BytesRecv:   netInterface.BytesRecv,
+				PacketsSent: netInterface.PacketsSent,
+				PacketsRecv: netInterface.PacketsRecv,
+				ErrIn:       netInterface.Errin,
+				ErrOut:      netInterface.Errout,
+				DropIn:      netInterface.Dropin,
+				DropOut:     netInterface.Dropout,
+			}
 		}
+
+		response.NetInfo.Interfaces = netStat
 	}()
 
 	wg.Wait()

@@ -151,13 +151,18 @@ func TestAgent_GetStat(t *testing.T) {
 		}, func(b bool) (stat []net.IOCountersStat, err error) {
 			return []net.IOCountersStat{
 				{
+					Name: "test",
 					BytesRecv: 5,
 				},
 			}, nil
 		},func() *timestamp.Timestamp {
 			return &timestamp.Timestamp{}
 		})
-		assert.EqualValues(t, &agentPb.NetInfo{BytesRecv: 5}, a.GetStat().NetInfo)
+		assert.EqualValues(t, &agentPb.NetInfo{Interfaces: map[string]*agentPb.NetInfo_Interface{
+			"test": {
+				BytesRecv: 5,
+			},
+		}}, a.GetStat().NetInfo)
 	})
 	t.Run("Should: fill default value if throw error", func(t *testing.T) {
 		errValue := errors.New("test")
@@ -181,6 +186,7 @@ func TestAgent_GetStat(t *testing.T) {
 			MemoryInfo: &agentPb.MemoryInfo{},
 			DiskInfo:   &agentPb.DiskInfo{},
 			Time: &timestamp.Timestamp{},
+			NetInfo: &agentPb.NetInfo{},
 		}, a.GetStat())
 	})
 	t.Run("Should: fill default value if throw error, if disk usage not throw error", func(t *testing.T) {
@@ -203,6 +209,7 @@ func TestAgent_GetStat(t *testing.T) {
 		assert.Equal(t, &agentPb.SendStatRequest{
 			CpuInfo:    &agentPb.CpuInfo{},
 			MemoryInfo: &agentPb.MemoryInfo{},
+			NetInfo: &agentPb.NetInfo{},
 			DiskInfo: &agentPb.DiskInfo{
 				Disks: make(map[string]*agentPb.DiskInfo_Disk),
 			},
