@@ -53,7 +53,7 @@ func (a *agent) GetStat() *agentPb.SendStatRequest {
 		CpuInfo:    &agentPb.CpuInfo{},
 		MemoryInfo: &agentPb.MemoryInfo{},
 		DiskInfo:   &agentPb.DiskInfo{},
-		NetInfo: &agentPb.NetInfo{},
+		NetInfo:    &agentPb.NetInfo{},
 	}
 
 	var wg sync.WaitGroup
