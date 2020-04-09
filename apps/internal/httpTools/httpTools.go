@@ -1,6 +1,7 @@
 package httpTools
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -37,7 +38,16 @@ var (
 			),
 		)
 	}
+	defaultTimeout = time.Duration(RequestTimeout) * time.Second
 )
+
+type HttpTool interface {
+	SendRequest(req *http.Request) (int, []byte, error)
+	SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error)
+	SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error)
+	SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int,) (int, []byte, error)
+	CreateRequest(method string, url string, headers *map[string]string, logId string) *http.Request
+}
 
 func (h *httpTool) CreateRequest(method string, url string, headers *map[string]string, logId string) *http.Request {
 	req, _ := http.NewRequest(method, url, nil)
@@ -60,21 +70,34 @@ func (h *httpTool) CreateRequest(method string, url string, headers *map[string]
 }
 
 func (h *httpTool) SendRequest(req *http.Request) (int, []byte, error) {
-	return h.sendReq(req, false, 0)
+	return sendReq(h.client, req, false, 0)
 }
 
 func (h *httpTool) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
-	return h.sendReq(req, true, expectedCode)
+	return sendReq(h.client, req, true, expectedCode)
 }
 
-type HttpTool interface {
-	SendRequest(req *http.Request) (int, []byte, error)
-	SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error)
-	CreateRequest(method string, url string, headers *map[string]string, logId string) *http.Request
+func (h *httpTool) SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error) {
+	return h.sendRequestTimeout(req, timeout, false, 0)
 }
 
-func (h *httpTool) sendReq(req *http.Request, checkCode bool, statusCode int) (int, []byte, error) {
-	resp, err := h.client.Do(req)
+func (h *httpTool) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int) (int, []byte, error) {
+	return h.sendRequestTimeout(req, timeout, true, expectedCode)
+}
+
+func (h *httpTool) sendRequestTimeout(req *http.Request, timeout time.Duration, checkCode bool, code int) (int, []byte, error) {
+	// If timeout not present will be use method with custom http client
+	if timeout.Seconds() <= 0 {
+		return sendReq(h.client, req, false, 0)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	reqTimeout := req.WithContext(ctx)
+	return sendReq(http.DefaultClient, reqTimeout, checkCode, code)
+}
+
+func sendReq(client *http.Client, req *http.Request, checkCode bool, statusCode int) (int, []byte, error) {
+	resp, err := client.Do(req)
 
 	if err != nil {
 		return 0, nil, err
@@ -112,7 +135,7 @@ func New(userAgentVersion string) HttpTool {
 				MaxIdleConnsPerHost: MaxIdleConnectionsPerHost,
 				MaxIdleConns:        MaxIdleConnections,
 			},
-			Timeout: time.Duration(RequestTimeout) * time.Second,
+			Timeout: defaultTimeout,
 		},
 	}
 }

@@ -10,10 +10,19 @@ import (
 	"squzy/apps/internal/parsers"
 	"squzy/apps/internal/semaphore"
 	"testing"
+	"time"
 )
 
 type mockHttpTools struct {
 	
+}
+
+func (m mockHttpTools) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+	panic("implement me")
+}
+
+func (m mockHttpTools) SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error) {
+	panic("implement me")
 }
 
 func (m mockHttpTools) CreateRequest(method string, url string, headers *map[string]string, log string) *http.Request {
@@ -88,6 +97,14 @@ func (s siteMapStorageEmptyIgnore) Get(url string) (*parsers.SiteMap, error) {
 
 type mockHttpToolsWithError struct {
 
+}
+
+func (m mockHttpToolsWithError) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+	panic("implement me")
+}
+
+func (m mockHttpToolsWithError) SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error) {
+	panic("implement me")
 }
 
 func (m mockHttpToolsWithError) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {

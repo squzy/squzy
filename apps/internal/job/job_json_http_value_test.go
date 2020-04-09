@@ -8,14 +8,31 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+	"time"
 )
 
 type mockError struct {
 
 }
 
+func (m mockError) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+	panic("implement me")
+}
+
+func (m mockError) SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error) {
+	panic("implement me")
+}
+
 type mockSuccess struct {
 
+}
+
+func (m mockSuccess) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+	panic("implement me")
+}
+
+func (m mockSuccess) SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error) {
+	panic("implement me")
 }
 
 func (m mockSuccess) SendRequest(req *http.Request) (int, []byte, error) {

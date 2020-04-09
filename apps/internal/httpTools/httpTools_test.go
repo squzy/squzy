@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestNew(t *testing.T) {
@@ -133,5 +134,77 @@ func TestHttpTool_CreateRequest(t *testing.T) {
 		rq := h.CreateRequest(http.MethodGet, "http://test.ru", nil, "12")
 		assert.Equal(t,"http://test.ru", rq.URL.String())
 		assert.Equal(t, rq.Header.Get(userAgentHeaderKey), getUserAgent("version"))
+	})
+}
+
+func TestHttpTool_SendRequestTimeout(t *testing.T) {
+	t.Run("Should: return error because more then timeout", func(t *testing.T) {
+		bytes := []byte("Hello, client")
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(time.Second * 2)
+			w.WriteHeader(201)
+			_, _ = w.Write(bytes)
+		}))
+		j := New("veriosn")
+		req  := newRequest(http.MethodGet, ts.URL, nil)
+		s, _, err := j.SendRequestTimeout(req, time.Second)
+		assert.NotEqual(t, nil, err)
+		assert.Equal(t, 0, s)
+	})
+	t.Run("Should: return success because lest then timeout", func(t *testing.T) {
+		bytes := []byte("Hello, client")
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(time.Second * 2)
+			w.WriteHeader(201)
+			_, _ = w.Write(bytes)
+		}))
+		j := New("veriosn")
+		req  := newRequest(http.MethodGet, ts.URL, nil)
+		s, _, err := j.SendRequestTimeout(req, time.Second * 4)
+		assert.Equal(t, nil, err)
+		assert.Equal(t, 201, s)
+	})
+	t.Run("Should: return success because use default timeout", func(t *testing.T) {
+		bytes := []byte("Hello, client")
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(time.Second * 2)
+			w.WriteHeader(201)
+			_, _ = w.Write(bytes)
+		}))
+		j := New("veriosn")
+		req  := newRequest(http.MethodGet, ts.URL, nil)
+		s, _, err := j.SendRequestTimeout(req, time.Second * (-4))
+		assert.Equal(t, nil, err)
+		assert.Equal(t, 201, s)
+	})
+}
+
+func TestHttpTool_SendRequestTimeoutStatusCode(t *testing.T) {
+	t.Run("Test: Should not return error", func(t *testing.T) {
+		bytes := []byte("Hello, client")
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(time.Second)
+			w.WriteHeader(200)
+			_, _ = w.Write(bytes)
+		}))
+		defer ts.Close()
+		j := New("")
+		req := newRequest(http.MethodGet, ts.URL, nil)
+		_, body, _ := j.SendRequestTimeoutStatusCode(req, time.Second * 2, http.StatusOK)
+		assert.Equal(t, body, bytes)
+	})
+
+	t.Run("Test: Should return error because timeout", func(t *testing.T) {
+		bytes := []byte("Hello, client")
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(time.Second * 3)
+			w.WriteHeader(200)
+			_, _ = w.Write(bytes)
+		}))
+		defer ts.Close()
+		j := New("")
+		req := newRequest(http.MethodGet, ts.URL, nil)
+		_, body, _ := j.SendRequestTimeoutStatusCode(req, time.Second * 1, http.StatusOK)
+		assert.Equal(t, []uint8([]byte(nil)), body)
 	})
 }

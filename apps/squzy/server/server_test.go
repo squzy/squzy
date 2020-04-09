@@ -11,6 +11,7 @@ import (
 	"squzy/apps/internal/scheduler"
 	"squzy/apps/internal/semaphore"
 	"testing"
+	"time"
 )
 
 type mockSchedulerStorageError struct {
@@ -139,6 +140,14 @@ func (m mockSchedulerStorage) GetList() map[string]bool {
 
 type mockHttpTools struct {
 
+}
+
+func (m mockHttpTools) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+	panic("implement me")
+}
+
+func (m mockHttpTools) SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error) {
+	panic("implement me")
 }
 
 func (m mockHttpTools) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {

@@ -6,9 +6,18 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+	"time"
 )
 
 type httpToolsMock struct {
+}
+
+func (h httpToolsMock) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+	panic("implement me")
+}
+
+func (h httpToolsMock) SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error) {
+	panic("implement me")
 }
 
 func (h httpToolsMock) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
@@ -25,6 +34,14 @@ func (h httpToolsMock) CreateRequest(method string, url string, headers *map[str
 }
 
 type httpToolsMockError struct {
+}
+
+func (h httpToolsMockError) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+	panic("implement me")
+}
+
+func (h httpToolsMockError) SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error) {
+	panic("implement me")
 }
 
 func (h httpToolsMockError) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
