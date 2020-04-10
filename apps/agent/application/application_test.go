@@ -48,13 +48,12 @@ type configSecondMock struct {
 }
 
 type serverSteamError struct {
-
 }
 
 func (s serverSteamError) Register(context.Context, *agentPb.RegisterRequest) (*agentPb.RegisterResponse, error) {
 	return &agentPb.RegisterResponse{
-		Id:                   "",
-	},nil
+		Id: "",
+	}, nil
 }
 
 func (s serverSteamError) UnRegister(context.Context, *agentPb.UnRegisterRequest) (*agentPb.UnRegisterResponse, error) {
@@ -74,7 +73,7 @@ func (c configSecondMock) GetExecutionTimeout() time.Duration {
 }
 
 type serverSuccess struct {
-	ch chan *agentPb.SendStatRequest
+	ch    chan *agentPb.SendStatRequest
 	count int
 }
 
@@ -85,10 +84,10 @@ func (s *serverSuccess) Register(context.Context, *agentPb.RegisterRequest) (*ag
 }
 
 func (s *serverSuccess) UnRegister(context.Context, *agentPb.UnRegisterRequest) (*agentPb.UnRegisterResponse, error) {
-	s.count +=1
+	s.count += 1
 	return &agentPb.UnRegisterResponse{
 		Id: "asf",
-	},nil
+	}, nil
 }
 
 func (s serverSuccess) SendStat(rq agentPb.AgentServer_SendStatServer) error {
@@ -166,7 +165,6 @@ func (c configSuccessMock) GetPort() int32 {
 }
 
 type configSuccessSteamMock struct {
-
 }
 
 func (c configSuccessSteamMock) GetSquzyServer() string {
@@ -186,7 +184,7 @@ func TestNew(t *testing.T) {
 		a := New(&executorMock{}, &grpcToolsMock{}, &configMock{}, func() (stat *host.InfoStat, err error) {
 			return nil, nil
 		}, func(agent agentPb.AgentServerClient) (statClient agentPb.AgentServer_SendStatClient, err error) {
-				return nil, nil
+			return nil, nil
 		})
 		assert.Implements(t, (*Application)(nil), a)
 	})
@@ -206,7 +204,7 @@ func TestApplication_Run(t *testing.T) {
 			return &host.InfoStat{
 
 			}, nil
-		},func(agent agentPb.AgentServerClient) (statClient agentPb.AgentServer_SendStatClient, err error) {
+		}, func(agent agentPb.AgentServerClient) (statClient agentPb.AgentServer_SendStatClient, err error) {
 			return nil, nil
 		})
 		assert.NotEqual(t, nil, a.Run())
@@ -249,10 +247,10 @@ func TestApplication_Run(t *testing.T) {
 		msgChan := make(chan *agentPb.SendStatRequest)
 		grpcServer := grpc.NewServer()
 		s := &serverSuccess{
-			ch: msgChan,
+			ch:    msgChan,
 			count: 0,
 		}
-		agentPb.RegisterAgentServerServer(grpcServer,s )
+		agentPb.RegisterAgentServerServer(grpcServer, s)
 		go func() {
 			_ = grpcServer.Serve(lis)
 		}()
@@ -284,8 +282,6 @@ func TestApplication_Run(t *testing.T) {
 }
 
 type client struct {
-
-
 }
 
 func (c client) Register(ctx context.Context, in *agentPb.RegisterRequest, opts ...grpc.CallOption) (*agentPb.RegisterResponse, error) {
@@ -305,7 +301,6 @@ func (c client) GetList(ctx context.Context, in *agentPb.GetListRequest, opts ..
 }
 
 type clientError struct {
-
 }
 
 func (c clientError) Register(ctx context.Context, in *agentPb.RegisterRequest, opts ...grpc.CallOption) (*agentPb.RegisterResponse, error) {
@@ -326,11 +321,11 @@ func (c clientError) GetList(ctx context.Context, in *agentPb.GetListRequest, op
 
 func TestNewStream(t *testing.T) {
 	t.Run("Should: not throw error", func(t *testing.T) {
-		_ , err := NewStream(&client{})
+		_, err := NewStream(&client{})
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: throw error", func(t *testing.T) {
-		_ , err := NewStream(&clientError{})
+		_, err := NewStream(&clientError{})
 		assert.NotEqual(t, nil, err)
 	})
 }

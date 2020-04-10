@@ -30,6 +30,6 @@ func TestCfg_GetStorageTimeout(t *testing.T) {
 	t.Run("Should: return from env", func(t *testing.T) {
 		os.Setenv("STORAGE_TIMEOUT", "11")
 		s := New()
-		assert.Equal(t, s.GetStorageTimeout(), time.Second * 11)
+		assert.Equal(t, s.GetStorageTimeout(), time.Second*11)
 	})
 }

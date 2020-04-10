@@ -7,7 +7,6 @@ import (
 )
 
 type schedulerStopErrorMock struct {
-
 }
 
 func (s schedulerStopErrorMock) GetId() string {
@@ -27,7 +26,6 @@ func (s schedulerStopErrorMock) IsRun() bool {
 }
 
 type schedulerMock struct {
-
 }
 
 func (s schedulerMock) GetId() string {

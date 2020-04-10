@@ -9,7 +9,7 @@ var (
 	Version = "local"
 )
 
-func init(){
+func init() {
 	log.Println(fmt.Sprintf("Version: %s", GetVersion()))
 }
 

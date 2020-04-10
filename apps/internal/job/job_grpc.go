@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc"
 	health_check "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
+	"squzy/apps/internal/helpers"
 )
 
 const (
@@ -20,15 +21,17 @@ type grpcJob struct {
 	service     string
 	host        string
 	port        int32
+	timeout     int32
 	connOptions []grpc.DialOption
 	callOptions []grpc.CallOption
 }
 
-func NewGrpcJob(service string, host string, port int32, connOptions []grpc.DialOption, callOptions []grpc.CallOption) Job {
+func NewGrpcJob(service string, host string, port int32, timeout int32, connOptions []grpc.DialOption, callOptions []grpc.CallOption) Job {
 	return &grpcJob{
 		service:     service,
 		host:        host,
 		port:        port,
+		timeout:     timeout,
 		callOptions: callOptions,
 		connOptions: connOptions,
 	}
@@ -75,7 +78,7 @@ func (j *grpcJob) Do() CheckError {
 	logId := uuid.New().String()
 	startTime := ptypes.TimestampNow()
 
-	ctx, cancel := context.WithTimeout(context.Background(), connTimeout)
+	ctx, cancel := helpers.TimeoutContext(context.Background(), helpers.DurationFromSecond(j.timeout))
 
 	defer cancel()
 
@@ -95,11 +98,7 @@ func (j *grpcJob) Do() CheckError {
 		logMetaData: logId,
 	})
 
-	reqCtx, cancelCtx := context.WithTimeout(metadata.NewOutgoingContext(context.Background(), md), connTimeout)
-
-	defer cancelCtx()
-
-	res, err := client.Check(reqCtx, &health_check.HealthCheckRequest{Service: j.service}, j.callOptions...)
+	res, err := client.Check(metadata.NewOutgoingContext(ctx, md), &health_check.HealthCheckRequest{Service: j.service}, j.callOptions...)
 
 	if err != nil {
 		return newGrpcError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, connTimeoutError.Error(), j.host, j.port)

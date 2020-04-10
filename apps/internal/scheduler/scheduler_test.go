@@ -63,16 +63,16 @@ func TestSchl_Run(t *testing.T) {
 			i, _ := New(time.Second, j, store)
 			_ = i.Run()
 			ch := make(chan bool)
-			time.AfterFunc(time.Millisecond * 1100, func() {
+			time.AfterFunc(time.Millisecond*1100, func() {
 				assert.Equal(t, 1, j.count)
 				assert.Equal(t, 1, store.count)
-				ch<-true
+				ch <- true
 			})
 			<-ch
-			time.AfterFunc(time.Millisecond * 1100, func() {
+			time.AfterFunc(time.Millisecond*1100, func() {
 				assert.Equal(t, 2, j.count)
 				assert.Equal(t, 2, store.count)
-				ch<-true
+				ch <- true
 			})
 			<-ch
 			_ = i.Stop()
@@ -131,7 +131,7 @@ func TestSchl_GetId(t *testing.T) {
 	t.Run("Should: return string(uuid) id", func(t *testing.T) {
 		j := &jb{count: 0}
 		i, _ := New(time.Second, j, &storageMock{})
-		id:= i.GetId()
+		id := i.GetId()
 		_, err := uuid.Parse(id)
 		assert.IsType(t, "", id)
 		assert.Equal(t, nil, err)

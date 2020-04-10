@@ -11,29 +11,27 @@ import (
 	"squzy/apps/internal/scheduler"
 	"squzy/apps/internal/semaphore"
 	"testing"
+	"time"
 )
 
 type mockSchedulerStorageError struct {
-
 }
 
 type mockSchedulerError struct {
-
 }
 
 type mockSchedulerStorageGetError struct {
-
 }
 
 func (m mockSchedulerStorageGetError) Get(string) (scheduler.Scheduler, error) {
 	return nil, errors.New("safsaf")
 }
 
-func (m mockSchedulerStorageGetError) Set(scheduler.Scheduler) (error) {
+func (m mockSchedulerStorageGetError) Set(scheduler.Scheduler) error {
 	panic("implement me")
 }
 
-func (m mockSchedulerStorageGetError) Remove(string) (error) {
+func (m mockSchedulerStorageGetError) Remove(string) error {
 	panic("implement me")
 }
 
@@ -61,11 +59,11 @@ func (m mockSchedulerStorageError) Get(string) (scheduler.Scheduler, error) {
 	return &mockSchedulerError{}, nil
 }
 
-func (m mockSchedulerStorageError) Set(scheduler.Scheduler) (error) {
+func (m mockSchedulerStorageError) Set(scheduler.Scheduler) error {
 	return errors.New("e")
 }
 
-func (m mockSchedulerStorageError) Remove(string) (error) {
+func (m mockSchedulerStorageError) Remove(string) error {
 	return errors.New("e")
 }
 
@@ -74,11 +72,9 @@ func (m mockSchedulerStorageError) GetList() map[string]bool {
 }
 
 type mockSchedulerStorage struct {
-
 }
 
 type schedulerMock struct {
-
 }
 
 func (s schedulerMock) GetId() string {
@@ -98,18 +94,17 @@ func (s schedulerMock) IsRun() bool {
 }
 
 type mockSchedulerStorageRunned struct {
-
 }
 
 func (m mockSchedulerStorageRunned) Get(string) (scheduler.Scheduler, error) {
 	panic("implement me")
 }
 
-func (m mockSchedulerStorageRunned) Set(scheduler.Scheduler) (error) {
+func (m mockSchedulerStorageRunned) Set(scheduler.Scheduler) error {
 	panic("implement me")
 }
 
-func (m mockSchedulerStorageRunned) Remove(string) (error) {
+func (m mockSchedulerStorageRunned) Remove(string) error {
 	panic("implement me")
 }
 
@@ -123,11 +118,11 @@ func (m mockSchedulerStorage) Get(string) (scheduler.Scheduler, error) {
 	return &schedulerMock{}, nil
 }
 
-func (m mockSchedulerStorage) Set(scheduler.Scheduler) (error) {
+func (m mockSchedulerStorage) Set(scheduler.Scheduler) error {
 	return nil
 }
 
-func (m mockSchedulerStorage) Remove(string) (error) {
+func (m mockSchedulerStorage) Remove(string) error {
 	return nil
 }
 
@@ -138,7 +133,14 @@ func (m mockSchedulerStorage) GetList() map[string]bool {
 }
 
 type mockHttpTools struct {
+}
 
+func (m mockHttpTools) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+	panic("implement me")
+}
+
+func (m mockHttpTools) SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error) {
+	panic("implement me")
 }
 
 func (m mockHttpTools) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
@@ -162,7 +164,6 @@ func (m mockHttpTools) SendRequestWithStatusCode(req *http.Request, expectedCode
 }
 
 type mockSiteMapStorage struct {
-
 }
 
 func (m mockSiteMapStorage) Get(url string) (*parsers.SiteMap, error) {
@@ -170,7 +171,6 @@ func (m mockSiteMapStorage) Get(url string) (*parsers.SiteMap, error) {
 }
 
 type mockExternalStorage struct {
-
 }
 
 func (m mockExternalStorage) Write(id string, log job.CheckError) error {
@@ -205,8 +205,8 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             0,
-				Check:                nil,
+				Interval: 0,
+				Check:    nil,
 			})
 			assert.Equal(t, nil, err)
 		})
@@ -221,12 +221,12 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_TcpCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_TcpCheck{
 					TcpCheck: &serverPb.TcpCheck{
-					Host:                 "wefewf",
-					Port:                 23,
-				}},
+						Host: "wefewf",
+						Port: 23,
+					}},
 			})
 			assert.Equal(t, nil, err)
 		})
@@ -241,8 +241,8 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_HttpCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_HttpCheck{
 					HttpCheck: &serverPb.HttpCheck{},
 				},
 			})
@@ -259,8 +259,8 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_HttpJsonValue{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_HttpJsonValue{
 					HttpJsonValue: &serverPb.HttpJsonValueCheck{},
 				},
 			})
@@ -277,12 +277,12 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_GrpcCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_GrpcCheck{
 					GrpcCheck: &serverPb.GrpcCheck{
 						Service: "",
-						Host:                 "wefewf",
-						Port:                 23,
+						Host:    "wefewf",
+						Port:    23,
 					}},
 			})
 			assert.Equal(t, nil, err)
@@ -298,8 +298,8 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_SitemapCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_SitemapCheck{
 					SitemapCheck: &serverPb.SiteMapCheck{
 						Url: "",
 					}},
@@ -319,11 +319,11 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             0,
-				Check:                &serverPb.AddSchedulerRequest_TcpCheck{
+				Interval: 0,
+				Check: &serverPb.AddSchedulerRequest_TcpCheck{
 					TcpCheck: &serverPb.TcpCheck{
-						Host:                 "wefewf",
-						Port:                 23,
+						Host: "wefewf",
+						Port: 23,
 					}},
 			})
 			assert.NotEqual(t, nil, err)
@@ -339,8 +339,8 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             0,
-				Check:                &serverPb.AddSchedulerRequest_HttpCheck{
+				Interval: 0,
+				Check: &serverPb.AddSchedulerRequest_HttpCheck{
 					HttpCheck: &serverPb.HttpCheck{},
 				},
 			})
@@ -357,12 +357,12 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             0,
-				Check:                &serverPb.AddSchedulerRequest_GrpcCheck{
+				Interval: 0,
+				Check: &serverPb.AddSchedulerRequest_GrpcCheck{
 					GrpcCheck: &serverPb.GrpcCheck{
 						Service: "",
-						Host:                 "wefewf",
-						Port:                 23,
+						Host:    "wefewf",
+						Port:    23,
 					}},
 			})
 			assert.NotEqual(t, nil, err)
@@ -378,8 +378,8 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             0,
-				Check:                &serverPb.AddSchedulerRequest_SitemapCheck{
+				Interval: 0,
+				Check: &serverPb.AddSchedulerRequest_SitemapCheck{
 					SitemapCheck: &serverPb.SiteMapCheck{
 						Url: "",
 					}},
@@ -397,8 +397,8 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             0,
-				Check:                &serverPb.AddSchedulerRequest_HttpJsonValue{
+				Interval: 0,
+				Check: &serverPb.AddSchedulerRequest_HttpJsonValue{
 					HttpJsonValue: &serverPb.HttpJsonValueCheck{},
 				},
 			})
@@ -415,12 +415,12 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_TcpCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_TcpCheck{
 					TcpCheck: &serverPb.TcpCheck{
-					Host:                 "wefewf",
-					Port:                 23,
-				}},
+						Host: "wefewf",
+						Port: 23,
+					}},
 			})
 			assert.NotEqual(t, nil, err)
 		})
@@ -435,8 +435,8 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_HttpCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_HttpCheck{
 					HttpCheck: &serverPb.HttpCheck{
 					}},
 			})
@@ -453,8 +453,8 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_HttpJsonValue{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_HttpJsonValue{
 					HttpJsonValue: &serverPb.HttpJsonValueCheck{
 					}},
 			})
@@ -471,10 +471,10 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_SitemapCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_SitemapCheck{
 					SitemapCheck: &serverPb.SiteMapCheck{
-						Url:"",
+						Url: "",
 					}},
 			})
 			assert.NotEqual(t, nil, err)
@@ -490,8 +490,8 @@ func TestServer_AddScheduler(t *testing.T) {
 				},
 			)
 			_, err := s.AddScheduler(context.Background(), &serverPb.AddSchedulerRequest{
-				Interval:             1,
-				Check:                &serverPb.AddSchedulerRequest_GrpcCheck{
+				Interval: 1,
+				Check: &serverPb.AddSchedulerRequest_GrpcCheck{
 					GrpcCheck: &serverPb.GrpcCheck{
 						Port: 8080,
 					}},
@@ -657,7 +657,7 @@ func TestServer_GetList(t *testing.T) {
 		assert.Equal(t, nil, err)
 		assert.EqualValues(t, []*serverPb.SchedulerListItem{
 			{
-				Id: "1",
+				Id:     "1",
 				Status: serverPb.Status_STOPPED,
 			},
 		}, resp.List)
@@ -676,7 +676,7 @@ func TestServer_GetList(t *testing.T) {
 		assert.Equal(t, nil, err)
 		assert.EqualValues(t, []*serverPb.SchedulerListItem{
 			{
-				Id: "1",
+				Id:     "1",
 				Status: serverPb.Status_RUNNED,
 			},
 		}, resp.List)

@@ -26,12 +26,12 @@ type Scheduler interface {
 }
 
 type schl struct {
-	ticker    *time.Ticker
-	isStopped bool
-	quitCh    chan bool
-	interval  time.Duration
-	job       job.Job
-	id        string
+	ticker          *time.Ticker
+	isStopped       bool
+	quitCh          chan bool
+	interval        time.Duration
+	job             job.Job
+	id              string
 	externalStorage storage.Storage
 }
 
@@ -40,10 +40,10 @@ func New(interval time.Duration, job job.Job, externalStorage storage.Storage) (
 		return nil, intervalLessHalfSecondError
 	}
 	return &schl{
-		id:        uuid.New().String(),
-		interval:  interval,
-		isStopped: true,
-		job:       job,
+		id:              uuid.New().String(),
+		interval:        interval,
+		isStopped:       true,
+		job:             job,
 		externalStorage: externalStorage,
 	}, nil
 }

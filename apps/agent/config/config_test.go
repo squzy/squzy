@@ -27,7 +27,7 @@ func TestCfg_GetExecutionTimeout(t *testing.T) {
 	t.Run("Should: return execution timeout from env", func(t *testing.T) {
 		os.Setenv("SQUZY_EXECUTION_TIMEOUT", "12")
 		s := New()
-		assert.Equal(t, s.GetExecutionTimeout(), time.Second * 12)
+		assert.Equal(t, s.GetExecutionTimeout(), time.Second*12)
 	})
 }
 
@@ -35,6 +35,6 @@ func TestCfg_GetStorageTimeout(t *testing.T) {
 	t.Run("Should: return from env", func(t *testing.T) {
 		os.Setenv("SQUZY_SERVER_TIMEOUT", "11")
 		s := New()
-		assert.Equal(t, s.GetSquzyServerTimeout(), time.Second * 11)
+		assert.Equal(t, s.GetSquzyServerTimeout(), time.Second*11)
 	})
 }

@@ -3,11 +3,6 @@ package job
 import (
 	"errors"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
-	"time"
-)
-
-const (
-	connTimeout = time.Second * 5
 )
 
 var (
