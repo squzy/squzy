@@ -16,12 +16,12 @@ type httpTool struct {
 }
 
 const (
-	MaxIdleConnections        int = 30
-	MaxIdleConnectionsPerHost int = 30
-	RequestTimeout            int = 10
-	userAgentPrefix               = "Squzy_monitoring"
-	logHeader                     = "Squzy_log_id"
-	userAgentHeaderKey            = "User-Agent"
+	MaxIdleConnections        int   = 30
+	MaxIdleConnectionsPerHost int   = 30
+	RequestTimeout            int32 = 10
+	userAgentPrefix                 = "Squzy_monitoring"
+	logHeader                       = "Squzy_log_id"
+	userAgentHeaderKey              = "User-Agent"
 )
 
 var (
@@ -38,14 +38,14 @@ var (
 			),
 		)
 	}
-	defaultTimeout = time.Duration(RequestTimeout) * time.Second
+	defaultTimeout = helpers.DurationFromSecond(10)
 )
 
 type HttpTool interface {
 	SendRequest(req *http.Request) (int, []byte, error)
 	SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error)
 	SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error)
-	SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int,) (int, []byte, error)
+	SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error)
 	CreateRequest(method string, url string, headers *map[string]string, logId string) *http.Request
 }
 
@@ -90,7 +90,7 @@ func (h *httpTool) sendRequestTimeout(req *http.Request, timeout time.Duration, 
 	if timeout.Seconds() <= 0 {
 		return sendReq(h.client, req, false, 0)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := helpers.TimeoutContext(context.Background(), timeout)
 	defer cancel()
 	reqTimeout := req.WithContext(ctx)
 	return sendReq(http.DefaultClient, reqTimeout, checkCode, code)

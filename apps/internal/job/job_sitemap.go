@@ -17,6 +17,7 @@ import (
 type siteMapJob struct {
 	url              string
 	concurrency      int32
+	timeout          int32
 	siteMapStorage   sitemap_storage.SiteMapStorage
 	httpTools        httpTools.HttpTool
 	semaphoreFactory func(n int) semaphore.Semaphore
@@ -59,10 +60,11 @@ func newSiteMapError(logId string, startTime *timestamp.Timestamp, endTime *time
 	}
 }
 
-func NewSiteMapJob(url string, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, semaphoreFactoryFn func(n int) semaphore.Semaphore, concurrency int32) Job {
+func NewSiteMapJob(url string, timeout int32, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, semaphoreFactoryFn func(n int) semaphore.Semaphore, concurrency int32) Job {
 	return &siteMapJob{
 		url:              url,
 		concurrency:      concurrency,
+		timeout:          timeout,
 		siteMapStorage:   siteMapStorage,
 		httpTools:        httpTools,
 		semaphoreFactory: semaphoreFactoryFn,
@@ -109,7 +111,7 @@ func (j *siteMapJob) Do() CheckError {
 			defer sem.Release()
 
 			rq := j.httpTools.CreateRequest(http.MethodGet, location, nil, logId)
-			_, _, err = j.httpTools.SendRequestWithStatusCode(rq, http.StatusOK)
+			_, _, err = j.httpTools.SendRequestTimeoutStatusCode(rq, helpers.DurationFromSecond(j.timeout), http.StatusOK)
 
 			if err != nil {
 				return err

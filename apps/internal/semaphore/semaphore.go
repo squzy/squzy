@@ -5,7 +5,7 @@ import (
 	"golang.org/x/sync/semaphore"
 )
 
-type SemaphoreFactory func (int) Semaphore
+type SemaphoreFactory func(int) Semaphore
 
 type Semaphore interface {
 	Acquire(ctx context.Context) error

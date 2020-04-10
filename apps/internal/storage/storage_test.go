@@ -8,77 +8,73 @@ import (
 )
 
 type mockStartTimeErrorMock struct {
-	
 }
 
 func (m mockStartTimeErrorMock) GetLogData() *storagePb.Log {
 	return &storagePb.Log{
-		Code:                 0,
-		Description:          "",
-		Meta:                 &storagePb.MetaData{
-			Id:                   "",
-			Location:             "",
-			Port:                 0,
-			StartTime:            nil,
-			EndTime:              nil,
-			Type:                 0,
+		Code:        0,
+		Description: "",
+		Meta: &storagePb.MetaData{
+			Id:        "",
+			Location:  "",
+			Port:      0,
+			StartTime: nil,
+			EndTime:   nil,
+			Type:      0,
 		},
 	}
 }
 
 type mockEndTimeErrorMock struct {
-
 }
 
 func (m mockEndTimeErrorMock) GetLogData() *storagePb.Log {
 	return &storagePb.Log{
-		Code:                 0,
-		Description:          "",
-		Meta:                 &storagePb.MetaData{
-			Id:                   "",
-			Location:             "",
-			Port:                 0,
-			StartTime:            ptypes.TimestampNow(),
-			EndTime:              nil,
-			Type:                 0,
+		Code:        0,
+		Description: "",
+		Meta: &storagePb.MetaData{
+			Id:        "",
+			Location:  "",
+			Port:      0,
+			StartTime: ptypes.TimestampNow(),
+			EndTime:   nil,
+			Type:      0,
 		},
 	}
 }
 
 type mockError struct {
-	
 }
 
 func (m mockError) GetLogData() *storagePb.Log {
 	return &storagePb.Log{
-		Code:                 storagePb.StatusCode_Error,
-		Description:          "",
-		Meta:                 &storagePb.MetaData{
-			Id:                   "",
-			Location:             "",
-			Port:                 0,
-			StartTime:            ptypes.TimestampNow(),
-			EndTime:              ptypes.TimestampNow(),
-			Type:                 0,
+		Code:        storagePb.StatusCode_Error,
+		Description: "",
+		Meta: &storagePb.MetaData{
+			Id:        "",
+			Location:  "",
+			Port:      0,
+			StartTime: ptypes.TimestampNow(),
+			EndTime:   ptypes.TimestampNow(),
+			Type:      0,
 		},
 	}
 }
 
 type mockOk struct {
-	
 }
 
 func (m mockOk) GetLogData() *storagePb.Log {
 	return &storagePb.Log{
-		Code:                 storagePb.StatusCode_OK,
-		Description:          "",
-		Meta:                 &storagePb.MetaData{
-			Id:                   "",
-			Location:             "",
-			Port:                 0,
-			StartTime:            ptypes.TimestampNow(),
-			EndTime:              ptypes.TimestampNow(),
-			Type:                 0,
+		Code:        storagePb.StatusCode_OK,
+		Description: "",
+		Meta: &storagePb.MetaData{
+			Id:        "",
+			Location:  "",
+			Port:      0,
+			StartTime: ptypes.TimestampNow(),
+			EndTime:   ptypes.TimestampNow(),
+			Type:      0,
 		},
 	}
 }

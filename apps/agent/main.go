@@ -10,10 +10,10 @@ import (
 	"log"
 	"squzy/apps/agent/application"
 	"squzy/apps/agent/config"
+	_ "squzy/apps/agent/version"
 	"squzy/apps/internal/agent"
 	agent_executor "squzy/apps/internal/agent-executor"
 	"squzy/apps/internal/grpcTools"
-    _ "squzy/apps/agent/version"
 )
 
 func main() {

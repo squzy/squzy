@@ -8,15 +8,12 @@ import (
 )
 
 type mock struct {
-
 }
 
 type mockMoreSecond struct {
-
 }
 
 type mockLessSecond struct {
-
 }
 
 func (m mockLessSecond) GetStat() *squzy_agents_v1_agent.SendStatRequest {
@@ -50,9 +47,9 @@ func TestExecutor_Execute(t *testing.T) {
 		a, _ := New(&mock{}, time.Second)
 		channel := a.Execute()
 		value := <-channel
-		assert.EqualValues(t,  &squzy_agents_v1_agent.SendStatRequest{}, value)
+		assert.EqualValues(t, &squzy_agents_v1_agent.SendStatRequest{}, value)
 		value2 := <-channel
-		assert.EqualValues(t,  &squzy_agents_v1_agent.SendStatRequest{}, value2)
+		assert.EqualValues(t, &squzy_agents_v1_agent.SendStatRequest{}, value2)
 	})
 	t.Run("Should: not get value, if job execute more that inteval", func(t *testing.T) {
 		a, _ := New(&mockMoreSecond{}, time.Second)

@@ -4,6 +4,7 @@ import (
 	"context"
 	serverPb "github.com/squzy/squzy_generated/generated/server/proto/v1"
 	"google.golang.org/grpc"
+	"squzy/apps/internal/helpers"
 	"squzy/apps/internal/httpTools"
 	"squzy/apps/internal/job"
 	"squzy/apps/internal/scheduler"
@@ -11,7 +12,6 @@ import (
 	"squzy/apps/internal/semaphore"
 	sitemap_storage "squzy/apps/internal/sitemap-storage"
 	"squzy/apps/internal/storage"
-	"time"
 )
 
 type server struct {
@@ -61,13 +61,13 @@ func (s server) StopScheduler(ctx context.Context, rq *serverPb.StopSchedulerReq
 }
 
 func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerRequest) (*serverPb.AddSchedulerResponse, error) {
-	interval := rq.Interval
+	interval := helpers.DurationFromSecond(rq.Interval)
 	switch check := rq.Check.(type) {
 	case *serverPb.AddSchedulerRequest_TcpCheck:
 		tcpCheck := check.TcpCheck
 		schld, err := scheduler.New(
-			time.Second*time.Duration(interval),
-			job.NewTcpJob(tcpCheck.Host, tcpCheck.Port),
+			interval,
+			job.NewTcpJob(tcpCheck.Host, tcpCheck.Port, rq.Timeout),
 			s.externalStorage,
 		)
 		if err != nil {
@@ -83,8 +83,8 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 	case *serverPb.AddSchedulerRequest_SitemapCheck:
 		siteMapCheck := check.SitemapCheck
 		schld, err := scheduler.New(
-			time.Second*time.Duration(interval),
-			job.NewSiteMapJob(siteMapCheck.Url, s.siteMapStorage, s.httpTools, s.semaphoreFactory, siteMapCheck.Concurrency),
+			interval,
+			job.NewSiteMapJob(siteMapCheck.Url, rq.Timeout, s.siteMapStorage, s.httpTools, s.semaphoreFactory, siteMapCheck.Concurrency),
 			s.externalStorage,
 		)
 		if err != nil {
@@ -100,8 +100,8 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 	case *serverPb.AddSchedulerRequest_GrpcCheck:
 		grcpCheck := check.GrpcCheck
 		schld, err := scheduler.New(
-			time.Second*time.Duration(interval),
-			job.NewGrpcJob(grcpCheck.Service, grcpCheck.Host, grcpCheck.Port, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{}),
+			interval,
+			job.NewGrpcJob(grcpCheck.Service, grcpCheck.Host, grcpCheck.Port, rq.Timeout, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{}),
 			s.externalStorage,
 		)
 		if err != nil {
@@ -117,8 +117,8 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 	case *serverPb.AddSchedulerRequest_HttpCheck:
 		httpCheck := check.HttpCheck
 		schld, err := scheduler.New(
-			time.Second*time.Duration(interval),
-			job.NewHttpJob(httpCheck.Method, httpCheck.Url, httpCheck.Headers, httpCheck.StatusCode, s.httpTools),
+			interval,
+			job.NewHttpJob(httpCheck.Method, httpCheck.Url, httpCheck.Headers, rq.Timeout, httpCheck.StatusCode, s.httpTools),
 			s.externalStorage,
 		)
 		if err != nil {
@@ -135,8 +135,8 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 	case *serverPb.AddSchedulerRequest_HttpJsonValue:
 		httpJsonValueCheck := check.HttpJsonValue
 		schld, err := scheduler.New(
-			time.Second*time.Duration(interval),
-			job.NewJsonHttpValueJob(httpJsonValueCheck.Method, httpJsonValueCheck.Url, httpJsonValueCheck.Headers, s.httpTools, httpJsonValueCheck.Selectors),
+			interval,
+			job.NewJsonHttpValueJob(httpJsonValueCheck.Method, httpJsonValueCheck.Url, httpJsonValueCheck.Headers, rq.Timeout, s.httpTools, httpJsonValueCheck.Selectors),
 			s.externalStorage,
 		)
 		if err != nil {

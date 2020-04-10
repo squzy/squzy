@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
 	"net"
+	"squzy/apps/internal/helpers"
 )
 
 type tcpError struct {
@@ -45,20 +46,22 @@ func newTcpError(startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, c
 }
 
 type jobTcp struct {
-	port int32
-	host string
+	port    int32
+	host    string
+	timeout int32
 }
 
-func NewTcpJob(host string, port int32) Job {
+func NewTcpJob(host string, port int32, timeout int32) Job {
 	return &jobTcp{
-		port: port,
-		host: host,
+		port:    port,
+		host:    host,
+		timeout: timeout,
 	}
 }
 
 func (j *jobTcp) Do() CheckError {
 	startTime := ptypes.TimestampNow()
-	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", j.host, j.port), connTimeout)
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(j.host, fmt.Sprintf("%d", j.port)), helpers.DurationFromSecond(j.timeout))
 	if err != nil {
 		return newTcpError(startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, wrongConnectConfigError.Error(), j.host, j.port)
 	}

@@ -14,8 +14,8 @@ var (
 
 type SchedulerStorage interface {
 	Get(string) (scheduler.Scheduler, error)
-	Set(scheduler.Scheduler) (error)
-	Remove(string) (error)
+	Set(scheduler.Scheduler) error
+	Remove(string) error
 	GetList() map[string]bool
 }
 
@@ -44,7 +44,7 @@ func (s *storage) Get(id string) (scheduler.Scheduler, error) {
 	return value, nil
 }
 
-func (s *storage) Set(schl scheduler.Scheduler) (error) {
+func (s *storage) Set(schl scheduler.Scheduler) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	id := schl.GetId()
@@ -57,7 +57,7 @@ func (s *storage) Set(schl scheduler.Scheduler) (error) {
 	return nil
 }
 
-func (s *storage) Remove(id string) (error) {
+func (s *storage) Remove(id string) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	_, exist := s.kv[id]

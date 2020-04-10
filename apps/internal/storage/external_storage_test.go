@@ -18,11 +18,9 @@ type server struct {
 }
 
 type serverError struct {
-
 }
 
 type serverErrorThrow struct {
-
 }
 
 func (s serverErrorThrow) SendLogMessage(context.Context, *squzy_logger_v1_service.SendLogMessageRequest) (*squzy_logger_v1_service.SendLogMessageResponse, error) {
@@ -100,7 +98,7 @@ func TestExternalStorage_Write(t *testing.T) {
 		go func() {
 			_ = grpcServer.Serve(lis)
 		}()
-		s := NewExternalStorage(grpcTools.New(), "localhost:12122", time.Second * 2, &mockStorage{}, grpc.WithInsecure(), grpc.WithBlock())
+		s := NewExternalStorage(grpcTools.New(), "localhost:12122", time.Second*2, &mockStorage{}, grpc.WithInsecure(), grpc.WithBlock())
 		assert.Equal(t, nil, s.Write("", &mock{}))
 	})
 	t.Run("Should: return error on write real storage", func(t *testing.T) {
@@ -110,7 +108,7 @@ func TestExternalStorage_Write(t *testing.T) {
 		go func() {
 			_ = grpcServer.Serve(lis)
 		}()
-		s := NewExternalStorage(grpcTools.New(), "localhost:12123", time.Second * 2, &mockStorage{},grpc.WithInsecure(), grpc.WithBlock())
+		s := NewExternalStorage(grpcTools.New(), "localhost:12123", time.Second*2, &mockStorage{}, grpc.WithInsecure(), grpc.WithBlock())
 		assert.Equal(t, storageNotSaveLog, s.Write("", &mock{}))
 	})
 	t.Run("Should: return error connection error on write real storage", func(t *testing.T) {
@@ -120,7 +118,7 @@ func TestExternalStorage_Write(t *testing.T) {
 		go func() {
 			_ = grpcServer.Serve(lis)
 		}()
-		s := NewExternalStorage(grpcTools.New(), "localhost:12124", time.Second * 2, &mockStorage{}, grpc.WithInsecure(), grpc.WithBlock())
+		s := NewExternalStorage(grpcTools.New(), "localhost:12124", time.Second*2, &mockStorage{}, grpc.WithInsecure(), grpc.WithBlock())
 		assert.Equal(t, connectionExternalStorageError, s.Write("", &mock{}))
 	})
 }

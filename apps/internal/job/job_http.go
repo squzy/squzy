@@ -14,6 +14,7 @@ type jobHTTP struct {
 	url            string
 	headers        map[string]string
 	expectedStatus int32
+	timeout        int32
 	httpTool       httpTools.HttpTool
 }
 
@@ -57,7 +58,7 @@ func (j *jobHTTP) Do() CheckError {
 	startTime := ptypes.TimestampNow()
 	req := j.httpTool.CreateRequest(j.methodType, j.url, &j.headers, logId)
 
-	_, _, err := j.httpTool.SendRequestWithStatusCode(req, int(j.expectedStatus))
+	_, _, err := j.httpTool.SendRequestTimeoutStatusCode(req, helpers.DurationFromSecond(j.timeout), int(j.expectedStatus))
 
 	if err != nil {
 		return newHttpError(
@@ -80,12 +81,13 @@ func (j *jobHTTP) Do() CheckError {
 	)
 }
 
-func NewHttpJob(method, url string, headers map[string]string, expectedStatus int32, httpTool httpTools.HttpTool) *jobHTTP {
+func NewHttpJob(method, url string, headers map[string]string, timeout int32, expectedStatus int32, httpTool httpTools.HttpTool) *jobHTTP {
 	return &jobHTTP{
 		methodType:     method,
 		url:            url,
 		headers:        headers,
 		expectedStatus: expectedStatus,
+		timeout:        timeout,
 		httpTool:       httpTool,
 	}
 }

@@ -10,7 +10,6 @@ import (
 )
 
 type mockHttp struct {
-
 }
 
 func (m mockHttp) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
@@ -42,11 +41,9 @@ func (m mockHttp) SendRequestWithStatusCode(req *http.Request, expectedCode int)
 }
 
 type mockSiteMapParser struct {
-
 }
 
 type mockSiteMapParserError struct {
-
 }
 
 func (m mockSiteMapParserError) Parse(xmlBytes []byte) (*parsers.SiteMap, error) {
@@ -57,9 +54,7 @@ func (m mockSiteMapParser) Parse(xmlBytes []byte) (*parsers.SiteMap, error) {
 	return &parsers.SiteMap{}, nil
 }
 
-
 type mockHttpError struct {
-
 }
 
 func (m mockHttpError) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
