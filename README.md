@@ -31,6 +31,7 @@ Usually that check used for monitoring web sites
 ```shell script
 {
   "interval": 10, - 10 second interval
+  "timeout": 5, - // default timeout is 10 sec
   "http_check": {
     "method": "GET", - method GET/POST/PUT/DELETE/HEAD
     "url": "https://google.com", - url which should call
@@ -49,6 +50,7 @@ Check good use for monitoring open ports or not
 ```shell script
 {
   "interval": 10, - 10 second interval
+  "timeout": 5, - // default timeout is 10 sec
   "tcp_check": {
     "host": "localhost", - host
     "port": 6345 - port
@@ -67,6 +69,7 @@ That check good usage when you have critical URL in sitemap, if any of URL throw
 ```shell script
 {
   "interval": 10,
+  "timeout": 5, - // default timeout is 10 sec
   "sitemap_check": {
     "url": "https://www.sitemaps.org/sitemap.xml", - url of sitemap (https://www.sitemaps.org/sitemap.xml)
     "concurrency": 5 - parallel 5 request  
@@ -81,6 +84,7 @@ Check better to use for internal testing of API services
 ```shell script
 {
   "interval": 10,
+  "timeout": 5, - // default timeout is 10 sec
   "grpc_check": {
     "service": "Check", - service name
     "host": "localhost", - host
@@ -101,6 +105,7 @@ Support type: https://github.com/squzy/squzy_proto/blob/master/proto/v1/server.p
 ```shell script
 {
   "interval": 10,
+  "timeout": 5, - // default timeout is 10 sec
   "http_json_value": {
       "method": "GET",
       "url": "https://api.exchangeratesapi.io/latest?base=USD",
@@ -138,13 +143,13 @@ For current develop branch use tag: **latest**
 Docker Hub
 
 ```shell script
-docker pull squzy/squzy_app:v1.3.0
+docker pull squzy/squzy_app:v1.5.0
 ```
 
 ### Run locally with docker:
 
 ```shell script
-docker run -p 8080:8080 squzy/squzy_app:v1.3.0
+docker run -p 8080:8080 squzy/squzy_app:v1.5.0
 ```
 
 # Authors
