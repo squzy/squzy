@@ -67,7 +67,7 @@ func (h httpToolsMock) SendRequestWithStatusCode(req *http.Request, expectedCode
 
 func TestNewHttpJob(t *testing.T) {
 	t.Run("Should: implement interface", func(t *testing.T) {
-		s := NewHttpJob(http.MethodGet, "", map[string]string{}, http.StatusOK, 0, &httpToolsMock{})
+		s := NewHttpJob(http.MethodGet, "", map[string]string{}, 0, http.StatusOK, &httpToolsMock{})
 		assert.Implements(t, (*Job)(nil), s)
 	})
 
@@ -75,11 +75,11 @@ func TestNewHttpJob(t *testing.T) {
 
 func TestJobHTTP_Do(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := NewHttpJob(http.MethodGet, "", map[string]string{}, http.StatusOK, 0, &httpToolsMock{})
+		s := NewHttpJob(http.MethodGet, "", map[string]string{}, 0, http.StatusOK, &httpToolsMock{})
 		assert.Equal(t, storagePb.StatusCode_OK, s.Do().GetLogData().Code)
 	})
 	t.Run("Should: return error because long request", func(t *testing.T) {
-		s := NewHttpJob(http.MethodGet, "", map[string]string{}, http.StatusOK, 0, &httpToolsMock{})
+		s := NewHttpJob(http.MethodGet, "", map[string]string{}, 0, http.StatusOK, &httpToolsMock{})
 		assert.Equal(t, storagePb.StatusCode_OK, s.Do().GetLogData().Code)
 	})
 	t.Run("Should: not return error with headers", func(t *testing.T) {
@@ -89,15 +89,15 @@ func TestJobHTTP_Do(t *testing.T) {
 		assert.Equal(t, storagePb.StatusCode_OK, s.Do().GetLogData().Code)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := NewHttpJob(http.MethodGet, "", map[string]string{}, http.StatusOK, 0, &httpToolsMockError{})
+		s := NewHttpJob(http.MethodGet, "", map[string]string{}, 0, http.StatusOK, &httpToolsMockError{})
 		assert.Equal(t, storagePb.StatusCode_Error, s.Do().GetLogData().Code)
 	})
 	t.Run("Should: return error port 80", func(t *testing.T) {
-		s := NewHttpJob(http.MethodGet, "http://google.ru", map[string]string{}, http.StatusOK, 0, &httpToolsMockError{})
+		s := NewHttpJob(http.MethodGet, "http://google.ru", map[string]string{}, 0, http.StatusOK, &httpToolsMockError{})
 		assert.Equal(t, int32(80), s.Do().GetLogData().Meta.Port)
 	})
 	t.Run("Should: return error port 80", func(t *testing.T) {
-		s := NewHttpJob(http.MethodGet, "https://google.ru", map[string]string{}, http.StatusOK, 0, &httpToolsMockError{})
+		s := NewHttpJob(http.MethodGet, "https://google.ru", map[string]string{}, 0, http.StatusOK, &httpToolsMockError{})
 		assert.Equal(t, int32(443), s.Do().GetLogData().Meta.Port)
 	})
 }
