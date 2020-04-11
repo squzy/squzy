@@ -11,7 +11,7 @@ go_library(
           "//apps/agent/config:config",
           "//apps/internal/grpcTools:grpcTools",
           "@com_github_shirou_gopsutil//host:go_default_library",
-         "@com_github_squzy_squzy_generated//generated/agent/proto/v1:go_default_library",
+          "@com_github_squzy_squzy_generated//generated/agent/proto/v1:go_default_library",
      ],
 
 )

@@ -9,6 +9,9 @@ go_library(
     ],
     importpath = "squzy/apps/server",
     deps = [
+        "//apps/server/application:application",
+        "//apps/server/config:config",
+        "//apps/internal/database:database",
         "//apps/server/version:version",
     ]
 )
