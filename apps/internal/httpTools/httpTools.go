@@ -88,7 +88,7 @@ func (h *httpTool) SendRequestTimeoutStatusCode(req *http.Request, timeout time.
 func (h *httpTool) sendRequestTimeout(req *http.Request, timeout time.Duration, checkCode bool, code int) (int, []byte, error) {
 	// If timeout not present will be use method with custom http client
 	if timeout.Seconds() <= 0 {
-		return sendReq(h.client, req, false, 0)
+		return sendReq(h.client, req, checkCode, code)
 	}
 	ctx, cancel := helpers.TimeoutContext(context.Background(), timeout)
 	defer cancel()
