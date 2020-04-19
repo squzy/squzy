@@ -1,12 +1,12 @@
 package database
 
 type Database interface {
-}
-
-type db struct {
-
+	InsertMetaData(data *MetaData) error
+	GetMetaData(id string) (*MetaData, error)
+	InsertStatRequest(data *StatRequest) error
+	GetStatRequest(id string) (*StatRequest, error)
 }
 
 func New() Database {
-	return &db{}
+	return &postgres{}
 }

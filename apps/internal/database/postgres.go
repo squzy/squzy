@@ -1,0 +1,190 @@
+package database
+
+import (
+	"errors"
+	"fmt"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"time"
+)
+
+type postgres struct {
+	db *gorm.DB
+
+	host     string
+	port     string
+	user     string
+	password string
+	dbname   string
+}
+
+type Model struct {
+	CreatedAt time.Time  `json:"createdAt" gorm:"index"`
+	UpdatedAt time.Time  `json:"createdAt,omitEmpty" gorm:"index"`
+	DeletedAt *time.Time `json:"createdAt" gorm:"index"`
+}
+
+type MetaData struct {
+	gorm.Model
+	Location  string     `gorm:"location"`
+	Port      int32      `gorm:"port"`
+	StartTime *time.Time `gorm:"startTime"`
+	EndTime   *time.Time `gorm:"endTime"`
+	Type      int32      `gorm:"column:type"`
+}
+
+type StatRequest struct {
+	gorm.Model
+	CpuInfo    []*CpuInfo  `gorm:"cpuInfo"`
+	MemoryInfo *MemoryInfo `gorm:"memoryInfo"`
+	DiskInfo   []*DiskInfo `gorm:"diskInfo"`
+	NetInfo    []*NetInfo  `gorm:"netInfo"`
+	Time       *time.Time  `gorm:"time"`
+}
+
+type CpuInfo struct {
+	gorm.Model
+	StatRequestID uint    `gorm:"statRequestId"`
+	Load          float64 `gorm:"load"`
+}
+
+type MemoryInfo struct {
+	gorm.Model
+	StatRequestID uint    `gorm:"statRequestId"`
+	Mem           *Memory `gorm:"mem"`
+	Swap          *Memory `gorm:"swap"`
+}
+
+type Memory struct { ///Will we need check for Total = used + free + shared?
+	gorm.Model
+	MemoryInfoID uint    `gorm:"memoryInfoId"`
+	Total        uint64  `gorm:"total"`
+	Used         uint64  `gorm:"used"`
+	Free         uint64  `gorm:"free"`
+	Shared       uint64  `gorm:"shared"`
+	UsedPercent  float64 `gorm:"usedPercent"`
+}
+
+type DiskInfo struct { ///Will we need check for Total = used + free?
+	gorm.Model
+	StatRequestID uint    `gorm:"statRequestId"`
+	Name          string  `gorm:"name"`
+	Total         uint64  `gorm:"total"`
+	Free          uint64  `gorm:"free"`
+	Used          uint64  `gorm:"used"`
+	UsedPercent   float64 `gorm:"usedPercent"`
+}
+
+type NetInfo struct {
+	gorm.Model
+	StatRequestID uint   `gorm:"statRequestId"`
+	Name          string `gorm:"name"`
+	BytesSent     uint64 `gorm:"bytesSent"`
+	BytesRecv     uint64 `gorm:"bytesRecv"`
+	PacketsSent   uint64 `gorm:"packetsSent"`
+	PacketsRecv   uint64 `gorm:"packetsRecv"`
+	ErrIn         uint64 `gorm:"errIn"`
+	ErrOut        uint64 `gorm:"errOut"`
+	DropIn        uint64 `gorm:"dropIn"`
+	DropOut       uint64 `gorm:"dropOut"`
+}
+
+const (
+	dbMetaDataCollection    = "meta_datas"    //TODO: check
+	dbStatRequestCollection = "stat_requests" //TODO: check
+)
+
+var (
+	errorConnection = errors.New("ERROR_CONNECTING_TO_POSTGRES")
+)
+
+func (p *postgres) newClient() (*gorm.DB, error) {
+	var err error
+	p.db, err = gorm.Open(
+		"postgres",
+		fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s connect_timeout=10 sslmode=disable",
+			p.host,
+			p.port,
+			p.user,
+			p.dbname,
+			p.password,
+		),
+	)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, errorConnection
+	}
+	p.db.LogMode(true)
+	errs := p.Migrate()
+	if len(errs) > 0 {
+		for _, val := range errs {
+			fmt.Println(val.Error())
+		}
+	}
+	return p.db, nil
+}
+
+func (p *postgres) Migrate() []error {
+	var errs []error
+	err := p.db.DB().Ping() // ping the pg
+	if err != nil {
+		errs = append(errs, err)
+		return errs
+	}
+
+	models := []interface{}{
+		&MetaData{},
+		&StatRequest{},
+		&CpuInfo{},
+		&MemoryInfo{},
+		&Memory{},
+		&DiskInfo{},
+		&NetInfo{},
+	}
+
+	for _, model := range models {
+		err = p.db.AutoMigrate(model).Error // migrate models one-by-one
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errs
+}
+
+func (p *postgres) InsertMetaData(data *MetaData) error {
+	db, err := p.newClient()
+	if err != nil {
+		return err
+	}
+	db.Table(dbMetaDataCollection).Create(data)
+	return nil
+}
+
+func (p *postgres) GetMetaData(id string) (*MetaData, error) {
+	db, err := p.newClient()
+	if err != nil {
+		return nil, err
+	}
+	metaData := &MetaData{}
+	db.Table(dbMetaDataCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbMetaDataCollection), id).First(metaData)
+	return metaData, nil
+}
+
+func (p *postgres) InsertStatRequest(data *StatRequest) error {
+	db, err := p.newClient()
+	if err != nil {
+		return err
+	}
+	db.Table(dbStatRequestCollection).Create(data)
+	return nil
+}
+
+func (p *postgres) GetStatRequest(id string) (*StatRequest, error) {
+	db, err := p.newClient()
+	if err != nil {
+		return nil, err
+	}
+	statRequest := &StatRequest{}
+	db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).First(statRequest)
+	return statRequest, nil
+}
