@@ -2,7 +2,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
      name = "database",
-     srcs = ["database.go"],
+     srcs = [
+         "database.go",
+         "postgres.go",
+     ],
      importpath = "squzy/apps/internal/database",
      visibility = ["//visibility:public"],
      deps = [
@@ -14,6 +17,7 @@ go_test(
     name = "database_test",
     srcs = [
         "database_test.go",
+        "postgres_test.go",
     ],
     embed = [":database"],
     deps = [
