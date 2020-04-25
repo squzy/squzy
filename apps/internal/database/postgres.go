@@ -10,12 +10,6 @@ import (
 
 type postgres struct {
 	db *gorm.DB
-
-	host     string
-	port     string
-	user     string
-	password string
-	dbname   string
 }
 
 type Model struct {
@@ -99,18 +93,9 @@ var (
 	errorDataBase   = errors.New("ERROR_DATABASE_OPERATION")
 )
 
-func (p *postgres) newClient() error {
+func (p *postgres) newClient(getDB func() (*gorm.DB, error)) error {
 	var err error
-	p.db, err = gorm.Open(
-		"postgres",
-		fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s connect_timeout=10 sslmode=disable",
-			p.host,
-			p.port,
-			p.user,
-			p.dbname,
-			p.password,
-		),
-	)
+	p.db, err = getDB()
 	if err != nil {
 		fmt.Println(err.Error()) //TODO: log?
 		return errorConnection

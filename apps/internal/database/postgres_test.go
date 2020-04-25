@@ -14,20 +14,8 @@ import (
 
 //docker run -d --rm --name postgres -e POSTGRES_USER="user" -e POSTGRES_PASSWORD="password" -e POSTGRES_DB="database" -p 5432:5432 postgres
 var (
-	postgr = &postgres{
-		host:     "localhost",
-		port:     "5432",
-		user:     "user",
-		password: "password",
-		dbname:   "database",
-	}
-	postgrWrong = &postgres{
-		host:     "localhost",
-		port:     "5432",
-		user:     "wrongUser",
-		password: "wrongPassword",
-		dbname:   "database",
-	}
+	postgr = &postgres{}
+	postgrWrong = &postgres{}
 )
 
 type Suite struct {
@@ -52,22 +40,21 @@ func (s *Suite) SetupSuite() {
 	s.DB.LogMode(true)
 }
 
-
 func TestPostgres_NewClient(t *testing.T) {
 	t.Run("wrongPostgress", func(t *testing.T) {
-		err := postgrWrong.newClient()
+		err := postgrWrong.newClient(func() (db *gorm.DB, e error) {
+			return gorm.Open(
+				"postgres",
+				fmt.Sprintf("host=lkl port=00 user=us dbname=dbn password=ps connect_timeout=10 sslmode=disable"))
+		})
 		assert.Error(t, err)
 	})
-	/*t.Run("correctPostgress", func(t *testing.T) {
-		err := postgr.newClient()
-		assert.NoError(t, err)
-	})*/
 }
 
 func (s *Suite) Test_InsertMetaData() {
 	s.mock.ExpectBegin()
 	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, dbMetaDataCollection)).
-		WithArgs(sqlmock.AnyArg(),sqlmock.AnyArg(),sqlmock.AnyArg(),sqlmock.AnyArg(),sqlmock.AnyArg(),sqlmock.AnyArg(),sqlmock.AnyArg(),sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.mock.ExpectCommit()
 
@@ -77,7 +64,7 @@ func (s *Suite) Test_InsertMetaData() {
 
 func (s *Suite) Test_GetMetaData() {
 	var (
-	    id = "1"
+		id = "1"
 	)
 	query := fmt.Sprintf(`SELECT * FROM "%s" WHERE "%s"."deleted_at" IS NULL`, dbMetaDataCollection, dbMetaDataCollection)
 	rows := sqlmock.NewRows([]string{"id"}).AddRow("1")
@@ -92,7 +79,7 @@ func (s *Suite) Test_GetMetaData() {
 func (s *Suite) Test_InsertStatRequest() {
 	s.mock.ExpectBegin()
 	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestCollection)).
-		WithArgs(sqlmock.AnyArg(),sqlmock.AnyArg(),sqlmock.AnyArg(),sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.mock.ExpectCommit()
 
@@ -121,7 +108,6 @@ func (s *Suite) AfterTest(_, _ string) {
 func TestInit(t *testing.T) {
 	suite.Run(t, new(Suite))
 }
-
 
 func TestPostgres_Migrate(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {

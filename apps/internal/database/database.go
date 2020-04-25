@@ -1,5 +1,7 @@
 package database
 
+import "github.com/jinzhu/gorm"
+
 type Database interface {
 	InsertMetaData(data *MetaData) error
 	GetMetaData(id string) (*MetaData, error)
@@ -7,14 +9,9 @@ type Database interface {
 	GetStatRequest(id string) (*StatRequest, error)
 }
 
-func New() (Database, error) {
+func New(getDB func() (*gorm.DB, error)) (Database, error) {
 	db := &postgres{
-		host:     "",
-		port:     "",
-		user:     "",
-		password: "",
-		dbname:   "",
 	}
-	err := db.newClient()
+	err := db.newClient(getDB)
 	return db, err
 }
