@@ -9,6 +9,7 @@ go_library(
      importpath = "squzy/apps/internal/database",
      visibility = ["//visibility:public"],
      deps = [
+        "@com_github_jinzhu_gorm//:go_default_library",
      ],
 
 )
@@ -21,6 +22,8 @@ go_test(
     ],
     embed = [":database"],
     deps = [
-        "@com_github_stretchr_testify//assert:go_default_library"
+        "@com_github_stretchr_testify//:go_default_library",
+        "@com_github_data_dog_go_sqlmock//:go_default_library",
+        "@com_github_jinzhu_gorm//:go_default_library",
     ]
 )

@@ -13,6 +13,7 @@ go_library(
         "//apps/server/config:config",
         "//apps/internal/database:database",
         "//apps/server/version:version",
+        "@com_github_jinzhu_gorm//:go_default_library",
     ]
 )
 
