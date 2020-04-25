@@ -126,7 +126,7 @@ func TestInit(t *testing.T) {
 func TestPostgres_Migrate(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		err := postgrWrong.Migrate()
-		assert.Error(t, err[0])
+		assert.Error(t, err)
 	})
 }
 

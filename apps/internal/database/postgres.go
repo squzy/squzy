@@ -116,18 +116,11 @@ func (p *postgres) newClient() error {
 		return errorConnection
 	}
 	p.db.LogMode(true)
-	errs := p.Migrate()
-	if len(errs) > 0 {
-		for _, val := range errs {
-			fmt.Println(val.Error()) //TODO: log?
-		}
-		return errorDataBase
-	}
-	return nil
+	return p.Migrate()
 }
 
-func (p *postgres) Migrate() []error {
-	var errs []error
+func (p *postgres) Migrate() (resErr error) {
+	resErr = nil
 	models := []interface{}{
 		&MetaData{},
 		&StatRequest{},
@@ -141,10 +134,11 @@ func (p *postgres) Migrate() []error {
 	for _, model := range models {
 		err := p.db.AutoMigrate(model).Error // migrate models one-by-one
 		if err != nil {
-			errs = append(errs, err)
+			fmt.Println(err.Error()) //TODO: log?
+			resErr = errorDataBase
 		}
 	}
-	return errs
+	return resErr
 }
 
 func (p *postgres) InsertMetaData(data *MetaData) error {
