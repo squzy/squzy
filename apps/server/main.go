@@ -10,6 +10,10 @@ import (
 
 func main() {
 	cfg := config.New()
-	app := application.New(database.New())
+	db, err := database.New()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	app := application.New(db)
 	log.Fatal(app.Run(cfg.GetPort()))
 }

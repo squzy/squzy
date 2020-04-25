@@ -90,15 +90,16 @@ type NetInfo struct {
 }
 
 const (
-	dbMetaDataCollection    = "meta_datas"    //TODO: check
+	dbMetaDataCollection    = "meta_data"    //TODO: check
 	dbStatRequestCollection = "stat_requests" //TODO: check
 )
 
 var (
 	errorConnection = errors.New("ERROR_CONNECTING_TO_POSTGRES")
+	errorDataBase   = errors.New("ERROR_DATABASE_OPERATION")
 )
 
-func (p *postgres) newClient() (*gorm.DB, error) {
+func (p *postgres) newClient() error {
 	var err error
 	p.db, err = gorm.Open(
 		"postgres",
@@ -111,27 +112,22 @@ func (p *postgres) newClient() (*gorm.DB, error) {
 		),
 	)
 	if err != nil {
-		fmt.Println(err.Error())
-		return nil, errorConnection
+		fmt.Println(err.Error()) //TODO: log?
+		return errorConnection
 	}
 	p.db.LogMode(true)
 	errs := p.Migrate()
 	if len(errs) > 0 {
 		for _, val := range errs {
-			fmt.Println(val.Error())
+			fmt.Println(val.Error()) //TODO: log?
 		}
+		return errorDataBase
 	}
-	return p.db, nil
+	return nil
 }
 
 func (p *postgres) Migrate() []error {
 	var errs []error
-	err := p.db.DB().Ping() // ping the pg
-	if err != nil {
-		errs = append(errs, err)
-		return errs
-	}
-
 	models := []interface{}{
 		&MetaData{},
 		&StatRequest{},
@@ -143,7 +139,7 @@ func (p *postgres) Migrate() []error {
 	}
 
 	for _, model := range models {
-		err = p.db.AutoMigrate(model).Error // migrate models one-by-one
+		err := p.db.AutoMigrate(model).Error // migrate models one-by-one
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -152,39 +148,34 @@ func (p *postgres) Migrate() []error {
 }
 
 func (p *postgres) InsertMetaData(data *MetaData) error {
-	db, err := p.newClient()
-	if err != nil {
-		return err
+	if err := p.db.Table(dbMetaDataCollection).Create(data).Error; err != nil {
+		return errorDataBase
 	}
-	db.Table(dbMetaDataCollection).Create(data)
 	return nil
 }
 
 func (p *postgres) GetMetaData(id string) (*MetaData, error) {
-	db, err := p.newClient()
-	if err != nil {
-		return nil, err
-	}
 	metaData := &MetaData{}
-	db.Table(dbMetaDataCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbMetaDataCollection), id).First(metaData)
+	if err := p.db.Table(dbMetaDataCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbMetaDataCollection), id).First(metaData).Error; err != nil {
+		fmt.Println(err.Error()) //TODO: log?
+		return nil, errorDataBase
+	}
 	return metaData, nil
 }
 
 func (p *postgres) InsertStatRequest(data *StatRequest) error {
-	db, err := p.newClient()
-	if err != nil {
-		return err
+	if err := p.db.Table(dbStatRequestCollection).Create(data).Error; err != nil {
+		fmt.Println(err.Error()) //TODO: log?
+		return errorDataBase
 	}
-	db.Table(dbStatRequestCollection).Create(data)
 	return nil
 }
 
 func (p *postgres) GetStatRequest(id string) (*StatRequest, error) {
-	db, err := p.newClient()
-	if err != nil {
-		return nil, err
-	}
 	statRequest := &StatRequest{}
-	db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).First(statRequest)
+	if err := p.db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).First(statRequest).Error; err != nil {
+		fmt.Println(err.Error()) //TODO: log?
+		return nil, errorDataBase
+	}
 	return statRequest, nil
 }

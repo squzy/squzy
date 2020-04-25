@@ -7,7 +7,7 @@ import (
 
 func TestNew(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New()
+		_, s := New()
 		assert.NotEqual(t, nil, s)
 	})
 }

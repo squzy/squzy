@@ -7,6 +7,14 @@ type Database interface {
 	GetStatRequest(id string) (*StatRequest, error)
 }
 
-func New() Database {
-	return &postgres{}
+func New() (Database, error) {
+	db := &postgres{
+		host:     "",
+		port:     "",
+		user:     "",
+		password: "",
+		dbname:   "",
+	}
+	err := db.newClient()
+	return db, err
 }
