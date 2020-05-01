@@ -1,0 +1,26 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+     name = "mongo",
+     srcs = ["mongo.go"],
+     importpath = "squzy/internal/mongo",
+     visibility = ["//visibility:public"],
+     deps = [
+         "@org_mongodb_go_mongo_driver//bson:go_default_library",
+         "@org_mongodb_go_mongo_driver//bson/bsoncodec:go_default_library",
+         "@org_mongodb_go_mongo_driver//mongo:go_default_library",
+         "@org_mongodb_go_mongo_driver//mongo/options:go_default_library",
+     ],
+
+)
+
+go_test(
+    name = "mongo_test",
+    srcs = [
+        "mongo_test.go",
+    ],
+    embed = [":mongo"],
+    deps = [
+        "@com_github_stretchr_testify//assert:go_default_library"
+    ]
+)

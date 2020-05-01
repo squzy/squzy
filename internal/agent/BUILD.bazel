@@ -1,0 +1,30 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+     name = "agent",
+     srcs = ["agent.go"],
+     importpath = "squzy/internal/agent",
+     visibility = ["//visibility:public"],
+     deps = [
+         "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
+         "@com_github_shirou_gopsutil//cpu:go_default_library",
+         "@com_github_shirou_gopsutil//mem:go_default_library",
+         "@com_github_shirou_gopsutil//disk:go_default_library",
+         "@com_github_shirou_gopsutil//net:go_default_library",
+         "@com_github_shirou_gopsutil//host:go_default_library",
+         "@com_github_golang_protobuf//ptypes:go_default_library",
+         "@com_github_squzy_squzy_generated//generated/agent/proto/v1:go_default_library",
+     ],
+
+)
+
+go_test(
+    name = "agent_test",
+    srcs = [
+        "agent_test.go",
+    ],
+    embed = [":agent"],
+    deps = [
+        "@com_github_stretchr_testify//assert:go_default_library",
+    ]
+)
