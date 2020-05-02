@@ -31,7 +31,7 @@ func (s *server) GetSchedulerList(ctx context.Context, rq *empty.Empty) (*apiPb.
 	}
 	arr := make([]*apiPb.Scheduler, len(list))
 	var errGroup errgroup.Group
-	for i, _ := range list {
+	for i := range list {
 		index := i
 		errGroup.Go(func() error {
 			res, err := s.GetSchedulerById(ctx, &apiPb.GetSchedulerByIdRequest{

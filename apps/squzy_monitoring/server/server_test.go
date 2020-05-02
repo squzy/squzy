@@ -97,9 +97,9 @@ var (
 
 	rqMap = map[apiPb.SchedulerType]*apiPb.AddRequest{
 		apiPb.SchedulerType_Tcp: {
-			Interval:             10,
-			Timeout:              0,
-			Config:               &apiPb.AddRequest_Tcp{
+			Interval: 10,
+			Timeout:  0,
+			Config: &apiPb.AddRequest_Tcp{
 				Tcp: &apiPb.TcpConfig{
 					Host:                 "",
 					Port:                 0,
@@ -110,47 +110,47 @@ var (
 			},
 		},
 		apiPb.SchedulerType_Http: {
-			Interval:             10,
-			Timeout:              0,
-			Config:               &apiPb.AddRequest_Http{
+			Interval: 10,
+			Timeout:  0,
+			Config: &apiPb.AddRequest_Http{
 				Http: &apiPb.HttpConfig{
-					Method:               "",
-					Url:                  "",
-					Headers:              nil,
-					StatusCode:           0,
+					Method:     "",
+					Url:        "",
+					Headers:    nil,
+					StatusCode: 0,
 				},
 			},
 		},
 		apiPb.SchedulerType_HttpJsonValue: {
-			Interval:             10,
-			Timeout:              0,
-			Config:               &apiPb.AddRequest_HttpValue{
+			Interval: 10,
+			Timeout:  0,
+			Config: &apiPb.AddRequest_HttpValue{
 				HttpValue: &apiPb.HttpJsonValueConfig{
-					Method:               "",
-					Url:                  "",
-					Headers:              nil,
+					Method:    "",
+					Url:       "",
+					Headers:   nil,
 					Selectors: nil,
 				},
 			},
 		},
 		apiPb.SchedulerType_SiteMap: {
-			Interval:             10,
-			Timeout:              0,
-			Config:               &apiPb.AddRequest_Sitemap{
+			Interval: 10,
+			Timeout:  0,
+			Config: &apiPb.AddRequest_Sitemap{
 				Sitemap: &apiPb.SiteMapConfig{
-					Url:                  "",
-					Concurrency:          0,
+					Url:         "",
+					Concurrency: 0,
 				},
 			},
 		},
 		apiPb.SchedulerType_Grpc: {
-			Interval:             10,
-			Timeout:              0,
-			Config:               &apiPb.AddRequest_Grpc{
+			Interval: 10,
+			Timeout:  0,
+			Config: &apiPb.AddRequest_Grpc{
 				Grpc: &apiPb.GrpcConfig{
-					Service:              "",
-					Host:                 "",
-					Port:                 0,
+					Service: "",
+					Host:    "",
+					Port:    0,
 				},
 			},
 		},
@@ -162,7 +162,6 @@ var (
 )
 
 type schedulerMock struct {
-
 }
 
 func (s schedulerMock) GetId() string {
@@ -174,11 +173,9 @@ func (s schedulerMock) GetIdBson() primitive.ObjectID {
 }
 
 func (s schedulerMock) Run() {
-	return
 }
 
 func (s schedulerMock) Stop() {
-	return
 }
 
 func (s schedulerMock) IsRun() bool {
@@ -186,7 +183,6 @@ func (s schedulerMock) IsRun() bool {
 }
 
 type mockStorageOk struct {
-
 }
 
 func (m mockStorageOk) Get(string) (scheduler.Scheduler, error) {
@@ -202,11 +198,10 @@ func (m mockStorageOk) Remove(string) error {
 }
 
 type mockStorageError struct {
-
 }
 
 func (m mockStorageError) Get(string) (scheduler.Scheduler, error) {
-	return  nil, errors.New("")
+	return nil, errors.New("")
 }
 
 func (m mockStorageError) Set(scheduler.Scheduler) error {
@@ -399,28 +394,28 @@ func TestServer_Run(t *testing.T) {
 	t.Run("Should: return error because id not bson", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageOk{})
 		_, err := s.Run(context.Background(), &apiPb.RunRequest{
-			Id:                   "sff",
+			Id: "sff",
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because id not found in DB", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageErrorSingle{})
 		_, err := s.Run(context.Background(), &apiPb.RunRequest{
-			Id:                   primitive.NewObjectID().Hex(),
+			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because cant find in memory", func(t *testing.T) {
 		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{})
 		_, err := s.Run(context.Background(), &apiPb.RunRequest{
-			Id:                   primitive.NewObjectID().Hex(),
+			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
 		_, err := s.Run(context.Background(), &apiPb.RunRequest{
-			Id:                   primitive.NewObjectID().Hex(),
+			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
@@ -430,28 +425,28 @@ func TestServer_Stop(t *testing.T) {
 	t.Run("Should: return error because id not bson", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageOk{})
 		_, err := s.Stop(context.Background(), &apiPb.StopRequest{
-			Id:                   "sff",
+			Id: "sff",
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because id not found in DB", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageErrorSingle{})
 		_, err := s.Stop(context.Background(), &apiPb.StopRequest{
-			Id:                   primitive.NewObjectID().Hex(),
+			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because cant find in memory", func(t *testing.T) {
 		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{})
 		_, err := s.Stop(context.Background(), &apiPb.StopRequest{
-			Id:                   primitive.NewObjectID().Hex(),
+			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
 		_, err := s.Stop(context.Background(), &apiPb.StopRequest{
-			Id:                   primitive.NewObjectID().Hex(),
+			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
@@ -461,28 +456,28 @@ func TestServer_Remove(t *testing.T) {
 	t.Run("Should: return error because id not bson", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageOk{})
 		_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
-			Id:                   "sff",
+			Id: "sff",
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because id not found in DB", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageErrorSingle{})
 		_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
-			Id:                   primitive.NewObjectID().Hex(),
+			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because cant find in memory", func(t *testing.T) {
 		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{})
 		_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
-			Id:                   primitive.NewObjectID().Hex(),
+			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
 		_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
-			Id:                   primitive.NewObjectID().Hex(),
+			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
@@ -492,9 +487,9 @@ func TestServer_Add(t *testing.T) {
 	t.Run("Should: return error because wrong interval", func(t *testing.T) {
 		s := New(nil, nil, nil)
 		_, err := s.Add(context.Background(), &apiPb.AddRequest{
-			Interval:             0,
-			Timeout:              0,
-			Config:               nil,
+			Interval: 0,
+			Timeout:  0,
+			Config:   nil,
 		})
 		assert.NotEqual(t, nil, err)
 	})

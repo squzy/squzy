@@ -1,7 +1,6 @@
 package job
 
 import (
-	"errors"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	structType "github.com/golang/protobuf/ptypes/struct"
@@ -25,7 +24,7 @@ type jsonHttpError struct {
 
 var (
 	valueNotExistErrorFn = func(path string) error {
-		return errors.New(fmt.Sprintf("Value by path=`%s` not exist", path))
+		return fmt.Errorf("Value by path=`%s` not exist", path)
 	}
 )
 

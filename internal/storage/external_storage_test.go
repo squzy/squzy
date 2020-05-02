@@ -22,13 +22,6 @@ func (s server) SendResponseFromAgent(context.Context, *apiPb.SendMetricsRequest
 	panic("implement me")
 }
 
-type serverError struct {
-}
-
-func (s serverError) SendResponseFromAgent(context.Context, *apiPb.SendMetricsRequest) (*empty.Empty, error) {
-	panic("implement me")
-}
-
 type serverErrorThrow struct {
 }
 
@@ -38,10 +31,6 @@ func (s serverErrorThrow) SendResponseFromScheduler(context.Context, *apiPb.Sche
 
 func (s serverErrorThrow) SendResponseFromAgent(context.Context, *apiPb.SendMetricsRequest) (*empty.Empty, error) {
 	panic("implement me")
-}
-
-func (s serverError) SendResponseFromScheduler(context.Context, *apiPb.SchedulerResponse) (*empty.Empty, error) {
-	return &empty.Empty{}, nil
 }
 
 func (s server) SendResponseFromScheduler(context.Context, *apiPb.SchedulerResponse) (*empty.Empty, error) {

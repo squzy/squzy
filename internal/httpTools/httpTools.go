@@ -27,15 +27,13 @@ const (
 var (
 	notExpectedStatusCode   = errors.New("NOT_EXPECTED_STATUS_CODE")
 	notExpectedStatusCodeFn = func(url string, statusCode int, expectedStatusCode int) error {
-		return errors.New(
-			fmt.Sprintf(
-				"ErrCode: %s, Location: %s, StatusCode: %d, ExpectedStatusCode: %d, Port: %d",
-				notExpectedStatusCode,
-				url,
-				statusCode,
-				expectedStatusCode,
-				helpers.GetPortByUrl(url),
-			),
+		return fmt.Errorf(
+			"ErrCode: %s, Location: %s, StatusCode: %d, ExpectedStatusCode: %d, Port: %d",
+			notExpectedStatusCode,
+			url,
+			statusCode,
+			expectedStatusCode,
+			helpers.GetPortByUrl(url),
 		)
 	}
 	defaultTimeout = helpers.DurationFromSecond(10)
@@ -45,7 +43,7 @@ type HttpTool interface {
 	SendRequest(req *http.Request) (int, []byte, error)
 	SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error)
 	SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error)
-	SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error)
+	SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int) (int, []byte, error)
 	CreateRequest(method string, url string, headers *map[string]string, schedulerId string) *http.Request
 }
 

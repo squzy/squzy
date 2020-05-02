@@ -12,7 +12,7 @@ import (
 type mockHttp struct {
 }
 
-func (m mockHttp) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+func (m mockHttp) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int) (int, []byte, error) {
 	panic("implement me")
 }
 
@@ -57,7 +57,7 @@ func (m mockSiteMapParser) Parse(xmlBytes []byte) (*parsers.SiteMap, error) {
 type mockHttpError struct {
 }
 
-func (m mockHttpError) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+func (m mockHttpError) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int) (int, []byte, error) {
 	panic("implement me")
 }
 

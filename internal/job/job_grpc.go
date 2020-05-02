@@ -54,7 +54,7 @@ func newGrpcError(schedulerId string, startTime *timestamp.Timestamp, endTime *t
 	}
 }
 
-func ExecGrpc(schedulerId string, timeout int32, config *scheduler_config_storage.GrpcConfig, opts... grpc.DialOption) CheckError {
+func ExecGrpc(schedulerId string, timeout int32, config *scheduler_config_storage.GrpcConfig, opts ...grpc.DialOption) CheckError {
 	startTime := ptypes.TimestampNow()
 
 	ctx, cancel := helpers.TimeoutContext(context.Background(), helpers.DurationFromSecond(timeout))

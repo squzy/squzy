@@ -33,9 +33,9 @@ func (s *siteMapError) GetLogData() *apiPb.SchedulerResponse {
 	}
 	return &apiPb.SchedulerResponse{
 		SchedulerId: s.schedulerId,
-		Code:  s.code,
-		Error: err,
-		Type:  apiPb.SchedulerType_SiteMap,
+		Code:        s.code,
+		Error:       err,
+		Type:        apiPb.SchedulerType_SiteMap,
 		Meta: &apiPb.SchedulerResponse_MetaData{
 			StartTime: s.startTime,
 			EndTime:   s.endTime,
@@ -43,9 +43,9 @@ func (s *siteMapError) GetLogData() *apiPb.SchedulerResponse {
 	}
 }
 
-func newSiteMapError(schedulerId string,startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string, location string) CheckError {
+func newSiteMapError(schedulerId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string, location string) CheckError {
 	return &siteMapError{
-		schedulerId:schedulerId,
+		schedulerId: schedulerId,
 		startTime:   startTime,
 		endTime:     endTime,
 		code:        code,
@@ -58,7 +58,7 @@ func ExecSiteMap(schedulerId string, timeout int32, config *scheduler_config_sto
 	startTime := ptypes.TimestampNow()
 	siteMap, err := siteMapStorage.Get(config.Url)
 	if err != nil {
-		return newSiteMapError(schedulerId,startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, err.Error(), config.Url)
+		return newSiteMapError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, err.Error(), config.Url)
 	}
 
 	count := len(siteMap.UrlSet)

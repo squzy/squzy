@@ -83,7 +83,11 @@ func TestExecGrpc(t *testing.T) {
 			go func() {
 				_ = grpcServer.Serve(lis)
 			}()
-			job := ExecGrpc("data", 1, &scheduler_config_storage.GrpcConfig{"","localhost", 9090}, grpc.WithInsecure())
+			job := ExecGrpc("data", 1, &scheduler_config_storage.GrpcConfig{
+				Service: "",
+				Host:    "localhost",
+				Port:    9090,
+			}, grpc.WithInsecure())
 			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
 			grpcServer.Stop()
 		})
@@ -95,7 +99,11 @@ func TestExecGrpc(t *testing.T) {
 			go func() {
 				_ = grpcServer.Serve(lis)
 			}()
-			job := ExecGrpc("data",2, &scheduler_config_storage.GrpcConfig{"test", "localhost", 9090}, grpc.WithInsecure())
+			job := ExecGrpc("data", 2, &scheduler_config_storage.GrpcConfig{
+				Service: "test",
+				Host:    "localhost",
+				Port:    9090,
+			}, grpc.WithInsecure())
 			assert.Equal(t, apiPb.SchedulerResponseCode_Error, job.GetLogData().Code)
 			grpcServer.Stop()
 		})
@@ -107,18 +115,22 @@ func TestExecGrpc(t *testing.T) {
 			go func() {
 				_ = grpcServer.Serve(lis)
 			}()
-			job := ExecGrpc("", 0, &scheduler_config_storage.GrpcConfig{"test", "localhost", 9090},grpc.WithInsecure())
+			job := ExecGrpc("", 0, &scheduler_config_storage.GrpcConfig{
+				Service: "test",
+				Host:    "localhost",
+				Port:    9090,
+			}, grpc.WithInsecure())
 			assert.Equal(t, grpcNotServing.Error(), job.GetLogData().Error.Message)
 			grpcServer.Stop()
 		})
 
 		t.Run("Should: Return connTimeoutError error", func(t *testing.T) {
-			job := ExecGrpc("", 0, &scheduler_config_storage.GrpcConfig{"test", "localhost", 9091}, grpc.WithInsecure())
+			job := ExecGrpc("", 0, &scheduler_config_storage.GrpcConfig{Service: "test", Host: "localhost", Port: 9091}, grpc.WithInsecure())
 			assert.Equal(t, connTimeoutError.Error(), job.GetLogData().Error.Message)
 		})
 
 		t.Run("Should: Return wrongConnectConfigError error", func(t *testing.T) {
-			job := ExecGrpc("",0, &scheduler_config_storage.GrpcConfig{"test", "localhost", 9091},  grpc.WithInsecure(), grpc.WithBlock())
+			job := ExecGrpc("", 0, &scheduler_config_storage.GrpcConfig{Service: "test", Host: "localhost", Port: 9091}, grpc.WithInsecure(), grpc.WithBlock())
 			assert.Equal(t, wrongConnectConfigError.Error(), job.GetLogData().Error.Message)
 		})
 	})

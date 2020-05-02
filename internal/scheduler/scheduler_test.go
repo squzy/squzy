@@ -96,9 +96,9 @@ func TestSchl_IsRun(t *testing.T) {
 func TestSchl_GetId(t *testing.T) {
 	t.Run("Should: return id as string", func(t *testing.T) {
 		id := primitive.NewObjectID()
-		s, err:= New(id, time.Second, &jobExecutor{})
+		s, err := New(id, time.Second, &jobExecutor{})
 		assert.Equal(t, id.Hex(), s.GetId())
-		assert.IsType(t, "",  s.GetId())
+		assert.IsType(t, "", s.GetId())
 		assert.Equal(t, nil, err)
 	})
 }
@@ -106,9 +106,9 @@ func TestSchl_GetId(t *testing.T) {
 func TestSchl_GetIdBson(t *testing.T) {
 	t.Run("Should: return id as bson", func(t *testing.T) {
 		id := primitive.NewObjectID()
-		s, err:= New(id, time.Second, &jobExecutor{})
+		s, err := New(id, time.Second, &jobExecutor{})
 		assert.Equal(t, id, s.GetIdBson())
-		assert.IsType(t, primitive.ObjectID{},  s.GetIdBson())
+		assert.IsType(t, primitive.ObjectID{}, s.GetIdBson())
 		assert.Equal(t, nil, err)
 	})
 }

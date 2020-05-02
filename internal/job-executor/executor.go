@@ -14,7 +14,7 @@ import (
 )
 
 type HttpExecutor func(schedulerId string, timeout int32, config *scheduler_config_storage.HttpConfig, httpTool httpTools.HttpTool) job.CheckError
-type GrpcExecutor func(schedulerId string, timeout int32, config *scheduler_config_storage.GrpcConfig, opts... grpc.DialOption) job.CheckError
+type GrpcExecutor func(schedulerId string, timeout int32, config *scheduler_config_storage.GrpcConfig, opts ...grpc.DialOption) job.CheckError
 type TcpExecutor func(schedulerId string, timeout int32, config *scheduler_config_storage.TcpConfig) job.CheckError
 type SiteMapExecutor func(schedulerId string, timeout int32, config *scheduler_config_storage.SiteMapConfig, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, semaphoreFactoryFn func(n int) semaphore.Semaphore) job.CheckError
 type HttpValueExecutor func(schedulerId string, timeout int32, config *scheduler_config_storage.HttpValueConfig, httpTool httpTools.HttpTool) job.CheckError

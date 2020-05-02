@@ -44,9 +44,7 @@ func (s serverError) Register(context.Context, *apiPb.RegisterRequest) (*apiPb.R
 }
 
 func (s serverError) UnRegister(context.Context, *apiPb.UnRegisterRequest) (*apiPb.UnRegisterResponse, error) {
-	return &apiPb.UnRegisterResponse{
-
-	}, nil
+	return &apiPb.UnRegisterResponse{}, nil
 }
 
 type configSecondMock struct {
@@ -238,9 +236,7 @@ func TestApplication_Run(t *testing.T) {
 	})
 	t.Run("Should: throw error if cant connect to squzy server", func(t *testing.T) {
 		a := New(&executorMock{}, grpcTools.New(), &configErrorMock{}, func() (stat *host.InfoStat, err error) {
-			return &host.InfoStat{
-
-			}, nil
+			return &host.InfoStat{}, nil
 		}, func(agent apiPb.AgentServerClient) (statClient apiPb.AgentServer_SendMetricsClient, err error) {
 			return nil, nil
 		})
@@ -254,9 +250,7 @@ func TestApplication_Run(t *testing.T) {
 			_ = grpcServer.Serve(lis)
 		}()
 		a := New(&executorMock{}, grpcTools.New(), &configSuccessMock{}, func() (stat *host.InfoStat, err error) {
-			return &host.InfoStat{
-
-			}, nil
+			return &host.InfoStat{}, nil
 		}, func(agent apiPb.AgentServerClient) (statClient apiPb.AgentServer_SendMetricsClient, err error) {
 			return nil, nil
 		})
@@ -270,9 +264,7 @@ func TestApplication_Run(t *testing.T) {
 			_ = grpcServer.Serve(lis)
 		}()
 		a := New(&executorMock{}, grpcTools.New(), &configSuccessSteamMock{}, func() (stat *host.InfoStat, err error) {
-			return &host.InfoStat{
-
-			}, nil
+			return &host.InfoStat{}, nil
 		}, func(agent apiPb.AgentServerClient) (statClient apiPb.AgentServer_SendMetricsClient, err error) {
 			return nil, errors.New("asfasf")
 		})
@@ -363,7 +355,6 @@ func (c clientError) UnRegister(ctx context.Context, in *apiPb.UnRegisterRequest
 func (c clientError) SendMetrics(ctx context.Context, opts ...grpc.CallOption) (apiPb.AgentServer_SendMetricsClient, error) {
 	return nil, errors.New("asf")
 }
-
 
 func TestNewStream(t *testing.T) {
 	t.Run("Should: not throw error", func(t *testing.T) {

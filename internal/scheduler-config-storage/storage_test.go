@@ -10,12 +10,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"testing"
 )
+
 var (
 	basicError = errors.New("")
 )
 
 type mockOk struct {
-
 }
 
 func (m mockOk) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
@@ -35,7 +35,6 @@ func (m mockOk) UpdateOne(ctx context.Context, filter interface{}, update interf
 }
 
 type mockError struct {
-
 }
 
 func (m mockError) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {

@@ -17,7 +17,7 @@ import (
 type mockHttpTools struct {
 }
 
-func (m mockHttpTools) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+func (m mockHttpTools) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int) (int, []byte, error) {
 	return 200, nil, nil
 }
 
@@ -86,15 +86,14 @@ type siteMapStorageEmptyIgnore struct {
 
 func (s siteMapStorageEmptyIgnore) Get(url string) (*parsers.SiteMap, error) {
 	return &parsers.SiteMap{
-		UrlSet: []parsers.SiteMapUrl{
-		},
+		UrlSet: []parsers.SiteMapUrl{},
 	}, nil
 }
 
 type mockHttpToolsWithError struct {
 }
 
-func (m mockHttpToolsWithError) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+func (m mockHttpToolsWithError) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int) (int, []byte, error) {
 	return 500, nil, errors.New("Wrong code")
 }
 
@@ -144,7 +143,7 @@ func TestExecSiteMap(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
 		t.Run("Because mock with 200", func(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
-				Url: "",
+				Url:         "",
 				Concurrency: -1,
 			}, &siteMapStorage{}, &mockHttpTools{}, successFactory)
 			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
@@ -153,11 +152,11 @@ func TestExecSiteMap(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
 				Url:         "",
 				Concurrency: 5,
-			},&siteMapStorageIgnore{}, &mockHttpToolsWithError{}, successFactory)
+			}, &siteMapStorageIgnore{}, &mockHttpToolsWithError{}, successFactory)
 			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
 		})
 		t.Run("Because: empty sitemap", func(t *testing.T) {
-			job := ExecSiteMap("", 0,&scheduler_config_storage.SiteMapConfig{
+			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
 				Url:         "",
 				Concurrency: 5,
 			}, &siteMapStorageEmptyIgnore{}, &mockHttpToolsWithError{}, successFactory)

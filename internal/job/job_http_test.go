@@ -13,7 +13,7 @@ import (
 type httpToolsMock struct {
 }
 
-func (h httpToolsMock) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+func (h httpToolsMock) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int) (int, []byte, error) {
 	return 0, nil, nil
 }
 
@@ -29,7 +29,7 @@ func (h httpToolsMock) CreateRequest(method string, url string, headers *map[str
 type httpToolsMockError struct {
 }
 
-func (h httpToolsMockError) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+func (h httpToolsMockError) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int) (int, []byte, error) {
 	return 0, nil, errors.New("safsaf")
 }
 
@@ -68,21 +68,21 @@ func (h httpToolsMock) SendRequestWithStatusCode(req *http.Request, expectedCode
 
 func TestExecHttp(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := ExecHttp("", 0, &scheduler_config_storage.HttpConfig{http.MethodGet, "", map[string]string{},http.StatusOK}, &httpToolsMock{})
+		s := ExecHttp("", 0, &scheduler_config_storage.HttpConfig{Method: http.MethodGet, Headers: map[string]string{}, StatusCode: http.StatusOK}, &httpToolsMock{})
 		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
 	})
 	t.Run("Should: return error because long request", func(t *testing.T) {
-		s := ExecHttp("", 0, &scheduler_config_storage.HttpConfig{http.MethodGet, "", map[string]string{}, http.StatusOK}, &httpToolsMock{})
+		s := ExecHttp("", 0, &scheduler_config_storage.HttpConfig{Method: http.MethodGet, Headers: map[string]string{}, StatusCode: http.StatusOK}, &httpToolsMock{})
 		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
 	})
 	t.Run("Should: not return error with headers", func(t *testing.T) {
-		s := ExecHttp("", 0, &scheduler_config_storage.HttpConfig{http.MethodGet, "", map[string]string{
+		s := ExecHttp("", 0, &scheduler_config_storage.HttpConfig{Method: http.MethodGet, Headers: map[string]string{
 			"test": "asf",
-		}, http.StatusOK}, &httpToolsMock{})
+		}, StatusCode: http.StatusOK}, &httpToolsMock{})
 		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := ExecHttp("", 0, &scheduler_config_storage.HttpConfig{http.MethodGet, "", map[string]string{}, http.StatusOK}, &httpToolsMockError{})
+		s := ExecHttp("", 0, &scheduler_config_storage.HttpConfig{Method: http.MethodGet, Headers: map[string]string{}, StatusCode: http.StatusOK}, &httpToolsMockError{})
 		assert.Equal(t, apiPb.SchedulerResponseCode_Error, s.GetLogData().Code)
 	})
 }

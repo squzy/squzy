@@ -100,7 +100,7 @@ func New(
 	config config.Config,
 	hostStatFn func() (*host.InfoStat, error),
 	getStreamFn func(agent apiPb.AgentServerClient) (apiPb.AgentServer_SendMetricsClient, error),
-	) Application {
+) Application {
 	return &application{
 		config:      config,
 		executor:    executor,

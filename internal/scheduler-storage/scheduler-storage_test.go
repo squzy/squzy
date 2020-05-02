@@ -6,28 +6,6 @@ import (
 	"testing"
 )
 
-type schedulerStopErrorMock struct {
-}
-
-func (s schedulerStopErrorMock) GetIdBson() primitive.ObjectID {
-	panic("implement me")
-}
-
-func (s schedulerStopErrorMock) GetId() string {
-	return "1"
-}
-
-func (s schedulerStopErrorMock) Run() {
-}
-
-func (s schedulerStopErrorMock) Stop() {
-	return
-}
-
-func (s schedulerStopErrorMock) IsRun() bool {
-	panic("implement me")
-}
-
 type schedulerMock struct {
 }
 
@@ -44,7 +22,6 @@ func (s schedulerMock) Run() {
 }
 
 func (s schedulerMock) Stop() {
-	return
 }
 
 func (s schedulerMock) IsRun() bool {

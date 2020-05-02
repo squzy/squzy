@@ -16,7 +16,6 @@ import (
 )
 
 type externalStorageMock struct {
-
 }
 
 func (e externalStorageMock) Write(log job.CheckError) error {
@@ -29,8 +28,8 @@ type configStorageMockOk struct {
 
 func (c configStorageMockOk) Get(ctx context.Context, schedulerId primitive.ObjectID) (*scheduler_config_storage.SchedulerConfig, error) {
 	return &scheduler_config_storage.SchedulerConfig{
-		Id:              primitive.NewObjectID(),
-		Type:            c.typeOfChecker,
+		Id:   primitive.NewObjectID(),
+		Type: c.typeOfChecker,
 	}, nil
 }
 
@@ -103,7 +102,7 @@ func (m *fnMock) SiteMapMock(schedulerId string, timeout int32, config *schedule
 	return nil
 }
 
-func (m *fnMock) GrpcMock(schedulerId string, timeout int32, config *scheduler_config_storage.GrpcConfig, opts... grpc.DialOption) job.CheckError {
+func (m *fnMock) GrpcMock(schedulerId string, timeout int32, config *scheduler_config_storage.GrpcConfig, opts ...grpc.DialOption) job.CheckError {
 	m.executed = true
 	return nil
 }
