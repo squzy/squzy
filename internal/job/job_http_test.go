@@ -5,6 +5,7 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"testing"
 	"time"
 )
@@ -65,31 +66,23 @@ func (h httpToolsMock) SendRequestWithStatusCode(req *http.Request, expectedCode
 	return 0, nil, nil
 }
 
-func TestNewHttpJob(t *testing.T) {
-	t.Run("Should: implement interface", func(t *testing.T) {
-		s := NewHttpJob(http.MethodGet, "", map[string]string{}, 0, http.StatusOK, &httpToolsMock{})
-		assert.Implements(t, (*Job)(nil), s)
-	})
-
-}
-
-func TestJobHTTP_Do(t *testing.T) {
+func TestExecHttp(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := NewHttpJob(http.MethodGet, "", map[string]string{}, 0, http.StatusOK, &httpToolsMock{})
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.Do("").GetLogData().Code)
+		s := ExecHttp("", 0, &scheduler_config_storage.HttpConfig{http.MethodGet, "", map[string]string{},http.StatusOK}, &httpToolsMock{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
 	})
 	t.Run("Should: return error because long request", func(t *testing.T) {
-		s := NewHttpJob(http.MethodGet, "", map[string]string{}, 0, http.StatusOK, &httpToolsMock{})
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.Do("").GetLogData().Code)
+		s := ExecHttp("", 0, &scheduler_config_storage.HttpConfig{http.MethodGet, "", map[string]string{}, http.StatusOK}, &httpToolsMock{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
 	})
 	t.Run("Should: not return error with headers", func(t *testing.T) {
-		s := NewHttpJob(http.MethodGet, "", map[string]string{
+		s := ExecHttp("", 0, &scheduler_config_storage.HttpConfig{http.MethodGet, "", map[string]string{
 			"test": "asf",
-		}, http.StatusOK, 0, &httpToolsMock{})
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.Do("").GetLogData().Code)
+		}, http.StatusOK}, &httpToolsMock{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := NewHttpJob(http.MethodGet, "", map[string]string{}, 0, http.StatusOK, &httpToolsMockError{})
-		assert.Equal(t, apiPb.SchedulerResponseCode_Error, s.Do("").GetLogData().Code)
+		s := ExecHttp("", 0, &scheduler_config_storage.HttpConfig{http.MethodGet, "", map[string]string{}, http.StatusOK}, &httpToolsMockError{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_Error, s.GetLogData().Code)
 	})
 }

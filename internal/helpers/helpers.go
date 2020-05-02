@@ -2,6 +2,8 @@ package helpers
 
 import (
 	"context"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"strings"
 	"time"
 )
@@ -29,4 +31,26 @@ func TimeoutContext(parentCtx context.Context, timeout time.Duration) (context.C
 		timeout = defaultTimeoutDuration
 	}
 	return context.WithTimeout(parentCtx, timeout)
+}
+
+func SelectorsToDb(selectors []*apiPb.HttpJsonValueConfig_Selectors) []*scheduler_config_storage.Selectors {
+	arr := []*scheduler_config_storage.Selectors{}
+	for _, v := range selectors {
+		arr = append(arr, &scheduler_config_storage.Selectors{
+			Type: v.Type,
+			Path: v.Path,
+		})
+	}
+	return arr
+}
+
+func SelectorsToProto(selectors []*scheduler_config_storage.Selectors) []*apiPb.HttpJsonValueConfig_Selectors {
+	arr := []*apiPb.HttpJsonValueConfig_Selectors{}
+	for _, v := range selectors {
+		arr = append(arr, &apiPb.HttpJsonValueConfig_Selectors{
+			Type: v.Type,
+			Path: v.Path,
+		})
+	}
+	return arr
 }

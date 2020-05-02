@@ -2,7 +2,9 @@ package helpers
 
 import (
 	"context"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
+	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"testing"
 	"time"
 )
@@ -34,5 +36,37 @@ func TestTimeoutContext(t *testing.T) {
 		defer cancel()
 		deadline, _ := ctx.Deadline()
 		assert.Equal(t, time.Now().Add(defaultTimeoutDuration).Unix(), deadline.Unix())
+	})
+}
+
+func TestSelectorsToDb(t *testing.T) {
+	t.Run("Should: convert correct", func(t *testing.T) {
+		assert.EqualValues(t, []*scheduler_config_storage.Selectors{
+			{
+				Type: apiPb.HttpJsonValueConfig_String,
+				Path: "select",
+			},
+		}, SelectorsToDb([]*apiPb.HttpJsonValueConfig_Selectors{
+			{
+				Type: apiPb.HttpJsonValueConfig_String,
+				Path: "select",
+			},
+		}))
+	})
+}
+
+func TestSelectorsToProto(t *testing.T) {
+	t.Run("Should: convert correct", func(t *testing.T) {
+		assert.EqualValues(t, []*apiPb.HttpJsonValueConfig_Selectors{
+			{
+				Type: apiPb.HttpJsonValueConfig_String,
+				Path: "select",
+			},
+		}, SelectorsToProto([]*scheduler_config_storage.Selectors{
+			{
+				Type: apiPb.HttpJsonValueConfig_String,
+				Path: "select",
+			},
+		}))
 	})
 }

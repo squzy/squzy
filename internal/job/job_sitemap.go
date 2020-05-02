@@ -10,18 +10,10 @@ import (
 	"net/http"
 	"squzy/internal/helpers"
 	"squzy/internal/httpTools"
+	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"squzy/internal/semaphore"
 	sitemap_storage "squzy/internal/sitemap-storage"
 )
-
-type siteMapJob struct {
-	url              string
-	concurrency      int32
-	timeout          int32
-	siteMapStorage   sitemap_storage.SiteMapStorage
-	httpTools        httpTools.HttpTool
-	semaphoreFactory func(n int) semaphore.Semaphore
-}
 
 type siteMapError struct {
 	schedulerId string
@@ -62,22 +54,11 @@ func newSiteMapError(schedulerId string,startTime *timestamp.Timestamp, endTime 
 	}
 }
 
-func NewSiteMapJob(url string, timeout int32, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, semaphoreFactoryFn func(n int) semaphore.Semaphore, concurrency int32) Job {
-	return &siteMapJob{
-		url:              url,
-		concurrency:      concurrency,
-		timeout:          timeout,
-		siteMapStorage:   siteMapStorage,
-		httpTools:        httpTools,
-		semaphoreFactory: semaphoreFactoryFn,
-	}
-}
-
-func (j *siteMapJob) Do(schedulerId string) CheckError {
+func ExecSiteMap(schedulerId string, timeout int32, config *scheduler_config_storage.SiteMapConfig, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, semaphoreFactoryFn func(n int) semaphore.Semaphore) CheckError {
 	startTime := ptypes.TimestampNow()
-	siteMap, err := j.siteMapStorage.Get(j.url)
+	siteMap, err := siteMapStorage.Get(config.Url)
 	if err != nil {
-		return newSiteMapError(schedulerId,startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, err.Error(), j.url)
+		return newSiteMapError(schedulerId,startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, err.Error(), config.Url)
 	}
 
 	count := len(siteMap.UrlSet)
@@ -86,13 +67,13 @@ func (j *siteMapJob) Do(schedulerId string) CheckError {
 		return newSiteMapError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "", "")
 	}
 
-	concurrency := int(j.concurrency)
+	concurrency := int(config.Concurrency)
 
 	if concurrency <= 0 || concurrency > count {
 		concurrency = len(siteMap.UrlSet)
 	}
 
-	sem := j.semaphoreFactory(concurrency)
+	sem := semaphoreFactoryFn(concurrency)
 
 	group, ctx := errgroup.WithContext(context.Background())
 	for _, v := range siteMap.UrlSet {
@@ -111,8 +92,8 @@ func (j *siteMapJob) Do(schedulerId string) CheckError {
 
 			defer sem.Release()
 
-			rq := j.httpTools.CreateRequest(http.MethodGet, location, nil, schedulerId)
-			_, _, err = j.httpTools.SendRequestTimeoutStatusCode(rq, helpers.DurationFromSecond(j.timeout), http.StatusOK)
+			rq := httpTools.CreateRequest(http.MethodGet, location, nil, schedulerId)
+			_, _, err = httpTools.SendRequestTimeoutStatusCode(rq, helpers.DurationFromSecond(timeout), http.StatusOK)
 
 			if err != nil {
 				return err
@@ -123,7 +104,7 @@ func (j *siteMapJob) Do(schedulerId string) CheckError {
 	}
 	err = group.Wait()
 	if err != nil {
-		return newSiteMapError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, err.Error(), j.url) //nolint
+		return newSiteMapError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, err.Error(), config.Url)
 	}
 	return newSiteMapError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "", "")
 }

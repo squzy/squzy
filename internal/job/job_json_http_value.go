@@ -10,17 +10,9 @@ import (
 	"github.com/tidwall/gjson"
 	"squzy/internal/helpers"
 	"squzy/internal/httpTools"
+	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"time"
 )
-
-type jsonHttpValueJob struct {
-	method    string
-	url       string
-	timeout   int32
-	headers   map[string]string
-	httpTool  httpTools.HttpTool
-	selectors []*apiPb.HttpJsonValueConfig_Selectors
-}
 
 type jsonHttpError struct {
 	schedulerId string
@@ -46,9 +38,9 @@ func (e *jsonHttpError) GetLogData() *apiPb.SchedulerResponse {
 	}
 	return &apiPb.SchedulerResponse{
 		SchedulerId: e.schedulerId,
-		Code:  e.code,
-		Error: err,
-		Type:  apiPb.SchedulerType_HttpJsonValue,
+		Code:        e.code,
+		Error:       err,
+		Type:        apiPb.SchedulerType_HttpJsonValue,
 		Meta: &apiPb.SchedulerResponse_MetaData{
 			StartTime: e.startTime,
 			EndTime:   e.endTime,
@@ -57,11 +49,11 @@ func (e *jsonHttpError) GetLogData() *apiPb.SchedulerResponse {
 	}
 }
 
-func (j *jsonHttpValueJob) Do(schedulerId string) CheckError {
+func ExecHttpValue(schedulerId string, timeout int32, config *scheduler_config_storage.HttpValueConfig, httpTool httpTools.HttpTool) CheckError {
 	startTime := ptypes.TimestampNow()
-	req := j.httpTool.CreateRequest(j.method, j.url, &j.headers, schedulerId)
+	req := httpTool.CreateRequest(config.Method, config.Url, &config.Headers, schedulerId)
 
-	_, data, err := j.httpTool.SendRequestTimeout(req, helpers.DurationFromSecond(j.timeout))
+	_, data, err := httpTool.SendRequestTimeout(req, helpers.DurationFromSecond(timeout))
 
 	if err != nil {
 		return newJsonHttpError(
@@ -78,7 +70,7 @@ func (j *jsonHttpValueJob) Do(schedulerId string) CheckError {
 
 	results := []*structType.Value{}
 
-	if len(j.selectors) == 0 {
+	if len(config.Selectors) == 0 {
 		return newJsonHttpError(
 			schedulerId,
 			startTime,
@@ -89,7 +81,7 @@ func (j *jsonHttpValueJob) Do(schedulerId string) CheckError {
 		)
 	}
 
-	for _, value := range j.selectors {
+	for _, value := range config.Selectors {
 		res := gjson.Get(jsonString, value.Path)
 		if !res.Exists() {
 			return newJsonHttpError(
@@ -141,7 +133,7 @@ func (j *jsonHttpValueJob) Do(schedulerId string) CheckError {
 		}
 	}
 
-	if len(j.selectors) == 1 {
+	if len(config.Selectors) == 1 {
 		return newJsonHttpError(
 			schedulerId,
 			startTime,
@@ -168,7 +160,7 @@ func (j *jsonHttpValueJob) Do(schedulerId string) CheckError {
 	)
 }
 
-func newJsonHttpError(schedulerId string,startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string, value *structType.Value) CheckError {
+func newJsonHttpError(schedulerId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string, value *structType.Value) CheckError {
 	return &jsonHttpError{
 		schedulerId: schedulerId,
 		startTime:   startTime,
@@ -176,16 +168,5 @@ func newJsonHttpError(schedulerId string,startTime *timestamp.Timestamp, endTime
 		code:        code,
 		description: description,
 		value:       value,
-	}
-}
-
-func NewJsonHttpValueJob(method, url string, headers map[string]string, timeout int32, httpTool httpTools.HttpTool, selectors []*apiPb.HttpJsonValueConfig_Selectors) *jsonHttpValueJob {
-	return &jsonHttpValueJob{
-		method:    method,
-		url:       url,
-		headers:   headers,
-		timeout:   timeout,
-		httpTool:  httpTool,
-		selectors: selectors,
 	}
 }

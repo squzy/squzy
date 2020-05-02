@@ -3,649 +3,539 @@ package server
 import (
 	"context"
 	"errors"
+	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"squzy/internal/job"
-	"squzy/internal/parsers"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"squzy/internal/scheduler"
-	"squzy/internal/semaphore"
+	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"testing"
-	"time"
 )
 
-type mockSchedulerStorageError struct {
-}
+var (
+	successTcpConfig = &scheduler_config_storage.SchedulerConfig{
+		Id:       primitive.ObjectID{},
+		Type:     apiPb.SchedulerType_Tcp,
+		Status:   0,
+		Interval: 0,
+		Timeout:  0,
+		TcpConfig: &scheduler_config_storage.TcpConfig{
+			Host: "",
+			Port: 0,
+		},
+	}
 
-type mockSchedulerError struct {
-}
+	successHttpConfig = &scheduler_config_storage.SchedulerConfig{
+		Id:       primitive.NewObjectID(),
+		Type:     apiPb.SchedulerType_Http,
+		Status:   0,
+		Interval: 0,
+		Timeout:  0,
+		HttpConfig: &scheduler_config_storage.HttpConfig{
+			Method:     "",
+			Url:        "",
+			Headers:    nil,
+			StatusCode: 0,
+		},
+	}
 
-type mockSchedulerStorageGetError struct {
-}
+	successHttpValueConfig = &scheduler_config_storage.SchedulerConfig{
+		Id:       primitive.NewObjectID(),
+		Type:     apiPb.SchedulerType_HttpJsonValue,
+		Status:   0,
+		Interval: 0,
+		Timeout:  0,
+		HttpValueConfig: &scheduler_config_storage.HttpValueConfig{
+			Method:    "",
+			Url:       "",
+			Headers:   nil,
+			Selectors: nil,
+		},
+	}
 
-func (m mockSchedulerStorageGetError) Get(string) (scheduler.Scheduler, error) {
-	return nil, errors.New("safsaf")
-}
+	successGrpcConfig = &scheduler_config_storage.SchedulerConfig{
+		Id:       primitive.NewObjectID(),
+		Type:     apiPb.SchedulerType_Grpc,
+		Status:   0,
+		Interval: 0,
+		Timeout:  0,
+		GrpcConfig: &scheduler_config_storage.GrpcConfig{
+			Service: "",
+			Host:    "",
+			Port:    0,
+		},
+	}
 
-func (m mockSchedulerStorageGetError) Set(scheduler.Scheduler) error {
-	panic("implement me")
-}
+	successSiteMapConfig = &scheduler_config_storage.SchedulerConfig{
+		Id:       primitive.NewObjectID(),
+		Type:     apiPb.SchedulerType_SiteMap,
+		Status:   0,
+		Interval: 0,
+		Timeout:  0,
+		SiteMapConfig: &scheduler_config_storage.SiteMapConfig{
+			Url:         "",
+			Concurrency: 0,
+		},
+	}
 
-func (m mockSchedulerStorageGetError) Remove(string) error {
-	panic("implement me")
-}
+	errorConfig = &scheduler_config_storage.SchedulerConfig{
+		Id:       primitive.NewObjectID(),
+		Type:     11111,
+		Status:   0,
+		Interval: 0,
+		Timeout:  0,
+	}
 
-func (m mockSchedulerStorageGetError) GetList() map[string]bool {
-	panic("implement me")
-}
+	cfgMap = map[primitive.ObjectID]*scheduler_config_storage.SchedulerConfig{
+		successTcpConfig.Id:       successTcpConfig,
+		successGrpcConfig.Id:      successGrpcConfig,
+		successHttpConfig.Id:      successHttpConfig,
+		successHttpValueConfig.Id: successHttpValueConfig,
+		successSiteMapConfig.Id:   successSiteMapConfig,
+		errorConfig.Id:            errorConfig,
+	}
 
-func (m mockSchedulerError) GetId() string {
-	panic("implement me")
-}
-
-func (m mockSchedulerError) Run() error {
-	return errors.New("e")
-}
-
-func (m mockSchedulerError) Stop() error {
-	return errors.New("e")
-}
-
-func (m mockSchedulerError) IsRun() bool {
-	return true
-}
-
-func (m mockSchedulerStorageError) Get(string) (scheduler.Scheduler, error) {
-	return &mockSchedulerError{}, nil
-}
-
-func (m mockSchedulerStorageError) Set(scheduler.Scheduler) error {
-	return errors.New("e")
-}
-
-func (m mockSchedulerStorageError) Remove(string) error {
-	return errors.New("e")
-}
-
-func (m mockSchedulerStorageError) GetList() map[string]bool {
-	panic("implement me")
-}
-
-type mockSchedulerStorage struct {
-}
+	rqMap = map[apiPb.SchedulerType]*apiPb.AddRequest{
+		apiPb.SchedulerType_Tcp: {
+			Interval:             10,
+			Timeout:              0,
+			Config:               &apiPb.AddRequest_Tcp{
+				Tcp: &apiPb.TcpConfig{
+					Host:                 "",
+					Port:                 0,
+					XXX_NoUnkeyedLiteral: struct{}{},
+					XXX_unrecognized:     nil,
+					XXX_sizecache:        0,
+				},
+			},
+		},
+		apiPb.SchedulerType_Http: {
+			Interval:             10,
+			Timeout:              0,
+			Config:               &apiPb.AddRequest_Http{
+				Http: &apiPb.HttpConfig{
+					Method:               "",
+					Url:                  "",
+					Headers:              nil,
+					StatusCode:           0,
+				},
+			},
+		},
+		apiPb.SchedulerType_HttpJsonValue: {
+			Interval:             10,
+			Timeout:              0,
+			Config:               &apiPb.AddRequest_HttpValue{
+				HttpValue: &apiPb.HttpJsonValueConfig{
+					Method:               "",
+					Url:                  "",
+					Headers:              nil,
+					Selectors: nil,
+				},
+			},
+		},
+		apiPb.SchedulerType_SiteMap: {
+			Interval:             10,
+			Timeout:              0,
+			Config:               &apiPb.AddRequest_Sitemap{
+				Sitemap: &apiPb.SiteMapConfig{
+					Url:                  "",
+					Concurrency:          0,
+				},
+			},
+		},
+		apiPb.SchedulerType_Grpc: {
+			Interval:             10,
+			Timeout:              0,
+			Config:               &apiPb.AddRequest_Grpc{
+				Grpc: &apiPb.GrpcConfig{
+					Service:              "",
+					Host:                 "",
+					Port:                 0,
+				},
+			},
+		},
+		1000: {
+			Interval: 10,
+			Timeout:  0,
+		},
+	}
+)
 
 type schedulerMock struct {
+
 }
 
 func (s schedulerMock) GetId() string {
-	return "1"
+	panic("implement me")
 }
 
-func (s schedulerMock) Run() error {
-	return nil
+func (s schedulerMock) GetIdBson() primitive.ObjectID {
+	panic("implement me")
 }
 
-func (s schedulerMock) Stop() error {
-	return nil
+func (s schedulerMock) Run() {
+	return
+}
+
+func (s schedulerMock) Stop() {
+	return
 }
 
 func (s schedulerMock) IsRun() bool {
-	return true
-}
-
-type mockSchedulerStorageRunned struct {
-}
-
-func (m mockSchedulerStorageRunned) Get(string) (scheduler.Scheduler, error) {
 	panic("implement me")
 }
 
-func (m mockSchedulerStorageRunned) Set(scheduler.Scheduler) error {
-	panic("implement me")
+type mockStorageOk struct {
+
 }
 
-func (m mockSchedulerStorageRunned) Remove(string) error {
-	panic("implement me")
-}
-
-func (m mockSchedulerStorageRunned) GetList() map[string]bool {
-	return map[string]bool{
-		"1": true,
-	}
-}
-
-func (m mockSchedulerStorage) Get(string) (scheduler.Scheduler, error) {
+func (m mockStorageOk) Get(string) (scheduler.Scheduler, error) {
 	return &schedulerMock{}, nil
 }
 
-func (m mockSchedulerStorage) Set(scheduler.Scheduler) error {
+func (m mockStorageOk) Set(scheduler.Scheduler) error {
 	return nil
 }
 
-func (m mockSchedulerStorage) Remove(string) error {
+func (m mockStorageOk) Remove(string) error {
 	return nil
 }
 
-func (m mockSchedulerStorage) GetList() map[string]bool {
-	return map[string]bool{
-		"1": false,
-	}
+type mockStorageError struct {
+
 }
 
-type mockHttpTools struct {
+func (m mockStorageError) Get(string) (scheduler.Scheduler, error) {
+	return  nil, errors.New("")
 }
 
-func (m mockHttpTools) SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error) {
+func (m mockStorageError) Set(scheduler.Scheduler) error {
+	return errors.New("")
+}
+
+func (m mockStorageError) Remove(string) error {
+	return errors.New("")
+}
+
+type mockConfigStorageOk struct {
+}
+
+func (m mockConfigStorageOk) Get(ctx context.Context, schedulerId primitive.ObjectID) (*scheduler_config_storage.SchedulerConfig, error) {
+	return cfgMap[schedulerId], nil
+}
+
+func (m mockConfigStorageOk) Add(ctx context.Context, config *scheduler_config_storage.SchedulerConfig) error {
+	return nil
+}
+
+func (m mockConfigStorageOk) Remove(ctx context.Context, schedulerId primitive.ObjectID) error {
+	return nil
+}
+
+func (m mockConfigStorageOk) Run(ctx context.Context, schedulerId primitive.ObjectID) error {
+	return nil
+}
+
+func (m mockConfigStorageOk) Stop(ctx context.Context, schedulerId primitive.ObjectID) error {
+	return nil
+}
+
+func (m mockConfigStorageOk) GetAll(ctx context.Context) ([]*scheduler_config_storage.SchedulerConfig, error) {
+	return []*scheduler_config_storage.SchedulerConfig{
+		{
+			Id: successGrpcConfig.Id,
+		},
+	}, nil
+}
+
+func (m mockConfigStorageOk) GetAllForSync(ctx context.Context) ([]*scheduler_config_storage.SchedulerConfig, error) {
 	panic("implement me")
 }
 
-func (m mockHttpTools) SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error) {
+type mockConfigStorageErrorSingle struct {
+}
+
+func (m mockConfigStorageErrorSingle) Get(ctx context.Context, schedulerId primitive.ObjectID) (*scheduler_config_storage.SchedulerConfig, error) {
+	return nil, errors.New("")
+}
+
+func (m mockConfigStorageErrorSingle) Add(ctx context.Context, config *scheduler_config_storage.SchedulerConfig) error {
+	return errors.New("")
+}
+
+func (m mockConfigStorageErrorSingle) Remove(ctx context.Context, schedulerId primitive.ObjectID) error {
+	return errors.New("")
+}
+
+func (m mockConfigStorageErrorSingle) Run(ctx context.Context, schedulerId primitive.ObjectID) error {
+	return errors.New("")
+}
+
+func (m mockConfigStorageErrorSingle) Stop(ctx context.Context, schedulerId primitive.ObjectID) error {
+	return errors.New("")
+}
+
+func (m mockConfigStorageErrorSingle) GetAll(ctx context.Context) ([]*scheduler_config_storage.SchedulerConfig, error) {
+	return []*scheduler_config_storage.SchedulerConfig{
+		{
+			Id: primitive.NewObjectID(),
+		},
+	}, nil
+}
+
+func (m mockConfigStorageErrorSingle) GetAllForSync(ctx context.Context) ([]*scheduler_config_storage.SchedulerConfig, error) {
 	panic("implement me")
 }
 
-func (m mockHttpTools) GetWithRedirectsWithStatusCode(url string, expectedCode int) (int, []byte, error) {
+type mockConfigStorageError struct {
+}
+
+func (m mockConfigStorageError) Get(ctx context.Context, schedulerId primitive.ObjectID) (*scheduler_config_storage.SchedulerConfig, error) {
 	panic("implement me")
 }
 
-func (m mockHttpTools) GetWithRedirects(url string) (int, []byte, error) {
+func (m mockConfigStorageError) Add(ctx context.Context, config *scheduler_config_storage.SchedulerConfig) error {
 	panic("implement me")
 }
 
-func (m mockHttpTools) CreateRequest(method string, url string, headers *map[string]string, log string) *http.Request {
+func (m mockConfigStorageError) Remove(ctx context.Context, schedulerId primitive.ObjectID) error {
 	panic("implement me")
 }
 
-func (m mockHttpTools) SendRequest(req *http.Request) (int, []byte, error) {
+func (m mockConfigStorageError) Run(ctx context.Context, schedulerId primitive.ObjectID) error {
 	panic("implement me")
 }
 
-func (m mockHttpTools) SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error) {
+func (m mockConfigStorageError) Stop(ctx context.Context, schedulerId primitive.ObjectID) error {
 	panic("implement me")
 }
 
-type mockSiteMapStorage struct {
+func (m mockConfigStorageError) GetAll(ctx context.Context) ([]*scheduler_config_storage.SchedulerConfig, error) {
+	return nil, errors.New("")
 }
 
-func (m mockSiteMapStorage) Get(url string) (*parsers.SiteMap, error) {
-	panic("implement me")
-}
-
-type mockExternalStorage struct {
-}
-
-func (m mockExternalStorage) Write(log job.CheckError) error {
+func (m mockConfigStorageError) GetAllForSync(ctx context.Context) ([]*scheduler_config_storage.SchedulerConfig, error) {
 	panic("implement me")
 }
 
 func TestNew(t *testing.T) {
-	t.Run("Should: create new server", func(t *testing.T) {
-		s := New(
-			&mockSchedulerStorage{},
-			&mockExternalStorage{},
-			&mockSiteMapStorage{},
-			&mockHttpTools{},
-			func(i int) semaphore.Semaphore {
-				return semaphore.NewSemaphore(i)
-			},
-		)
+	t.Run("Should: implement interface", func(t *testing.T) {
+		s := New(nil, nil, nil)
 		assert.Implements(t, (*apiPb.SchedulersExecutorServer)(nil), s)
 	})
 }
 
-func TestServer_Add(t *testing.T) {
-	t.Run("Should: not return error", func(t *testing.T) {
-		t.Run("Because default", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 0,
-				Config:    nil,
-			})
-			assert.Equal(t, nil, err)
-		})
-		t.Run("Because: correct tcp", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 1,
-				Config: &apiPb.AddRequest_Tcp{
-					Tcp: &apiPb.TcpConfig{
-						Host: "wefewf",
-						Port: 23,
-					}},
-			})
-			assert.Equal(t, nil, err)
-		})
-		t.Run("Because: correct http", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 1,
-				Config: &apiPb.AddRequest_Http{
-					Http: &apiPb.HttpConfig{},
-				},
-			})
-			assert.Equal(t, nil, err)
-		})
-		t.Run("Because: correct httpJsonValue", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 1,
-				Config: &apiPb.AddRequest_HttpValue{
-					HttpValue: &apiPb.HttpJsonValueConfig{},
-				},
-			})
-			assert.Equal(t, nil, err)
-		})
-		t.Run("Because: correct grpc", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 1,
-				Config: &apiPb.AddRequest_Grpc{
-					Grpc: &apiPb.GrpcConfig{
-						Service: "",
-						Host:    "wefewf",
-						Port:    23,
-					}},
-			})
-			assert.Equal(t, nil, err)
-		})
-		t.Run("Because: correct sitemap", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 1,
-				Config: &apiPb.AddRequest_Sitemap{
-					Sitemap: &apiPb.SiteMapConfig{
-						Url: "",
-					}},
-			})
-			assert.Equal(t, nil, err)
-		})
+func TestServer_GetSchedulerList(t *testing.T) {
+	t.Run("Should: return error because DB", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageError{})
+		_, err := s.GetSchedulerList(context.Background(), &empty.Empty{})
+		assert.NotEqual(t, nil, err)
 	})
-	t.Run("Should: return error", func(t *testing.T) {
-		t.Run("Because: not correct timeout tcp", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 0,
-				Config: &apiPb.AddRequest_Tcp{
-					Tcp: &apiPb.TcpConfig{
-						Host: "wefewf",
-						Port: 23,
-					}},
-			})
-			assert.NotEqual(t, nil, err)
-		})
-		t.Run("Because: not correct timeout http", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 0,
-				Config: &apiPb.AddRequest_Http{
-					Http: &apiPb.HttpConfig{},
-				},
-			})
-			assert.NotEqual(t, nil, err)
-		})
-		t.Run("Because: not correct timeout grpc", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 0,
-				Config: &apiPb.AddRequest_Grpc{
-					Grpc: &apiPb.GrpcConfig{
-						Service: "",
-						Host:    "wefewf",
-						Port:    23,
-					}},
-			})
-			assert.NotEqual(t, nil, err)
-		})
-		t.Run("Because: not correct sitemap tcp", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 0,
-				Config: &apiPb.AddRequest_Sitemap{
-					Sitemap: &apiPb.SiteMapConfig{
-						Url: "",
-					}},
-			})
-			assert.NotEqual(t, nil, err)
-		})
-		t.Run("Because: not correct timeout httpJsonValue", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 0,
-				Config: &apiPb.AddRequest_HttpValue{
-					HttpValue: &apiPb.HttpJsonValueConfig{},
-				},
-			})
-			assert.NotEqual(t, nil, err)
-		})
-		t.Run("Because: tcp alreadyExistId", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorageError{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 1,
-				Config: &apiPb.AddRequest_Tcp{
-					Tcp: &apiPb.TcpConfig{
-						Host: "wefewf",
-						Port: 23,
-					}},
-			})
-			assert.NotEqual(t, nil, err)
-		})
-		t.Run("Because: http alreadyExistId", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorageError{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 1,
-				Config: &apiPb.AddRequest_Http{
-					Http: &apiPb.HttpConfig{
-					}},
-			})
-			assert.NotEqual(t, nil, err)
-		})
-		t.Run("Because: httpJsonValue alreadyExistId", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorageError{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 1,
-				Config: &apiPb.AddRequest_HttpValue{
-					HttpValue: &apiPb.HttpJsonValueConfig{
-					}},
-			})
-			assert.NotEqual(t, nil, err)
-		})
-		t.Run("Because: siteMap alreadyExistId", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorageError{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 1,
-				Config: &apiPb.AddRequest_Sitemap{
-					Sitemap: &apiPb.SiteMapConfig{
-						Url: "",
-					}},
-			})
-			assert.NotEqual(t, nil, err)
-		})
-		t.Run("Because: grpc alreadyExistId", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorageError{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Add(context.Background(), &apiPb.AddRequest{
-				Interval: 1,
-				Config: &apiPb.AddRequest_Grpc{
-					Grpc: &apiPb.GrpcConfig{
-						Port: 8080,
-					}},
-			})
-			assert.NotEqual(t, nil, err)
-		})
+	t.Run("Should: return error because sinle DB error", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageErrorSingle{})
+		_, err := s.GetSchedulerList(context.Background(), &empty.Empty{})
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: return without error", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{})
+		_, err := s.GetSchedulerList(context.Background(), &empty.Empty{})
+		assert.Equal(t, nil, err)
 	})
 }
 
-func TestServer_Remove(t *testing.T) {
-	t.Run("Should: not return error", func(t *testing.T) {
-		t.Run("Because: correct setting", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
-				Id: "",
-			})
-			assert.Equal(t, nil, err)
+func TestServer_GetSchedulerById(t *testing.T) {
+	t.Run("Should: return error because DB", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageErrorSingle{})
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: "",
 		})
+		assert.NotEqual(t, nil, err)
 	})
-	t.Run("Should: return error", func(t *testing.T) {
-		t.Run("Because: not exist", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorageError{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
-				Id: "",
-			})
-			assert.NotEqual(t, nil, err)
+	t.Run("Should: return tcp config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{})
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successTcpConfig.Id.Hex(),
 		})
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return grpc config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{})
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successGrpcConfig.Id.Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return http config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{})
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successHttpConfig.Id.Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return sitemap config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{})
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successSiteMapConfig.Id.Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return httpValue config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{})
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successHttpValueConfig.Id.Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return error because not correct typw", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{})
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: errorConfig.Id.Hex(),
+		})
+		assert.NotEqual(t, nil, err)
 	})
 }
 
 func TestServer_Run(t *testing.T) {
-	t.Run("Should: not return error", func(t *testing.T) {
-		t.Run("Because: correct setting", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Run(context.Background(), &apiPb.RunRequest{
-				Id: "",
-			})
-			assert.Equal(t, nil, err)
+	t.Run("Should: return error because id not bson", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{})
+		_, err := s.Run(context.Background(), &apiPb.RunRequest{
+			Id:                   "sff",
 		})
+		assert.NotEqual(t, nil, err)
 	})
-	t.Run("Should: return error", func(t *testing.T) {
-		t.Run("Because: cant run", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorageError{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Run(context.Background(), &apiPb.RunRequest{
-				Id: "",
-			})
-			assert.NotEqual(t, nil, err)
+	t.Run("Should: return error because id not found in DB", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageErrorSingle{})
+		_, err := s.Run(context.Background(), &apiPb.RunRequest{
+			Id:                   primitive.NewObjectID().Hex(),
 		})
-		t.Run("Because: not exist", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorageGetError{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Run(context.Background(), &apiPb.RunRequest{
-				Id: "",
-			})
-			assert.NotEqual(t, nil, err)
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: return error because cant find in memory", func(t *testing.T) {
+		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{})
+		_, err := s.Run(context.Background(), &apiPb.RunRequest{
+			Id:                   primitive.NewObjectID().Hex(),
 		})
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		_, err := s.Run(context.Background(), &apiPb.RunRequest{
+			Id:                   primitive.NewObjectID().Hex(),
+		})
+		assert.Equal(t, nil, err)
 	})
 }
 
 func TestServer_Stop(t *testing.T) {
+	t.Run("Should: return error because id not bson", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{})
+		_, err := s.Stop(context.Background(), &apiPb.StopRequest{
+			Id:                   "sff",
+		})
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: return error because id not found in DB", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageErrorSingle{})
+		_, err := s.Stop(context.Background(), &apiPb.StopRequest{
+			Id:                   primitive.NewObjectID().Hex(),
+		})
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: return error because cant find in memory", func(t *testing.T) {
+		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{})
+		_, err := s.Stop(context.Background(), &apiPb.StopRequest{
+			Id:                   primitive.NewObjectID().Hex(),
+		})
+		assert.NotEqual(t, nil, err)
+	})
 	t.Run("Should: not return error", func(t *testing.T) {
-		t.Run("Because: correct setting", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorage{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Stop(context.Background(), &apiPb.StopRequest{
-				Id: "",
-			})
-			assert.Equal(t, nil, err)
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		_, err := s.Stop(context.Background(), &apiPb.StopRequest{
+			Id:                   primitive.NewObjectID().Hex(),
 		})
-	})
-	t.Run("Should: return error", func(t *testing.T) {
-		t.Run("Because: not cant stop", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorageError{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Stop(context.Background(), &apiPb.StopRequest{
-				Id: "",
-			})
-			assert.NotEqual(t, nil, err)
-		})
-		t.Run("Because: not exist", func(t *testing.T) {
-			s := New(
-				&mockSchedulerStorageGetError{},
-				&mockExternalStorage{},
-				&mockSiteMapStorage{},
-				&mockHttpTools{},
-				func(i int) semaphore.Semaphore {
-					return semaphore.NewSemaphore(i)
-				},
-			)
-			_, err := s.Stop(context.Background(), &apiPb.StopRequest{
-				Id: "",
-			})
-			assert.NotEqual(t, nil, err)
-		})
+		assert.Equal(t, nil, err)
 	})
 }
 
-func TestServer_GetSchedulerList(t *testing.T) {
-
+func TestServer_Remove(t *testing.T) {
+	t.Run("Should: return error because id not bson", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{})
+		_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
+			Id:                   "sff",
+		})
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: return error because id not found in DB", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageErrorSingle{})
+		_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
+			Id:                   primitive.NewObjectID().Hex(),
+		})
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: return error because cant find in memory", func(t *testing.T) {
+		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{})
+		_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
+			Id:                   primitive.NewObjectID().Hex(),
+		})
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
+			Id:                   primitive.NewObjectID().Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
 }
 
-func TestServer_GetSchedulerById(t *testing.T) {
-
+func TestServer_Add(t *testing.T) {
+	t.Run("Should: return error because wrong interval", func(t *testing.T) {
+		s := New(nil, nil, nil)
+		_, err := s.Add(context.Background(), &apiPb.AddRequest{
+			Interval:             0,
+			Timeout:              0,
+			Config:               nil,
+		})
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: return error because wrong type", func(t *testing.T) {
+		s := New(nil, nil, nil)
+		_, err := s.Add(context.Background(), rqMap[1000])
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: return error because cant add to DB", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageErrorSingle{})
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_Tcp])
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: return error because cant add to in memory", func(t *testing.T) {
+		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{})
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_Tcp])
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: add tcp check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_Tcp])
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: add grcp check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_Grpc])
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: add sitemap check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_SiteMap])
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: add httpValue check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_HttpJsonValue])
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: add http check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_Http])
+		assert.Equal(t, nil, err)
+	})
 }

@@ -9,6 +9,7 @@ import (
 	health_check "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
 	"net"
+	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"testing"
 	"time"
 )
@@ -73,14 +74,7 @@ func (s server) Watch(*health_check.HealthCheckRequest, health_check.Health_Watc
 	panic("implement me")
 }
 
-func TestNewGrpcJob(t *testing.T) {
-	t.Run("Should: Should implement interface Job", func(t *testing.T) {
-		job := NewGrpcJob("test", "localhost", 9090, 0, []grpc.DialOption{}, []grpc.CallOption{})
-		assert.Implements(t, (*Job)(nil), job)
-	})
-}
-
-func TestGrpcJob_Do(t *testing.T) {
+func TestExecGrpc(t *testing.T) {
 	t.Run("Test: Testing grpc health_check:", func(t *testing.T) {
 		t.Run("Should: Return nil", func(t *testing.T) {
 			lis, _ := net.Listen("tcp", ":9090")
@@ -89,8 +83,8 @@ func TestGrpcJob_Do(t *testing.T) {
 			go func() {
 				_ = grpcServer.Serve(lis)
 			}()
-			job := NewGrpcJob("test", "localhost", 9090, 1, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
-			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.Do("haha").GetLogData().Code)
+			job := ExecGrpc("data", 1, &scheduler_config_storage.GrpcConfig{"","localhost", 9090}, grpc.WithInsecure())
+			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
 			grpcServer.Stop()
 		})
 
@@ -101,8 +95,8 @@ func TestGrpcJob_Do(t *testing.T) {
 			go func() {
 				_ = grpcServer.Serve(lis)
 			}()
-			job := NewGrpcJob("test", "localhost", 9090, 2, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
-			assert.Equal(t, apiPb.SchedulerResponseCode_Error, job.Do("").GetLogData().Code)
+			job := ExecGrpc("data",2, &scheduler_config_storage.GrpcConfig{"test", "localhost", 9090}, grpc.WithInsecure())
+			assert.Equal(t, apiPb.SchedulerResponseCode_Error, job.GetLogData().Code)
 			grpcServer.Stop()
 		})
 
@@ -113,19 +107,19 @@ func TestGrpcJob_Do(t *testing.T) {
 			go func() {
 				_ = grpcServer.Serve(lis)
 			}()
-			job := NewGrpcJob("test", "localhost", 9090, 0, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
-			assert.Equal(t, grpcNotServing.Error(), job.Do("").GetLogData().Error.Message)
+			job := ExecGrpc("", 0, &scheduler_config_storage.GrpcConfig{"test", "localhost", 9090},grpc.WithInsecure())
+			assert.Equal(t, grpcNotServing.Error(), job.GetLogData().Error.Message)
 			grpcServer.Stop()
 		})
 
 		t.Run("Should: Return connTimeoutError error", func(t *testing.T) {
-			job := NewGrpcJob("test", "localhost", 9091, 0, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
-			assert.Equal(t, connTimeoutError.Error(), job.Do("").GetLogData().Error.Message)
+			job := ExecGrpc("", 0, &scheduler_config_storage.GrpcConfig{"test", "localhost", 9091}, grpc.WithInsecure())
+			assert.Equal(t, connTimeoutError.Error(), job.GetLogData().Error.Message)
 		})
 
 		t.Run("Should: Return wrongConnectConfigError error", func(t *testing.T) {
-			job := NewGrpcJob("test", "localhost", 9091, 0, []grpc.DialOption{grpc.WithInsecure(), grpc.WithBlock()}, []grpc.CallOption{})
-			assert.Equal(t, wrongConnectConfigError.Error(), job.Do("").GetLogData().Error.Message)
+			job := ExecGrpc("",0, &scheduler_config_storage.GrpcConfig{"test", "localhost", 9091},  grpc.WithInsecure(), grpc.WithBlock())
+			assert.Equal(t, wrongConnectConfigError.Error(), job.GetLogData().Error.Message)
 		})
 	})
 }

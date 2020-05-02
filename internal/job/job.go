@@ -14,7 +14,3 @@ var (
 type CheckError interface {
 	GetLogData() *apiPb.SchedulerResponse
 }
-
-type Job interface {
-	Do(schedulerId string) CheckError
-}

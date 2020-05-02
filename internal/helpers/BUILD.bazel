@@ -6,6 +6,8 @@ go_library(
      importpath = "squzy/internal/helpers",
      visibility = ["//visibility:public"],
      deps = [
+        "//internal/scheduler-config-storage:storage",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
      ],
 
 )

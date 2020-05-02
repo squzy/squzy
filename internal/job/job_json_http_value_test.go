@@ -6,6 +6,7 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"testing"
 	"time"
 )
@@ -58,101 +59,87 @@ func (m mockError) CreateRequest(method string, url string, headers *map[string]
 	return req
 }
 
-func TestNewJsonHttpValueJob(t *testing.T) {
-	t.Run("Should: implement interface", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, nil, nil)
-		assert.Implements(t, (*Job)(nil), s)
-	})
-}
-
-func TestJsonHttpValueJob_Do(t *testing.T) {
+func TestExecHttpValue(t *testing.T) {
 	t.Run("Should: return error on http request", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockError{}, nil)
-		assert.Equal(t, apiPb.SchedulerResponseCode_Error, s.Do("").GetLogData().Code)
+		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{http.MethodGet, "", map[string]string{}, nil}, &mockError{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_Error, s.GetLogData().Code)
 	})
 	t.Run("Should: return error because value not exist", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
+		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{http.MethodGet, "", map[string]string{}, []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_String,
 				Path: "asfasf",
 			},
-		})
-		res := s.Do("")
-		assert.Equal(t, apiPb.SchedulerResponseCode_Error, res.GetLogData().Code)
-		assert.Equal(t, "", res.GetLogData().Meta.Value.GetStringValue())
+		}}, &mockSuccess{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_Error, s.GetLogData().Code)
+		assert.Equal(t, "", s.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: not return error because selectors is missing", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, nil)
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.Do("").GetLogData().Code)
+		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{http.MethodGet, "", map[string]string{}, nil}, &mockSuccess{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
 	})
 	t.Run("Should: parse single bool value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
+		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{http.MethodGet, "", map[string]string{}, []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_Bool,
 				Path: "success",
 			},
-		})
-		res := s.Do("")
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
-		assert.Equal(t, true, res.GetLogData().Meta.Value.GetBoolValue())
+		}}, &mockSuccess{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
+		assert.Equal(t, true, s.GetLogData().Meta.Value.GetBoolValue())
 	})
 	t.Run("Should: parse single string value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
+		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{http.MethodGet, "", map[string]string{}, []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_String,
 				Path: "name",
 			},
-		})
-		res := s.Do("")
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
-		assert.Equal(t, "John", res.GetLogData().Meta.Value.GetStringValue())
+		}}, &mockSuccess{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
+		assert.Equal(t, "John", s.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: parse single number value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
+		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{http.MethodGet, "", map[string]string{}, []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_Number,
 				Path: "age",
 			},
-		})
-		res := s.Do("")
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
-		assert.Equal(t, float64(31), res.GetLogData().Meta.Value.GetNumberValue())
+		}}, &mockSuccess{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
+		assert.Equal(t, float64(31), s.GetLogData().Meta.Value.GetNumberValue())
 	})
 	t.Run("Should: parse single any value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
+		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{http.MethodGet, "", map[string]string{}, []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_Any,
 				Path: "age",
 			},
-		})
-		res := s.Do("")
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
-		assert.Equal(t, "31", res.GetLogData().Meta.Value.GetStringValue())
+		}}, &mockSuccess{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
+		assert.Equal(t, "31", s.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: parse single raw value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
+		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{http.MethodGet, "", map[string]string{}, []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_Raw,
 				Path: "raw",
 			},
-		})
-		res := s.Do("")
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
-		assert.Equal(t, `{"name":"ahha"}`, res.GetLogData().Meta.Value.GetStringValue())
+		}}, &mockSuccess{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
+		assert.Equal(t, `{"name":"ahha"}`, s.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: parse single time value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
+		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{http.MethodGet, "", map[string]string{}, []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_Time,
 				Path: "time",
 			},
-		})
-		res := s.Do("")
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
-		assert.Equal(t, "2012-04-23T18:25:43Z", res.GetLogData().Meta.Value.GetStringValue())
+		}}, &mockSuccess{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
+		assert.Equal(t, "2012-04-23T18:25:43Z", s.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: parse multipile value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
+		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{http.MethodGet, "", map[string]string{}, []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_Time,
 				Path: "time",
@@ -161,9 +148,8 @@ func TestJsonHttpValueJob_Do(t *testing.T) {
 				Type: apiPb.HttpJsonValueConfig_Number,
 				Path: "age",
 			},
-		})
-		res := s.Do("")
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
+		}}, &mockSuccess{})
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
 		assert.EqualValues(t, &structType.ListValue{
 			Values: []*structType.Value{
 				{
@@ -177,6 +163,6 @@ func TestJsonHttpValueJob_Do(t *testing.T) {
 					},
 				},
 			},
-		}, res.GetLogData().Meta.Value.GetListValue())
+		}, s.GetLogData().Meta.Value.GetListValue())
 	})
 }

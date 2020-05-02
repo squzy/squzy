@@ -2,61 +2,57 @@ package scheduler
 
 import (
 	"errors"
-	"github.com/google/uuid"
-	"squzy/internal/job"
-	"squzy/internal/storage"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	job_executor "squzy/internal/job-executor"
 	"time"
 )
 
 var (
-	alreadyRunError             = errors.New("SCHEDULER_ALREADY_RUN")
-	alreadyStopError            = errors.New("SCHEDULER_ALREADY_STOP")
 	intervalLessHalfSecondError = errors.New("INTERVAL_LESS_THAN_HALF_SECOND")
 )
 
 type Scheduler interface {
 	// Should return id
 	GetId() string
+	//Get ID bson
+	GetIdBson() primitive.ObjectID
 	// Should run Scheduler every tick
-	Run() error
+	Run()
 	// Should stop Scheduler
-	Stop() error
+	Stop()
 	// Return true/false depends from current state
 	IsRun() bool
 }
 
 type schl struct {
-	ticker          *time.Ticker
-	isStopped       bool
-	quitCh          chan bool
-	interval        time.Duration
-	job             job.Job
-	id              string
-	externalStorage storage.Storage
+	ticker      *time.Ticker
+	isStopped   bool
+	quitCh      chan bool
+	interval    time.Duration
+	id          primitive.ObjectID
+	jobExecutor job_executor.JobExecutor
 }
 
-func New(interval time.Duration, job job.Job, externalStorage storage.Storage) (Scheduler, error) {
+func New(id primitive.ObjectID, interval time.Duration, jobExecutor job_executor.JobExecutor) (Scheduler, error) {
 	if interval < time.Millisecond*500 {
 		return nil, intervalLessHalfSecondError
 	}
 	return &schl{
-		id:              uuid.New().String(),
-		interval:        interval,
-		isStopped:       true,
-		job:             job,
-		externalStorage: externalStorage,
+		id:          id,
+		interval:    interval,
+		isStopped:   true,
+		jobExecutor: jobExecutor,
 	}, nil
 }
 
-func (s *schl) Run() error {
+func (s *schl) Run() {
 	if !s.isStopped {
-		return alreadyRunError
+		return
 	}
 	s.ticker = time.NewTicker(s.interval)
 	s.isStopped = false
 	s.quitCh = make(chan bool, 1)
 	s.observer()
-	return nil
 }
 
 func (s *schl) observer() {
@@ -65,7 +61,7 @@ func (s *schl) observer() {
 		for {
 			select {
 			case <-s.ticker.C:
-				_ = s.externalStorage.Write(s.job.Do(s.id))
+				s.jobExecutor.Execute(s.id)
 			case <-s.quitCh:
 				break loop
 			}
@@ -78,16 +74,19 @@ func (s *schl) IsRun() bool {
 }
 
 func (s *schl) GetId() string {
+	return s.id.Hex()
+}
+
+func (s *schl) GetIdBson() primitive.ObjectID {
 	return s.id
 }
 
-func (s *schl) Stop() error {
+func (s *schl) Stop() {
 	if s.isStopped {
-		return alreadyStopError
+		return
 	}
 	s.ticker.Stop()
 	s.quitCh <- true
 	close(s.quitCh)
 	s.isStopped = true
-	return nil
 }

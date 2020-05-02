@@ -6,16 +6,8 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"squzy/internal/helpers"
 	"squzy/internal/httpTools"
+	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 )
-
-type jobHTTP struct {
-	methodType     string
-	url            string
-	headers        map[string]string
-	expectedStatus int32
-	timeout        int32
-	httpTool       httpTools.HttpTool
-}
 
 type httpError struct {
 	schedulerId string
@@ -54,11 +46,11 @@ func newHttpError(schedulerId string, startTime *timestamp.Timestamp, endTime *t
 	}
 }
 
-func (j *jobHTTP) Do(schedulerId string) CheckError {
+func ExecHttp(schedulerId string, timeout int32, config *scheduler_config_storage.HttpConfig, httpTool httpTools.HttpTool) CheckError {
 	startTime := ptypes.TimestampNow()
-	req := j.httpTool.CreateRequest(j.methodType, j.url, &j.headers, schedulerId)
+	req := httpTool.CreateRequest(config.Method, config.Url, &config.Headers, schedulerId)
 
-	_, _, err := j.httpTool.SendRequestTimeoutStatusCode(req, helpers.DurationFromSecond(j.timeout), int(j.expectedStatus))
+	_, _, err := httpTool.SendRequestTimeoutStatusCode(req, helpers.DurationFromSecond(timeout), int(config.StatusCode))
 
 	if err != nil {
 		return newHttpError(
@@ -77,15 +69,4 @@ func (j *jobHTTP) Do(schedulerId string) CheckError {
 		apiPb.SchedulerResponseCode_OK,
 		"",
 	)
-}
-
-func NewHttpJob(method, url string, headers map[string]string, timeout int32, expectedStatus int32, httpTool httpTools.HttpTool) *jobHTTP {
-	return &jobHTTP{
-		methodType:     method,
-		url:            url,
-		headers:        headers,
-		expectedStatus: expectedStatus,
-		timeout:        timeout,
-		httpTool:       httpTool,
-	}
 }

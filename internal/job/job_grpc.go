@@ -10,31 +10,12 @@ import (
 	health_check "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
 	"squzy/internal/helpers"
+	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 )
 
 const (
 	logMetaData = "squzy_scheduler_id"
 )
-
-type grpcJob struct {
-	service     string
-	host        string
-	port        int32
-	timeout     int32
-	connOptions []grpc.DialOption
-	callOptions []grpc.CallOption
-}
-
-func NewGrpcJob(service string, host string, port int32, timeout int32, connOptions []grpc.DialOption, callOptions []grpc.CallOption) Job {
-	return &grpcJob{
-		service:     service,
-		host:        host,
-		port:        port,
-		timeout:     timeout,
-		callOptions: callOptions,
-		connOptions: connOptions,
-	}
-}
 
 type grpcError struct {
 	schedulerId string
@@ -53,9 +34,9 @@ func (s *grpcError) GetLogData() *apiPb.SchedulerResponse {
 	}
 	return &apiPb.SchedulerResponse{
 		SchedulerId: s.schedulerId,
-		Code:  s.code,
-		Error: err,
-		Type:  apiPb.SchedulerType_Grpc,
+		Code:        s.code,
+		Error:       err,
+		Type:        apiPb.SchedulerType_Grpc,
 		Meta: &apiPb.SchedulerResponse_MetaData{
 			StartTime: s.startTime,
 			EndTime:   s.endTime,
@@ -73,14 +54,14 @@ func newGrpcError(schedulerId string, startTime *timestamp.Timestamp, endTime *t
 	}
 }
 
-func (j *grpcJob) Do(schedulerId string) CheckError {
+func ExecGrpc(schedulerId string, timeout int32, config *scheduler_config_storage.GrpcConfig, opts... grpc.DialOption) CheckError {
 	startTime := ptypes.TimestampNow()
 
-	ctx, cancel := helpers.TimeoutContext(context.Background(), helpers.DurationFromSecond(j.timeout))
+	ctx, cancel := helpers.TimeoutContext(context.Background(), helpers.DurationFromSecond(timeout))
 
 	defer cancel()
 
-	conn, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%d", j.host, j.port), j.connOptions...)
+	conn, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%d", config.Host, config.Port), opts...)
 
 	if err != nil {
 		return newGrpcError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, wrongConnectConfigError.Error())
@@ -96,7 +77,7 @@ func (j *grpcJob) Do(schedulerId string) CheckError {
 		logMetaData: schedulerId,
 	})
 
-	res, err := client.Check(metadata.NewOutgoingContext(ctx, md), &health_check.HealthCheckRequest{Service: j.service}, j.callOptions...)
+	res, err := client.Check(metadata.NewOutgoingContext(ctx, md), &health_check.HealthCheckRequest{Service: config.Service})
 
 	if err != nil {
 		return newGrpcError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, connTimeoutError.Error())

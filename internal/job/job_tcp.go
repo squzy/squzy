@@ -7,6 +7,7 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"net"
 	"squzy/internal/helpers"
+	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 )
 
 type tcpError struct {
@@ -25,9 +26,10 @@ func (s *tcpError) GetLogData() *apiPb.SchedulerResponse {
 		}
 	}
 	return &apiPb.SchedulerResponse{
-		Code:  s.code,
-		Error: err,
-		Type:  apiPb.SchedulerType_Tcp,
+		SchedulerId: s.schedulerId,
+		Code:        s.code,
+		Error:       err,
+		Type:        apiPb.SchedulerType_Tcp,
 		Meta: &apiPb.SchedulerResponse_MetaData{
 			StartTime: s.startTime,
 			EndTime:   s.endTime,
@@ -45,23 +47,9 @@ func newTcpError(schedulerId string, startTime *timestamp.Timestamp, endTime *ti
 	}
 }
 
-type jobTcp struct {
-	port    int32
-	host    string
-	timeout int32
-}
-
-func NewTcpJob(host string, port int32, timeout int32) Job {
-	return &jobTcp{
-		port:    port,
-		host:    host,
-		timeout: timeout,
-	}
-}
-
-func (j *jobTcp) Do(schedulerId string) CheckError {
+func ExecTcp(schedulerId string, timeout int32, config *scheduler_config_storage.TcpConfig) CheckError {
 	startTime := ptypes.TimestampNow()
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort(j.host, fmt.Sprintf("%d", j.port)), helpers.DurationFromSecond(j.timeout))
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(config.Host, fmt.Sprintf("%d", config.Port)), helpers.DurationFromSecond(timeout))
 	if err != nil {
 		return newTcpError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, wrongConnectConfigError.Error())
 	}

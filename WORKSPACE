@@ -112,8 +112,8 @@ go_repository(
 go_repository(
     name = "co_honnef_go_tools",
     importpath = "honnef.co/go/tools",
-    sum = "h1:/hemPrYIhOhy8zYrNj+069zDB68us2sMGsfkFJO0iZs=",
-    version = "v0.0.0-20190523083050-ea95bdfd59fc",
+    sum = "h1:3JgtbtFHMiCmsznwGVTUWbgGov+pVqnlf1dEJTNAXeM=",
+    version = "v0.0.1-2019.2.3",
 )
 
 go_repository(
@@ -232,8 +232,8 @@ go_repository(
 go_repository(
     name = "org_golang_x_lint",
     importpath = "golang.org/x/lint",
-    sum = "h1:XQyxROzUlZH+WIQwySDgnISgOivlhjIEwaQaJEJrrN0=",
-    version = "v0.0.0-20190313153728-d0100b6bd8b3",
+    sum = "h1:5hukYrvBGR8/eNkX5mdUezrA6JiaEZDtJb9Ei+1LlBs=",
+    version = "v0.0.0-20190930215403-16217165b5de",
 )
 
 go_repository(
@@ -274,8 +274,8 @@ go_repository(
 go_repository(
     name = "org_golang_x_tools",
     importpath = "golang.org/x/tools",
-    sum = "h1:bt+R27hbE7uVf7PY9S6wpNg9Xo2WRe/XQT0uGq9RQQw=",
-    version = "v0.0.0-20190531172133-b3315ee88b7d",
+    sum = "h1:hKsoRgsbwY1NafxrwTs+k64bikrLBkAgPir1TNCj3Zs=",
+    version = "v0.0.0-20191029190741-b9c20aec41a5",
 )
 
 go_repository(
@@ -288,8 +288,8 @@ go_repository(
 go_repository(
     name = "com_github_squzy_squzy_generated",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:uhIJET9A3scOc+lE20VTOEEC15lJTXCM0K/0TwqxlIo=",
-    version = "v1.3.5-0.20200501223004-9e3091ced73c",
+    sum = "h1:8t07qid77z+hz5hPSWmqvWVQhzfTA97Aqqfh7cAlyb4=",
+    version = "v1.3.5-0.20200502164724-f4b5dc121a3b",
 )
 
 go_repository(
@@ -680,20 +680,55 @@ go_repository(
 go_repository(
     name = "org_uber_go_atomic",
     importpath = "go.uber.org/atomic",
-    sum = "h1:cxzIVoETapQEqDhQu3QfnvXAV4AlzcvUCxkVUFw3+EU=",
-    version = "v1.4.0",
+    sum = "h1:Ezj3JGmsOnG1MoRWQkPBsKLe9DwWD9QeXzTRzzldNVk=",
+    version = "v1.6.0",
 )
 
 go_repository(
     name = "org_uber_go_multierr",
     importpath = "go.uber.org/multierr",
-    sum = "h1:HoEmRHQPVSqub6w2z2d2EOVs2fjyFRGyofhKuyDq0QI=",
-    version = "v1.1.0",
+    sum = "h1:KCa4XfM8CWFCpxXRGok+Q0SS/0XBhMDbHHGABQLvD2A=",
+    version = "v1.5.0",
 )
 
 go_repository(
     name = "org_uber_go_zap",
     importpath = "go.uber.org/zap",
-    sum = "h1:ORx85nbTijNz8ljznvCMR1ZBIPKFn3jQrag10X2AsuM=",
-    version = "v1.10.0",
+    sum = "h1:ZZCA22JRF2gQE5FoNmhmrf7jeJJ2uhqDUNRYKm8dvmM=",
+    version = "v1.15.0",
+)
+
+go_repository(
+    name = "com_github_google_renameio",
+    importpath = "github.com/google/renameio",
+    sum = "h1:GOZbcHa3HfsPKPlmyPyN2KEohoMXOhdMbHrvbpl2QaA=",
+    version = "v0.1.0",
+)
+
+go_repository(
+    name = "com_github_squzy_mongo_helper",
+    importpath = "github.com/squzy/mongo_helper",
+    sum = "h1:4ufoIuMrHwWfD0aea+m26wwNWiQh+jsWq2iltaXbKb4=",
+    version = "v0.0.0-20200502155448-a2e6845a8ba0",
+)
+
+go_repository(
+    name = "org_golang_x_mod",
+    importpath = "golang.org/x/mod",
+    sum = "h1:JgcxKXxCjrA2tyDP/aNU9K0Ck5Czfk6C7e2tMw7+bSI=",
+    version = "v0.0.0-20190513183733-4bf6d317e70e",
+)
+
+go_repository(
+    name = "org_golang_x_xerrors",
+    importpath = "golang.org/x/xerrors",
+    sum = "h1:9zdDQZ7Thm29KFXgAX/+yaf3eVbP7djjWp/dXAppNCc=",
+    version = "v0.0.0-20190717185122-a985d3407aa7",
+)
+
+go_repository(
+    name = "org_uber_go_tools",
+    importpath = "go.uber.org/tools",
+    sum = "h1:0mgffUl7nfd+FpvXMVz4IDEaUSmT1ysygQC7qYo7sG4=",
+    version = "v0.0.0-20190618225709-2cfd321de3ee",
 )

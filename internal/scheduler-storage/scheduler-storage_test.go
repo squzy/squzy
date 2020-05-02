@@ -1,24 +1,27 @@
 package scheduler_storage
 
 import (
-	"errors"
 	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"testing"
 )
 
 type schedulerStopErrorMock struct {
 }
 
+func (s schedulerStopErrorMock) GetIdBson() primitive.ObjectID {
+	panic("implement me")
+}
+
 func (s schedulerStopErrorMock) GetId() string {
 	return "1"
 }
 
-func (s schedulerStopErrorMock) Run() error {
-	panic("implement me")
+func (s schedulerStopErrorMock) Run() {
 }
 
-func (s schedulerStopErrorMock) Stop() error {
-	return errors.New("no")
+func (s schedulerStopErrorMock) Stop() {
+	return
 }
 
 func (s schedulerStopErrorMock) IsRun() bool {
@@ -28,16 +31,20 @@ func (s schedulerStopErrorMock) IsRun() bool {
 type schedulerMock struct {
 }
 
+func (s schedulerMock) GetIdBson() primitive.ObjectID {
+	panic("implement me")
+}
+
 func (s schedulerMock) GetId() string {
 	return "1"
 }
 
-func (s schedulerMock) Run() error {
+func (s schedulerMock) Run() {
 	panic("implement me")
 }
 
-func (s schedulerMock) Stop() error {
-	return nil
+func (s schedulerMock) Stop() {
+	return
 }
 
 func (s schedulerMock) IsRun() bool {
@@ -106,22 +113,5 @@ func TestStorage_Remove(t *testing.T) {
 		assert.Equal(t, nil, err)
 		err = s.Remove("1")
 		assert.Equal(t, nil, err)
-	})
-	t.Run("Should: return error if cant stop observer", func(t *testing.T) {
-		s := New()
-		err := s.Set(&schedulerStopErrorMock{})
-		assert.Equal(t, nil, err)
-		err = s.Remove("1")
-		assert.NotEqual(t, nil, err)
-	})
-}
-
-func TestStorage_GetList(t *testing.T) {
-	t.Run("Should: return map with element", func(t *testing.T) {
-		s := New()
-		_ = s.Set(&schedulerMock{})
-		assert.Equal(t, map[string]bool{
-			"1": true,
-		}, s.GetList())
 	})
 }

@@ -4,43 +4,47 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"net"
+	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"testing"
 	"time"
 )
 
-func TestNewTcpJob(t *testing.T) {
-	t.Run("Should: Should implement interface Job", func(t *testing.T) {
-		job := NewTcpJob("localhost", 9090, 0)
-		assert.Implements(t, (*Job)(nil), job)
-	})
-}
-
-func TestJobTcp_Do(t *testing.T) {
+func TestExecTcp(t *testing.T) {
 	t.Run("Test: Testing tcp health_check:", func(t *testing.T) {
 		t.Run("Should: return wrongConnectConfigError", func(t *testing.T) {
-			job := NewTcpJob("localhost", 10002, 0)
 			server, _ := net.Listen("tcp", "localhost:10003")
 			defer server.Close()
-			assert.Equal(t, wrongConnectConfigError.Error(), job.Do("").GetLogData().Error.Message)
+			job := ExecTcp("", 0, &scheduler_config_storage.TcpConfig{
+				Host: "localhost",
+				Port: 10002,
+			})
+			assert.Equal(t, wrongConnectConfigError.Error(), job.GetLogData().Error.Message)
 		})
 		t.Run("Should: return nil", func(t *testing.T) {
-			job := NewTcpJob("localhost", 10003, 0)
-			server, _ := net.Listen("tcp", "localhost:10003")
+			server, err := net.Listen("tcp", "localhost:10003")
+			assert.Equal(t, nil, err)
 			go func() {
 				_, _ = server.Accept()
 			}()
 			defer server.Close()
-			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.Do("").GetLogData().Code)
+			job := ExecTcp("", 0, &scheduler_config_storage.TcpConfig{
+				Host: "localhost",
+				Port: 10003,
+			})
+			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
 		})
 		t.Run("Should: return error because timeout", func(t *testing.T) {
-			job := NewTcpJob("localhost", 10004, 1)
 			go func() {
 				time.Sleep(time.Second * 5)
 				server, _ := net.Listen("tcp", "localhost:10004")
 				_, _ = server.Accept()
 				defer server.Close()
 			}()
-			assert.Equal(t, apiPb.SchedulerResponseCode_Error, job.Do("").GetLogData().Code)
+			job := ExecTcp("", 1, &scheduler_config_storage.TcpConfig{
+				Host: "localhost",
+				Port: 10004,
+			})
+			assert.Equal(t, apiPb.SchedulerResponseCode_Error, job.GetLogData().Code)
 		})
 	})
 }

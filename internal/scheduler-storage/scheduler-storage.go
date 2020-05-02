@@ -16,22 +16,11 @@ type SchedulerStorage interface {
 	Get(string) (scheduler.Scheduler, error)
 	Set(scheduler.Scheduler) error
 	Remove(string) error
-	GetList() map[string]bool
 }
 
 type storage struct {
 	kv    map[string]scheduler.Scheduler
 	mutex sync.RWMutex
-}
-
-func (s *storage) GetList() map[string]bool {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	statusMap := make(map[string]bool)
-	for _, schl := range s.kv {
-		statusMap[schl.GetId()] = schl.IsRun()
-	}
-	return statusMap
 }
 
 func (s *storage) Get(id string) (scheduler.Scheduler, error) {
@@ -65,11 +54,7 @@ func (s *storage) Remove(id string) error {
 		return storageKeyNotExistError
 	}
 	// make sure that observer stop before delete
-	err := s.kv[id].Stop()
-	if err != nil {
-		// @TODO here we should add log to StdERR because that we should handle on monitoring side
-		return err
-	}
+	s.kv[id].Stop()
 	delete(s.kv, id)
 	return nil
 }

@@ -7,34 +7,66 @@ import (
 	"time"
 )
 
+const (
+	ENV_PORT             = "PORT"
+	ENV_STORAGE_TIMEOUT  = "STORAGE_TIMEOUT"
+	ENV_MONGO_DB         = "MONGO_DB"
+	ENV_MONGO_URI        = "MONGO_URI"
+	ENV_MONGO_COLLECTION = "MONGO_COLLECTION"
+	ENV_STORAGE_HOST     = "SQUZY_STORAGE_HOST"
+
+	defaultPort           = int32(9090)
+	defaultStorageTimeout = time.Second * 5
+	defaultMongoDb        = "squzy_monitoring"
+	defaultCollection     = "schedulers"
+)
+
 type cfg struct {
-	port          int32
-	timeout       time.Duration
-	clientAddress string
+	port            int32
+	timeout         time.Duration
+	clientAddress   string
+	mongoUri        string
+	mongoDb         string
+	mongoCollection string
 }
 
-func (c cfg) GetPort() int32 {
+func (c *cfg) GetPort() int32 {
 	return c.port
 }
 
-func (c cfg) GetClientAddress() string {
+func (c *cfg) GetClientAddress() string {
 	return c.clientAddress
 }
 
-func (c cfg) GetStorageTimeout() time.Duration {
+func (c *cfg) GetStorageTimeout() time.Duration {
 	return c.timeout
+}
+
+func (c *cfg) GetMongoUri() string {
+	return c.mongoUri
+}
+
+func (c *cfg) GetMongoDb() string {
+	return c.mongoDb
+}
+
+func (c *cfg) GetMongoCollection() string {
+	return c.mongoCollection
 }
 
 type Config interface {
 	GetPort() int32
 	GetClientAddress() string
 	GetStorageTimeout() time.Duration
+	GetMongoUri() string
+	GetMongoDb() string
+	GetMongoCollection() string
 }
 
 func New() Config {
 	// Read port
-	portValue := os.Getenv("PORT")
-	port := int32(8080)
+	portValue := os.Getenv(ENV_PORT)
+	port := defaultPort
 	if portValue != "" {
 		i, err := strconv.ParseInt(portValue, 10, 32)
 		if err == nil {
@@ -42,19 +74,28 @@ func New() Config {
 		}
 	}
 	// Read storage
-	timeoutValue := os.Getenv("STORAGE_TIMEOUT")
-	timeoutStorage := time.Second * 5
+	timeoutValue := os.Getenv(ENV_STORAGE_TIMEOUT)
+	timeoutStorage := defaultStorageTimeout
 	if timeoutValue != "" {
 		i, err := strconv.ParseInt(timeoutValue, 10, 32)
 		if err == nil {
 			timeoutStorage = helpers.DurationFromSecond(int32(i))
 		}
 	}
-	// Client Adress
-	clientAddress := os.Getenv("STORAGE_HOST")
+	mongoDb := os.Getenv(ENV_MONGO_DB)
+	if mongoDb == "" {
+		mongoDb = defaultMongoDb
+	}
+	collection := os.Getenv(ENV_MONGO_COLLECTION)
+	if collection == "" {
+		collection = defaultCollection
+	}
 	return &cfg{
-		clientAddress: clientAddress,
-		timeout:       timeoutStorage,
-		port:          port,
+		clientAddress:   os.Getenv(ENV_STORAGE_HOST),
+		timeout:         timeoutStorage,
+		port:            port,
+		mongoUri:        os.Getenv(ENV_MONGO_URI),
+		mongoDb:         mongoDb,
+		mongoCollection: collection,
 	}
 }
