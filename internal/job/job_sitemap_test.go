@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"squzy/internal/parsers"
@@ -150,29 +150,29 @@ func TestSiteMapJob_Do(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
 		t.Run("Because mock with 200", func(t *testing.T) {
 			job := NewSiteMapJob("", 0, &siteMapStorage{}, &mockHttpTools{}, successFactory, -1)
-			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.Do("").GetLogData().Code)
 		})
 		t.Run("Because ignore url", func(t *testing.T) {
 			job := NewSiteMapJob("", 0, &siteMapStorageIgnore{}, &mockHttpToolsWithError{}, successFactory, 5)
-			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.Do("").GetLogData().Code)
 		})
 		t.Run("Because: empty sitemap", func(t *testing.T) {
 			job := NewSiteMapJob("", 0, &siteMapStorageEmptyIgnore{}, &mockHttpToolsWithError{}, successFactory, 5)
-			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.Do("").GetLogData().Code)
 		})
 	})
 	t.Run("Should: return error", func(t *testing.T) {
 		t.Run("Because Acquire error", func(t *testing.T) {
 			job := NewSiteMapJob("", 0, &siteMapStorage{}, &mockHttpToolsWithError{}, errorFactory, 5)
-			assert.IsType(t, clientPb.StatusCode_Error, job.Do().GetLogData().Code)
+			assert.IsType(t, apiPb.SchedulerResponseCode_Error, job.Do("").GetLogData().Code)
 		})
 		t.Run("Because return 500", func(t *testing.T) {
 			job := NewSiteMapJob("", 0, &siteMapStorage{}, &mockHttpToolsWithError{}, successFactory, 5)
-			assert.IsType(t, clientPb.StatusCode_Error, job.Do().GetLogData().Code)
+			assert.IsType(t, apiPb.SchedulerResponseCode_Error, job.Do("").GetLogData().Code)
 		})
 		t.Run("Because sitemapError", func(t *testing.T) {
 			job := NewSiteMapJob("", 0, &siteMapStorageError{}, &mockHttpTools{}, successFactory, 5)
-			assert.IsType(t, clientPb.StatusCode_Error, job.Do().GetLogData().Code)
+			assert.IsType(t, apiPb.SchedulerResponseCode_Error, job.Do("").GetLogData().Code)
 		})
 	})
 }

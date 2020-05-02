@@ -288,8 +288,8 @@ go_repository(
 go_repository(
     name = "com_github_squzy_squzy_generated",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:QwGrb5BtrWxTYOxRi49AYfHkFVvjc39na89l4qt68jw=",
-    version = "v1.3.3",
+    sum = "h1:uhIJET9A3scOc+lE20VTOEEC15lJTXCM0K/0TwqxlIo=",
+    version = "v1.3.5-0.20200501223004-9e3091ced73c",
 )
 
 go_repository(
@@ -626,4 +626,74 @@ go_repository(
     importpath = "go.mongodb.org/mongo-driver",
     sum = "h1:IYppNjEV/C+/3VPbhHVxQ4t04eVW0cLp0/pNdW++6Ug=",
     version = "v1.3.2",
+)
+
+go_repository(
+    name = "com_github_go_kit_kit",
+    importpath = "github.com/go-kit/kit",
+    sum = "h1:wDJmvq38kDhkVxi50ni9ykkdUr1PKgqKOoi01fa0Mdk=",
+    version = "v0.9.0",
+)
+
+go_repository(
+    name = "com_github_go_logfmt_logfmt",
+    importpath = "github.com/go-logfmt/logfmt",
+    sum = "h1:MP4Eh7ZCb31lleYCFuwm0oe4/YGak+5l1vA2NOE80nA=",
+    version = "v0.4.0",
+)
+
+go_repository(
+    name = "com_github_gogo_protobuf",
+    importpath = "github.com/gogo/protobuf",
+    sum = "h1:/s5zKNz0uPFCZ5hddgPdo2TK2TVrUNMn0OOX8/aZMTE=",
+    version = "v1.2.1",
+)
+
+go_repository(
+    name = "com_github_grpc_ecosystem_go_grpc_middleware",
+    importpath = "github.com/grpc-ecosystem/go-grpc-middleware",
+    sum = "h1:0IKlLyQ3Hs9nDaiK5cSHAGmcQEIC8l2Ts1u6x5Dfrqg=",
+    version = "v1.2.0",
+)
+
+go_repository(
+    name = "com_github_kisielk_gotool",
+    importpath = "github.com/kisielk/gotool",
+    sum = "h1:AV2c/EiW3KqPNT9ZKl07ehoAGi4C5/01Cfbblndcapg=",
+    version = "v1.0.0",
+)
+
+go_repository(
+    name = "com_github_kr_logfmt",
+    importpath = "github.com/kr/logfmt",
+    sum = "h1:T+h1c/A9Gawja4Y9mFVWj2vyii2bbUNDw3kt9VxK2EY=",
+    version = "v0.0.0-20140226030751-b84e30acd515",
+)
+
+go_repository(
+    name = "com_github_opentracing_opentracing_go",
+    importpath = "github.com/opentracing/opentracing-go",
+    sum = "h1:pWlfV3Bxv7k65HYwkikxat0+s3pV4bsqf19k25Ur8rU=",
+    version = "v1.1.0",
+)
+
+go_repository(
+    name = "org_uber_go_atomic",
+    importpath = "go.uber.org/atomic",
+    sum = "h1:cxzIVoETapQEqDhQu3QfnvXAV4AlzcvUCxkVUFw3+EU=",
+    version = "v1.4.0",
+)
+
+go_repository(
+    name = "org_uber_go_multierr",
+    importpath = "go.uber.org/multierr",
+    sum = "h1:HoEmRHQPVSqub6w2z2d2EOVs2fjyFRGyofhKuyDq0QI=",
+    version = "v1.1.0",
+)
+
+go_repository(
+    name = "org_uber_go_zap",
+    importpath = "go.uber.org/zap",
+    sum = "h1:ORx85nbTijNz8ljznvCMR1ZBIPKFn3jQrag10X2AsuM=",
+    version = "v1.10.0",
 )

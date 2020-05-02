@@ -12,14 +12,14 @@ go_library(
         "@com_github_shirou_gopsutil//host:go_default_library",
         "@com_github_shirou_gopsutil//net:go_default_library",
         "@com_github_shirou_gopsutil//mem:go_default_library",
-        "//apps/agent/config:config",
-         "//apps/agent/version:version",
-        "//apps/internal/agent:agent",
-        "//apps/agent/application:application",
+        "//apps/agent_client/config:config",
+        "//apps/agent_client/version:version",
+        "//internal/agent:agent",
+        "//apps/agent_client/application:application",
         "@com_github_golang_protobuf//ptypes:go_default_library",
         "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
-        "//apps/internal/agent-executor:agent-executor",
-        "//apps/internal/grpcTools:grpcTools",
+        "//internal/agent-executor:agent-executor",
+        "//internal/grpcTools:grpcTools",
     ]
 )
 

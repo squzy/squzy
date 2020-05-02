@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"squzy/internal/helpers"
 	"strconv"
 	"time"
 )
@@ -46,7 +47,7 @@ func New() Config {
 	if timeoutValue != "" {
 		i, err := strconv.ParseInt(timeoutValue, 10, 32)
 		if err == nil {
-			timeoutStorage = time.Duration(int32(i)) * time.Second
+			timeoutStorage = helpers.DurationFromSecond(int32(i))
 		}
 	}
 	// Client Adress

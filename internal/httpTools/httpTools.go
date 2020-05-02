@@ -20,7 +20,7 @@ const (
 	MaxIdleConnectionsPerHost int   = 30
 	RequestTimeout            int32 = 10
 	userAgentPrefix                 = "Squzy_monitoring"
-	logHeader                       = "Squzy_log_id"
+	logHeader                       = "Squzy_scheduler_id"
 	userAgentHeaderKey              = "User-Agent"
 )
 
@@ -46,7 +46,7 @@ type HttpTool interface {
 	SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error)
 	SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error)
 	SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int, ) (int, []byte, error)
-	CreateRequest(method string, url string, headers *map[string]string, logId string) *http.Request
+	CreateRequest(method string, url string, headers *map[string]string, schedulerId string) *http.Request
 }
 
 func (h *httpTool) CreateRequest(method string, url string, headers *map[string]string, logId string) *http.Request {

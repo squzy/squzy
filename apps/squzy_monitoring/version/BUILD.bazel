@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
      name = "version",
      srcs = ["version.go"],
-    importpath = "squzy/apps/squzy/version",
+    importpath = "squzy/apps/squzy_monitoring/version",
      visibility = ["//visibility:public"],
 )
 

@@ -65,7 +65,7 @@ func (s *schl) observer() {
 		for {
 			select {
 			case <-s.ticker.C:
-				_ = s.externalStorage.Write(s.id, s.job.Do())
+				_ = s.externalStorage.Write(s.job.Do(s.id))
 			case <-s.quitCh:
 				break loop
 			}

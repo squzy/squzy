@@ -2,7 +2,9 @@ package application
 
 import (
 	"fmt"
-	serverPb "github.com/squzy/squzy_generated/generated/server/proto/v1"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
 	"net"
 	"squzy/internal/httpTools"
@@ -42,8 +44,17 @@ func (s *app) Run(port int32) error {
 	if err != nil {
 		return err
 	}
-	grpcServer := grpc.NewServer()
-	serverPb.RegisterServerServer(
+	grpcServer := grpc.NewServer(
+		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
+			grpc_recovery.StreamServerInterceptor(),
+			),
+		),
+		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			grpc_recovery.UnaryServerInterceptor(),
+			),
+		),
+	)
+	apiPb.RegisterSchedulersExecutorServer(
 		grpcServer,
 		server.New(
 			s.schedulerStorage,

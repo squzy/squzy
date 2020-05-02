@@ -6,8 +6,8 @@ go_library(
      importpath = "squzy/internal/scheduler",
      visibility = ["//visibility:public"],
      deps = [
-        "//apps/internal/job:job",
-        "//apps/internal/storage:storage",
+        "//internal/job:job",
+        "//internal/storage:storage",
         "@com_github_google_uuid//:go_default_library"
      ],
 

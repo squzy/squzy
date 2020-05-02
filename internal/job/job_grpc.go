@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/google/uuid"
-	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
 	health_check "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
@@ -14,7 +13,7 @@ import (
 )
 
 const (
-	logMetaData = "Squzy_log_id"
+	logMetaData = "squzy_scheduler_id"
 )
 
 type grpcJob struct {
@@ -38,44 +37,43 @@ func NewGrpcJob(service string, host string, port int32, timeout int32, connOpti
 }
 
 type grpcError struct {
-	logId       string
+	schedulerId string
 	startTime   *timestamp.Timestamp
 	endTime     *timestamp.Timestamp
-	code        clientPb.StatusCode
+	code        apiPb.SchedulerResponseCode
 	description string
-	location    string
-	port        int32
 }
 
-func (s *grpcError) GetLogData() *clientPb.Log {
-	return &clientPb.Log{
-		Code:        s.code,
-		Description: s.description,
-		Meta: &clientPb.MetaData{
-			Id:        s.logId,
-			Location:  s.location,
-			Port:      s.port,
+func (s *grpcError) GetLogData() *apiPb.SchedulerResponse {
+	var err *apiPb.SchedulerResponse_Error
+	if s.code == apiPb.SchedulerResponseCode_Error {
+		err = &apiPb.SchedulerResponse_Error{
+			Message: s.description,
+		}
+	}
+	return &apiPb.SchedulerResponse{
+		SchedulerId: s.schedulerId,
+		Code:  s.code,
+		Error: err,
+		Type:  apiPb.SchedulerType_Grpc,
+		Meta: &apiPb.SchedulerResponse_MetaData{
 			StartTime: s.startTime,
 			EndTime:   s.endTime,
-			Type:      clientPb.Type_Grpc,
 		},
 	}
 }
 
-func newGrpcError(logId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code clientPb.StatusCode, description string, location string, port int32) CheckError {
+func newGrpcError(schedulerId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string) CheckError {
 	return &grpcError{
-		logId:       logId,
+		schedulerId: schedulerId,
 		startTime:   startTime,
 		endTime:     endTime,
 		code:        code,
 		description: description,
-		location:    location,
-		port:        port,
 	}
 }
 
-func (j *grpcJob) Do() CheckError {
-	logId := uuid.New().String()
+func (j *grpcJob) Do(schedulerId string) CheckError {
 	startTime := ptypes.TimestampNow()
 
 	ctx, cancel := helpers.TimeoutContext(context.Background(), helpers.DurationFromSecond(j.timeout))
@@ -85,7 +83,7 @@ func (j *grpcJob) Do() CheckError {
 	conn, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%d", j.host, j.port), j.connOptions...)
 
 	if err != nil {
-		return newGrpcError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, wrongConnectConfigError.Error(), j.host, j.port)
+		return newGrpcError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, wrongConnectConfigError.Error())
 	}
 
 	defer func() {
@@ -95,17 +93,17 @@ func (j *grpcJob) Do() CheckError {
 	client := health_check.NewHealthClient(conn)
 
 	md := metadata.New(map[string]string{
-		logMetaData: logId,
+		logMetaData: schedulerId,
 	})
 
 	res, err := client.Check(metadata.NewOutgoingContext(ctx, md), &health_check.HealthCheckRequest{Service: j.service}, j.callOptions...)
 
 	if err != nil {
-		return newGrpcError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, connTimeoutError.Error(), j.host, j.port)
+		return newGrpcError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, connTimeoutError.Error())
 	}
 
 	if res.Status != health_check.HealthCheckResponse_SERVING {
-		return newGrpcError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, grpcNotServing.Error(), j.host, j.port)
+		return newGrpcError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, grpcNotServing.Error())
 	}
-	return newGrpcError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", j.host, j.port)
+	return newGrpcError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "")
 }

@@ -3,8 +3,7 @@ package job
 import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/google/uuid"
-	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"squzy/internal/helpers"
 	"squzy/internal/httpTools"
 )
@@ -19,65 +18,64 @@ type jobHTTP struct {
 }
 
 type httpError struct {
-	logId       string
+	schedulerId string
 	startTime   *timestamp.Timestamp
 	endTime     *timestamp.Timestamp
-	code        clientPb.StatusCode
+	code        apiPb.SchedulerResponseCode
 	description string
-	location    string
 }
 
-func (e *httpError) GetLogData() *clientPb.Log {
-	return &clientPb.Log{
+func (e *httpError) GetLogData() *apiPb.SchedulerResponse {
+	var err *apiPb.SchedulerResponse_Error
+	if e.code == apiPb.SchedulerResponseCode_Error {
+		err = &apiPb.SchedulerResponse_Error{
+			Message: e.description,
+		}
+	}
+	return &apiPb.SchedulerResponse{
+		SchedulerId: e.schedulerId,
 		Code:        e.code,
-		Description: e.description,
-		Meta: &clientPb.MetaData{
-			Id:        e.logId,
-			Location:  e.location,
-			Port:      helpers.GetPortByUrl(e.location),
+		Error:       err,
+		Type:        apiPb.SchedulerType_Http,
+		Meta: &apiPb.SchedulerResponse_MetaData{
 			StartTime: e.startTime,
 			EndTime:   e.endTime,
-			Type:      clientPb.Type_Http,
 		},
 	}
 }
 
-func newHttpError(logId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code clientPb.StatusCode, description string, location string) CheckError {
+func newHttpError(schedulerId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string) CheckError {
 	return &httpError{
-		logId:       logId,
+		schedulerId: schedulerId,
 		startTime:   startTime,
 		endTime:     endTime,
 		code:        code,
 		description: description,
-		location:    location,
 	}
 }
 
-func (j *jobHTTP) Do() CheckError {
-	logId := uuid.New().String()
+func (j *jobHTTP) Do(schedulerId string) CheckError {
 	startTime := ptypes.TimestampNow()
-	req := j.httpTool.CreateRequest(j.methodType, j.url, &j.headers, logId)
+	req := j.httpTool.CreateRequest(j.methodType, j.url, &j.headers, schedulerId)
 
 	_, _, err := j.httpTool.SendRequestTimeoutStatusCode(req, helpers.DurationFromSecond(j.timeout), int(j.expectedStatus))
 
 	if err != nil {
 		return newHttpError(
-			logId,
+			schedulerId,
 			startTime,
 			ptypes.TimestampNow(),
-			clientPb.StatusCode_Error,
+			apiPb.SchedulerResponseCode_Error,
 			err.Error(),
-			j.url,
 		)
 	}
 
 	return newHttpError(
-		logId,
+		schedulerId,
 		startTime,
 		ptypes.TimestampNow(),
-		clientPb.StatusCode_OK,
+		apiPb.SchedulerResponseCode_OK,
 		"",
-		j.url,
 	)
 }
 

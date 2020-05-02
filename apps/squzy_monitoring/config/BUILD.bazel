@@ -3,8 +3,11 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
      name = "config",
      srcs = ["config.go"],
-     importpath = "squzy/apps/squzy/config",
+     importpath = "squzy/apps/squzy_monitoring/config",
      visibility = ["//visibility:public"],
+     deps = [
+         "//internal/helpers:helpers"
+     ]
 )
 
 go_test(

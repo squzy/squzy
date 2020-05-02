@@ -1,7 +1,7 @@
 package job
 
 import (
-	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"net"
 	"testing"
@@ -21,7 +21,7 @@ func TestJobTcp_Do(t *testing.T) {
 			job := NewTcpJob("localhost", 10002, 0)
 			server, _ := net.Listen("tcp", "localhost:10003")
 			defer server.Close()
-			assert.Equal(t, wrongConnectConfigError.Error(), job.Do().GetLogData().Description)
+			assert.Equal(t, wrongConnectConfigError.Error(), job.Do("").GetLogData().Error.Message)
 		})
 		t.Run("Should: return nil", func(t *testing.T) {
 			job := NewTcpJob("localhost", 10003, 0)
@@ -30,7 +30,7 @@ func TestJobTcp_Do(t *testing.T) {
 				_, _ = server.Accept()
 			}()
 			defer server.Close()
-			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.Do("").GetLogData().Code)
 		})
 		t.Run("Should: return error because timeout", func(t *testing.T) {
 			job := NewTcpJob("localhost", 10004, 1)
@@ -40,7 +40,7 @@ func TestJobTcp_Do(t *testing.T) {
 				_, _ = server.Accept()
 				defer server.Close()
 			}()
-			assert.Equal(t, clientPb.StatusCode_Error, job.Do().GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerResponseCode_Error, job.Do("").GetLogData().Code)
 		})
 	})
 }

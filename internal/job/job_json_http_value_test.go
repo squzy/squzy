@@ -3,8 +3,7 @@ package job
 import (
 	"errors"
 	structType "github.com/golang/protobuf/ptypes/struct"
-	httpPb "github.com/squzy/squzy_generated/generated/server/proto/v1"
-	storagePb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
@@ -69,102 +68,102 @@ func TestNewJsonHttpValueJob(t *testing.T) {
 func TestJsonHttpValueJob_Do(t *testing.T) {
 	t.Run("Should: return error on http request", func(t *testing.T) {
 		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockError{}, nil)
-		assert.Equal(t, storagePb.StatusCode_Error, s.Do().GetLogData().Code)
+		assert.Equal(t, apiPb.SchedulerResponseCode_Error, s.Do("").GetLogData().Code)
 	})
 	t.Run("Should: return error because value not exist", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*httpPb.HttpJsonValueCheck_Selectors{
+		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
 			{
-				Type: httpPb.HttpJsonValueCheck_String,
+				Type: apiPb.HttpJsonValueConfig_String,
 				Path: "asfasf",
 			},
 		})
-		res := s.Do()
-		assert.Equal(t, storagePb.StatusCode_Error, res.GetLogData().Code)
-		assert.Equal(t, "", res.GetLogData().Value.GetStringValue())
+		res := s.Do("")
+		assert.Equal(t, apiPb.SchedulerResponseCode_Error, res.GetLogData().Code)
+		assert.Equal(t, "", res.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: not return error because selectors is missing", func(t *testing.T) {
 		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, nil)
-		assert.Equal(t, storagePb.StatusCode_OK, s.Do().GetLogData().Code)
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.Do("").GetLogData().Code)
 	})
 	t.Run("Should: parse single bool value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*httpPb.HttpJsonValueCheck_Selectors{
+		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
 			{
-				Type: httpPb.HttpJsonValueCheck_Bool,
+				Type: apiPb.HttpJsonValueConfig_Bool,
 				Path: "success",
 			},
 		})
-		res := s.Do()
-		assert.Equal(t, storagePb.StatusCode_OK, res.GetLogData().Code)
-		assert.Equal(t, true, res.GetLogData().Value.GetBoolValue())
+		res := s.Do("")
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
+		assert.Equal(t, true, res.GetLogData().Meta.Value.GetBoolValue())
 	})
 	t.Run("Should: parse single string value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*httpPb.HttpJsonValueCheck_Selectors{
+		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
 			{
-				Type: httpPb.HttpJsonValueCheck_String,
+				Type: apiPb.HttpJsonValueConfig_String,
 				Path: "name",
 			},
 		})
-		res := s.Do()
-		assert.Equal(t, storagePb.StatusCode_OK, res.GetLogData().Code)
-		assert.Equal(t, "John", res.GetLogData().Value.GetStringValue())
+		res := s.Do("")
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
+		assert.Equal(t, "John", res.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: parse single number value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*httpPb.HttpJsonValueCheck_Selectors{
+		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
 			{
-				Type: httpPb.HttpJsonValueCheck_Number,
+				Type: apiPb.HttpJsonValueConfig_Number,
 				Path: "age",
 			},
 		})
-		res := s.Do()
-		assert.Equal(t, storagePb.StatusCode_OK, res.GetLogData().Code)
-		assert.Equal(t, float64(31), res.GetLogData().Value.GetNumberValue())
+		res := s.Do("")
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
+		assert.Equal(t, float64(31), res.GetLogData().Meta.Value.GetNumberValue())
 	})
 	t.Run("Should: parse single any value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*httpPb.HttpJsonValueCheck_Selectors{
+		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
 			{
-				Type: httpPb.HttpJsonValueCheck_Any,
+				Type: apiPb.HttpJsonValueConfig_Any,
 				Path: "age",
 			},
 		})
-		res := s.Do()
-		assert.Equal(t, storagePb.StatusCode_OK, res.GetLogData().Code)
-		assert.Equal(t, "31", res.GetLogData().Value.GetStringValue())
+		res := s.Do("")
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
+		assert.Equal(t, "31", res.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: parse single raw value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*httpPb.HttpJsonValueCheck_Selectors{
+		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
 			{
-				Type: httpPb.HttpJsonValueCheck_Raw,
+				Type: apiPb.HttpJsonValueConfig_Raw,
 				Path: "raw",
 			},
 		})
-		res := s.Do()
-		assert.Equal(t, storagePb.StatusCode_OK, res.GetLogData().Code)
-		assert.Equal(t, `{"name":"ahha"}`, res.GetLogData().Value.GetStringValue())
+		res := s.Do("")
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
+		assert.Equal(t, `{"name":"ahha"}`, res.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: parse single time value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*httpPb.HttpJsonValueCheck_Selectors{
+		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
 			{
-				Type: httpPb.HttpJsonValueCheck_Time,
+				Type: apiPb.HttpJsonValueConfig_Time,
 				Path: "time",
 			},
 		})
-		res := s.Do()
-		assert.Equal(t, storagePb.StatusCode_OK, res.GetLogData().Code)
-		assert.Equal(t, "2012-04-23T18:25:43Z", res.GetLogData().Value.GetStringValue())
+		res := s.Do("")
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
+		assert.Equal(t, "2012-04-23T18:25:43Z", res.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: parse multipile value", func(t *testing.T) {
-		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*httpPb.HttpJsonValueCheck_Selectors{
+		s := NewJsonHttpValueJob(http.MethodGet, "", map[string]string{}, 0, &mockSuccess{}, []*apiPb.HttpJsonValueConfig_Selectors{
 			{
-				Type: httpPb.HttpJsonValueCheck_Time,
+				Type: apiPb.HttpJsonValueConfig_Time,
 				Path: "time",
 			},
 			{
-				Type: httpPb.HttpJsonValueCheck_Number,
+				Type: apiPb.HttpJsonValueConfig_Number,
 				Path: "age",
 			},
 		})
-		res := s.Do()
-		assert.Equal(t, storagePb.StatusCode_OK, res.GetLogData().Code)
+		res := s.Do("")
+		assert.Equal(t, apiPb.SchedulerResponseCode_OK, res.GetLogData().Code)
 		assert.EqualValues(t, &structType.ListValue{
 			Values: []*structType.Value{
 				{
@@ -178,6 +177,6 @@ func TestJsonHttpValueJob_Do(t *testing.T) {
 					},
 				},
 			},
-		}, res.GetLogData().Value.GetListValue())
+		}, res.GetLogData().Meta.Value.GetListValue())
 	})
 }

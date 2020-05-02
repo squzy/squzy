@@ -6,8 +6,8 @@ go_library(
      importpath = "squzy/internal/sitemap-storage",
      visibility = ["//visibility:public"],
      deps = [
-        "//apps/internal/parsers:parsers",
-        "//apps/internal/httpTools:httpTools",
+        "//internal/parsers:parsers",
+        "//internal/httpTools:httpTools",
      ],
 
 )

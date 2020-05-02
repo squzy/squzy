@@ -6,7 +6,7 @@ go_library(
      importpath = "squzy/internal/scheduler-storage",
      visibility = ["//visibility:public"],
      deps = [
-        "//apps/internal/scheduler:scheduler",
+        "//internal/scheduler:scheduler",
      ],
 
 )

@@ -12,7 +12,7 @@ type storageMock struct {
 	count int
 }
 
-func (s *storageMock) Write(id string, log job.CheckError) error {
+func (s *storageMock) Write(log job.CheckError) error {
 	s.count += 1
 	return nil
 }
@@ -21,7 +21,7 @@ type jb struct {
 	count int
 }
 
-func (j *jb) Do() job.CheckError {
+func (j *jb) Do(id string) job.CheckError {
 	j.count += 1
 	return nil
 }

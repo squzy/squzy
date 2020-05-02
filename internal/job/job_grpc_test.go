@@ -3,7 +3,7 @@ package job
 import (
 	"context"
 	"errors"
-	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	health_check "google.golang.org/grpc/health/grpc_health_v1"
@@ -90,7 +90,7 @@ func TestGrpcJob_Do(t *testing.T) {
 				_ = grpcServer.Serve(lis)
 			}()
 			job := NewGrpcJob("test", "localhost", 9090, 1, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
-			assert.Equal(t, clientPb.StatusCode_OK, job.Do().GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.Do("haha").GetLogData().Code)
 			grpcServer.Stop()
 		})
 
@@ -102,7 +102,7 @@ func TestGrpcJob_Do(t *testing.T) {
 				_ = grpcServer.Serve(lis)
 			}()
 			job := NewGrpcJob("test", "localhost", 9090, 2, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
-			assert.Equal(t, clientPb.StatusCode_Error, job.Do().GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerResponseCode_Error, job.Do("").GetLogData().Code)
 			grpcServer.Stop()
 		})
 
@@ -114,18 +114,18 @@ func TestGrpcJob_Do(t *testing.T) {
 				_ = grpcServer.Serve(lis)
 			}()
 			job := NewGrpcJob("test", "localhost", 9090, 0, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
-			assert.Equal(t, grpcNotServing.Error(), job.Do().GetLogData().Description)
+			assert.Equal(t, grpcNotServing.Error(), job.Do("").GetLogData().Error.Message)
 			grpcServer.Stop()
 		})
 
 		t.Run("Should: Return connTimeoutError error", func(t *testing.T) {
 			job := NewGrpcJob("test", "localhost", 9091, 0, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{})
-			assert.Equal(t, connTimeoutError.Error(), job.Do().GetLogData().Description)
+			assert.Equal(t, connTimeoutError.Error(), job.Do("").GetLogData().Error.Message)
 		})
 
 		t.Run("Should: Return wrongConnectConfigError error", func(t *testing.T) {
 			job := NewGrpcJob("test", "localhost", 9091, 0, []grpc.DialOption{grpc.WithInsecure(), grpc.WithBlock()}, []grpc.CallOption{})
-			assert.Equal(t, wrongConnectConfigError.Error(), job.Do().GetLogData().Description)
+			assert.Equal(t, wrongConnectConfigError.Error(), job.Do("").GetLogData().Error.Message)
 		})
 	})
 }

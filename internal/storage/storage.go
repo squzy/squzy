@@ -3,7 +3,8 @@ package storage
 import (
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
-	storagePb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
+	"github.com/google/uuid"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	logger "log"
 	"os"
 	"squzy/internal/job"
@@ -11,7 +12,7 @@ import (
 )
 
 type Storage interface {
-	Write(id string, log job.CheckError) error
+	Write(log job.CheckError) error
 }
 
 type memory struct {
@@ -19,9 +20,9 @@ type memory struct {
 	errLogger  *logger.Logger
 }
 
-func (m *memory) Write(id string, log job.CheckError) error {
+func (m *memory) Write(log job.CheckError) error {
 	logData := log.GetLogData()
-
+	logId := uuid.New().String()
 	startTime, err := ptypes.Timestamp(logData.Meta.StartTime)
 
 	if err != nil {
@@ -34,13 +35,13 @@ func (m *memory) Write(id string, log job.CheckError) error {
 		return err
 	}
 
-	if logData.Code == storagePb.StatusCode_OK {
+	if logData.Code == apiPb.SchedulerResponseCode_OK {
 		m.infoLogger.Println(fmt.Sprintf(
 			"SchedulerId: %s, Value: %s, LogId: %s, Status: Ok, Type: %s, startTime: %s, endTime: %s, duration: %s",
-			id,
-			logData.Value.GetStringValue(),
-			logData.Meta.Id,
-			logData.Meta.Type.String(),
+			logData.SchedulerId,
+			logData.Meta.Value,
+			logId,
+			logData.Type.String(),
 			startTime.Format(time.RFC3339),
 			endTime.Format(time.RFC3339),
 			fmt.Sprintf("%f", endTime.Sub(startTime).Seconds()),
@@ -48,13 +49,11 @@ func (m *memory) Write(id string, log job.CheckError) error {
 		return nil
 	}
 	m.errLogger.Println(fmt.Sprintf(
-		"SchedulerId: %s, LogId: %s, Error msg: %s, Location: %s, port: %d, Type: %s, startTime: %s, endTime: %s, duration: %s",
-		id,
-		logData.Meta.Id,
-		logData.Description,
-		logData.Meta.Location,
-		logData.Meta.Port,
-		logData.Meta.Type.String(),
+		"SchedulerId: %s, LogId: %s, Error msg: %s, Type: %s, startTime: %s, endTime: %s, duration: %s",
+		logData.SchedulerId,
+		logId,
+		logData.Error.Message,
+		logData.Type.String(),
 		startTime.Format(time.RFC3339),
 		endTime.Format(time.RFC3339),
 		fmt.Sprintf("%f", endTime.Sub(startTime).Seconds()),

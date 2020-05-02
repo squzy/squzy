@@ -2,7 +2,8 @@ package server
 
 import (
 	"context"
-	serverPb "github.com/squzy/squzy_generated/generated/server/proto/v1"
+	"github.com/golang/protobuf/ptypes/empty"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
 	"squzy/internal/helpers"
 	"squzy/internal/httpTools"
@@ -22,17 +23,25 @@ type server struct {
 	httpTools        httpTools.HttpTool
 }
 
-func (s server) RemoveScheduler(ctx context.Context, rq *serverPb.RemoveSchedulerRequest) (*serverPb.RemoveSchedulerResponse, error) {
+func (s *server) GetSchedulerList(context.Context, *empty.Empty) (*apiPb.GetSchedulerListResponse, error) {
+	return &apiPb.GetSchedulerListResponse{}, nil
+}
+
+func (s *server) GetSchedulerById(context.Context, *apiPb.GetSchedulerByIdRequest) (*apiPb.Scheduler, error) {
+	return &apiPb.Scheduler{}, nil
+}
+
+func (s *server) Remove(ctx context.Context, rq *apiPb.RemoveRequest) (*apiPb.RemoveResponse, error) {
 	err := s.schedulerStorage.Remove(rq.Id)
 	if err != nil {
 		return nil, err
 	}
-	return &serverPb.RemoveSchedulerResponse{
+	return &apiPb.RemoveResponse{
 		Id: rq.Id,
 	}, nil
 }
 
-func (s server) RunScheduler(ctx context.Context, rq *serverPb.RunSchedulerRequest) (*serverPb.RunSchedulerResponse, error) {
+func (s *server) Run(ctx context.Context, rq *apiPb.RunRequest) (*apiPb.RunResponse, error) {
 	schld, err := s.schedulerStorage.Get(rq.Id)
 	if err != nil {
 		return nil, err
@@ -41,12 +50,12 @@ func (s server) RunScheduler(ctx context.Context, rq *serverPb.RunSchedulerReque
 	if err != nil {
 		return nil, err
 	}
-	return &serverPb.RunSchedulerResponse{
+	return &apiPb.RunResponse{
 		Id: schld.GetId(),
 	}, nil
 }
 
-func (s server) StopScheduler(ctx context.Context, rq *serverPb.StopSchedulerRequest) (*serverPb.StopSchedulerResponse, error) {
+func (s *server) Stop(ctx context.Context, rq *apiPb.StopRequest) (*apiPb.StopResponse, error) {
 	schld, err := s.schedulerStorage.Get(rq.Id)
 	if err != nil {
 		return nil, err
@@ -55,16 +64,16 @@ func (s server) StopScheduler(ctx context.Context, rq *serverPb.StopSchedulerReq
 	if err != nil {
 		return nil, err
 	}
-	return &serverPb.StopSchedulerResponse{
+	return &apiPb.StopResponse{
 		Id: schld.GetId(),
 	}, nil
 }
 
-func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerRequest) (*serverPb.AddSchedulerResponse, error) {
+func (s *server) Add(ctx context.Context, rq *apiPb.AddRequest) (*apiPb.AddResponse, error) {
 	interval := helpers.DurationFromSecond(rq.Interval)
-	switch check := rq.Check.(type) {
-	case *serverPb.AddSchedulerRequest_TcpCheck:
-		tcpCheck := check.TcpCheck
+	switch check := rq.Config.(type) {
+	case *apiPb.AddRequest_Tcp:
+		tcpCheck := check.Tcp
 		schld, err := scheduler.New(
 			interval,
 			job.NewTcpJob(tcpCheck.Host, tcpCheck.Port, rq.Timeout),
@@ -77,11 +86,11 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		if err != nil {
 			return nil, err
 		}
-		return &serverPb.AddSchedulerResponse{
+		return &apiPb.AddResponse{
 			Id: schld.GetId(),
 		}, nil
-	case *serverPb.AddSchedulerRequest_SitemapCheck:
-		siteMapCheck := check.SitemapCheck
+	case *apiPb.AddRequest_Sitemap:
+		siteMapCheck := check.Sitemap
 		schld, err := scheduler.New(
 			interval,
 			job.NewSiteMapJob(siteMapCheck.Url, rq.Timeout, s.siteMapStorage, s.httpTools, s.semaphoreFactory, siteMapCheck.Concurrency),
@@ -94,11 +103,11 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		if err != nil {
 			return nil, err
 		}
-		return &serverPb.AddSchedulerResponse{
+		return &apiPb.AddResponse{
 			Id: schld.GetId(),
 		}, nil
-	case *serverPb.AddSchedulerRequest_GrpcCheck:
-		grcpCheck := check.GrpcCheck
+	case *apiPb.AddRequest_Grpc:
+		grcpCheck := check.Grpc
 		schld, err := scheduler.New(
 			interval,
 			job.NewGrpcJob(grcpCheck.Service, grcpCheck.Host, grcpCheck.Port, rq.Timeout, []grpc.DialOption{grpc.WithInsecure()}, []grpc.CallOption{}),
@@ -111,11 +120,11 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		if err != nil {
 			return nil, err
 		}
-		return &serverPb.AddSchedulerResponse{
+		return &apiPb.AddResponse{
 			Id: schld.GetId(),
 		}, nil
-	case *serverPb.AddSchedulerRequest_HttpCheck:
-		httpCheck := check.HttpCheck
+	case *apiPb.AddRequest_Http:
+		httpCheck := check.Http
 		schld, err := scheduler.New(
 			interval,
 			job.NewHttpJob(httpCheck.Method, httpCheck.Url, httpCheck.Headers, rq.Timeout, httpCheck.StatusCode, s.httpTools),
@@ -128,12 +137,12 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		if err != nil {
 			return nil, err
 		}
-		return &serverPb.AddSchedulerResponse{
+		return &apiPb.AddResponse{
 			Id: schld.GetId(),
 		}, nil
 
-	case *serverPb.AddSchedulerRequest_HttpJsonValue:
-		httpJsonValueCheck := check.HttpJsonValue
+	case *apiPb.AddRequest_HttpValue:
+		httpJsonValueCheck := check.HttpValue
 		schld, err := scheduler.New(
 			interval,
 			job.NewJsonHttpValueJob(httpJsonValueCheck.Method, httpJsonValueCheck.Url, httpJsonValueCheck.Headers, rq.Timeout, s.httpTools, httpJsonValueCheck.Selectors),
@@ -146,32 +155,14 @@ func (s server) AddScheduler(ctx context.Context, rq *serverPb.AddSchedulerReque
 		if err != nil {
 			return nil, err
 		}
-		return &serverPb.AddSchedulerResponse{
+		return &apiPb.AddResponse{
 			Id: schld.GetId(),
 		}, nil
 	default:
-		return &serverPb.AddSchedulerResponse{
+		return &apiPb.AddResponse{
 			Id: "",
 		}, nil
 	}
-}
-
-func (s server) GetList(context.Context, *serverPb.GetListRequest) (*serverPb.GetListResponse, error) {
-	sMap := s.schedulerStorage.GetList()
-	list := []*serverPb.SchedulerListItem{}
-	for k, v := range sMap {
-		status := serverPb.Status_STOPPED
-		if v {
-			status = serverPb.Status_RUNNED
-		}
-		list = append(list, &serverPb.SchedulerListItem{
-			Id:     k,
-			Status: status,
-		})
-	}
-	return &serverPb.GetListResponse{
-		List: list,
-	}, nil
 }
 
 func New(
@@ -180,7 +171,7 @@ func New(
 	siteMapStorage sitemap_storage.SiteMapStorage,
 	httpTools httpTools.HttpTool,
 	semaphoreFactory semaphore.SemaphoreFactory,
-) serverPb.ServerServer {
+) apiPb.SchedulersExecutorServer {
 	return &server{
 		schedulerStorage: schedulerStorage,
 		externalStorage:  externalStorage,

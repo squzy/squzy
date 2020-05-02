@@ -6,8 +6,8 @@ go_library(
      importpath = "squzy/internal/agent-executor",
      visibility = ["//visibility:public"],
      deps = [
-         "//apps/internal/agent:agent",
-         "@com_github_squzy_squzy_generated//generated/agent/proto/v1:go_default_library",
+         "//internal/agent:agent",
+         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
      ],
 
 )

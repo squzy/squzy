@@ -2,7 +2,7 @@ package job
 
 import (
 	"errors"
-	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 )
 
 var (
@@ -12,9 +12,9 @@ var (
 )
 
 type CheckError interface {
-	GetLogData() *clientPb.Log
+	GetLogData() *apiPb.SchedulerResponse
 }
 
 type Job interface {
-	Do() CheckError
+	Do(schedulerId string) CheckError
 }

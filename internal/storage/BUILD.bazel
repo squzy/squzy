@@ -10,10 +10,11 @@ go_library(
      visibility = ["//visibility:public"],
      deps = [
         "@com_github_golang_protobuf//ptypes:go_default_library",
-        "//apps/internal/grpcTools:grpcTools",
+        "//internal/grpcTools:grpcTools",
         "@org_golang_google_grpc//:go_default_library",
-        "@com_github_squzy_squzy_generated//generated/storage/proto/v1:go_default_library",
-        "//apps/internal/job:job",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
+        "//internal/job:job",
+        "@com_github_google_uuid//:go_default_library",
      ],
 
 )

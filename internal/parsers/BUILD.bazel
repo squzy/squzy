@@ -20,7 +20,7 @@ go_test(
         "@com_github_stretchr_testify//assert:go_default_library"
     ],
     data = [
-        "//apps/internal/parsers:tests_file"
+        "//internal/parsers:tests_file"
     ]
 )
 

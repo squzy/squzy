@@ -6,7 +6,7 @@ go_library(
      importpath = "squzy/internal/httpTools",
      visibility = ["//visibility:public"],
      deps = [
-         "//apps/internal/helpers:helpers",
+         "//internal/helpers:helpers",
      ],
 )
 

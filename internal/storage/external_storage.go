@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	storagePb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
 	"log"
 	"squzy/internal/grpcTools"
@@ -13,7 +13,7 @@ import (
 )
 
 type externalStorage struct {
-	client   storagePb.LoggerClient
+	client   apiPb.StorageClient
 	fallback Storage
 	address  string
 }
@@ -35,29 +35,23 @@ func NewExternalStorage(grpcTools grpcTools.GrpcTool, address string, timeout ti
 	}
 	log.Println(fmt.Sprintf("Will send log to client %s", address))
 	return &externalStorage{
-		client:   storagePb.NewLoggerClient(conn),
+		client:   apiPb.NewStorageClient(conn),
 		fallback: fallBack,
 		address:  address,
 	}
 }
 
-func (s *externalStorage) Write(id string, checkerLog job.CheckError) error {
-	req := &storagePb.SendLogMessageRequest{
-		SchedulerId: id,
-		Log:         checkerLog.GetLogData(),
-	}
+func (s *externalStorage) Write(checkerLog job.CheckError) error {
+	req := checkerLog.GetLogData()
 	ctx, cancel := context.WithTimeout(context.Background(), loggerConnTimeout)
 	defer cancel()
-	res, err := s.client.SendLogMessage(ctx, req)
+	_, err := s.client.SendResponseFromScheduler(ctx, req)
 	if err != nil {
 		if s.fallback != nil {
 			log.Println(fmt.Sprintf("Cant connect to %s will use fallback to std", s.address))
-			_ = s.fallback.Write(id, checkerLog)
+			_ = s.fallback.Write(checkerLog)
 		}
 		return connectionExternalStorageError
-	}
-	if !res.Success {
-		return storageNotSaveLog
 	}
 	return nil
 }

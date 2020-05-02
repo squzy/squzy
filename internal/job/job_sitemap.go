@@ -2,10 +2,10 @@ package job
 
 import (
 	"context"
+	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/google/uuid"
-	clientPb "github.com/squzy/squzy_generated/generated/storage/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"golang.org/x/sync/errgroup"
 	"net/http"
 	"squzy/internal/helpers"
@@ -24,39 +24,41 @@ type siteMapJob struct {
 }
 
 type siteMapError struct {
-	logId       string
+	schedulerId string
 	startTime   *timestamp.Timestamp
 	endTime     *timestamp.Timestamp
-	code        clientPb.StatusCode
+	code        apiPb.SchedulerResponseCode
 	description string
 	location    string
-	port        int32
 }
 
-func (s *siteMapError) GetLogData() *clientPb.Log {
-	return &clientPb.Log{
-		Code:        s.code,
-		Description: s.description,
-		Meta: &clientPb.MetaData{
-			Id:        s.logId,
-			Location:  s.location,
-			Port:      s.port,
+func (s *siteMapError) GetLogData() *apiPb.SchedulerResponse {
+	var err *apiPb.SchedulerResponse_Error
+	if s.code == apiPb.SchedulerResponseCode_Error {
+		err = &apiPb.SchedulerResponse_Error{
+			Message: fmt.Sprintf("Error: %s, Url: %s", s.description, s.location),
+		}
+	}
+	return &apiPb.SchedulerResponse{
+		SchedulerId: s.schedulerId,
+		Code:  s.code,
+		Error: err,
+		Type:  apiPb.SchedulerType_SiteMap,
+		Meta: &apiPb.SchedulerResponse_MetaData{
 			StartTime: s.startTime,
 			EndTime:   s.endTime,
-			Type:      clientPb.Type_SiteMap,
 		},
 	}
 }
 
-func newSiteMapError(logId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code clientPb.StatusCode, description string, location string, port int32) CheckError {
+func newSiteMapError(schedulerId string,startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string, location string) CheckError {
 	return &siteMapError{
-		logId:       logId,
+		schedulerId:schedulerId,
 		startTime:   startTime,
 		endTime:     endTime,
 		code:        code,
 		description: description,
 		location:    location,
-		port:        port,
 	}
 }
 
@@ -71,18 +73,17 @@ func NewSiteMapJob(url string, timeout int32, siteMapStorage sitemap_storage.Sit
 	}
 }
 
-func (j *siteMapJob) Do() CheckError {
-	logId := uuid.New().String()
+func (j *siteMapJob) Do(schedulerId string) CheckError {
 	startTime := ptypes.TimestampNow()
 	siteMap, err := j.siteMapStorage.Get(j.url)
 	if err != nil {
-		return newSiteMapError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, 0)
+		return newSiteMapError(schedulerId,startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, err.Error(), j.url)
 	}
 
 	count := len(siteMap.UrlSet)
 
 	if count == 0 {
-		return newSiteMapError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", "", 0)
+		return newSiteMapError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "", "")
 	}
 
 	concurrency := int(j.concurrency)
@@ -110,7 +111,7 @@ func (j *siteMapJob) Do() CheckError {
 
 			defer sem.Release()
 
-			rq := j.httpTools.CreateRequest(http.MethodGet, location, nil, logId)
+			rq := j.httpTools.CreateRequest(http.MethodGet, location, nil, schedulerId)
 			_, _, err = j.httpTools.SendRequestTimeoutStatusCode(rq, helpers.DurationFromSecond(j.timeout), http.StatusOK)
 
 			if err != nil {
@@ -122,7 +123,7 @@ func (j *siteMapJob) Do() CheckError {
 	}
 	err = group.Wait()
 	if err != nil {
-		return newSiteMapError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_Error, err.Error(), j.url, helpers.GetPortByUrl(j.url)) //nolint
+		return newSiteMapError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, err.Error(), j.url) //nolint
 	}
-	return newSiteMapError(logId, startTime, ptypes.TimestampNow(), clientPb.StatusCode_OK, "", "", 0)
+	return newSiteMapError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "", "")
 }
