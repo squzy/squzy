@@ -10,10 +10,6 @@ import (
 	"time"
 )
 
-const (
-	cpuInterval = time.Millisecond * 500
-)
-
 type Agent interface {
 	GetStat() *apiPb.SendMetricsRequest
 }
@@ -62,7 +58,7 @@ func (a *agent) GetStat() *apiPb.SendMetricsRequest {
 
 	go func() {
 		defer wg.Done()
-		cpuStat, err := a.cpuStatFn(cpuInterval, true)
+		cpuStat, err := a.cpuStatFn(0, true)
 
 		if err != nil || cpuStat == nil {
 			return
