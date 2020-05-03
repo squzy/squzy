@@ -44,6 +44,7 @@ func (s *server) SendMetrics(stream apiPb.AgentServer_SendMetricsServer) error {
 		if err != nil {
 			return err
 		}
+
 		fmt.Println(stat)
 	}
 }
