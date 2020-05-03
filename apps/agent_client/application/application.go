@@ -6,6 +6,7 @@ import (
 	"github.com/shirou/gopsutil/host"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
+	"io"
 	"log"
 	"os"
 	"os/signal"
@@ -67,7 +68,16 @@ func (a *application) Run() error {
 			stat.AgentId = a.id
 			stat.AgentUniqName = a.config.GetAgentName()
 			// what we should do if squzy server cant get msg
-			_ = stream.Send(stat)
+			err = stream.Send(stat)
+
+			if err == io.EOF {
+				for {
+					stream, err = a.getStreamFn(client)
+					if err == nil {
+						break
+					}
+				}
+			}
 		}
 	}()
 

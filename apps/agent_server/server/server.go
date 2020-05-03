@@ -6,6 +6,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"io"
+	"time"
 )
 
 type server struct {
@@ -44,7 +45,7 @@ func (s *server) SendMetrics(stream apiPb.AgentServer_SendMetricsServer) error {
 		if err != nil {
 			return err
 		}
-
+		fmt.Println(time.Now().Format(time.RFC3339))
 		fmt.Println(stat)
 	}
 }
