@@ -3,7 +3,6 @@ package job
 import (
 	"context"
 	"errors"
-	"fmt"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -126,7 +125,6 @@ type mockErrorSemaphore struct {
 }
 
 func (*mockErrorSemaphore) Acquire(ctx context.Context) error {
-	fmt.Println("saf")
 	return errors.New("Acquire error")
 }
 func (*mockErrorSemaphore) Release() {}
