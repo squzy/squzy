@@ -1,4 +1,4 @@
-# Squzy - opensource monitoring and alerting system
+# Squzy - opensource monitoring, incident and alerting system
 
 [![version](https://img.shields.io/github/v/release/squzy/squzy.svg)](https://github.com/squzy/squzy)
 [![codecov](https://codecov.io/gh/squzy/squzy/branch/develop/graph/badge.svg)](https://codecov.io/gh/squzy/squzy)
@@ -23,6 +23,15 @@ High perfomance health check system
 5) Value from http response by selectors(https://github.com/tidwall/gjson)
 
 ### [Squzy Agents](https://github.com/squzy/squzy/tree/develop/apps/agent_client)
+
+Small application for get information from Host(server)
+
+Which information you can get:
+1. CPU load per each
+2. Memory usage (used/free/total/shared)
+3. Disk (used/free/total) per each disk
+4. Net (bytes sent/get, package sent/get , err stat)
+
 
 # Authors
 - [Iurii Panarin](https://github.com/PxyUp)

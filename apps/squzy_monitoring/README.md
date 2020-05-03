@@ -130,10 +130,12 @@ Support type: https://github.com/squzy/squzy_proto/blob/master/proto/v1/server.p
 
 ## Environment variables
 
+Bold is required
+
 - PORT(9090) - on with port run squzy
 - SQUZY_STORAGE_HOST - log storage host(example *localhost:9090*)
 - SQUZY_STORAGE_TIMEOUT - timeout for connect to log storage
-- MONGO_URI - mongo url for save data
+- **MONGO_URI** - mongo url for save data
 - MONGO_DB(squzy_monitoring) - mongo db name
 - MONGO_COLLECTION(schedulers) - in which collection we should save data
 

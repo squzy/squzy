@@ -27,7 +27,7 @@ func TestCfg_GetSquzyServer(t *testing.T) {
 
 func TestCfg_GetExecutionTimeout(t *testing.T) {
 	t.Run("Should: return execution timeout from env", func(t *testing.T) {
-		os.Setenv(ENV_SQUZY_EXECUTION_TIMEOUT, "12")
+		os.Setenv(ENV_SQUZY_AGENT_INTERVAL, "12")
 		s := New()
 		assert.Equal(t, s.GetExecutionTimeout(), time.Second*12)
 	})

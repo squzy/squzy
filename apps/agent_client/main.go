@@ -28,7 +28,7 @@ func main() {
 			net.IOCounters,
 			ptypes.TimestampNow,
 		),
-		cfg.GetExecutionTimeout(),
+		cfg.GetInterval(),
 	)
 	if err != nil {
 		log.Fatal(err)

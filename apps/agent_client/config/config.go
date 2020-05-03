@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	ENV_SQUZY_SERVER_TIMEOUT = "SQUZY_SERVER_TIMEOUT"
-	ENV_SQUZY_EXECUTION_TIMEOUT = "SQUZY_EXECUTION_TIMEOUT"
+	ENV_SQUZY_SERVER_TIMEOUT = "SQUZY_AGENT_SERVER_TIMEOUT"
+	ENV_SQUZY_AGENT_INTERVAL = "SQUZY_AGENT_INTERVAL"
 	ENV_SQUZY_AGENT_SERVER_HOST = "SQUZY_AGENT_SERVER_HOST"
 	ENV_SQUZY_AGENT_NAME = "SQUZY_AGENT_NAME"
 
@@ -18,7 +18,7 @@ const (
 
 type Config interface {
 	GetSquzyServer() string
-	GetExecutionTimeout() time.Duration
+	GetInterval() time.Duration
 	GetSquzyServerTimeout() time.Duration
 	GetAgentName() string
 }
@@ -30,7 +30,7 @@ type cfg struct {
 	agentName        string
 }
 
-func (c *cfg) GetExecutionTimeout() time.Duration {
+func (c *cfg) GetInterval() time.Duration {
 	return c.executionTimeout
 }
 
@@ -57,7 +57,7 @@ func New() Config {
 		}
 	}
 	// Server timeout execution
-	timeoutExecutionValue := os.Getenv(ENV_SQUZY_EXECUTION_TIMEOUT)
+	timeoutExecutionValue := os.Getenv(ENV_SQUZY_AGENT_INTERVAL)
 	timeoutExecution := defaultTimeout
 	if timeoutExecutionValue != "" {
 		i, err := strconv.ParseInt(timeoutExecutionValue, 10, 32)
