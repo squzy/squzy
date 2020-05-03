@@ -32,10 +32,10 @@ default: build
 	bazel test --define version="local" //apps/...
 
 .build_agent:
-	./build.bash agent squzy_agent_$(version) $(version)
+	./build.bash agent_client squzy_agent_$(version) $(version)
 
 .build_bin_squzy:
-	./build.bash squzy squzy_monitoring_$(version) $(version)
+	./build.bash squzy_monitoring squzy_monitoring_$(version) $(version)
 
 .test_debug:
 	bazel test --define version="local" //apps/...:all --sandbox_debug

@@ -5,7 +5,7 @@ go_library(
     srcs = [
         "main.go",
     ],
-    importpath = "squzy/apps/agent",
+    importpath = "squzy/apps/agent_client",
     deps = [
         "@com_github_shirou_gopsutil//cpu:go_default_library",
         "@com_github_shirou_gopsutil//disk:go_default_library",
