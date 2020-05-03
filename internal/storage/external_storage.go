@@ -48,7 +48,6 @@ func (s *externalStorage) Write(checkerLog job.CheckError) error {
 	_, err := s.client.SendResponseFromScheduler(ctx, req)
 	if err != nil {
 		if s.fallback != nil {
-			log.Println(fmt.Sprintf("Cant connect to %s will use fallback to std", s.address))
 			_ = s.fallback.Write(checkerLog)
 		}
 		return connectionExternalStorageError

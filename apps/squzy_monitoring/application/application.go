@@ -8,6 +8,7 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
 	"net"
+	"os"
 	"squzy/apps/squzy_monitoring/server"
 	"squzy/internal/helpers"
 	job_executor "squzy/internal/job-executor"
@@ -37,16 +38,23 @@ func New(
 func (s *app) SyncOne(config *scheduler_config_storage.SchedulerConfig) error {
 	sched, err := scheduler.New(config.Id, helpers.DurationFromSecond(config.Interval), s.jobExecutor)
 	if err != nil {
+		fmt.Fprintln(os.Stderr, fmt.Sprintf("SchedulerId: %s cant synced, error in config", config.Id.Hex()))
 		// @TODO logger here
 		return err
 	}
 	err = s.schedulerStorage.Set(sched)
 	if err != nil {
+		fmt.Fprintln(os.Stderr, fmt.Sprintf("SchedulerId: %s cant synced, error in memory storage", config.Id.Hex()))
 		// @TODO logger here
 		return err
 	}
+	if config.Status == apiPb.SchedulerStatus_STOPPED {
+		fmt.Fprintln(os.Stdout, fmt.Sprintf("SchedulerId: %s synced and STOP", config.Id.Hex()))
+		return nil
+	}
 	if config.Status == apiPb.SchedulerStatus_RUNNED {
 		sched.Run()
+		fmt.Fprintln(os.Stdout, fmt.Sprintf("SchedulerId: %s synced and RUN", config.Id.Hex()))
 	}
 	return nil
 }
@@ -59,6 +67,7 @@ func (s *app) sync() error {
 	for _, config := range configs {
 		_ = s.SyncOne(config)
 	}
+	fmt.Fprintln(os.Stdout, "Sync done")
 	return nil
 }
 

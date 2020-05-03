@@ -70,11 +70,18 @@ type storage struct {
 	connector mongo_helper.Connector
 }
 
+var (
+	statusForAction = []apiPb.SchedulerStatus{
+		apiPb.SchedulerStatus_STOPPED,
+		apiPb.SchedulerStatus_RUNNED,
+	}
+)
+
 func (s *storage) GetAllForSync(ctx context.Context) ([]*SchedulerConfig, error) {
 	configs := []*SchedulerConfig{}
 	err := s.connector.FindAll(ctx, bson.M{
 		"status": bson.M{
-			"$ne": apiPb.SchedulerStatus_REMOVED,
+			"$in": statusForAction,
 		},
 	}, &configs)
 	if err != nil {
@@ -112,7 +119,7 @@ func (s *storage) Run(ctx context.Context, schedulerId primitive.ObjectID) error
 	_, err := s.connector.UpdateOne(ctx, bson.M{
 		"_id": schedulerId,
 		"status": bson.M{
-			"$ne": apiPb.SchedulerStatus_REMOVED,
+			"$in": statusForAction,
 		},
 	}, bson.M{
 		"$set": bson.M{
@@ -126,7 +133,7 @@ func (s *storage) Stop(ctx context.Context, schedulerId primitive.ObjectID) erro
 	_, err := s.connector.UpdateOne(ctx, bson.M{
 		"_id": schedulerId,
 		"status": bson.M{
-			"$ne": apiPb.SchedulerStatus_REMOVED,
+			"$in": statusForAction,
 		},
 	}, bson.M{
 		"$set": bson.M{

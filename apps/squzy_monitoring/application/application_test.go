@@ -94,7 +94,7 @@ func (m mockConfigStorageOk) GetAllForSync(ctx context.Context) ([]*scheduler_co
 		{
 			Id:       primitive.ObjectID{},
 			Type:     0,
-			Status:   apiPb.SchedulerStatus_RUNNED,
+			Status:   apiPb.SchedulerStatus_STOPPED,
 			Interval: 1,
 			Timeout:  1,
 		},
