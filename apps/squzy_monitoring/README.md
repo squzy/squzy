@@ -154,7 +154,7 @@ docker pull squzy/squzy_monitoring:v1.6.0
 ### Run locally with docker:
 
 ```shell script
-docker run -p 8080:8080 squzy/squzy_monitoring:v1.6.0
+docker run -p 9090:9090 squzy/squzy_monitoring:v1.6.0
 ```
 
 # Want to help?
