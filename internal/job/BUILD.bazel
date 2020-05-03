@@ -1,0 +1,48 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+     name = "job",
+     srcs = [
+         "job.go",
+         "job_http.go",
+         "job_grpc.go",
+         "job_tcp.go",
+         "job_sitemap.go",
+         "job_json_http_value.go",
+     ],
+     importpath = "squzy/internal/job",
+     visibility = ["//visibility:public"],
+     deps = [
+        "//internal/httpTools:httpTools",
+        "//internal/sitemap-storage:sitemap-storage",
+        "//internal/parsers:parsers",
+        "//internal/semaphore:semaphore",
+        "//internal/helpers:helpers",
+        "@org_golang_x_sync//errgroup:go_default_library",
+        "@org_golang_google_grpc//:go_default_library",
+        "//internal/scheduler-config-storage:storage",
+        "@org_golang_google_grpc//metadata:go_default_library",
+        "@org_golang_google_grpc//health/grpc_health_v1:go_default_library",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
+        "@com_github_golang_protobuf//ptypes:go_default_library",
+        "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
+        "@com_github_golang_protobuf//ptypes/struct:go_default_library",
+        "@com_github_tidwall_gjson//:go_default_library"
+     ]
+)
+
+go_test(
+    name = "job_test",
+    srcs = [
+        "job_test.go",
+        "job_http_test.go",
+        "job_grpc_test.go",
+        "job_tcp_test.go",
+        "job_sitemap_test.go",
+        "job_json_http_value_test.go",
+    ],
+    embed = [":job"],
+    deps = [
+        "@com_github_stretchr_testify//assert:go_default_library",
+    ]
+)

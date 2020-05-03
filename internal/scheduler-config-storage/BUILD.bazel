@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+     name = "storage",
+     srcs = ["storage.go"],
+     importpath = "squzy/internal/scheduler-config-storage",
+     visibility = ["//visibility:public"],
+     deps = [
+        "@com_github_squzy_mongo_helper//:go_default_library",
+        "@org_mongodb_go_mongo_driver//bson/primitive:go_default_library",
+        "@org_mongodb_go_mongo_driver//bson:go_default_library",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
+     ],
+
+)
+
+go_test(
+    name = "storage_test",
+    srcs = [
+        "storage_test.go",
+    ],
+    embed = [":storage"],
+    deps = [
+        "@org_mongodb_go_mongo_driver//mongo:go_default_library",
+        "@org_mongodb_go_mongo_driver//mongo/options:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
+    ]
+)
