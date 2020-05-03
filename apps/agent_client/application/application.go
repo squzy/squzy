@@ -30,11 +30,11 @@ func (a *application) Run() error {
 	if err != nil {
 		return err
 	}
-	conn, err := a.grpcTools.GetConnection(a.config.GetSquzyServer(), a.config.GetSquzyServerTimeout(), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := a.grpcTools.GetConnection(a.config.GetAgentServer(), a.config.GetAgentServerTimeout(), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		return fmt.Errorf("Can't connect to squzy server %s", a.config.GetSquzyServer())
+		return fmt.Errorf("Can't connect to squzy server %s", a.config.GetAgentServer())
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), a.config.GetSquzyServerTimeout())
+	ctx, cancel := context.WithTimeout(context.Background(), a.config.GetAgentServerTimeout())
 	defer cancel()
 	client := apiPb.NewAgentServerClient(conn)
 	res, err := client.Register(ctx, &apiPb.RegisterRequest{
@@ -79,7 +79,7 @@ func (a *application) Run() error {
 
 	_ = stream.CloseSend()
 
-	ctxClose, cancelClose := context.WithTimeout(context.Background(), a.config.GetSquzyServerTimeout())
+	ctxClose, cancelClose := context.WithTimeout(context.Background(), a.config.GetAgentServerTimeout())
 	defer cancelClose()
 	_, _ = client.UnRegister(ctxClose, &apiPb.UnRegisterRequest{
 		Id: a.id,

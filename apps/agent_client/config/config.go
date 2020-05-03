@@ -17,9 +17,9 @@ const (
 )
 
 type Config interface {
-	GetSquzyServer() string
+	GetAgentServer() string
 	GetInterval() time.Duration
-	GetSquzyServerTimeout() time.Duration
+	GetAgentServerTimeout() time.Duration
 	GetAgentName() string
 }
 
@@ -34,11 +34,11 @@ func (c *cfg) GetInterval() time.Duration {
 	return c.executionTimeout
 }
 
-func (c *cfg) GetSquzyServer() string {
+func (c *cfg) GetAgentServer() string {
 	return c.host
 }
 
-func (c *cfg) GetSquzyServerTimeout() time.Duration {
+func (c *cfg) GetAgentServerTimeout() time.Duration {
 	return c.timeout
 }
 

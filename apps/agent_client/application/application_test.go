@@ -50,6 +50,10 @@ func (s serverError) UnRegister(context.Context, *apiPb.UnRegisterRequest) (*api
 type configSecondMock struct {
 }
 
+func (c configSecondMock) GetInterval() time.Duration {
+	return time.Second * 5
+}
+
 func (c configSecondMock) GetAgentName() string {
 	return ""
 }
@@ -81,10 +85,6 @@ func (s serverSteamError) UnRegister(context.Context, *apiPb.UnRegisterRequest) 
 
 func (s serverSteamError) SendStat(req apiPb.AgentServer_SendMetricsClient) error {
 	return nil
-}
-
-func (c configSecondMock) GetExecutionTimeout() time.Duration {
-	return time.Second * 5
 }
 
 type serverSuccess struct {
@@ -119,11 +119,11 @@ func (s *serverSuccess) UnRegister(context.Context, *apiPb.UnRegisterRequest) (*
 	}, nil
 }
 
-func (c configSecondMock) GetSquzyServer() string {
+func (c configSecondMock) GetAgentServer() string {
 	return "localhost:14556"
 }
 
-func (c configSecondMock) GetSquzyServerTimeout() time.Duration {
+func (c configSecondMock) GetAgentServerTimeout() time.Duration {
 	return time.Second
 }
 
@@ -141,15 +141,15 @@ func (c configMock) GetAgentName() string {
 	return ""
 }
 
-func (c configMock) GetExecutionTimeout() time.Duration {
+func (c configMock) GetInterval() time.Duration {
 	return time.Second
 }
 
-func (c configMock) GetSquzyServer() string {
+func (c configMock) GetAgentServer() string {
 	return "localhost:14555"
 }
 
-func (c configMock) GetSquzyServerTimeout() time.Duration {
+func (c configMock) GetAgentServerTimeout() time.Duration {
 	return time.Second
 }
 
@@ -160,15 +160,15 @@ func (c configErrorMock) GetAgentName() string {
 	return ""
 }
 
-func (c configErrorMock) GetExecutionTimeout() time.Duration {
+func (c configErrorMock) GetInterval() time.Duration {
 	return time.Second
 }
 
-func (c configErrorMock) GetSquzyServer() string {
+func (c configErrorMock) GetAgentServer() string {
 	return "safafasfafsf:12424"
 }
 
-func (c configErrorMock) GetSquzyServerTimeout() time.Duration {
+func (c configErrorMock) GetAgentServerTimeout() time.Duration {
 	return time.Second
 }
 
@@ -179,15 +179,15 @@ func (c configSuccessMock) GetAgentName() string {
 	panic("implement me")
 }
 
-func (c configSuccessMock) GetExecutionTimeout() time.Duration {
+func (c configSuccessMock) GetInterval() time.Duration {
 	return time.Second
 }
 
-func (c configSuccessMock) GetSquzyServer() string {
+func (c configSuccessMock) GetAgentServer() string {
 	return "localhost:13453"
 }
 
-func (c configSuccessMock) GetSquzyServerTimeout() time.Duration {
+func (c configSuccessMock) GetAgentServerTimeout() time.Duration {
 	return time.Second
 }
 
@@ -202,15 +202,15 @@ func (c configSuccessSteamMock) GetAgentName() string {
 	return ""
 }
 
-func (c configSuccessSteamMock) GetSquzyServer() string {
+func (c configSuccessSteamMock) GetAgentServer() string {
 	return "localhost:13454"
 }
 
-func (c configSuccessSteamMock) GetExecutionTimeout() time.Duration {
+func (c configSuccessSteamMock) GetInterval() time.Duration {
 	return time.Second
 }
 
-func (c configSuccessSteamMock) GetSquzyServerTimeout() time.Duration {
+func (c configSuccessSteamMock) GetAgentServerTimeout() time.Duration {
 	return time.Second
 }
 
