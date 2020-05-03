@@ -5,6 +5,9 @@ go_library(
      srcs = ["config.go"],
      importpath = "squzy/apps/agent_client/config",
      visibility = ["//visibility:public"],
+     deps = [
+        "//internal/helpers:helpers"
+     ]
 )
 
 go_test(

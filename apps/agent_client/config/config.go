@@ -2,8 +2,18 @@ package config
 
 import (
 	"os"
+	"squzy/internal/helpers"
 	"strconv"
 	"time"
+)
+
+const (
+	ENV_SQUZY_SERVER_TIMEOUT = "SQUZY_SERVER_TIMEOUT"
+	ENV_SQUZY_EXECUTION_TIMEOUT = "SQUZY_EXECUTION_TIMEOUT"
+	ENV_SQUZY_AGENT_SERVER_HOST = "SQUZY_AGENT_SERVER_HOST"
+	ENV_SQUZY_AGENT_NAME = "SQUZY_AGENT_NAME"
+
+	defaultTimeout = time.Second * 5
 )
 
 type Config interface {
@@ -36,34 +46,30 @@ func (c *cfg) GetAgentName() string {
 	return c.agentName
 }
 
-const defaultTimeout = time.Second * 5
-
 func New() Config {
 	// Server timeout connection
-	timeoutValue := os.Getenv("SQUZY_SERVER_TIMEOUT")
+	timeoutValue := os.Getenv(ENV_SQUZY_SERVER_TIMEOUT)
 	timeoutServer := defaultTimeout
 	if timeoutValue != "" {
 		i, err := strconv.ParseInt(timeoutValue, 10, 32)
 		if err == nil {
-			timeoutServer = time.Duration(int32(i)) * time.Second
+			timeoutServer = helpers.DurationFromSecond(int32(i))
 		}
 	}
 	// Server timeout execution
-	timeoutExecutionValue := os.Getenv("SQUZY_EXECUTION_TIMEOUT")
+	timeoutExecutionValue := os.Getenv(ENV_SQUZY_EXECUTION_TIMEOUT)
 	timeoutExecution := defaultTimeout
 	if timeoutExecutionValue != "" {
 		i, err := strconv.ParseInt(timeoutExecutionValue, 10, 32)
 		if err == nil {
-			timeoutExecution = time.Duration(int32(i)) * time.Second
+			timeoutExecution = helpers.DurationFromSecond(int32(i))
 		}
 	}
-	// Squzy server address
-	clientAddress := os.Getenv("SQUZY_SERVER_HOST")
-	agentName := os.Getenv("SQUZY_AGENT_NAME")
+
 	return &cfg{
 		timeout:          timeoutServer,
-		host:             clientAddress,
+		host:             os.Getenv(ENV_SQUZY_AGENT_SERVER_HOST),
 		executionTimeout: timeoutExecution,
-		agentName:        agentName,
+		agentName:        os.Getenv(ENV_SQUZY_AGENT_NAME),
 	}
 }
