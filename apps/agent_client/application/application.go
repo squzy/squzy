@@ -142,14 +142,14 @@ func New(
 	config config.Config,
 	hostStatFn func() (*host.InfoStat, error),
 	getStreamFn getSteamFn,
-	interrupt     chan os.Signal,
+	interrupt chan os.Signal,
 ) Application {
 	return &application{
 		config:      config,
 		executor:    executor,
 		hostStatFn:  hostStatFn,
 		getStreamFn: getStreamFn,
-		interrupt: interrupt,
+		interrupt:   interrupt,
 	}
 }
 

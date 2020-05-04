@@ -56,7 +56,7 @@ func (s *serverSuccess) SendMetrics(rq apiPb.AgentServer_SendMetricsServer) erro
 		if err == io.EOF {
 			return rq.SendAndClose(&empty.Empty{})
 		}
-		if err !=nil {
+		if err != nil {
 			continue
 		}
 		s.count += 1
@@ -88,13 +88,6 @@ func (c configSecondMock) GetAgentServer() string {
 
 func (c configSecondMock) GetAgentServerTimeout() time.Duration {
 	return time.Second
-}
-
-type grpcToolsMock struct {
-}
-
-func (g grpcToolsMock) GetConnection(address string, timeout time.Duration, option ...grpc.DialOption) (*grpc.ClientConn, error) {
-	return &grpc.ClientConn{}, nil
 }
 
 type configMock struct {
@@ -226,7 +219,7 @@ func TestApplication_Run(t *testing.T) {
 			Load: 5,
 		}}, value.CpuInfo.Cpus)
 		fmt.Println(inter)
-		inter<-os.Interrupt
+		inter <- os.Interrupt
 		time.Sleep(time.Second * 2)
 		assert.Equal(t, 5, s.count)
 	})

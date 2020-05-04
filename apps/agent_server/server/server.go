@@ -10,13 +10,12 @@ import (
 )
 
 type server struct {
-	
 }
 
-func (s *server) Register(ctx context.Context,rq *apiPb.RegisterRequest) (*apiPb.RegisterResponse, error) {
+func (s *server) Register(ctx context.Context, rq *apiPb.RegisterRequest) (*apiPb.RegisterResponse, error) {
 	fmt.Println(rq)
 	return &apiPb.RegisterResponse{
-		Id:                   "1",
+		Id: "1",
 	}, nil
 }
 
@@ -24,9 +23,9 @@ func (s server) GetByAgentUniqName(context.Context, *apiPb.GetByAgentUniqNameReq
 	panic("implement me")
 }
 
-func (s *server) UnRegister(ctx context.Context,rq *apiPb.UnRegisterRequest) (*apiPb.UnRegisterResponse, error) {
+func (s *server) UnRegister(ctx context.Context, rq *apiPb.UnRegisterRequest) (*apiPb.UnRegisterResponse, error) {
 	return &apiPb.UnRegisterResponse{
-		Id:                   rq.Id,
+		Id: rq.Id,
 	}, nil
 }
 
