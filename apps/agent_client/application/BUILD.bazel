@@ -9,7 +9,7 @@ go_library(
          "@org_golang_google_grpc//:go_default_library",
           "//internal/agent-executor:agent-executor",
           "//apps/agent_client/config:config",
-          "//internal/grpcTools:grpcTools",
+          "//internal/helpers:helpers",
           "@com_github_shirou_gopsutil//host:go_default_library",
           "@com_github_golang_protobuf//ptypes/empty:go_default_library",
           "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",

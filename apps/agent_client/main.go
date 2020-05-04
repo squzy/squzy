@@ -8,12 +8,12 @@ import (
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
 	"log"
+	"os"
 	"squzy/apps/agent_client/application"
 	"squzy/apps/agent_client/config"
 	_ "squzy/apps/agent_client/version"
 	"squzy/internal/agent"
 	agent_executor "squzy/internal/agent-executor"
-	"squzy/internal/grpcTools"
 )
 
 func main() {
@@ -35,10 +35,10 @@ func main() {
 	}
 	a := application.New(
 		executor,
-		grpcTools.New(),
 		cfg,
 		host.Info,
 		application.NewStream,
+		make(chan os.Signal, 1),
 	)
 	err = a.Run()
 	if err != nil {

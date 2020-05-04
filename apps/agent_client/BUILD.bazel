@@ -19,7 +19,6 @@ go_library(
         "@com_github_golang_protobuf//ptypes:go_default_library",
         "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
         "//internal/agent-executor:agent-executor",
-        "//internal/grpcTools:grpcTools",
     ]
 )
 

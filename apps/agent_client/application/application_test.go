@@ -9,9 +9,10 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
+	"io"
 	"net"
-	"squzy/internal/grpcTools"
-	"syscall"
+	"os"
+	"sync"
 	"testing"
 	"time"
 )
@@ -22,29 +23,6 @@ type executorMock struct {
 
 func (e *executorMock) Execute() chan *apiPb.SendMetricsRequest {
 	return e.ch
-}
-
-type serverError struct {
-}
-
-func (s serverError) GetByAgentUniqName(context.Context, *apiPb.GetByAgentUniqNameRequest) (*apiPb.GetAgentListResponse, error) {
-	panic("implement me")
-}
-
-func (s serverError) GetAgentList(context.Context, *empty.Empty) (*apiPb.GetAgentListResponse, error) {
-	panic("implement me")
-}
-
-func (s serverError) SendMetrics(apiPb.AgentServer_SendMetricsServer) error {
-	panic("implement me")
-}
-
-func (s serverError) Register(context.Context, *apiPb.RegisterRequest) (*apiPb.RegisterResponse, error) {
-	return nil, errors.New("traarar")
-}
-
-func (s serverError) UnRegister(context.Context, *apiPb.UnRegisterRequest) (*apiPb.UnRegisterResponse, error) {
-	return &apiPb.UnRegisterResponse{}, nil
 }
 
 type configSecondMock struct {
@@ -58,38 +36,10 @@ func (c configSecondMock) GetAgentName() string {
 	return ""
 }
 
-type serverSteamError struct {
-}
-
-func (s serverSteamError) GetByAgentUniqName(context.Context, *apiPb.GetByAgentUniqNameRequest) (*apiPb.GetAgentListResponse, error) {
-	panic("implement me")
-}
-
-func (s serverSteamError) GetAgentList(context.Context, *empty.Empty) (*apiPb.GetAgentListResponse, error) {
-	panic("implement me")
-}
-
-func (s serverSteamError) SendMetrics(apiPb.AgentServer_SendMetricsServer) error {
-	panic("implement me")
-}
-
-func (s serverSteamError) Register(context.Context, *apiPb.RegisterRequest) (*apiPb.RegisterResponse, error) {
-	return &apiPb.RegisterResponse{
-		Id: "",
-	}, nil
-}
-
-func (s serverSteamError) UnRegister(context.Context, *apiPb.UnRegisterRequest) (*apiPb.UnRegisterResponse, error) {
-	panic("implement me")
-}
-
-func (s serverSteamError) SendStat(req apiPb.AgentServer_SendMetricsClient) error {
-	return nil
-}
-
 type serverSuccess struct {
 	ch    chan *apiPb.SendMetricsRequest
 	count int
+	mutex sync.Mutex
 }
 
 func (s *serverSuccess) GetByAgentUniqName(context.Context, *apiPb.GetByAgentUniqNameRequest) (*apiPb.GetAgentListResponse, error) {
@@ -101,18 +51,31 @@ func (s *serverSuccess) GetAgentList(context.Context, *empty.Empty) (*apiPb.GetA
 }
 
 func (s *serverSuccess) SendMetrics(rq apiPb.AgentServer_SendMetricsServer) error {
-	res, _ := rq.Recv()
-	s.ch <- res
-	return nil
+	for {
+		res, err := rq.Recv()
+		if err == io.EOF {
+			return rq.SendAndClose(&empty.Empty{})
+		}
+		if err !=nil {
+			continue
+		}
+		s.count += 1
+		s.ch <- res
+	}
 }
 
 func (s *serverSuccess) Register(context.Context, *apiPb.RegisterRequest) (*apiPb.RegisterResponse, error) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	s.count += 1
 	return &apiPb.RegisterResponse{
 		Id: "asf",
 	}, nil
 }
 
 func (s *serverSuccess) UnRegister(context.Context, *apiPb.UnRegisterRequest) (*apiPb.UnRegisterResponse, error) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	s.count += 1
 	return &apiPb.UnRegisterResponse{
 		Id: "asf",
@@ -172,107 +135,30 @@ func (c configErrorMock) GetAgentServerTimeout() time.Duration {
 	return time.Second
 }
 
-type configSuccessMock struct {
-}
-
-func (c configSuccessMock) GetAgentName() string {
-	panic("implement me")
-}
-
-func (c configSuccessMock) GetInterval() time.Duration {
-	return time.Second
-}
-
-func (c configSuccessMock) GetAgentServer() string {
-	return "localhost:13453"
-}
-
-func (c configSuccessMock) GetAgentServerTimeout() time.Duration {
-	return time.Second
-}
-
-func (c configSuccessMock) GetPort() int32 {
-	return 19944
-}
-
-type configSuccessSteamMock struct {
-}
-
-func (c configSuccessSteamMock) GetAgentName() string {
-	return ""
-}
-
-func (c configSuccessSteamMock) GetAgentServer() string {
-	return "localhost:13454"
-}
-
-func (c configSuccessSteamMock) GetInterval() time.Duration {
-	return time.Second
-}
-
-func (c configSuccessSteamMock) GetAgentServerTimeout() time.Duration {
-	return time.Second
-}
-
 func TestNew(t *testing.T) {
 	t.Run("Should: create application", func(t *testing.T) {
-		a := New(&executorMock{}, &grpcToolsMock{}, &configMock{}, func() (stat *host.InfoStat, err error) {
+		a := New(&executorMock{}, &configMock{}, func() (stat *host.InfoStat, err error) {
 			return nil, nil
 		}, func(agent apiPb.AgentServerClient) (statClient apiPb.AgentServer_SendMetricsClient, err error) {
 			return nil, nil
-		})
+		}, make(chan os.Signal, 1))
 		assert.Implements(t, (*Application)(nil), a)
 	})
 }
 
 func TestApplication_Run(t *testing.T) {
 	t.Run("Should: throw error if cant get host information", func(t *testing.T) {
-		a := New(&executorMock{}, grpcTools.New(), &configErrorMock{}, func() (stat *host.InfoStat, err error) {
+		a := New(&executorMock{}, &configErrorMock{}, func() (stat *host.InfoStat, err error) {
 			return nil, errors.New("asfasff")
 		}, func(agent apiPb.AgentServerClient) (statClient apiPb.AgentServer_SendMetricsClient, err error) {
 			return nil, nil
-		})
-		assert.NotEqual(t, nil, a.Run())
-	})
-	t.Run("Should: throw error if cant connect to squzy server", func(t *testing.T) {
-		a := New(&executorMock{}, grpcTools.New(), &configErrorMock{}, func() (stat *host.InfoStat, err error) {
-			return &host.InfoStat{}, nil
-		}, func(agent apiPb.AgentServerClient) (statClient apiPb.AgentServer_SendMetricsClient, err error) {
-			return nil, nil
-		})
-		assert.NotEqual(t, nil, a.Run())
-	})
-	t.Run("Should: throw error if register now working on server side", func(t *testing.T) {
-		lis, _ := net.Listen("tcp", fmt.Sprintf(":%d", 13453))
-		grpcServer := grpc.NewServer()
-		apiPb.RegisterAgentServerServer(grpcServer, &serverError{})
-		go func() {
-			_ = grpcServer.Serve(lis)
-		}()
-		a := New(&executorMock{}, grpcTools.New(), &configSuccessMock{}, func() (stat *host.InfoStat, err error) {
-			return &host.InfoStat{}, nil
-		}, func(agent apiPb.AgentServerClient) (statClient apiPb.AgentServer_SendMetricsClient, err error) {
-			return nil, nil
-		})
-		assert.NotEqual(t, nil, a.Run())
-	})
-	t.Run("Should: throw error if stream now working on server side", func(t *testing.T) {
-		lis, _ := net.Listen("tcp", fmt.Sprintf(":%d", 13454))
-		grpcServer := grpc.NewServer()
-		apiPb.RegisterAgentServerServer(grpcServer, &serverSteamError{})
-		go func() {
-			_ = grpcServer.Serve(lis)
-		}()
-		a := New(&executorMock{}, grpcTools.New(), &configSuccessSteamMock{}, func() (stat *host.InfoStat, err error) {
-			return &host.InfoStat{}, nil
-		}, func(agent apiPb.AgentServerClient) (statClient apiPb.AgentServer_SendMetricsClient, err error) {
-			return nil, errors.New("asfasf")
-		})
+		}, make(chan os.Signal, 1))
 		assert.NotEqual(t, nil, a.Run())
 	})
 
 	t.Run("Should: not throw error if all works like expected", func(t *testing.T) {
-		lis, _ := net.Listen("tcp", fmt.Sprintf(":%d", 14556))
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 14556))
+		assert.Equal(t, nil, err)
 		msgChan := make(chan *apiPb.SendMetricsRequest)
 		grpcServer := grpc.NewServer()
 		s := &serverSuccess{
@@ -281,32 +167,68 @@ func TestApplication_Run(t *testing.T) {
 		}
 		apiPb.RegisterAgentServerServer(grpcServer, s)
 		go func() {
-			_ = grpcServer.Serve(lis)
+			err := grpcServer.Serve(lis)
+			assert.Equal(t, nil, err)
 		}()
-		time.Sleep(time.Second)
-		ch := make(chan *apiPb.SendMetricsRequest)
+		time.Sleep(time.Second * 2)
 
+		ch := make(chan *apiPb.SendMetricsRequest)
+		inter := make(chan os.Signal, 1)
 		a := New(&executorMock{
 			ch: ch,
-		}, grpcTools.New(), &configSecondMock{}, func() (stat *host.InfoStat, err error) {
+		}, &configSecondMock{}, func() (stat *host.InfoStat, err error) {
 			return &host.InfoStat{}, nil
-		}, NewStream)
+		}, NewStream, inter)
+
 		go func() {
 			_ = a.Run()
 		}()
-		time.Sleep(time.Second)
+		time.Sleep(time.Second * 2)
+
 		ch <- &apiPb.SendMetricsRequest{
 			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
 				Load: 5,
 			}}},
 		}
+
 		value := <-msgChan
 		assert.EqualValues(t, []*apiPb.CpuInfo_CPU{{
 			Load: 5,
 		}}, value.CpuInfo.Cpus)
-		_ = syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+
+		grpcServer.Stop()
+		ch <- &apiPb.SendMetricsRequest{
+			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
+				Load: 5,
+			}}},
+		}
+
+		lis2, err := net.Listen("tcp", fmt.Sprintf(":%d", 14556))
+		assert.Equal(t, nil, err)
+		grpcServer = grpc.NewServer()
+		apiPb.RegisterAgentServerServer(grpcServer, s)
+
+		go func() {
+			err = grpcServer.Serve(lis2)
+			assert.Equal(t, nil, err)
+		}()
+
 		time.Sleep(time.Second * 2)
-		assert.Equal(t, 1, s.count)
+
+		ch <- &apiPb.SendMetricsRequest{
+			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
+				Load: 5,
+			}}},
+		}
+		value = <-msgChan
+		fmt.Println(value)
+		assert.EqualValues(t, []*apiPb.CpuInfo_CPU{{
+			Load: 5,
+		}}, value.CpuInfo.Cpus)
+		fmt.Println(inter)
+		inter<-os.Interrupt
+		time.Sleep(time.Second * 2)
+		assert.Equal(t, 5, s.count)
 	})
 }
 
