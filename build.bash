@@ -21,7 +21,6 @@ do
     if [ $GOOS = "windows" ]; then
         output_name+='.exe'
     fi
-    echo "-X $package_path/version.Version=$version_inject"
     env GOOS=$GOOS GOARCH=$GOARCH go build -o $output_name -ldflags "-s -w -X squzy/apps/$package_path/version.Version=$version_inject"  apps/$package_path/main.go
     if [ $? -ne 0 ]; then
         echo 'An error has occurred! Aborting the script execution...'
