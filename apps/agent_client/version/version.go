@@ -1,7 +1,6 @@
 package version
 
 import (
-	"fmt"
 	"log"
 )
 
@@ -10,7 +9,7 @@ var (
 )
 
 func init() {
-	log.Println(fmt.Sprintf("Version: %s", GetVersion()))
+	log.Println("Version: " + GetVersion())
 }
 
 func GetVersion() string {

@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"github.com/shirou/gopsutil/host"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
@@ -55,7 +54,7 @@ func (a *application) register(hostStat *host.InfoStat) string {
 				},
 			},
 		})
-		fmt.Println("send register")
+
 		if err == nil {
 			return res.Id
 		}
@@ -95,9 +94,7 @@ func (a *application) Run() error {
 			stat.AgentUniqName = a.config.GetAgentName()
 			// what we should do if squzy server cant get msg
 			err = st.Send(stat)
-			if err == nil {
-				fmt.Println("send stat")
-			}
+
 			if err == io.EOF {
 				a.buffer = append(a.buffer, stat)
 				if a.isStreamAvail {
@@ -127,8 +124,6 @@ func (a *application) Run() error {
 	_, _ = a.client.UnRegister(ctxClose, &apiPb.UnRegisterRequest{
 		Id: agentId,
 	})
-
-	fmt.Println("send unregister")
 
 	return nil
 }
