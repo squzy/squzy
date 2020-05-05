@@ -55,7 +55,6 @@ func (m mockStreamOk) RecvMsg(_ interface{}) error {
 }
 
 type mockInternalStreamError struct {
-
 }
 
 func (m mockInternalStreamError) SendAndClose(*empty.Empty) error {
@@ -91,7 +90,6 @@ func (m mockInternalStreamError) RecvMsg(_ interface{}) error {
 }
 
 type mockStreamError struct {
-
 }
 
 func (m mockStreamError) SendAndClose(*empty.Empty) error {
@@ -129,7 +127,6 @@ func (m mockStreamError) RecvMsg(_ interface{}) error {
 }
 
 type dbMockOk struct {
-
 }
 
 func (d dbMockOk) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, error) {
@@ -145,7 +142,6 @@ func (d dbMockOk) GetAll(ctx context.Context, filter bson.M) ([]*apiPb.AgentItem
 }
 
 type dbMockError struct {
-
 }
 
 func (d dbMockError) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, error) {
@@ -171,16 +167,16 @@ func TestServer_Register(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := New(&dbMockError{}, nil)
 		_, err := s.Register(context.Background(), &apiPb.RegisterRequest{
-			AgentName:            "",
-			HostInfo:             nil,
+			AgentName: "",
+			HostInfo:  nil,
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := New(&dbMockOk{}, nil)
 		_, err := s.Register(context.Background(), &apiPb.RegisterRequest{
-			AgentName:            "",
-			HostInfo:             nil,
+			AgentName: "",
+			HostInfo:  nil,
 		})
 		assert.Equal(t, nil, err)
 	})
@@ -196,8 +192,7 @@ func TestServer_UnRegister(t *testing.T) {
 	})
 	t.Run("Should: return error because id", func(t *testing.T) {
 		s := New(&dbMockOk{}, nil)
-		_, err := s.UnRegister(context.Background(), &apiPb.UnRegisterRequest{
-		})
+		_, err := s.UnRegister(context.Background(), &apiPb.UnRegisterRequest{})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return  error", func(t *testing.T) {
@@ -242,7 +237,7 @@ func TestServer_SendMetrics(t *testing.T) {
 	})
 	t.Run("Should: close stream without error if error", func(t *testing.T) {
 		s := New(&dbMockOk{}, nil)
-		assert.Equal(t, nil, s.SendMetrics(&mockInternalStreamError{}))
+		assert.NotEqual(t, nil, s.SendMetrics(&mockInternalStreamError{}))
 	})
 	t.Run("Should: works as excpected", func(t *testing.T) {
 		s := New(&dbMockOk{}, nil)

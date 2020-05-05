@@ -65,26 +65,30 @@ func (s *server) GetAgentList(ctx context.Context, e *empty.Empty) (*apiPb.GetAg
 }
 
 func (s *server) SendMetrics(stream apiPb.AgentServer_SendMetricsServer) error {
-	var agentId primitive.ObjectID
+
+	stat, err := stream.Recv()
+
+	if err != nil {
+		return err
+	}
+
+	id, err := primitive.ObjectIDFromHex(stat.AgentId)
+
+	if err != nil {
+		return err
+	}
+
+	_ = s.db.UpdateStatus(context.Background(), id, apiPb.AgentStatus_RUNNED)
 
 	for {
 
-		stat, err := stream.Recv()
+		_, err := stream.Recv()
 
 		if err != nil {
-			_ = s.db.UpdateStatus(context.Background(), agentId, apiPb.AgentStatus_DISCONNECTED)
+			_ = s.db.UpdateStatus(context.Background(), id, apiPb.AgentStatus_DISCONNECTED)
 			return stream.SendAndClose(&empty.Empty{})
 		}
 
-		id, err := primitive.ObjectIDFromHex(stat.AgentId)
-
-		if err != nil {
-			return err
-		}
-
-		agentId = id
-
-		_ = s.db.UpdateStatus(context.Background(), agentId, apiPb.AgentStatus_RUNNED)
 		// _, _ = s.client.SendResponseFromAgent(context.Background(), stat)
 	}
 }
