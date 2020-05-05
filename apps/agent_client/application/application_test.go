@@ -214,11 +214,10 @@ func TestApplication_Run(t *testing.T) {
 			}}},
 		}
 		value = <-msgChan
-		fmt.Println(value)
 		assert.EqualValues(t, []*apiPb.CpuInfo_CPU{{
 			Load: 5,
 		}}, value.CpuInfo.Cpus)
-		fmt.Println(inter)
+
 		inter <- os.Interrupt
 		time.Sleep(time.Second * 2)
 		assert.Equal(t, 5, s.count)

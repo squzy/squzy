@@ -12,6 +12,7 @@ import (
 	"squzy/apps/agent_client/config"
 	agent_executor "squzy/internal/agent-executor"
 	"squzy/internal/helpers"
+	"sync"
 	"syscall"
 )
 
@@ -26,6 +27,7 @@ type application struct {
 	buffer        []*apiPb.SendMetricsRequest
 	client        apiPb.AgentServerClient
 	interrupt     chan os.Signal
+	mutex         sync.Mutex
 }
 
 func (a *application) getClient(opts ...grpc.DialOption) apiPb.AgentServerClient {
@@ -102,8 +104,10 @@ func (a *application) Run() error {
 					go func() {
 						st = a.getStream()
 						a.isStreamAvail = true
+						a.mutex.Lock()
+						defer a.mutex.Unlock()
 						for _, v := range a.buffer {
-							a.executor.Execute() <- v
+							_ = st.Send(v)
 						}
 						a.buffer = []*apiPb.SendMetricsRequest{}
 					}()
