@@ -42,7 +42,7 @@ type serverSuccess struct {
 	mutex sync.Mutex
 }
 
-func (s *serverSuccess) GetByAgentUniqName(context.Context, *apiPb.GetByAgentUniqNameRequest) (*apiPb.GetAgentListResponse, error) {
+func (s *serverSuccess) GetByAgentName(context.Context, *apiPb.GetByAgentNameRequest) (*apiPb.GetAgentListResponse, error) {
 	panic("implement me")
 }
 
@@ -227,7 +227,7 @@ func TestApplication_Run(t *testing.T) {
 type client struct {
 }
 
-func (c client) GetByAgentUniqName(ctx context.Context, in *apiPb.GetByAgentUniqNameRequest, opts ...grpc.CallOption) (*apiPb.GetAgentListResponse, error) {
+func (c client) GetByAgentName(ctx context.Context, in *apiPb.GetByAgentNameRequest, opts ...grpc.CallOption) (*apiPb.GetAgentListResponse, error) {
 	panic("implement me")
 }
 
@@ -250,7 +250,7 @@ func (c client) UnRegister(ctx context.Context, in *apiPb.UnRegisterRequest, opt
 type clientError struct {
 }
 
-func (c clientError) GetByAgentUniqName(ctx context.Context, in *apiPb.GetByAgentUniqNameRequest, opts ...grpc.CallOption) (*apiPb.GetAgentListResponse, error) {
+func (c clientError) GetByAgentName(ctx context.Context, in *apiPb.GetByAgentNameRequest, opts ...grpc.CallOption) (*apiPb.GetAgentListResponse, error) {
 	panic("implement me")
 }
 

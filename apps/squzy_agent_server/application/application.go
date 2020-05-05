@@ -7,15 +7,17 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
 	"net"
+	"squzy/apps/squzy_agent_server/database"
+	"squzy/apps/squzy_agent_server/server"
 )
 
 type app struct {
-	server apiPb.AgentServerServer
+	db database.Database
 }
 
-func New(server apiPb.AgentServerServer) *app {
+func New(db database.Database) *app {
 	return &app{
-		server: server,
+		db: db,
 	}
 }
 
@@ -34,6 +36,6 @@ func (a *app) Run(port int32) error {
 		),
 		),
 	)
-	apiPb.RegisterAgentServerServer(grpcServer, a.server)
+	apiPb.RegisterAgentServerServer(grpcServer, server.New(a.db, nil))
 	return grpcServer.Serve(lis)
 }
