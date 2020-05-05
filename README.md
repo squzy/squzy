@@ -1,4 +1,5 @@
-# Squzy - opensource monitoring system
+# Squzy - opensource monitoring, incident and alerting system
+
 [![version](https://img.shields.io/github/v/release/squzy/squzy.svg)](https://github.com/squzy/squzy)
 [![codecov](https://codecov.io/gh/squzy/squzy/branch/develop/graph/badge.svg)](https://codecov.io/gh/squzy/squzy)
 [![GolangCI](https://golangci.com/badges/github.com/squzy/golangci-lint.svg)](https://golangci.com)
@@ -6,7 +7,13 @@
 
 ## About
 
-Squzy - is a high-performance open-source monitoring system written in Golang with [Bazel](https://bazel.build/) and love.
+Squzy - is a high-performance open-source monitoring and alerting system written in Golang with [Bazel](https://bazel.build/) and love.
+
+## Contains:
+
+### [Squzy Monitoring](https://github.com/squzy/squzy/tree/develop/apps/squzy_monitoring)
+
+High perfomance health check system
 
 **System Health Checks Capabilities**
 1) HTTP/HTTPS
@@ -15,142 +22,16 @@ Squzy - is a high-performance open-source monitoring system written in Golang wi
 4) SiteMap.xml - https://www.sitemaps.org/protocol.html
 5) Value from http response by selectors(https://github.com/tidwall/gjson)
 
-# Usage
+### [Squzy Agents](https://github.com/squzy/squzy/tree/develop/apps/agent_client)
 
-## API
-Squzy server implement [GRPC API](https://github.com/squzy/squzy_proto/blob/master/proto/v1/server.proto). 
+Small application for get information from Host(server)
 
-https://github.com/squzy/squzy_proto/blob/master/proto/v1/server.proto
+Which information you can get:
+1. CPU load per each
+2. Memory usage (used/free/total/shared)
+3. Disk (used/free/total) per each disk
+4. Net (bytes sent/get, package sent/get , err stat)
 
-## Examples of call from [BloomRPC](https://github.com/uw-labs/bloomrpc)
-
-### Http/Https check:
-
-Usually that check used for monitoring web sites
-
-```shell script
-{
-  "interval": 10, - 10 second interval
-  "timeout": 5, - // default timeout is 10 sec
-  "http_check": {
-    "method": "GET", - method GET/POST/PUT/DELETE/HEAD
-    "url": "https://google.com", - url which should call
-    "headers": {
-      "custom": "yes",
-    },
-    "statusCode": 200 - expected statusCode
-  }
-}
-```
-
-### Tcp check:
-
-Check good use for monitoring open ports or not
-
-```shell script
-{
-  "interval": 10, - 10 second interval
-  "timeout": 5, - // default timeout is 10 sec
-  "tcp_check": {
-    "host": "localhost", - host
-    "port": 6345 - port
-  },
-}
-```
-
-### SiteMap check:
-
-**Supports redirects!**
-
-**Every route should return 200**
-
-That check good usage when you have critical URL in sitemap, if any of URL throw error check will be failed
-
-```shell script
-{
-  "interval": 10,
-  "timeout": 5, - // default timeout is 10 sec
-  "sitemap_check": {
-    "url": "https://www.sitemaps.org/sitemap.xml", - url of sitemap (https://www.sitemaps.org/sitemap.xml)
-    "concurrency": 5 - parallel 5 request  
-  },
-}
-```
-
-### GRPC check:
-
-Check better to use for internal testing of API services
-
-```shell script
-{
-  "interval": 10,
-  "timeout": 5, - // default timeout is 10 sec
-  "grpc_check": {
-    "service": "Check", - service name
-    "host": "localhost", - host
-    "port": 9090 - port
-  },
-}
-```
-
-### Value monitoring from Http json response (v1.3.0+)
-
-Monitoring specific value from http request by json selector
-
-Valid selectors you can find here: https://github.com/tidwall/gjson
-
-Support type: https://github.com/squzy/squzy_proto/blob/master/proto/v1/server.proto#L84
-    
-
-```shell script
-{
-  "interval": 10,
-  "timeout": 5, - // default timeout is 10 sec
-  "http_json_value": {
-      "method": "GET",
-      "url": "https://api.exchangeratesapi.io/latest?base=USD",
-      "headers": {
-        "custom": "yes",
-      },
-      "selectors": [
-        {
-          "type": 4,
-          "path": "rates.RUB"
-        }
-      ]
-    }
-}
-```
-
-
-
-## Storage
-By default squzy use stdout for logs, but can be configured by ENV.
-
-Storage should implement that [API](https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto):
-
-https://github.com/squzy/squzy_proto/blob/master/proto/v1/storage.proto
-
-## Environment variables
-- PORT(8080) - on with port run squzy
-- STORAGE_HOST - log storage host(example *localhost:9090*)
-- STORAGE_TIMEOUT - timeout for connect to log storage
-
-## Docker
-
-For current develop branch use tag: **latest**
-
-Docker Hub
-
-```shell script
-docker pull squzy/squzy_app:v1.5.0
-```
-
-### Run locally with docker:
-
-```shell script
-docker run -p 8080:8080 squzy/squzy_app:v1.5.0
-```
 
 # Authors
 - [Iurii Panarin](https://github.com/PxyUp)

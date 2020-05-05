@@ -1,0 +1,35 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+     name = "server",
+     srcs = [
+         "server.go",
+     ],
+     importpath = "squzy/apps/squzy_monitoring/server",
+     visibility = ["//visibility:public"],
+     deps = [
+        "//internal/scheduler:scheduler",
+        "//internal/scheduler-storage:scheduler-storage",
+        "//internal/storage:storage",
+        "//internal/helpers:helpers",
+        "//internal/job-executor:job-executor",
+        "//internal/scheduler-config-storage:storage",
+        "@org_mongodb_go_mongo_driver//bson/primitive:go_default_library",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_x_sync//errgroup:go_default_library",
+        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
+     ],
+
+)
+
+go_test(
+    name = "server_test",
+    srcs = [
+        "server_test.go"
+    ],
+    embed = [":server"],
+    deps = [
+        "@com_github_stretchr_testify//assert:go_default_library",
+    ]
+)

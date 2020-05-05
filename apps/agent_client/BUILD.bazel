@@ -1,0 +1,29 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_library(
+    name = "agent",
+    srcs = [
+        "main.go",
+    ],
+    importpath = "squzy/apps/agent_client",
+    deps = [
+        "@com_github_shirou_gopsutil//cpu:go_default_library",
+        "@com_github_shirou_gopsutil//disk:go_default_library",
+        "@com_github_shirou_gopsutil//host:go_default_library",
+        "@com_github_shirou_gopsutil//net:go_default_library",
+        "@com_github_shirou_gopsutil//mem:go_default_library",
+        "//apps/agent_client/config:config",
+        "//apps/agent_client/version:version",
+        "//internal/agent:agent",
+        "//apps/agent_client/application:application",
+        "@com_github_golang_protobuf//ptypes:go_default_library",
+        "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
+        "//internal/agent-executor:agent-executor",
+        "//internal/grpcTools:grpcTools",
+    ]
+)
+
+go_binary(
+    name = "squzy_agent_app",
+    embed = [":agent"],
+)

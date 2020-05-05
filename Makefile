@@ -8,12 +8,6 @@ build_bin_squzy: .build_bin_squzy
 
 run_agent: .run_agent
 
-push: .push
-
-push_hub: .push_hub
-
-build_squzy: .build_squzy
-
 run_squzy: .run_squzy
 
 test: .test
@@ -31,32 +25,17 @@ default: build
 .lint:
 	golangci-lint run
 
-.run_squzy:
-	bazel run //apps/squzy:squzy_app
-
 .build_squzy:
-	bazel build //apps/squzy:squzy
-
-.push:
-	bazel run //apps/squzy:squzy_push
-
-.push_hub:
-	bazel run //apps/squzy:squzy_push_hub
-
-.build:
-	bazel build //apps/...
+	bazel build //apps/squzy_monitoring:squzy_monitoring_src
 
 .test:
 	bazel test --define version="local" //apps/...
 
 .build_agent:
-	./build.bash agent squzy_agent_$(version) $(version)
+	./build.bash agent_client squzy_agent_$(version) $(version)
 
 .build_bin_squzy:
-	./build.bash squzy squzy_$(version) $(version)
-
-.run_agent:
-	bazel run //apps/agent:squzy_agent_app
+	./build.bash squzy_monitoring squzy_monitoring_$(version) $(version)
 
 .test_debug:
 	bazel test --define version="local" //apps/...:all --sandbox_debug

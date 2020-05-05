@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+     name = "agent-executor",
+     srcs = ["agent_executor.go"],
+     importpath = "squzy/internal/agent-executor",
+     visibility = ["//visibility:public"],
+     deps = [
+         "//internal/agent:agent",
+         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
+     ],
+
+)
+
+go_test(
+    name = "agent-executor_test",
+    srcs = [
+        "agent_executor_test.go",
+    ],
+    embed = [":agent-executor"],
+    deps = [
+        "@com_github_stretchr_testify//assert:go_default_library",
+    ]
+)
