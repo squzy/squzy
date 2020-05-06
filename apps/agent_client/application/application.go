@@ -46,6 +46,7 @@ func (a *application) register(hostStat *host.InfoStat) string {
 		ctx, cancel := helpers.TimeoutContext(context.Background(), 0)
 		defer cancel()
 		res, err := a.client.Register(ctx, &apiPb.RegisterRequest{
+			AgentName:  a.config.GetAgentName(),
 			HostInfo: &apiPb.HostInfo{
 				HostName: hostStat.Hostname,
 				Os:       hostStat.OS,
@@ -85,15 +86,14 @@ func (a *application) Run() error {
 
 	log.Printf("Registred with ID=%s", agentId)
 
-	go func() {
-		var st apiPb.AgentServer_SendMetricsClient
+	st := a.getStream()
 
-		st = a.getStream()
+	go func() {
 		a.isStreamAvail = true
 
 		for stat := range a.executor.Execute() {
 			stat.AgentId = agentId
-			stat.AgentUniqName = a.config.GetAgentName()
+			stat.AgentName = a.config.GetAgentName()
 			// what we should do if squzy server cant get msg
 			err = st.Send(stat)
 
@@ -121,6 +121,8 @@ func (a *application) Run() error {
 	defer signal.Stop(a.interrupt)
 
 	<-a.interrupt
+
+	_ = st.CloseSend()
 
 	ctxClose, cancelClose := helpers.TimeoutContext(context.Background(), 0)
 	defer cancelClose()

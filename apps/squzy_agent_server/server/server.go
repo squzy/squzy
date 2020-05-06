@@ -24,10 +24,10 @@ func (s *server) Register(ctx context.Context, rq *apiPb.RegisterRequest) (*apiP
 	}, nil
 }
 
-func (s server) GetByAgentName(ctx context.Context, name *apiPb.GetByAgentNameRequest) (*apiPb.GetAgentListResponse, error) {
+func (s server) GetByAgentName(ctx context.Context, rq *apiPb.GetByAgentNameRequest) (*apiPb.GetAgentListResponse, error) {
 	agents, err := s.db.GetAll(ctx, bson.M{
 		"agentName": bson.M{
-			"$eq": name,
+			"$eq": rq.AgentName,
 		},
 	})
 	if err != nil {
