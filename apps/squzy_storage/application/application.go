@@ -10,7 +10,7 @@ type server struct {
 	database database.Database
 }
 
-func NewStorage() *apiPb.StorageServer {
+func NewStorage() apiPb.StorageServer {
 	return &server{}
 }
 
