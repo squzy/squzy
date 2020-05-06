@@ -163,7 +163,6 @@ func TestApplication_Run(t *testing.T) {
 			err := grpcServer.Serve(lis)
 			assert.Equal(t, nil, err)
 		}()
-		time.Sleep(time.Second * 2)
 
 		ch := make(chan *apiPb.SendMetricsRequest)
 		inter := make(chan os.Signal, 1)
@@ -176,7 +175,6 @@ func TestApplication_Run(t *testing.T) {
 		go func() {
 			_ = a.Run()
 		}()
-		time.Sleep(time.Second * 2)
 
 		ch <- &apiPb.SendMetricsRequest{
 			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
@@ -206,8 +204,6 @@ func TestApplication_Run(t *testing.T) {
 			assert.Equal(t, nil, err)
 		}()
 
-		time.Sleep(time.Second * 2)
-
 		ch <- &apiPb.SendMetricsRequest{
 			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
 				Load: 5,
@@ -219,7 +215,7 @@ func TestApplication_Run(t *testing.T) {
 		}}, value.CpuInfo.Cpus)
 
 		inter <- os.Interrupt
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Second * 5)
 		assert.Equal(t, 5, s.count)
 	})
 }
