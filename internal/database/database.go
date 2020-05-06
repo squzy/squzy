@@ -6,8 +6,8 @@ import (
 )
 
 type Database interface {
-	InsertMetaData(data *MetaData) error //TODO: fix
-	GetMetaData(id string) (*MetaData, error) //TODO: fix
+	InsertSnapshot(data *apiPb.SchedulerResponse) error //TODO: fix
+	GetSnapshots(id string) ([]*apiPb.Snapshot, error) //TODO: fix
 	InsertStatRequest(data *apiPb.SendMetricsRequest) error
 	GetStatRequest(id string) (*apiPb.SendMetricsRequest, error)
 }

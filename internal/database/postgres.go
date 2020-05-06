@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	_struct "github.com/golang/protobuf/ptypes/struct"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
@@ -20,15 +21,30 @@ type Model struct {
 	DeletedAt *time.Time `json:"createdAt" gorm:"index"`
 }
 
-type MetaData struct {
+//Scheduler gorm description
+type Scheduler struct {
 	gorm.Model
-	Location  string     `gorm:"location"`
-	Port      int32      `gorm:"port"`
-	StartTime *time.Time `gorm:"startTime"`
-	EndTime   *time.Time `gorm:"endTime"`
-	Type      int32      `gorm:"column:type"`
+	Snapshots []*Snapshot `gorm:"snapshots"`
 }
 
+type Snapshot struct {
+	gorm.Model
+	SchedulerId uint      `gorm:"schedulerId"`
+	Code        string    `gorm:"code"`
+	Type        string    `gorm:"column:type"`
+	Error       string    `gorm:"error"`
+	Meta        *MetaData `gorm:"meta"`
+}
+
+type MetaData struct {
+	gorm.Model
+	SnapshotId uint           `gorm:"snapshotId"`
+	StartTime  *time.Time     `gorm:"startTime"`
+	EndTime    *time.Time     `gorm:"endTime"`
+	Value      *_struct.Value `gorm:"value"`
+}
+
+//Agent gorm description
 type StatRequest struct {
 	gorm.Model
 	CpuInfo    []*CpuInfo  `gorm:"cpuInfo"`
@@ -86,7 +102,8 @@ type NetInfo struct {
 }
 
 const (
-	dbMetaDataCollection    = "meta_data"    //TODO: check
+	dbSchedulerCollection   = "schedulers"    //TODO: check
+	dbSnapshotCollection    = "snapshots"     //TODO: check
 	dbStatRequestCollection = "stat_requests" //TODO: check
 )
 
@@ -109,6 +126,7 @@ func (p *postgres) newClient(getDB func() (*gorm.DB, error)) error {
 func (p *postgres) Migrate() (resErr error) {
 	resErr = nil
 	models := []interface{}{
+		&Snapshot{},
 		&MetaData{},
 		&StatRequest{},
 		&CpuInfo{},
@@ -128,20 +146,24 @@ func (p *postgres) Migrate() (resErr error) {
 	return resErr
 }
 
-func (p *postgres) InsertMetaData(data *MetaData) error {
-	if err := p.db.Table(dbMetaDataCollection).Create(data).Error; err != nil {
+func (p *postgres) InsertSnapshot(data *apiPb.SchedulerResponse) error {
+	snapshot, err := convertion.ConvertToPostgressScheduler(data)
+	if err != nil {
+		return err
+	}
+	if err := p.db.Table(dbSnapshotCollection).Create(snapshot).Error; err != nil {
 		return errorDataBase
 	}
 	return nil
 }
 
-func (p *postgres) GetMetaData(id string) (*MetaData, error) {
-	metaData := &MetaData{}
-	if err := p.db.Table(dbMetaDataCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbMetaDataCollection), id).First(metaData).Error; err != nil {
+func (p *postgres) GetSnapshots(id string) ([]*apiPb.Snapshot, error) {
+	var scheduler Scheduler
+	if err := p.db.Table(dbSchedulerCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbSchedulerCollection), id).First(scheduler).Error; err != nil {
 		fmt.Println(err.Error()) //TODO: log?
 		return nil, errorDataBase
 	}
-	return metaData, nil
+	return convertion.ConvertFromPostgressSnapshots(scheduler.Snapshots), nil
 }
 
 func (p *postgres) InsertStatRequest(data *apiPb.SendMetricsRequest) error {

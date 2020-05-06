@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jinzhu/gorm"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -15,7 +16,7 @@ import (
 
 //docker run -d --rm --name postgres -e POSTGRES_USER="user" -e POSTGRES_PASSWORD="password" -e POSTGRES_DB="database" -p 5432:5432 postgres
 var (
-	postgr = &postgres{}
+	postgr      = &postgres{}
 	postgrWrong = &postgres{}
 )
 
@@ -54,12 +55,12 @@ func TestPostgres_NewClient(t *testing.T) {
 
 func (s *Suite) Test_InsertMetaData() {
 	s.mock.ExpectBegin()
-	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, dbMetaDataCollection)).
+	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, dbSchedulerCollection)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.mock.ExpectCommit()
 
-	err := postgr.InsertMetaData(&MetaData{})
+	err := postgr.InsertSnapshot(&apiPb.SchedulerResponse{})
 	require.NoError(s.T(), err)
 }
 
@@ -67,13 +68,13 @@ func (s *Suite) Test_GetMetaData() {
 	var (
 		id = "1"
 	)
-	query := fmt.Sprintf(`SELECT * FROM "%s" WHERE "%s"."deleted_at" IS NULL`, dbMetaDataCollection, dbMetaDataCollection)
+	query := fmt.Sprintf(`SELECT * FROM "%s" WHERE "%s"."deleted_at" IS NULL`, dbSchedulerCollection, dbSchedulerCollection)
 	rows := sqlmock.NewRows([]string{"id"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(id).
 		WillReturnRows(rows)
 
-	_, err := postgr.GetMetaData(id)
+	_, err := postgr.GetSnapshots(id)
 	require.NoError(s.T(), err)
 }
 
@@ -119,14 +120,14 @@ func TestPostgres_Migrate(t *testing.T) {
 
 func TestPostgres_InsertMetaData(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		err := postgrWrong.InsertMetaData(&MetaData{})
+		err := postgrWrong.InsertSnapshot(&apiPb.SchedulerResponse{})
 		assert.Error(t, err)
 	})
 }
 
 func TestPostgres_GetMetaData(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		_, err := postgrWrong.GetMetaData("")
+		_, err := postgrWrong.GetSnapshots("")
 		assert.Error(t, err)
 	})
 }

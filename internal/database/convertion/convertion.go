@@ -6,8 +6,22 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"squzy/internal/database"
+	"strconv"
 	"time"
 )
+
+func ConvertToPostgressScheduler(request *apiPb.SchedulerResponse) (*database.Snapshot, error) {
+	id, err := strconv.ParseUint(request.GetSchedulerId(), 10, 32)
+	return convertToSnapshot(request.GetSnapshot(), uint(id)), err
+}
+
+func ConvertFromPostgressSnapshots(snapshots []*database.Snapshot) []*apiPb.Snapshot {
+	var res []*apiPb.Snapshot
+	for _, v := range snapshots {
+		res = append(res, convertFromSnapshot(v))
+	}
+	return res
+}
 
 func ConvertToPostgressStatRequest(request *apiPb.SendMetricsRequest) *database.StatRequest {
 	return &database.StatRequest{
@@ -28,6 +42,55 @@ func ConvertFromPostgressStatRequest(data *database.StatRequest) *apiPb.SendMetr
 		DiskInfo:      convertFromDiskInfo(data.DiskInfo),
 		NetInfo:       convertFromNetInfo(data.NetInfo),
 		Time:          convertFromTime(data.Time),
+	}
+}
+
+func convertToSnapshot(request *apiPb.Snapshot, schedulerId uint) *database.Snapshot {
+	if request == nil {
+		return nil
+	}
+	res := &database.Snapshot{
+		SchedulerId: schedulerId,
+		Code:        request.GetCode().String(),
+		Type:        request.GetType().String(),
+		Meta:        convertToMetaData(request.GetMeta()),
+	}
+	if request.GetError() != nil {
+		res.Error = request.GetError().GetMessage()
+	}
+	return res
+}
+
+func convertToMetaData(request *apiPb.Snapshot_MetaData) *database.MetaData {
+	if request == nil {
+		return nil
+	}
+	return &database.MetaData{
+		StartTime: convertToTime(request.GetStartTime()),
+		EndTime:   convertToTime(request.GetEndTime()),
+		Value:     request.GetValue(),
+	}
+}
+
+func convertFromSnapshot(snapshot *database.Snapshot) *apiPb.Snapshot {
+	return &apiPb.Snapshot{
+		Code:                 apiPb.Snapshot_Code(apiPb.SchedulerResponseCode_value[snapshot.Code]),
+		Type:                 apiPb.SchedulerType(apiPb.SchedulerType_value[snapshot.Type]),
+		Error:                &apiPb.Snapshot_SnapshotError{
+			Message: snapshot.Error,
+		},
+		Meta:                 convertFromMetaData(snapshot.Meta),
+	}
+}
+
+func convertFromMetaData(metaData *database.MetaData) *apiPb.Snapshot_MetaData {
+	if metaData == nil {
+		return nil
+	}
+	return &apiPb.Snapshot_MetaData{
+		StartTime:            convertFromTime(metaData.StartTime),
+		EndTime:              convertFromTime(metaData.StartTime),
+		Value:                metaData.Value,
 	}
 }
 
@@ -109,7 +172,7 @@ func convertToNetInfo(request *apiPb.NetInfo) []*database.NetInfo {
 func convertToTime(tm *timestamp.Timestamp) *time.Time {
 	res, err := ptypes.Timestamp(tm)
 	if err != nil {
-		res = time.Now() //TODO: discuss
+		return nil
 	}
 	return &res
 }
@@ -183,7 +246,7 @@ func convertFromNetInfo(data []*database.NetInfo) *apiPb.NetInfo {
 func convertFromTime(tm *time.Time) *timestamp.Timestamp {
 	res, err := ptypes.TimestampProto(*tm)
 	if err != nil {
-		res = ptypes.TimestampNow() //TODO: discuss
+		return nil
 	}
 	return res
 }
