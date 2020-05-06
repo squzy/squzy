@@ -16,3 +16,4 @@
 
 bazel-*
 bin
+.DS_Store

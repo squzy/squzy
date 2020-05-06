@@ -2,6 +2,8 @@ clean: .clean
 
 build: .build
 
+build_agent_server: .build_agent_server
+
 build_agent: .build_agent
 
 build_bin_squzy: .build_bin_squzy
@@ -36,6 +38,9 @@ default: build
 
 .build_bin_squzy:
 	./build.bash squzy_monitoring squzy_monitoring_$(version) $(version)
+
+.build_agent_server:
+	./build.bash squzy_agent_server squzy_agent_server_$(version) $(version)
 
 .test_debug:
 	bazel test --define version="local" //apps/...:all --sandbox_debug

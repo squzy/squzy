@@ -32,6 +32,9 @@ Which information you can get:
 3. Disk (used/free/total) per each disk
 4. Net (bytes sent/get, package sent/get , err stat)
 
+### [Squzy Agents Server](https://github.com/squzy/squzy/tree/develop/apps/squzy_agent_server)
+
+Basic implementation for [agent server](https://github.com/squzy/squzy_proto/blob/master/proto/v1/squzy_agent_server.proto#L10)
 
 # Authors
 - [Iurii Panarin](https://github.com/PxyUp)
