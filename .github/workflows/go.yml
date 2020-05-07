@@ -25,7 +25,7 @@ jobs:
 
     - name: golangci-lint
       run: |
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.26.0
+        wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.26.0
         make lint
 
     - name: Install bazel
