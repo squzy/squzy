@@ -49,5 +49,4 @@ default: build
 	bazel run //:gazelle -- update-repos -from_file=go.mod
 
 .test_cover:
-	# bazel coverage --test_arg="-test.coverprofile=c.out" //apps/...
-	go test ./... -coverprofile=c.out
+	bazel coverage --define version="local" --test_arg="-test.coverprofile=c.out" //apps/...
