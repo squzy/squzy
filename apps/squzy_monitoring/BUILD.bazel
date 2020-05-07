@@ -3,28 +3,28 @@ load("@io_bazel_rules_docker//go:image.bzl", "go_image")
 load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 
 go_library(
-    name = "squzy_monitoring_src",
+    name = "go_default_library",
     srcs = [
         "main.go",
     ],
     importpath = "squzy/apps/squzy_monitoring",
     deps = [
-        "//apps/squzy_monitoring/application:application",
-        "//apps/squzy_monitoring/config:config",
-        "//apps/squzy_monitoring/version:version",
-        "//apps/squzy_monitoring/server:server",
-        "//internal/job:job",
-        "//internal/semaphore:semaphore",
-        "//internal/scheduler:scheduler",
-        "//internal/scheduler-config-storage:storage",
-        "//internal/sitemap-storage:sitemap-storage",
-        "//internal/storage:storage",
-        "//internal/httpTools:httpTools",
-        "//internal/grpcTools:grpcTools",
-        "//internal/parsers:parsers",
-        "//internal/helpers:helpers",
-        "//internal/scheduler-storage:scheduler-storage",
-        "//internal/job-executor:job-executor",
+        "//apps/squzy_monitoring/application:go_default_library",
+        "//apps/squzy_monitoring/config:go_default_library",
+        "//apps/squzy_monitoring/version:go_default_library",
+        "//apps/squzy_monitoring/server:go_default_library",
+        "//internal/job:go_default_library",
+        "//internal/semaphore:go_default_library",
+        "//internal/scheduler:go_default_library",
+        "//internal/scheduler-config-storage:go_default_library",
+        "//internal/sitemap-storage:go_default_library",
+        "//internal/storage:go_default_library",
+        "//internal/httpTools:go_default_library",
+        "//internal/grpcTools:go_default_library",
+        "//internal/parsers:go_default_library",
+        "//internal/helpers:go_default_library",
+        "//internal/scheduler-storage:go_default_library",
+        "//internal/job-executor:go_default_library",
         "@com_github_squzy_mongo_helper//:go_default_library",
         "@org_mongodb_go_mongo_driver//mongo:go_default_library",
         "@org_mongodb_go_mongo_driver//mongo/options:go_default_library",
@@ -35,7 +35,7 @@ go_library(
 
 go_binary(
     name = "squzy_monitoring",
-    embed = [":squzy_monitoring_src"],
+    embed = [":go_default_library"],
     x_defs = {"squzy/apps/squzy_monitoring/version.Version": "{VERSION}"},
 )
 
