@@ -1,39 +1,55 @@
 package convertion
 
 import (
+	"errors"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"squzy/internal/database"
 	"strconv"
-	"time"
 )
 
 func ConvertToPostgressScheduler(request *apiPb.SchedulerResponse) (*database.Snapshot, error) {
 	id, err := strconv.ParseUint(request.GetSchedulerId(), 10, 32)
-	return convertToSnapshot(request.GetSnapshot(), uint(id)), err
+	if err != nil {
+		return nil, err
+	}
+	return convertToSnapshot(request.GetSnapshot(), uint(id))
 }
 
-func ConvertFromPostgressSnapshots(snapshots []*database.Snapshot) []*apiPb.Snapshot {
+func ConvertFromPostgressSnapshots(snapshots []*database.Snapshot) ([]*apiPb.Snapshot, []error) {
+	var errors []error
 	var res []*apiPb.Snapshot
 	for _, v := range snapshots {
-		res = append(res, convertFromSnapshot(v))
+		snap, err := convertFromSnapshot(v)
+		if err != nil {
+			errors = append(errors, err)
+		} else {
+			res = append(res, snap)
+		}
 	}
-	return res
+	return res, errors
 }
 
-func ConvertToPostgressStatRequest(request *apiPb.SendMetricsRequest) *database.StatRequest {
+func ConvertToPostgressStatRequest(request *apiPb.SendMetricsRequest) (*database.StatRequest, error) {
+	t, err := ptypes.Timestamp(request.GetTime())
+	if err != nil {
+		return nil, err
+	}
 	return &database.StatRequest{
 		CpuInfo:    convertToCpuInfo(request.GetCpuInfo()),
 		MemoryInfo: convertToMemoryInfo(request.GetMemoryInfo()),
 		DiskInfo:   convertToDiskInfo(request.GetDiskInfo()),
 		NetInfo:    convertToNetInfo(request.GetNetInfo()),
-		Time:       convertToTime(request.GetTime()),
-	}
+		Time:       t,
+	}, nil
 }
 
-func ConvertFromPostgressStatRequest(data *database.StatRequest) *apiPb.SendMetricsRequest {
+func ConvertFromPostgressStatRequest(data *database.StatRequest) (*apiPb.SendMetricsRequest, error) {
+	t, err := ptypes.TimestampProto(data.Time)
+	if err != nil {
+		return nil, err
+	}
 	return &apiPb.SendMetricsRequest{
 		AgentId:       fmt.Sprint(data.ID),
 		AgentUniqName: "", //TODO
@@ -41,57 +57,81 @@ func ConvertFromPostgressStatRequest(data *database.StatRequest) *apiPb.SendMetr
 		MemoryInfo:    convertFromMemoryInfo(data.MemoryInfo),
 		DiskInfo:      convertFromDiskInfo(data.DiskInfo),
 		NetInfo:       convertFromNetInfo(data.NetInfo),
-		Time:          convertFromTime(data.Time),
-	}
+		Time:          t,
+	}, nil
 }
 
-func convertToSnapshot(request *apiPb.Snapshot, schedulerId uint) *database.Snapshot {
+func convertToSnapshot(request *apiPb.Snapshot, schedulerId uint) (*database.Snapshot, error) {
 	if request == nil {
-		return nil
+		return nil, errors.New("ERROR_SNAPSHOT_IS_EMPTY")
+	}
+	metaData, err := convertToMetaData(request.GetMeta())
+	if err != nil {
+		return nil, err
 	}
 	res := &database.Snapshot{
 		SchedulerId: schedulerId,
 		Code:        request.GetCode().String(),
 		Type:        request.GetType().String(),
-		Meta:        convertToMetaData(request.GetMeta()),
+		Meta:        metaData,
 	}
 	if request.GetError() != nil {
 		res.Error = request.GetError().GetMessage()
 	}
-	return res
+	return res, nil
 }
 
-func convertToMetaData(request *apiPb.Snapshot_MetaData) *database.MetaData {
+func convertToMetaData(request *apiPb.Snapshot_MetaData) (*database.MetaData, error) {
 	if request == nil {
-		return nil
+		return nil, errors.New("EMPTY_META_DATA")
+	}
+	startTime, err := ptypes.Timestamp(request.GetStartTime())
+	if err != nil {
+		return nil, err
+	}
+	endTime, err := ptypes.Timestamp(request.GetEndTime())
+	if err != nil {
+		return nil, err
 	}
 	return &database.MetaData{
-		StartTime: convertToTime(request.GetStartTime()),
-		EndTime:   convertToTime(request.GetEndTime()),
+		StartTime: startTime,
+		EndTime:   endTime,
 		Value:     request.GetValue(),
-	}
+	}, nil
 }
 
-func convertFromSnapshot(snapshot *database.Snapshot) *apiPb.Snapshot {
+func convertFromSnapshot(snapshot *database.Snapshot) (*apiPb.Snapshot, error) {
+	meta, err := convertFromMetaData(snapshot.Meta)
+	if err != nil {
+		return nil, err
+	}
 	return &apiPb.Snapshot{
 		Code:                 apiPb.Snapshot_Code(apiPb.SchedulerResponseCode_value[snapshot.Code]),
 		Type:                 apiPb.SchedulerType(apiPb.SchedulerType_value[snapshot.Type]),
 		Error:                &apiPb.Snapshot_SnapshotError{
 			Message: snapshot.Error,
 		},
-		Meta:                 convertFromMetaData(snapshot.Meta),
-	}
+		Meta:                 meta,
+	}, nil
 }
 
-func convertFromMetaData(metaData *database.MetaData) *apiPb.Snapshot_MetaData {
+func convertFromMetaData(metaData *database.MetaData) (*apiPb.Snapshot_MetaData, error) {
 	if metaData == nil {
-		return nil
+		return nil, errors.New("EMPTY_META_DATA")
+	}
+	startTime, err := ptypes.TimestampProto(metaData.StartTime)
+	if err != nil {
+		return nil, err
+	}
+	endTime, err := ptypes.TimestampProto(metaData.EndTime)
+	if err != nil {
+		return nil, err
 	}
 	return &apiPb.Snapshot_MetaData{
-		StartTime:            convertFromTime(metaData.StartTime),
-		EndTime:              convertFromTime(metaData.StartTime),
+		StartTime:            startTime,
+		EndTime:              endTime,
 		Value:                metaData.Value,
-	}
+	}, nil
 }
 
 func convertToCpuInfo(request *apiPb.CpuInfo) []*database.CpuInfo {
@@ -169,14 +209,6 @@ func convertToNetInfo(request *apiPb.NetInfo) []*database.NetInfo {
 	return res
 }
 
-func convertToTime(tm *timestamp.Timestamp) *time.Time {
-	res, err := ptypes.Timestamp(tm)
-	if err != nil {
-		return nil
-	}
-	return &res
-}
-
 func convertFromCpuInfo(data []*database.CpuInfo) *apiPb.CpuInfo {
 	var cpus []*apiPb.CpuInfo_CPU
 	for _, v := range data {
@@ -241,12 +273,4 @@ func convertFromNetInfo(data []*database.NetInfo) *apiPb.NetInfo {
 		}
 	}
 	return &apiPb.NetInfo{Interfaces: interfaces,}
-}
-
-func convertFromTime(tm *time.Time) *timestamp.Timestamp {
-	res, err := ptypes.TimestampProto(*tm)
-	if err != nil {
-		return nil
-	}
-	return res
 }

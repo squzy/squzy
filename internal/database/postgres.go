@@ -39,9 +39,9 @@ type Snapshot struct {
 type MetaData struct {
 	gorm.Model
 	SnapshotId uint           `gorm:"snapshotId"`
-	StartTime  *time.Time     `gorm:"startTime"`
-	EndTime    *time.Time     `gorm:"endTime"`
-	Value      *_struct.Value `gorm:"value"`
+	StartTime  time.Time     `gorm:"startTime"`
+	EndTime    time.Time     `gorm:"endTime"`
+	Value      *_struct.Value `gorm:"value"` //TODO: google
 }
 
 //Agent gorm description
@@ -51,7 +51,7 @@ type StatRequest struct {
 	MemoryInfo *MemoryInfo `gorm:"memoryInfo"`
 	DiskInfo   []*DiskInfo `gorm:"diskInfo"`
 	NetInfo    []*NetInfo  `gorm:"netInfo"`
-	Time       *time.Time  `gorm:"time"`
+	Time       time.Time  `gorm:"time"`
 }
 
 type CpuInfo struct {
@@ -163,11 +163,18 @@ func (p *postgres) GetSnapshots(id string) ([]*apiPb.Snapshot, error) {
 		fmt.Println(err.Error()) //TODO: log?
 		return nil, errorDataBase
 	}
-	return convertion.ConvertFromPostgressSnapshots(scheduler.Snapshots), nil
+	snapshots, errs := convertion.ConvertFromPostgressSnapshots(scheduler.Snapshots)
+	if len(errs) != 0 {
+		//TODO: log
+	}
+	return snapshots, nil
 }
 
 func (p *postgres) InsertStatRequest(data *apiPb.SendMetricsRequest) error {
-	pgData := convertion.ConvertToPostgressStatRequest(data)
+	pgData, err := convertion.ConvertToPostgressStatRequest(data)
+	if err != nil {
+		return err
+	}
 	if err := p.db.Table(dbStatRequestCollection).Create(pgData).Error; err != nil {
 		fmt.Println(err.Error()) //TODO: log?
 		return errorDataBase
@@ -181,5 +188,5 @@ func (p *postgres) GetStatRequest(id string) (*apiPb.SendMetricsRequest, error) 
 		fmt.Println(err.Error()) //TODO: log?
 		return nil, errorDataBase
 	}
-	return convertion.ConvertFromPostgressStatRequest(statRequest), nil
+	return convertion.ConvertFromPostgressStatRequest(statRequest)
 }
