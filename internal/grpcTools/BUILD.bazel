@@ -1,7 +1,7 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "grpcTools",
+     name = "go_default_library",
      srcs = ["grpcTools.go"],
      importpath = "squzy/internal/grpcTools",
      visibility = ["//visibility:public"],
@@ -11,8 +11,8 @@ go_library(
 )
 
 go_test(
-    name = "grpcTools_test",
-    embed = [":grpcTools"],
+    name = "go_default_test",
+    embed = [":go_default_library"],
     srcs = [
         "grpcTools_test.go",
     ],

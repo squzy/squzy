@@ -1,18 +1,18 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "config",
+     name = "go_default_library",
      srcs = ["config.go"],
      importpath = "squzy/apps/squzy_monitoring/config",
      visibility = ["//visibility:public"],
      deps = [
-         "//internal/helpers:helpers"
+         "//internal/helpers:go_default_library"
      ]
 )
 
 go_test(
-    name = "config_test",
-    embed = [":config"],
+    name = "go_default_test",
+    embed = [":go_default_library"],
     srcs = [
         "config_test.go",
     ],

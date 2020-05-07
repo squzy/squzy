@@ -1,7 +1,7 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "agent",
+     name = "go_default_library",
      srcs = ["agent.go"],
      importpath = "squzy/internal/agent",
      visibility = ["//visibility:public"],
@@ -19,7 +19,7 @@ go_library(
 )
 
 go_test(
-    name = "agent_test",
+    name = "go_default_test",
     srcs = [
         "agent_test.go",
     ],

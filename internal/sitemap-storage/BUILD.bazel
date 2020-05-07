@@ -1,23 +1,23 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "sitemap-storage",
+     name = "go_default_library",
      srcs = ["sitemap-storage.go"],
      importpath = "squzy/internal/sitemap-storage",
      visibility = ["//visibility:public"],
      deps = [
-        "//internal/parsers:parsers",
-        "//internal/httpTools:httpTools",
+        "//internal/parsers:go_default_library",
+        "//internal/httpTools:go_default_library",
      ],
 
 )
 
 go_test(
-    name = "sitemap-storage_test",
+    name = "go_default_test",
     srcs = [
         "sitemap-storage_test.go",
     ],
-    embed = [":sitemap-storage"],
+    embed = [":go_default_library"],
     deps = [
         "@com_github_stretchr_testify//assert:go_default_library",
     ]
