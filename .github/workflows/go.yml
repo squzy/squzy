@@ -23,13 +23,10 @@ jobs:
     - name: Get dependencies
       run: go mod download
 
-    - uses: actions/checkout@v2
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v0.1.7
-      with:
-        version: v1.26
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        args: ./apps/...
+      run: |
+        go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.26.0
+        make lint
 
     - name: Install bazel
       run: |
