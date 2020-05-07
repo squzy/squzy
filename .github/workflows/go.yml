@@ -6,7 +6,6 @@ on:
     tags-ignore:
       - 'v*.*.*'
 jobs:
-
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -29,7 +28,7 @@ jobs:
       with:
         version: v1.26
         github-token: ${{ secrets.GITHUB_TOKEN }}
-
+        args: .
 
     - name: Install bazel
       run: |

@@ -19,7 +19,6 @@ jobs:
       - image: circleci/golang:1.14.1
     steps:
       - checkout
-      - *install_bazel
       - run:
           name: Install dep
           command: go mod download
