@@ -23,6 +23,7 @@ jobs:
     - name: Get dependencies
       run: go mod download
 
+    - uses: actions/checkout@v2
     - name: golangci-lint
       uses: golangci/golangci-lint-action@v0.1.7
       with:
