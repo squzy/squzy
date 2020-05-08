@@ -11,18 +11,18 @@ import (
 func TestConvertToPostgressScheduler(t *testing.T) {
 	correctTime, _ := ptypes.TimestampProto(time.Now())
 	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertToPostgresScheduler(&apiPb.SchedulerResponse{})
+		_, err := ConvertToPostgresSnapshot(&apiPb.SchedulerResponse{})
 		assert.Error(t, err)
 	})
 	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertToPostgresScheduler(&apiPb.SchedulerResponse{
+		_, err := ConvertToPostgresSnapshot(&apiPb.SchedulerResponse{
 			SchedulerId: "id",
 			Snapshot:    &apiPb.Snapshot{},
 		})
 		assert.Error(t, err)
 	})
 	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertToPostgresScheduler(&apiPb.SchedulerResponse{
+		_, err := ConvertToPostgresSnapshot(&apiPb.SchedulerResponse{
 			SchedulerId: "id",
 			Snapshot: &apiPb.Snapshot{
 				Code: 0,
@@ -35,7 +35,7 @@ func TestConvertToPostgressScheduler(t *testing.T) {
 		assert.Error(t, err)
 	})
 	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertToPostgresScheduler(&apiPb.SchedulerResponse{
+		_, err := ConvertToPostgresSnapshot(&apiPb.SchedulerResponse{
 			SchedulerId: "id",
 			Snapshot: &apiPb.Snapshot{
 				Code: 0,
@@ -49,7 +49,7 @@ func TestConvertToPostgressScheduler(t *testing.T) {
 		assert.Error(t, err)
 	})
 	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertToPostgresScheduler(&apiPb.SchedulerResponse{
+		_, err := ConvertToPostgresSnapshot(&apiPb.SchedulerResponse{
 			SchedulerId: "id",
 			Snapshot: &apiPb.Snapshot{
 				Code:  0,
@@ -62,5 +62,46 @@ func TestConvertToPostgressScheduler(t *testing.T) {
 			},
 		})
 		assert.NoError(t, err)
+	})
+}
+
+func TestConvertFromPostgresSnapshots(t *testing.T) {
+	wrongTime := time.Unix(-62135596888, -100000000) //Protobuf validate this seconds aas error
+	t.Run("Test: error", func(t *testing.T) {
+		_, err := ConvertFromPostgresSnapshots([]*Snapshot{{}})
+		assert.NotEmpty(t, err)
+	})
+	t.Run("Test: error", func(t *testing.T) {
+		_, err := ConvertFromPostgresSnapshots([]*Snapshot{
+			{
+				Meta: &MetaData{
+					StartTime: wrongTime,
+					EndTime:   time.Time{},
+				},
+			},
+		})
+		assert.NotEmpty(t, err)
+	})
+	t.Run("Test: error", func(t *testing.T) {
+		_, err := ConvertFromPostgresSnapshots([]*Snapshot{
+			{
+				Meta: &MetaData{
+					StartTime: time.Time{},
+					EndTime:   wrongTime,
+				},
+			},
+		})
+		assert.NotEmpty(t, err)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		_, err := ConvertFromPostgresSnapshots([]*Snapshot{
+			{
+				Meta: &MetaData{
+					StartTime: time.Time{},
+					EndTime:   time.Time{},
+				},
+			},
+		})
+		assert.Empty(t, err)
 	})
 }

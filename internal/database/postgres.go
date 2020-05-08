@@ -139,7 +139,7 @@ func (p *postgres) Migrate() (resErr error) {
 }
 
 func (p *postgres) InsertSnapshot(data *apiPb.SchedulerResponse) error {
-	snapshot, err := ConvertToPostgresScheduler(data)
+	snapshot, err := ConvertToPostgresSnapshot(data)
 	if err != nil {
 		return err
 	}

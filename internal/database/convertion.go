@@ -7,7 +7,7 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 )
 
-func ConvertToPostgresScheduler(request *apiPb.SchedulerResponse) (*Snapshot, error) {
+func ConvertToPostgresSnapshot(request *apiPb.SchedulerResponse) (*Snapshot, error) {
 	return convertToSnapshot(request.GetSnapshot(), request.GetSchedulerId())
 }
 
