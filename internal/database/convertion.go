@@ -1,42 +1,36 @@
-package convertion
+package database
 
 import (
 	"errors"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/database"
-	"strconv"
 )
 
-func ConvertToPostgressScheduler(request *apiPb.SchedulerResponse) (*database.Snapshot, error) {
-	id, err := strconv.ParseUint(request.GetSchedulerId(), 10, 32)
-	if err != nil {
-		return nil, err
-	}
-	return convertToSnapshot(request.GetSnapshot(), uint(id))
+func ConvertToPostgresScheduler(request *apiPb.SchedulerResponse) (*Snapshot, error) {
+	return convertToSnapshot(request.GetSnapshot(), request.GetSchedulerId())
 }
 
-func ConvertFromPostgressSnapshots(snapshots []*database.Snapshot) ([]*apiPb.Snapshot, []error) {
-	var errors []error
+func ConvertFromPostgresSnapshots(snapshots []*Snapshot) ([]*apiPb.Snapshot, []error) {
+	var errorSlice []error
 	var res []*apiPb.Snapshot
 	for _, v := range snapshots {
 		snap, err := convertFromSnapshot(v)
 		if err != nil {
-			errors = append(errors, err)
+			errorSlice = append(errorSlice, err)
 		} else {
 			res = append(res, snap)
 		}
 	}
-	return res, errors
+	return res, errorSlice
 }
 
-func ConvertToPostgressStatRequest(request *apiPb.SendMetricsRequest) (*database.StatRequest, error) {
+func ConvertToPostgressStatRequest(request *apiPb.SendMetricsRequest) (*StatRequest, error) {
 	t, err := ptypes.Timestamp(request.GetTime())
 	if err != nil {
 		return nil, err
 	}
-	return &database.StatRequest{
+	return &StatRequest{
 		CpuInfo:    convertToCpuInfo(request.GetCpuInfo()),
 		MemoryInfo: convertToMemoryInfo(request.GetMemoryInfo()),
 		DiskInfo:   convertToDiskInfo(request.GetDiskInfo()),
@@ -45,7 +39,7 @@ func ConvertToPostgressStatRequest(request *apiPb.SendMetricsRequest) (*database
 	}, nil
 }
 
-func ConvertFromPostgressStatRequest(data *database.StatRequest) (*apiPb.SendMetricsRequest, error) {
+func ConvertFromPostgressStatRequest(data *StatRequest) (*apiPb.SendMetricsRequest, error) {
 	t, err := ptypes.TimestampProto(data.Time)
 	if err != nil {
 		return nil, err
@@ -61,7 +55,7 @@ func ConvertFromPostgressStatRequest(data *database.StatRequest) (*apiPb.SendMet
 	}, nil
 }
 
-func convertToSnapshot(request *apiPb.Snapshot, schedulerId uint) (*database.Snapshot, error) {
+func convertToSnapshot(request *apiPb.Snapshot, schedulerId string) (*Snapshot, error) {
 	if request == nil {
 		return nil, errors.New("ERROR_SNAPSHOT_IS_EMPTY")
 	}
@@ -69,7 +63,7 @@ func convertToSnapshot(request *apiPb.Snapshot, schedulerId uint) (*database.Sna
 	if err != nil {
 		return nil, err
 	}
-	res := &database.Snapshot{
+	res := &Snapshot{
 		SchedulerId: schedulerId,
 		Code:        request.GetCode().String(),
 		Type:        request.GetType().String(),
@@ -81,7 +75,7 @@ func convertToSnapshot(request *apiPb.Snapshot, schedulerId uint) (*database.Sna
 	return res, nil
 }
 
-func convertToMetaData(request *apiPb.Snapshot_MetaData) (*database.MetaData, error) {
+func convertToMetaData(request *apiPb.Snapshot_MetaData) (*MetaData, error) {
 	if request == nil {
 		return nil, errors.New("EMPTY_META_DATA")
 	}
@@ -93,29 +87,29 @@ func convertToMetaData(request *apiPb.Snapshot_MetaData) (*database.MetaData, er
 	if err != nil {
 		return nil, err
 	}
-	return &database.MetaData{
+	return &MetaData{
 		StartTime: startTime,
 		EndTime:   endTime,
 		Value:     request.GetValue(),
 	}, nil
 }
 
-func convertFromSnapshot(snapshot *database.Snapshot) (*apiPb.Snapshot, error) {
+func convertFromSnapshot(snapshot *Snapshot) (*apiPb.Snapshot, error) {
 	meta, err := convertFromMetaData(snapshot.Meta)
 	if err != nil {
 		return nil, err
 	}
 	return &apiPb.Snapshot{
-		Code:                 apiPb.Snapshot_Code(apiPb.SchedulerResponseCode_value[snapshot.Code]),
-		Type:                 apiPb.SchedulerType(apiPb.SchedulerType_value[snapshot.Type]),
-		Error:                &apiPb.Snapshot_SnapshotError{
+		Code: apiPb.Snapshot_Code(apiPb.SchedulerResponseCode_value[snapshot.Code]),
+		Type: apiPb.SchedulerType(apiPb.SchedulerType_value[snapshot.Type]),
+		Error: &apiPb.Snapshot_SnapshotError{
 			Message: snapshot.Error,
 		},
-		Meta:                 meta,
+		Meta: meta,
 	}, nil
 }
 
-func convertFromMetaData(metaData *database.MetaData) (*apiPb.Snapshot_MetaData, error) {
+func convertFromMetaData(metaData *MetaData) (*apiPb.Snapshot_MetaData, error) {
 	if metaData == nil {
 		return nil, errors.New("EMPTY_META_DATA")
 	}
@@ -128,30 +122,30 @@ func convertFromMetaData(metaData *database.MetaData) (*apiPb.Snapshot_MetaData,
 		return nil, err
 	}
 	return &apiPb.Snapshot_MetaData{
-		StartTime:            startTime,
-		EndTime:              endTime,
-		Value:                metaData.Value,
+		StartTime: startTime,
+		EndTime:   endTime,
+		Value:     metaData.Value,
 	}, nil
 }
 
-func convertToCpuInfo(request *apiPb.CpuInfo) []*database.CpuInfo {
-	var res []*database.CpuInfo
+func convertToCpuInfo(request *apiPb.CpuInfo) []*CpuInfo {
+	var res []*CpuInfo
 	if request == nil {
 		return res
 	}
 	for _, v := range request.Cpus {
-		res = append(res, &database.CpuInfo{Load: v.GetLoad()})
+		res = append(res, &CpuInfo{Load: v.GetLoad()})
 	}
 	return res
 }
 
-func convertToMemoryInfo(reqest *apiPb.MemoryInfo) *database.MemoryInfo {
+func convertToMemoryInfo(reqest *apiPb.MemoryInfo) *MemoryInfo {
 	if reqest == nil {
 		return nil
 	}
-	res := &database.MemoryInfo{}
+	res := &MemoryInfo{}
 	if reqest.GetMem() != nil {
-		res.Mem = &database.Memory{
+		res.Mem = &Memory{
 			Total:       reqest.GetMem().GetTotal(),
 			Used:        reqest.GetMem().GetUsed(),
 			Free:        reqest.GetMem().GetFree(),
@@ -160,7 +154,7 @@ func convertToMemoryInfo(reqest *apiPb.MemoryInfo) *database.MemoryInfo {
 		}
 	}
 	if reqest.GetSwap() != nil {
-		res.Swap = &database.Memory{
+		res.Swap = &Memory{
 			Total:       reqest.GetSwap().GetTotal(),
 			Used:        reqest.GetSwap().GetUsed(),
 			Free:        reqest.GetSwap().GetFree(),
@@ -171,13 +165,13 @@ func convertToMemoryInfo(reqest *apiPb.MemoryInfo) *database.MemoryInfo {
 	return res
 }
 
-func convertToDiskInfo(request *apiPb.DiskInfo) []*database.DiskInfo {
-	var res []*database.DiskInfo
+func convertToDiskInfo(request *apiPb.DiskInfo) []*DiskInfo {
+	var res []*DiskInfo
 	if request == nil {
 		return res
 	}
 	for name, v := range request.GetDisks() {
-		res = append(res, &database.DiskInfo{
+		res = append(res, &DiskInfo{
 			Name:        name,
 			Total:       v.GetTotal(),
 			Free:        v.GetFree(),
@@ -188,13 +182,13 @@ func convertToDiskInfo(request *apiPb.DiskInfo) []*database.DiskInfo {
 	return res
 }
 
-func convertToNetInfo(request *apiPb.NetInfo) []*database.NetInfo {
-	var res []*database.NetInfo
+func convertToNetInfo(request *apiPb.NetInfo) []*NetInfo {
+	var res []*NetInfo
 	if request == nil {
 		return res
 	}
 	for name, v := range request.GetInterfaces() {
-		res = append(res, &database.NetInfo{
+		res = append(res, &NetInfo{
 			Name:        name,
 			BytesSent:   v.GetBytesSent(),
 			BytesRecv:   v.GetBytesRecv(),
@@ -209,7 +203,7 @@ func convertToNetInfo(request *apiPb.NetInfo) []*database.NetInfo {
 	return res
 }
 
-func convertFromCpuInfo(data []*database.CpuInfo) *apiPb.CpuInfo {
+func convertFromCpuInfo(data []*CpuInfo) *apiPb.CpuInfo {
 	var cpus []*apiPb.CpuInfo_CPU
 	for _, v := range data {
 		cpus = append(cpus, &apiPb.CpuInfo_CPU{
@@ -219,7 +213,10 @@ func convertFromCpuInfo(data []*database.CpuInfo) *apiPb.CpuInfo {
 	return &apiPb.CpuInfo{Cpus: cpus,}
 }
 
-func convertFromMemoryInfo(data *database.MemoryInfo) *apiPb.MemoryInfo {
+func convertFromMemoryInfo(data *MemoryInfo) *apiPb.MemoryInfo {
+	if data == nil {
+		return nil
+	}
 	res := &apiPb.MemoryInfo{
 		Mem:  nil,
 		Swap: nil,
@@ -245,7 +242,7 @@ func convertFromMemoryInfo(data *database.MemoryInfo) *apiPb.MemoryInfo {
 	return res
 }
 
-func convertFromDiskInfo(data []*database.DiskInfo) *apiPb.DiskInfo {
+func convertFromDiskInfo(data []*DiskInfo) *apiPb.DiskInfo {
 	disks := map[string]*apiPb.DiskInfo_Disk{}
 	for _, v := range data {
 		disks[v.Name] = &apiPb.DiskInfo_Disk{
@@ -258,7 +255,7 @@ func convertFromDiskInfo(data []*database.DiskInfo) *apiPb.DiskInfo {
 	return &apiPb.DiskInfo{Disks: disks,}
 }
 
-func convertFromNetInfo(data []*database.NetInfo) *apiPb.NetInfo {
+func convertFromNetInfo(data []*NetInfo) *apiPb.NetInfo {
 	interfaces := map[string]*apiPb.NetInfo_Interface{}
 	for _, v := range data {
 		interfaces[v.Name] = &apiPb.NetInfo_Interface{

@@ -4,14 +4,15 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/jinzhu/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"regexp"
-	"squzy/internal/database/convertion"
 	"testing"
+	"time"
 )
 
 //docker run -d --rm --name postgres -e POSTGRES_USER="user" -e POSTGRES_PASSWORD="password" -e POSTGRES_DB="database" -p 5432:5432 postgres
@@ -55,12 +56,33 @@ func TestPostgres_NewClient(t *testing.T) {
 
 func (s *Suite) Test_InsertMetaData() {
 	s.mock.ExpectBegin()
-	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, dbSchedulerCollection)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, dbSnapshotCollection)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "meta_data")).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.mock.ExpectCommit()
 
-	err := postgr.InsertSnapshot(&apiPb.SchedulerResponse{})
+	correctTime, err := ptypes.TimestampProto(time.Now())
+	if err != nil {
+		panic("Time convertion error")
+	}
+	err = postgr.InsertSnapshot(&apiPb.SchedulerResponse{
+		SchedulerId:          "schId",
+		Snapshot:             &apiPb.Snapshot{
+			Code:                 0,
+			Type:                 0,
+			Error:                &apiPb.Snapshot_SnapshotError{
+				Message:              "message",
+			},
+			Meta:                 &apiPb.Snapshot_MetaData{
+				StartTime:            correctTime,
+				EndTime:              correctTime,
+				Value:                nil,
+			},
+		},
+	})
 	require.NoError(s.T(), err)
 }
 
@@ -68,7 +90,7 @@ func (s *Suite) Test_GetMetaData() {
 	var (
 		id = "1"
 	)
-	query := fmt.Sprintf(`SELECT * FROM "%s" WHERE "%s"."deleted_at" IS NULL`, dbSchedulerCollection, dbSchedulerCollection)
+	query := fmt.Sprintf(`SELECT * FROM "%s" WHERE "%s"."deleted_at" IS NULL`, dbSnapshotCollection, dbSnapshotCollection)
 	rows := sqlmock.NewRows([]string{"id"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(id).
@@ -83,9 +105,75 @@ func (s *Suite) Test_InsertStatRequest() {
 	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestCollection)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "cpu_infos")).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "memory_infos")).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "memories")).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "memories")).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "disk_infos")).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "net_infos")).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.mock.ExpectCommit()
 
-	err := postgr.InsertStatRequest(convertion.ConvertFromPostgressStatRequest(&StatRequest{}))
+	statReq, _ := ConvertFromPostgressStatRequest(
+		&StatRequest{
+			CpuInfo: []*CpuInfo{
+				{
+					Load: 0,
+				},
+			},
+			MemoryInfo: &MemoryInfo{
+				StatRequestID: 0,
+				Mem: &Memory{
+					Total:       0,
+					Used:        0,
+					Free:        0,
+					Shared:      0,
+					UsedPercent: 0,
+				},
+				Swap: &Memory{
+					Total:       0,
+					Used:        0,
+					Free:        0,
+					Shared:      0,
+					UsedPercent: 0,
+				},
+			},
+			DiskInfo: []*DiskInfo{
+				{
+					Name:        "",
+					Total:       0,
+					Free:        0,
+					Used:        0,
+					UsedPercent: 0,
+				},
+			},
+			NetInfo:  []*NetInfo{
+				{
+					Name:          "",
+					BytesSent:     0,
+					BytesRecv:     0,
+					PacketsSent:   0,
+					PacketsRecv:   0,
+					ErrIn:         0,
+					ErrOut:        0,
+					DropIn:        0,
+					DropOut:       0,
+				},
+			},
+			Time:     time.Now(),
+		})
+	err := postgr.InsertStatRequest(statReq)
 	require.NoError(s.T(), err)
 }
 
@@ -134,7 +222,55 @@ func TestPostgres_GetMetaData(t *testing.T) {
 
 func TestPostgres_InsertStatRequest(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		err := postgrWrong.InsertStatRequest(convertion.ConvertFromPostgressStatRequest(&StatRequest{}))
+		statReq, _ := ConvertFromPostgressStatRequest(
+			&StatRequest{
+				CpuInfo: []*CpuInfo{
+					{
+						Load: 0,
+					},
+				},
+				MemoryInfo: &MemoryInfo{
+					StatRequestID: 0,
+					Mem: &Memory{
+						Total:       0,
+						Used:        0,
+						Free:        0,
+						Shared:      0,
+						UsedPercent: 0,
+					},
+					Swap: &Memory{
+						Total:       0,
+						Used:        0,
+						Free:        0,
+						Shared:      0,
+						UsedPercent: 0,
+					},
+				},
+				DiskInfo: []*DiskInfo{
+					{
+						Name:        "",
+						Total:       0,
+						Free:        0,
+						Used:        0,
+						UsedPercent: 0,
+					},
+				},
+				NetInfo:  []*NetInfo{
+					{
+						Name:          "",
+						BytesSent:     0,
+						BytesRecv:     0,
+						PacketsSent:   0,
+						PacketsRecv:   0,
+						ErrIn:         0,
+						ErrOut:        0,
+						DropIn:        0,
+						DropOut:       0,
+					},
+				},
+				Time:     time.Now(),
+			})
+		err := postgrWrong.InsertStatRequest(statReq)
 		assert.Error(t, err)
 	})
 }

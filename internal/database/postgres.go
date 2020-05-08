@@ -7,7 +7,6 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/database/convertion"
 	"time"
 )
 
@@ -21,15 +20,9 @@ type Model struct {
 	DeletedAt *time.Time `json:"createdAt" gorm:"index"`
 }
 
-//Scheduler gorm description
-type Scheduler struct {
-	gorm.Model
-	Snapshots []*Snapshot `gorm:"snapshots"`
-}
-
 type Snapshot struct {
 	gorm.Model
-	SchedulerId uint      `gorm:"schedulerId"`
+	SchedulerId string      `gorm:"schedulerId"`
 	Code        string    `gorm:"code"`
 	Type        string    `gorm:"column:type"`
 	Error       string    `gorm:"error"`
@@ -102,7 +95,6 @@ type NetInfo struct {
 }
 
 const (
-	dbSchedulerCollection   = "schedulers"    //TODO: check
 	dbSnapshotCollection    = "snapshots"     //TODO: check
 	dbStatRequestCollection = "stat_requests" //TODO: check
 )
@@ -147,7 +139,7 @@ func (p *postgres) Migrate() (resErr error) {
 }
 
 func (p *postgres) InsertSnapshot(data *apiPb.SchedulerResponse) error {
-	snapshot, err := convertion.ConvertToPostgressScheduler(data)
+	snapshot, err := ConvertToPostgresScheduler(data)
 	if err != nil {
 		return err
 	}
@@ -158,12 +150,12 @@ func (p *postgres) InsertSnapshot(data *apiPb.SchedulerResponse) error {
 }
 
 func (p *postgres) GetSnapshots(id string) ([]*apiPb.Snapshot, error) {
-	var scheduler Scheduler
-	if err := p.db.Table(dbSchedulerCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbSchedulerCollection), id).First(scheduler).Error; err != nil {
+	var snpashots []*Snapshot
+	if err := p.db.Table(dbSnapshotCollection).Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), id).Find(&snpashots).Error; err != nil {
 		fmt.Println(err.Error()) //TODO: log?
 		return nil, errorDataBase
 	}
-	snapshots, errs := convertion.ConvertFromPostgressSnapshots(scheduler.Snapshots)
+	snapshots, errs := ConvertFromPostgresSnapshots(snpashots)
 	if len(errs) != 0 {
 		//TODO: log
 	}
@@ -171,7 +163,7 @@ func (p *postgres) GetSnapshots(id string) ([]*apiPb.Snapshot, error) {
 }
 
 func (p *postgres) InsertStatRequest(data *apiPb.SendMetricsRequest) error {
-	pgData, err := convertion.ConvertToPostgressStatRequest(data)
+	pgData, err := ConvertToPostgressStatRequest(data)
 	if err != nil {
 		return err
 	}
@@ -188,5 +180,5 @@ func (p *postgres) GetStatRequest(id string) (*apiPb.SendMetricsRequest, error) 
 		fmt.Println(err.Error()) //TODO: log?
 		return nil, errorDataBase
 	}
-	return convertion.ConvertFromPostgressStatRequest(statRequest)
+	return ConvertFromPostgressStatRequest(statRequest)
 }
