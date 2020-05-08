@@ -206,9 +206,27 @@ func TestPostgres_Migrate(t *testing.T) {
 	})
 }
 
-func TestPostgres_InsertMetaData(t *testing.T) {
+func TestPostgres_InsertSnapshots(t *testing.T) {
+	t.Run("Should: return conv error", func(t *testing.T) {
+		err := postgr.InsertSnapshot(&apiPb.SchedulerResponse{})
+		assert.Error(t, err)
+	})
 	t.Run("Should: return error", func(t *testing.T) {
-		err := postgrWrong.InsertSnapshot(&apiPb.SchedulerResponse{})
+		correctTime, err := ptypes.TimestampProto(time.Now())
+		if err != nil {
+			panic("Time convertion error")
+		}
+		err = postgrWrong.InsertSnapshot(&apiPb.SchedulerResponse{
+			SchedulerId:          "",
+			Snapshot:             &apiPb.Snapshot{
+				Code:                 0,
+				Type:                 0,
+				Meta:                 &apiPb.Snapshot_MetaData{
+					StartTime:            correctTime,
+					EndTime:              correctTime,
+				},
+			},
+		})
 		assert.Error(t, err)
 	})
 }
@@ -221,6 +239,10 @@ func TestPostgres_GetMetaData(t *testing.T) {
 }
 
 func TestPostgres_InsertStatRequest(t *testing.T) {
+	t.Run("Should: return conv error", func(t *testing.T) {
+		err := postgr.InsertStatRequest(&apiPb.SendMetricsRequest{})
+		assert.Error(t, err)
+	})
 	t.Run("Should: return error", func(t *testing.T) {
 		statReq, _ := ConvertFromPostgressStatRequest(
 			&StatRequest{
