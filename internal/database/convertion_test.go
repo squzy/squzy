@@ -121,14 +121,56 @@ func TestConvertToPostgressStatRequest(t *testing.T) {
 	})
 	t.Run("Test: no error", func(t *testing.T) {
 		_, err := ConvertToPostgressStatRequest(&apiPb.SendMetricsRequest{
-			CpuInfo: &apiPb.CpuInfo{},
+			CpuInfo: &apiPb.CpuInfo{
+				Cpus: []*apiPb.CpuInfo_CPU{{}},
+			},
 			MemoryInfo: &apiPb.MemoryInfo{
 				Mem:  &apiPb.MemoryInfo_Memory{},
 				Swap: &apiPb.MemoryInfo_Memory{},
 			},
-			DiskInfo: &apiPb.DiskInfo{},
-			NetInfo:  &apiPb.NetInfo{},
-			Time:     ptypes.TimestampNow(),
+			DiskInfo: &apiPb.DiskInfo{
+				Disks: map[string]*apiPb.DiskInfo_Disk{
+					"": {},
+				},
+			},
+			NetInfo: &apiPb.NetInfo{
+				Interfaces: map[string]*apiPb.NetInfo_Interface{
+					"": {},
+				},
+			},
+			Time: ptypes.TimestampNow(),
+		})
+		assert.NoError(t, err)
+	})
+}
+
+func TestConvertFromPostgressStatRequest(t *testing.T) {
+	t.Run("Test: error", func(t *testing.T) {
+		_, err := ConvertFromPostgressStatRequest(&StatRequest{
+			Time: time.Unix(-62135596888, -100000000), //Protobuf validate this seconds aas error
+		})
+		assert.Error(t, err)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		_, err := ConvertFromPostgressStatRequest(&StatRequest{
+			CpuInfo:    nil,
+			MemoryInfo: nil,
+			DiskInfo:   nil,
+			NetInfo:    nil,
+			Time:       time.Time{},
+		})
+		assert.NoError(t, err)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		_, err := ConvertFromPostgressStatRequest(&StatRequest{
+			CpuInfo:    []*CpuInfo{{}},
+			MemoryInfo: &MemoryInfo{
+				Mem:           &Memory{},
+				Swap:          &Memory{},
+			},
+			DiskInfo:   []*DiskInfo{{}},
+			NetInfo:    []*NetInfo{{}},
+			Time:       time.Time{},
 		})
 		assert.NoError(t, err)
 	})
