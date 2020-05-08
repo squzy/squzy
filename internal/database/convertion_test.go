@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func TestConvertToPostgressScheduler(t *testing.T) {
+func TestConvertToPostgresSnapshot(t *testing.T) {
 	correctTime, _ := ptypes.TimestampProto(time.Now())
 	t.Run("Test: error", func(t *testing.T) {
 		_, err := ConvertToPostgresSnapshot(&apiPb.SchedulerResponse{})
@@ -103,5 +103,33 @@ func TestConvertFromPostgresSnapshots(t *testing.T) {
 			},
 		})
 		assert.Empty(t, err)
+	})
+}
+
+func TestConvertToPostgressStatRequest(t *testing.T) {
+	t.Run("Test: error", func(t *testing.T) {
+		_, err := ConvertToPostgressStatRequest(&apiPb.SendMetricsRequest{
+			Time: nil,
+		})
+		assert.Error(t, err)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		_, err := ConvertToPostgressStatRequest(&apiPb.SendMetricsRequest{
+			Time: ptypes.TimestampNow(),
+		})
+		assert.NoError(t, err)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		_, err := ConvertToPostgressStatRequest(&apiPb.SendMetricsRequest{
+			CpuInfo: &apiPb.CpuInfo{},
+			MemoryInfo: &apiPb.MemoryInfo{
+				Mem:  &apiPb.MemoryInfo_Memory{},
+				Swap: &apiPb.MemoryInfo_Memory{},
+			},
+			DiskInfo: &apiPb.DiskInfo{},
+			NetInfo:  &apiPb.NetInfo{},
+			Time:     ptypes.TimestampNow(),
+		})
+		assert.NoError(t, err)
 	})
 }
