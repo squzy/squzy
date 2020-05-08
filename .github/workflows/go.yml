@@ -30,11 +30,11 @@ jobs:
         args: test --define version="" //apps/...
 
     - uses: actions/checkout@v1
-    - name: Login to DockerHub Registry
+    - name: Upload lastest image to Docker
       if: ${{ github.ref == 'refs/heads/develop'}}
       run: |
         echo ${{ secrets.DOCKER_TOKEN }} | docker login -u squzy --password-stdin
-        wget https://github.com/bazelbuild/bazel/releases/download/1.1.0/bazel-1.1.0-installer-linux-x86_64.sh -O bazel_installer.sh
+        wget https://github.com/bazelbuild/bazel/releases/download/3.1.0/bazel-3.1.0-installer-linux-x86_64.sh -O bazel_installer.sh
         chmod +x bazel_installer.sh
         ./bazel_installer.sh --user
         export PATH="$PATH:$HOME/bin"
