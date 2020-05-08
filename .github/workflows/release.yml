@@ -34,8 +34,6 @@ jobs:
           bazel --version
           touch ~/.netrc
           export SQUZY_VERSION=latest
-          bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_monitoring:squzy_push_hub_ci
-          bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_agent_server:squzy_push_hub_ci
 
       - name: Tests
         run: |
@@ -45,7 +43,8 @@ jobs:
         run: |
           echo ${{ secrets.DOCKER_TOKEN }} | docker login -u squzy --password-stdin
           export SQUZY_VERSION=${{ steps.set_env.outputs.RELEASE_VERSION }}
-          bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_monitoring:squzy_push_hub_ci
+          bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_monitoring:squzy_push_hub_ci
+          bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_agent_server:squzy_push_hub_ci
           make build_agent version=${{ steps.set_env.outputs.RELEASE_VERSION }}
           ./scripts/git_release.sh github_api_token=${{ secrets.GITHUB_RELEASE }} owner=squzy repo=squzy tag=${{ steps.set_env.outputs.RELEASE_VERSION }} filename=./bin/squzy_agent_${{ steps.set_env.outputs.RELEASE_VERSION }}-linux-arm64
           ./scripts/git_release.sh github_api_token=${{ secrets.GITHUB_RELEASE }} owner=squzy repo=squzy tag=${{ steps.set_env.outputs.RELEASE_VERSION }} filename=./bin/squzy_agent_${{ steps.set_env.outputs.RELEASE_VERSION }}-darwin-amd64

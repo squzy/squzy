@@ -33,8 +33,6 @@ jobs:
         bazel --version
         touch ~/.netrc
         export SQUZY_VERSION=latest
-        bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_monitoring:squzy_push_hub_ci
-        bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_agent_server:squzy_push_hub_ci
 
     - name: Tests
       run: |
