@@ -23,22 +23,25 @@ jobs:
 
     - name: Get dependencies
       run: go mod download
-    
-    - name: Test
-      uses: ngalaiko/bazel-action/1.2.1@master
-      with:
-        args: test --define version="" //apps/...
 
-    - uses: actions/checkout@v1
-    - name: Login to DockerHub Registry
-      if: ${{ github.ref == 'refs/heads/develop'}}
+    - name: Install bazel
       run: |
-        echo ${{ secrets.DOCKER_TOKEN }} | docker login -u squzy --password-stdin
-        wget https://github.com/bazelbuild/bazel/releases/download/1.1.0/bazel-1.1.0-installer-linux-x86_64.sh -O bazel_installer.sh
+        wget https://github.com/bazelbuild/bazel/releases/download/3.1.0/bazel-3.1.0-installer-linux-x86_64.sh -O bazel_installer.sh
         chmod +x bazel_installer.sh
         ./bazel_installer.sh --user
         export PATH="$PATH:$HOME/bin"
         bazel --version
+        touch ~/.netrc
+        export SQUZY_VERSION=latest
+
+    - name: Tests
+      run: |
+        make test
+
+    - name: Upload latest image to Docker
+      if: ${{ github.ref == 'refs/heads/develop'}}
+      run: |
+        echo ${{ secrets.DOCKER_TOKEN }} | docker login -u squzy --password-stdin
         export SQUZY_VERSION=latest
         bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_monitoring:squzy_push_hub_ci
         bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_agent_server:squzy_push_hub_ci

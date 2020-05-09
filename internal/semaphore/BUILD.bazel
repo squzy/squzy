@@ -1,7 +1,7 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-	name = "semaphore",
+	name = "go_default_library",
 	srcs = ["semaphore.go"],
 	importpath = "squzy/internal/semaphore",
 	visibility = ["//visibility:public"],
@@ -11,11 +11,11 @@ go_library(
 )
 
 go_test(
-	name = "semaphore_test",
+	name = "go_default_test",
 	srcs = [
 		"semaphore_test.go",
 	],
-	embed = [":semaphore"],
+	embed = [":go_default_library"],
 	deps = [
 		"@com_github_stretchr_testify//assert:go_default_library",
 	]

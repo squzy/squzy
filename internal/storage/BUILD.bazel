@@ -1,7 +1,7 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "storage",
+     name = "go_default_library",
      srcs = [
          "storage.go",
          "external_storage.go"
@@ -10,22 +10,22 @@ go_library(
      visibility = ["//visibility:public"],
      deps = [
         "@com_github_golang_protobuf//ptypes:go_default_library",
-        "//internal/grpcTools:grpcTools",
+        "//internal/grpcTools:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-        "//internal/job:job",
+        "//internal/job:go_default_library",
         "@com_github_google_uuid//:go_default_library",
      ],
 
 )
 
 go_test(
-    name = "storage_test",
+    name = "go_default_test",
     srcs = [
         "storage_test.go",
         "external_storage_test.go"
     ],
-    embed = [":storage"],
+    embed = [":go_default_library"],
     deps = [
         "@com_github_stretchr_testify//assert:go_default_library"
     ]

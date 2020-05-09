@@ -3,7 +3,7 @@ load("@io_bazel_rules_docker//go:image.bzl", "go_image")
 load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 
 go_library(
-    name = "squzy_agent_server_src",
+    name = "go_default_library",
     srcs = [
         "main.go",
     ],
@@ -13,18 +13,18 @@ go_library(
         "@org_mongodb_go_mongo_driver//mongo:go_default_library",
         "@org_mongodb_go_mongo_driver//mongo/options:go_default_library",
         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-        "//internal/helpers:helpers",
-        "//apps/squzy_agent_server/application:application",
-        "//apps/squzy_agent_server/server:server",
-        "//apps/squzy_agent_server/database:database",
-        "//apps/squzy_agent_server/version:version",
-        "//apps/squzy_agent_server/config:config",
+        "//internal/helpers:go_default_library",
+        "//apps/squzy_agent_server/application:go_default_library",
+        "//apps/squzy_agent_server/server:go_default_library",
+        "//apps/squzy_agent_server/database:go_default_library",
+        "//apps/squzy_agent_server/version:go_default_library",
+        "//apps/squzy_agent_server/config:go_default_library",
     ]
 )
 
 go_binary(
     name = "squzy_agent_server",
-    embed = [":squzy_agent_server_src"],
+    embed = [":go_default_library"],
     x_defs = {"squzy/apps/squzy_agent_server/version.Version": "{VERSION}"},
 )
 

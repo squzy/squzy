@@ -1,22 +1,22 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "scheduler-storage",
+     name = "go_default_library",
      srcs = ["scheduler-storage.go"],
      importpath = "squzy/internal/scheduler-storage",
      visibility = ["//visibility:public"],
      deps = [
-        "//internal/scheduler:scheduler",
+        "//internal/scheduler:go_default_library",
      ],
 
 )
 
 go_test(
-    name = "scheduler-storage_test",
+    name = "go_default_test",
     srcs = [
         "scheduler-storage_test.go",
     ],
-    embed = [":scheduler-storage"],
+    embed = [":go_default_library"],
     deps = [
         "@com_github_stretchr_testify//assert:go_default_library",
     ]

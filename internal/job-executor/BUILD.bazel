@@ -1,17 +1,17 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "job-executor",
+     name = "go_default_library",
      srcs = ["executor.go"],
      importpath = "squzy/internal/job-executor",
      visibility = ["//visibility:public"],
      deps = [
-        "//internal/httpTools:httpTools",
-        "//internal/storage:storage",
-        "//internal/semaphore:semaphore",
-        "//internal/job:job",
-        "//internal/sitemap-storage:sitemap-storage",
-        "//internal/scheduler-config-storage:storage",
+        "//internal/httpTools:go_default_library",
+        "//internal/storage:go_default_library",
+        "//internal/semaphore:go_default_library",
+        "//internal/job:go_default_library",
+        "//internal/sitemap-storage:go_default_library",
+        "//internal/scheduler-config-storage:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
         "@org_mongodb_go_mongo_driver//bson/primitive:go_default_library",
         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
@@ -20,11 +20,11 @@ go_library(
 )
 
 go_test(
-    name = "job-executor_test",
+    name = "go_default_test",
     srcs = [
         "executor_test.go",
     ],
-    embed = [":job-executor"],
+    embed = [":go_default_library"],
     deps = [
         "@com_github_stretchr_testify//assert:go_default_library",
     ]
