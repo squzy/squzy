@@ -171,17 +171,19 @@ func TestApplication_Run(t *testing.T) {
 		}, &configSecondMock{}, func() (stat *host.InfoStat, err error) {
 			return &host.InfoStat{}, nil
 		}, NewStream, inter)
-
+		var wg sync.WaitGroup
+		wg.Add(1)
 		go func() {
-			_ = a.Run()
-		}()
 
+			err = a.Run()
+			assert.Equal(t, nil, err)
+			wg.Done()
+		}()
 		ch <- &apiPb.SendMetricsRequest{
 			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
 				Load: 5,
 			}}},
 		}
-
 		value := <-msgChan
 		assert.EqualValues(t, []*apiPb.CpuInfo_CPU{{
 			Load: 5,
@@ -215,7 +217,7 @@ func TestApplication_Run(t *testing.T) {
 		}}, value.CpuInfo.Cpus)
 
 		inter <- os.Interrupt
-		time.Sleep(time.Second * 5)
+		wg.Wait()
 		assert.Equal(t, 5, s.count)
 	})
 }

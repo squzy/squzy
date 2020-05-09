@@ -31,7 +31,7 @@ default: build
 	bazel build //apps/squzy_monitoring:squzy_monitoring_src
 
 .test:
-	bazel test --define version="local" //apps/...
+	bazel test --cache_test_results=no --define version="local" //apps/...
 
 .build_agent:
 	./build.bash agent_client squzy_agent_$(version) $(version)
