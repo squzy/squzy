@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"squzy/internal/helpers"
 )
 
 type Handlers interface {
@@ -17,7 +18,9 @@ type handlers struct {
 }
 
 func (h *handlers) GetAgentList(ctx context.Context) ([]*apiPb.AgentItem, error) {
-	list, err := h.agentClient.GetAgentList(ctx, &empty.Empty{})
+	c, cancel := helpers.TimeoutContext(ctx, 0)
+	defer cancel()
+	list, err := h.agentClient.GetAgentList(c, &empty.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +28,9 @@ func (h *handlers) GetAgentList(ctx context.Context) ([]*apiPb.AgentItem, error)
 }
 
 func (h *handlers) GetAgentById(ctx context.Context, id string) (*apiPb.AgentItem, error) {
-	agent, err := h.agentClient.GetAgentById(ctx, &apiPb.GetAgentByIdRequest{
+	c, cancel := helpers.TimeoutContext(ctx, 0)
+	defer cancel()
+	agent, err := h.agentClient.GetAgentById(c, &apiPb.GetAgentByIdRequest{
 		AgentId: id,
 	})
 	if err != nil {
