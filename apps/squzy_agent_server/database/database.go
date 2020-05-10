@@ -118,7 +118,7 @@ func (d *db) GetAll(ctx context.Context, filter bson.M) ([]*apiPb.AgentItem, err
 func (d *db) GetById(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error) {
 	agentDao := &AgentDao{}
 	err := d.connector.FindOne(ctx, bson.M{
-		"id": bson.M{
+		"_id": bson.M{
 			"$eq": id,
 		},
 	}, agentDao)

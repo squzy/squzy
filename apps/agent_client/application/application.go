@@ -52,7 +52,7 @@ func (a *application) register(hostStat *host.InfoStat) string {
 				Os:       hostStat.OS,
 				PlatformInfo: &apiPb.PlatformInfo{
 					Name:    hostStat.Platform,
-					Family:  hostStat.PlatformVersion,
+					Family:  hostStat.PlatformFamily,
 					Version: hostStat.PlatformVersion,
 				},
 			},

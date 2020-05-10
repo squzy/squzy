@@ -3,7 +3,6 @@ package config
 import (
 	"os"
 	"strconv"
-	"time"
 )
 
 type Config interface {
@@ -36,7 +35,6 @@ const (
 	ENV_MONITORING_SERVER = "MONITORING_SERVER_HOST"
 
 	defaultPort    = int32(8080)
-	defaultTimeOut = time.Second * 10
 )
 
 func New() Config {
