@@ -21,7 +21,7 @@ func (m mockError) InsertOne(ctx context.Context, document interface{}, opts ...
 }
 
 func (m mockError) FindOne(ctx context.Context, filter interface{}, structToDeserialize interface{}, opts ...*options.FindOneOptions) error {
-	panic("implement me")
+	return errors.New("")
 }
 
 func (m mockError) FindAll(ctx context.Context, predicate bson.M, structToDeserialize interface{}, opts ...*options.FindOptions) error {
@@ -40,7 +40,7 @@ func (m mockOk) InsertOne(ctx context.Context, document interface{}, opts ...*op
 }
 
 func (m mockOk) FindOne(ctx context.Context, filter interface{}, structToDeserialize interface{}, opts ...*options.FindOneOptions) error {
-	panic("implement me")
+	return nil
 }
 
 func (m mockOk) FindAll(ctx context.Context, predicate bson.M, structToDeserialize interface{}, opts ...*options.FindOptions) error {
@@ -49,7 +49,15 @@ func (m mockOk) FindAll(ctx context.Context, predicate bson.M, structToDeseriali
 			Id:        primitive.NewObjectID(),
 			AgentName: "test",
 			Status:    0,
-			HostInfo:  nil,
+			HostInfo:  &HostInfo{
+				HostName:     "",
+				Os:           "",
+				PlatFormInfo: &PlatFormInfo{
+					Name:    "",
+					Family:  "",
+					Version: "",
+				},
+			},
 			History:   nil,
 		},
 		{
@@ -141,5 +149,18 @@ func TestDb_GetAll(t *testing.T) {
 		res, err := s.GetAll(context.Background(), bson.M{})
 		assert.Equal(t, nil, err)
 		assert.Equal(t, 2, len(res))
+	})
+}
+
+func TestDb_GetById(t *testing.T) {
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(&mockError{})
+		_, err := s.GetById(context.Background(), primitive.NewObjectID())
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: return agent", func(t *testing.T) {
+		s := New(&mockOk{})
+		_, err := s.GetById(context.Background(), primitive.NewObjectID())
+		assert.Equal(t, nil, err)
 	})
 }

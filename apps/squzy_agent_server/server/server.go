@@ -14,6 +14,18 @@ type server struct {
 	client apiPb.StorageClient
 }
 
+func (s *server) GetAgentById(ctx context.Context, rq *apiPb.GetAgentByIdRequest) (*apiPb.AgentItem, error) {
+	agentID, err := primitive.ObjectIDFromHex(rq.AgentId)
+	if err != nil {
+		return nil, err
+	}
+	res, err := s.db.GetById(ctx, agentID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (s *server) Register(ctx context.Context, rq *apiPb.RegisterRequest) (*apiPb.RegisterResponse, error) {
 	id, err := s.db.Add(ctx, rq)
 	if err != nil {

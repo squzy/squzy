@@ -129,6 +129,10 @@ func (m mockStreamError) RecvMsg(_ interface{}) error {
 type dbMockOk struct {
 }
 
+func (d dbMockOk) GetById(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error) {
+	return &apiPb.AgentItem{}, nil
+}
+
 func (d dbMockOk) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, error) {
 	return "", nil
 }
@@ -142,6 +146,10 @@ func (d dbMockOk) GetAll(ctx context.Context, filter bson.M) ([]*apiPb.AgentItem
 }
 
 type dbMockError struct {
+}
+
+func (d dbMockError) GetById(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error) {
+	return nil, errors.New("")
 }
 
 func (d dbMockError) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, error) {
@@ -242,5 +250,27 @@ func TestServer_SendMetrics(t *testing.T) {
 	t.Run("Should: works as excpected", func(t *testing.T) {
 		s := New(&dbMockOk{}, nil)
 		assert.Equal(t, nil, s.SendMetrics(&mockStreamOk{}))
+	})
+}
+
+func TestServer_GetAgentById(t *testing.T) {
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(&dbMockError{}, nil)
+		_, err := s.GetAgentById(context.Background(),  &apiPb.GetAgentByIdRequest{
+			AgentId: primitive.NewObjectID().Hex(),
+		})
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: return error because bson", func(t *testing.T) {
+		s := New(&dbMockOk{}, nil)
+		_, err := s.GetAgentById(context.Background(), &apiPb.GetAgentByIdRequest{})
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(&dbMockOk{}, nil)
+		_, err := s.GetAgentById(context.Background(), &apiPb.GetAgentByIdRequest{
+			AgentId: primitive.NewObjectID().Hex(),
+		})
+		assert.Equal(t, nil, err)
 	})
 }

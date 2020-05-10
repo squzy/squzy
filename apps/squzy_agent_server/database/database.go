@@ -13,6 +13,7 @@ type Database interface {
 	Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, error)
 	UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus) error
 	GetAll(ctx context.Context, filter bson.M) ([]*apiPb.AgentItem, error)
+	GetById(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error)
 }
 
 type db struct {
@@ -42,6 +43,28 @@ type PlatFormInfo struct {
 type HistoryItem struct {
 	Status    apiPb.AgentStatus `bson:"status"`
 	Timestamp time.Time         `bson:"time"`
+}
+
+func dbToPb(agent *AgentDao) *apiPb.AgentItem {
+	a := &apiPb.AgentItem{
+		Id:        agent.Id.Hex(),
+		AgentName: agent.AgentName,
+		Status:    agent.Status,
+	}
+	if agent.HostInfo != nil {
+		a.HostInfo = &apiPb.HostInfo{
+			HostName: agent.HostInfo.HostName,
+			Os:       agent.HostInfo.Os,
+		}
+		if agent.HostInfo.PlatFormInfo != nil {
+			a.HostInfo.PlatformInfo = &apiPb.PlatformInfo{
+				Name:    agent.HostInfo.PlatFormInfo.Name,
+				Family:  agent.HostInfo.PlatFormInfo.Family,
+				Version: agent.HostInfo.PlatFormInfo.Version,
+			}
+		}
+	}
+	return a
 }
 
 func (d *db) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, error) {
@@ -87,13 +110,22 @@ func (d *db) GetAll(ctx context.Context, filter bson.M) ([]*apiPb.AgentItem, err
 	}
 	res := []*apiPb.AgentItem{}
 	for _, v := range agents {
-		res = append(res, &apiPb.AgentItem{
-			Id:        v.Id.Hex(),
-			AgentName: v.AgentName,
-			Status:    v.Status,
-		})
+		res = append(res, dbToPb(v))
 	}
 	return res, nil
+}
+
+func (d *db) GetById(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error) {
+	agentDao := &AgentDao{}
+	err := d.connector.FindOne(ctx, bson.M{
+		"id": bson.M{
+			"$eq": id,
+		},
+	}, agentDao)
+	if err != nil {
+		return nil, err
+	}
+	return dbToPb(agentDao), nil
 }
 
 func (d *db) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus) error {

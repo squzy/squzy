@@ -42,6 +42,10 @@ type serverSuccess struct {
 	mutex sync.Mutex
 }
 
+func (s *serverSuccess) GetAgentById(ctx context.Context, request *apiPb.GetAgentByIdRequest) (*apiPb.AgentItem, error) {
+	panic("implement me")
+}
+
 func (s *serverSuccess) GetByAgentName(context.Context, *apiPb.GetByAgentNameRequest) (*apiPb.GetAgentListResponse, error) {
 	panic("implement me")
 }
@@ -225,6 +229,10 @@ func TestApplication_Run(t *testing.T) {
 type client struct {
 }
 
+func (c client) GetAgentById(ctx context.Context, in *apiPb.GetAgentByIdRequest, opts ...grpc.CallOption) (*apiPb.AgentItem, error) {
+	panic("implement me")
+}
+
 func (c client) GetByAgentName(ctx context.Context, in *apiPb.GetByAgentNameRequest, opts ...grpc.CallOption) (*apiPb.GetAgentListResponse, error) {
 	panic("implement me")
 }
@@ -246,6 +254,10 @@ func (c client) UnRegister(ctx context.Context, in *apiPb.UnRegisterRequest, opt
 }
 
 type clientError struct {
+}
+
+func (c clientError) GetAgentById(ctx context.Context, in *apiPb.GetAgentByIdRequest, opts ...grpc.CallOption) (*apiPb.AgentItem, error) {
+	panic("implement me")
 }
 
 func (c clientError) GetByAgentName(ctx context.Context, in *apiPb.GetByAgentNameRequest, opts ...grpc.CallOption) (*apiPb.GetAgentListResponse, error) {
