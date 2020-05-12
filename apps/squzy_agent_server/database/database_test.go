@@ -50,16 +50,16 @@ func (m mockOk) FindAll(ctx context.Context, predicate bson.M, structToDeseriali
 			Id:        primitive.NewObjectID(),
 			AgentName: "test",
 			Status:    0,
-			HostInfo:  &HostInfo{
-				HostName:     "",
-				Os:           "",
+			HostInfo: &HostInfo{
+				HostName: "",
+				Os:       "",
 				PlatFormInfo: &PlatFormInfo{
 					Name:    "",
 					Family:  "",
 					Version: "",
 				},
 			},
-			History:   nil,
+			History: nil,
 		},
 		{
 			Id:        primitive.NewObjectID(),
@@ -90,7 +90,7 @@ func TestDb_Add(t *testing.T) {
 		s := New(&mockOk{})
 		_, err := s.Add(context.Background(), &apiPb.RegisterRequest{
 			AgentName: "",
-			Time: ptypes.TimestampNow(),
+			Time:      ptypes.TimestampNow(),
 			HostInfo: &apiPb.HostInfo{
 				HostName: "",
 				Os:       "",
@@ -110,7 +110,7 @@ func TestDb_Add(t *testing.T) {
 		s := New(&mockOk{})
 		_, err := s.Add(context.Background(), &apiPb.RegisterRequest{
 			AgentName: "",
-			Time: nil,
+			Time:      nil,
 			HostInfo: &apiPb.HostInfo{
 				HostName: "",
 				Os:       "",
@@ -130,7 +130,7 @@ func TestDb_Add(t *testing.T) {
 		s := New(&mockError{})
 		_, err := s.Add(context.Background(), &apiPb.RegisterRequest{
 			AgentName: "",
-			Time: ptypes.TimestampNow(),
+			Time:      ptypes.TimestampNow(),
 			HostInfo: &apiPb.HostInfo{
 				HostName: "",
 				Os:       "",

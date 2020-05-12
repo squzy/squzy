@@ -13,7 +13,7 @@ type Handlers interface {
 }
 
 type handlers struct {
-	agentClient apiPb.AgentServerClient
+	agentClient      apiPb.AgentServerClient
 	monitoringClient apiPb.SchedulersExecutorClient
 }
 
@@ -42,9 +42,9 @@ func (h *handlers) GetAgentById(ctx context.Context, id string) (*apiPb.AgentIte
 func New(
 	agentClient apiPb.AgentServerClient,
 	monitoringClient apiPb.SchedulersExecutorClient,
-	) Handlers {
+) Handlers {
 	return &handlers{
-		agentClient: agentClient,
+		agentClient:      agentClient,
 		monitoringClient: monitoringClient,
 	}
 }

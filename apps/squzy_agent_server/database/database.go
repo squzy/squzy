@@ -74,7 +74,7 @@ func (d *db) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, err
 	regtime, err := ptypes.Timestamp(agent.Time)
 
 	if err != nil {
-		return  "", err
+		return "", err
 	}
 
 	agentData := &AgentDao{

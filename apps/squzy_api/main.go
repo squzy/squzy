@@ -9,8 +9,8 @@ import (
 	"squzy/apps/squzy_api/config"
 	"squzy/apps/squzy_api/handlers"
 	"squzy/apps/squzy_api/router"
-	"squzy/internal/grpcTools"
 	_ "squzy/apps/squzy_api/version"
+	"squzy/internal/grpcTools"
 )
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 	monitoringClient := apiPb.NewSchedulersExecutorClient(monitoringConn)
 	log.Fatal(
 		router.New(
-			handlers.New(agentServerClient,monitoringClient),
+			handlers.New(agentServerClient, monitoringClient),
 		).GetEngine().Run(fmt.Sprintf(":%d", cfg.GetPort())),
 	)
 }

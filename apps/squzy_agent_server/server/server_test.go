@@ -16,7 +16,6 @@ import (
 )
 
 type mockStreamClose struct {
-
 }
 
 func (m mockStreamClose) SendAndClose(e *empty.Empty) error {
@@ -43,7 +42,7 @@ func (m *mockStreamContinueWork) Recv() (*apiPb.SendMetricsRequest, error) {
 			Msg: &apiPb.SendMetricsRequest_Disconnect_{
 				Disconnect: &apiPb.SendMetricsRequest_Disconnect{
 					AgentId: primitive.NewObjectID().Hex(),
-					Time: ptypes.TimestampNow(),
+					Time:    ptypes.TimestampNow(),
 				},
 			},
 		}, nil
@@ -86,7 +85,7 @@ func (m mockStreamClose) Recv() (*apiPb.SendMetricsRequest, error) {
 		Msg: &apiPb.SendMetricsRequest_Disconnect_{
 			Disconnect: &apiPb.SendMetricsRequest_Disconnect{
 				AgentId: primitive.NewObjectID().Hex(),
-				Time: ptypes.TimestampNow(),
+				Time:    ptypes.TimestampNow(),
 			},
 		},
 	}, nil
@@ -376,7 +375,7 @@ func TestServer_SendMetrics(t *testing.T) {
 func TestServer_GetAgentById(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := New(&dbMockError{}, nil)
-		_, err := s.GetAgentById(context.Background(),  &apiPb.GetAgentByIdRequest{
+		_, err := s.GetAgentById(context.Background(), &apiPb.GetAgentByIdRequest{
 			AgentId: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)

@@ -22,13 +22,13 @@ type D struct {
 	Data interface{} `json:"data"`
 }
 
-func errWrap(c *gin.Context,status int,  err error) {
+func errWrap(c *gin.Context, status int, err error) {
 	c.AbortWithStatusJSON(status, E{
 		Error: err,
 	})
 }
 
-func successWrap(c *gin.Context,status int, data interface{}) {
+func successWrap(c *gin.Context, status int, data interface{}) {
 	c.JSON(status, D{
 		Data: data,
 	})

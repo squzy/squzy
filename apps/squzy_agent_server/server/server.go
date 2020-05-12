@@ -104,7 +104,7 @@ func (s *server) SendMetrics(stream apiPb.AgentServer_SendMetricsServer) error {
 
 			switch newMsg := incomeMsg.Msg.(type) {
 			case *apiPb.SendMetricsRequest_Metric:
-					// _, _ = s.client.SendResponseFromAgent(context.Background(), stat)
+				// _, _ = s.client.SendResponseFromAgent(context.Background(), stat)
 			case *apiPb.SendMetricsRequest_Disconnect_:
 				_ = s.db.UpdateStatus(context.Background(), id, apiPb.AgentStatus_DISCONNECTED, newMsg.Disconnect.Time)
 				return stream.SendAndClose(&empty.Empty{})
