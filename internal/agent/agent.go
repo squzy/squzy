@@ -11,7 +11,7 @@ import (
 )
 
 type Agent interface {
-	GetStat() *apiPb.SendMetricsRequest
+	GetStat() *apiPb.Metric
 }
 
 type agent struct {
@@ -44,8 +44,8 @@ func New(
 	}
 }
 
-func (a *agent) GetStat() *apiPb.SendMetricsRequest {
-	response := &apiPb.SendMetricsRequest{
+func (a *agent) GetStat() *apiPb.Metric {
+	response := &apiPb.Metric{
 		CpuInfo:    &apiPb.CpuInfo{},
 		MemoryInfo: &apiPb.MemoryInfo{},
 		DiskInfo:   &apiPb.DiskInfo{},

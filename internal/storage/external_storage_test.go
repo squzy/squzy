@@ -18,7 +18,7 @@ import (
 type server struct {
 }
 
-func (s server) SendResponseFromAgent(context.Context, *apiPb.SendMetricsRequest) (*empty.Empty, error) {
+func (s server) SendResponseFromAgent(context.Context, *apiPb.Metric) (*empty.Empty, error) {
 	panic("implement me")
 }
 
@@ -29,7 +29,7 @@ func (s serverErrorThrow) SendResponseFromScheduler(context.Context, *apiPb.Sche
 	return nil, errors.New("saf")
 }
 
-func (s serverErrorThrow) SendResponseFromAgent(context.Context, *apiPb.SendMetricsRequest) (*empty.Empty, error) {
+func (s serverErrorThrow) SendResponseFromAgent(context.Context, *apiPb.Metric) (*empty.Empty, error) {
 	panic("implement me")
 }
 

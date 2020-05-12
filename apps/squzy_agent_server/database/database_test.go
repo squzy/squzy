@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"errors"
+	"github.com/golang/protobuf/ptypes"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
@@ -89,6 +90,7 @@ func TestDb_Add(t *testing.T) {
 		s := New(&mockOk{})
 		_, err := s.Add(context.Background(), &apiPb.RegisterRequest{
 			AgentName: "",
+			Time: ptypes.TimestampNow(),
 			HostInfo: &apiPb.HostInfo{
 				HostName: "",
 				Os:       "",
@@ -104,10 +106,31 @@ func TestDb_Add(t *testing.T) {
 		})
 		assert.Equal(t, nil, err)
 	})
+	t.Run("Should: return error because time is nil", func(t *testing.T) {
+		s := New(&mockOk{})
+		_, err := s.Add(context.Background(), &apiPb.RegisterRequest{
+			AgentName: "",
+			Time: nil,
+			HostInfo: &apiPb.HostInfo{
+				HostName: "",
+				Os:       "",
+				PlatformInfo: &apiPb.PlatformInfo{
+					Name:                 "",
+					Family:               "",
+					Version:              "",
+					XXX_NoUnkeyedLiteral: struct{}{},
+					XXX_unrecognized:     nil,
+					XXX_sizecache:        0,
+				},
+			},
+		})
+		assert.NotEqual(t, nil, err)
+	})
 	t.Run("Should: return error", func(t *testing.T) {
 		s := New(&mockError{})
 		_, err := s.Add(context.Background(), &apiPb.RegisterRequest{
 			AgentName: "",
+			Time: ptypes.TimestampNow(),
 			HostInfo: &apiPb.HostInfo{
 				HostName: "",
 				Os:       "",
@@ -128,12 +151,22 @@ func TestDb_Add(t *testing.T) {
 func TestDb_UpdateStatus(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := New(&mockOk{})
-		err := s.UpdateStatus(context.Background(), primitive.NewObjectID(), 0)
+		err := s.UpdateStatus(context.Background(), primitive.NewObjectID(), 0, ptypes.TimestampNow())
 		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(&mockOk{})
+		err := s.UpdateStatus(context.Background(), primitive.NewObjectID(), apiPb.AgentStatus_DISCONNECTED, ptypes.TimestampNow())
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return because time error", func(t *testing.T) {
+		s := New(&mockOk{})
+		err := s.UpdateStatus(context.Background(), primitive.NewObjectID(), 0, nil)
+		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
 		s := New(&mockError{})
-		err := s.UpdateStatus(context.Background(), primitive.NewObjectID(), 0)
+		err := s.UpdateStatus(context.Background(), primitive.NewObjectID(), 0, ptypes.TimestampNow())
 		assert.NotEqual(t, nil, err)
 	})
 }

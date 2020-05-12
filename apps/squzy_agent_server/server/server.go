@@ -56,7 +56,7 @@ func (s *server) UnRegister(ctx context.Context, rq *apiPb.UnRegisterRequest) (*
 	if err != nil {
 		return nil, err
 	}
-	err = s.db.UpdateStatus(context.Background(), agentID, apiPb.AgentStatus_UNREGISTRED)
+	err = s.db.UpdateStatus(context.Background(), agentID, apiPb.AgentStatus_UNREGISTRED, rq.Time)
 	if err != nil {
 		return nil, err
 	}
@@ -84,24 +84,35 @@ func (s *server) SendMetrics(stream apiPb.AgentServer_SendMetricsServer) error {
 		return err
 	}
 
-	id, err := primitive.ObjectIDFromHex(stat.AgentId)
-
-	if err != nil {
-		return err
-	}
-
-	_ = s.db.UpdateStatus(context.Background(), id, apiPb.AgentStatus_RUNNED)
-
-	for {
-
-		_, err := stream.Recv()
+	switch msg := stat.Msg.(type) {
+	case *apiPb.SendMetricsRequest_Metric:
+		id, err := primitive.ObjectIDFromHex(msg.Metric.AgentId)
 
 		if err != nil {
-			_ = s.db.UpdateStatus(context.Background(), id, apiPb.AgentStatus_DISCONNECTED)
-			return stream.SendAndClose(&empty.Empty{})
+			return err
 		}
 
-		// _, _ = s.client.SendResponseFromAgent(context.Background(), stat)
+		_ = s.db.UpdateStatus(context.Background(), id, apiPb.AgentStatus_RUNNED, msg.Metric.Time)
+
+		for {
+
+			incomeMsg, err := stream.Recv()
+
+			if err != nil {
+				return stream.SendAndClose(&empty.Empty{})
+			}
+
+			switch newMsg := incomeMsg.Msg.(type) {
+			case *apiPb.SendMetricsRequest_Metric:
+					// _, _ = s.client.SendResponseFromAgent(context.Background(), stat)
+			case *apiPb.SendMetricsRequest_Disconnect_:
+				_ = s.db.UpdateStatus(context.Background(), id, apiPb.AgentStatus_DISCONNECTED, newMsg.Disconnect.Time)
+				return stream.SendAndClose(&empty.Empty{})
+			}
+
+		}
+	default:
+		return stream.SendAndClose(&empty.Empty{})
 	}
 }
 

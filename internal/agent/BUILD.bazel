@@ -12,7 +12,6 @@ go_library(
          "@com_github_shirou_gopsutil//disk:go_default_library",
          "@com_github_shirou_gopsutil//net:go_default_library",
          "@com_github_shirou_gopsutil//host:go_default_library",
-         "@com_github_golang_protobuf//ptypes:go_default_library",
          "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
      ],
 

@@ -2,6 +2,8 @@ package database
 
 import (
 	"context"
+	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/squzy/mongo_helper"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson"
@@ -11,7 +13,7 @@ import (
 
 type Database interface {
 	Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, error)
-	UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus) error
+	UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus, time *timestamp.Timestamp) error
 	GetAll(ctx context.Context, filter bson.M) ([]*apiPb.AgentItem, error)
 	GetById(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error)
 }
@@ -69,6 +71,11 @@ func dbToPb(agent *AgentDao) *apiPb.AgentItem {
 
 func (d *db) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, error) {
 	id := primitive.NewObjectID()
+	regtime, err := ptypes.Timestamp(agent.Time)
+
+	if err != nil {
+		return  "", err
+	}
 
 	agentData := &AgentDao{
 		Id:        id,
@@ -77,7 +84,7 @@ func (d *db) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, err
 		History: []*HistoryItem{
 			{
 				Status:    apiPb.AgentStatus_REGISTRED,
-				Timestamp: time.Now(),
+				Timestamp: regtime,
 			},
 		},
 	}
@@ -95,7 +102,8 @@ func (d *db) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, err
 			}
 		}
 	}
-	_, err := d.connector.InsertOne(ctx, agentData)
+	_, err = d.connector.InsertOne(ctx, agentData)
+
 	if err != nil {
 		return "", err
 	}
@@ -128,21 +136,62 @@ func (d *db) GetById(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentIt
 	return dbToPb(agentDao), nil
 }
 
-func (d *db) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus) error {
-	historyItem := &HistoryItem{
-		Status:    status,
-		Timestamp: time.Now(),
+func (d *db) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus, time *timestamp.Timestamp) error {
+	agentTime, err := ptypes.Timestamp(time)
+
+	if err != nil {
+		return err
 	}
-	_, err := d.connector.UpdateOne(ctx, bson.M{
-		"_id": agentId,
-	}, bson.M{
+
+	historyItems := []*HistoryItem{
+		&HistoryItem{
+			Status:    status,
+			Timestamp: agentTime,
+		},
+	}
+
+	filter := bson.M{
+		"_id": bson.M{
+			"$eq": agentId,
+		},
+	}
+
+	set := bson.M{
 		"$set": bson.M{
 			"status": status,
 		},
 		"$push": bson.M{
-			"history": historyItem,
+			"history": bson.M{
+				"$each": historyItems,
+				"$sort": bson.M{
+					"time": 1,
+				},
+			},
 		},
-	})
+	}
+
+	if status == apiPb.AgentStatus_DISCONNECTED {
+		filter = bson.M{
+			"_id": bson.M{
+				"$eq": agentId,
+			},
+			"status": bson.M{
+				"$ne": apiPb.AgentStatus_UNREGISTRED,
+			},
+		}
+		set = bson.M{
+			"$push": bson.M{
+				"history": bson.M{
+					"$each": historyItems,
+					"$sort": bson.M{
+						"time": 1,
+					},
+				},
+			},
+		}
+	}
+
+	_, err = d.connector.UpdateOne(ctx, filter, set)
 	return err
 }
 

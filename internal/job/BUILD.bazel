@@ -24,10 +24,10 @@ go_library(
         "@org_golang_google_grpc//metadata:go_default_library",
         "@org_golang_google_grpc//health/grpc_health_v1:go_default_library",
         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-        "@com_github_golang_protobuf//ptypes:go_default_library",
         "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
         "@com_github_golang_protobuf//ptypes/struct:go_default_library",
-        "@com_github_tidwall_gjson//:go_default_library"
+        "@com_github_tidwall_gjson//:go_default_library",
+        "@com_github_golang_protobuf//ptypes:go_default_library",
      ]
 )
 

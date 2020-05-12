@@ -23,6 +23,8 @@ go_test(
     ],
     deps =[
         "@org_golang_google_grpc//metadata:go_default_library",
-        "@com_github_stretchr_testify//assert:go_default_library"
+        "@com_github_stretchr_testify//assert:go_default_library",
+        "@com_github_golang_protobuf//ptypes:go_default_library",
+        "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
     ]
 )

@@ -3,14 +3,118 @@ package server
 import (
 	"context"
 	"errors"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/metadata"
+	"io"
 	"testing"
 )
+
+type mockStreamClose struct {
+
+}
+
+func (m mockStreamClose) SendAndClose(e *empty.Empty) error {
+	return nil
+}
+
+type mockStreamContinueWork struct {
+	count int
+}
+
+func (m mockStreamContinueWork) SendAndClose(e *empty.Empty) error {
+	return nil
+}
+
+func (m *mockStreamContinueWork) Recv() (*apiPb.SendMetricsRequest, error) {
+	defer func() {
+		m.count += 1
+	}()
+	if m.count == 3 {
+		return nil, io.EOF
+	}
+	if m.count == 2 {
+		return &apiPb.SendMetricsRequest{
+			Msg: &apiPb.SendMetricsRequest_Disconnect_{
+				Disconnect: &apiPb.SendMetricsRequest_Disconnect{
+					AgentId: primitive.NewObjectID().Hex(),
+					Time: ptypes.TimestampNow(),
+				},
+			},
+		}, nil
+	}
+	return &apiPb.SendMetricsRequest{
+		Msg: &apiPb.SendMetricsRequest_Metric{
+			Metric: &apiPb.Metric{
+				AgentId: primitive.NewObjectID().Hex(),
+			},
+		},
+	}, nil
+}
+
+func (m mockStreamContinueWork) SetHeader(md metadata.MD) error {
+	panic("implement me")
+}
+
+func (m mockStreamContinueWork) SendHeader(md metadata.MD) error {
+	panic("implement me")
+}
+
+func (m mockStreamContinueWork) SetTrailer(md metadata.MD) {
+	panic("implement me")
+}
+
+func (m mockStreamContinueWork) Context() context.Context {
+	panic("implement me")
+}
+
+func (mockStreamContinueWork) SendMsg(m interface{}) error {
+	panic("implement me")
+}
+
+func (mockStreamContinueWork) RecvMsg(m interface{}) error {
+	panic("implement me")
+}
+
+func (m mockStreamClose) Recv() (*apiPb.SendMetricsRequest, error) {
+	return &apiPb.SendMetricsRequest{
+		Msg: &apiPb.SendMetricsRequest_Disconnect_{
+			Disconnect: &apiPb.SendMetricsRequest_Disconnect{
+				AgentId: primitive.NewObjectID().Hex(),
+				Time: ptypes.TimestampNow(),
+			},
+		},
+	}, nil
+}
+
+func (m mockStreamClose) SetHeader(md metadata.MD) error {
+	panic("implement me")
+}
+
+func (m mockStreamClose) SendHeader(md metadata.MD) error {
+	panic("implement me")
+}
+
+func (m mockStreamClose) SetTrailer(md metadata.MD) {
+	panic("implement me")
+}
+
+func (m mockStreamClose) Context() context.Context {
+	panic("implement me")
+}
+
+func (mockStreamClose) SendMsg(m interface{}) error {
+	panic("implement me")
+}
+
+func (mockStreamClose) RecvMsg(m interface{}) error {
+	panic("implement me")
+}
 
 type mockStreamOk struct {
 	exec bool
@@ -26,7 +130,11 @@ func (m *mockStreamOk) Recv() (*apiPb.SendMetricsRequest, error) {
 	}
 	m.exec = true
 	return &apiPb.SendMetricsRequest{
-		AgentId: primitive.NewObjectID().Hex(),
+		Msg: &apiPb.SendMetricsRequest_Metric{
+			Metric: &apiPb.Metric{
+				AgentId: primitive.NewObjectID().Hex(),
+			},
+		},
 	}, nil
 }
 
@@ -98,7 +206,11 @@ func (m mockStreamError) SendAndClose(*empty.Empty) error {
 
 func (m mockStreamError) Recv() (*apiPb.SendMetricsRequest, error) {
 	return &apiPb.SendMetricsRequest{
-		AgentId: "asf",
+		Msg: &apiPb.SendMetricsRequest_Metric{
+			Metric: &apiPb.Metric{
+				AgentId: "asf",
+			},
+		},
 	}, nil
 }
 
@@ -137,7 +249,7 @@ func (d dbMockOk) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string
 	return "", nil
 }
 
-func (d dbMockOk) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus) error {
+func (d dbMockOk) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus, time *timestamp.Timestamp) error {
 	return nil
 }
 
@@ -156,7 +268,7 @@ func (d dbMockError) Add(ctx context.Context, agent *apiPb.RegisterRequest) (str
 	return "", errors.New("")
 }
 
-func (d dbMockError) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus) error {
+func (d dbMockError) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus, time *timestamp.Timestamp) error {
 	return errors.New("")
 }
 
@@ -250,6 +362,14 @@ func TestServer_SendMetrics(t *testing.T) {
 	t.Run("Should: works as excpected", func(t *testing.T) {
 		s := New(&dbMockOk{}, nil)
 		assert.Equal(t, nil, s.SendMetrics(&mockStreamOk{}))
+	})
+	t.Run("Should: works as excpected", func(t *testing.T) {
+		s := New(&dbMockOk{}, nil)
+		assert.Equal(t, nil, s.SendMetrics(&mockStreamClose{}))
+	})
+	t.Run("Should: works as excpected", func(t *testing.T) {
+		s := New(&dbMockOk{}, nil)
+		assert.Equal(t, nil, s.SendMetrics(&mockStreamContinueWork{}))
 	})
 }
 
