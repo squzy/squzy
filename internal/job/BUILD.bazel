@@ -13,7 +13,7 @@ go_library(
      importpath = "squzy/internal/job",
      visibility = ["//visibility:public"],
      deps = [
-        "//internal/httpTools:go_default_library",
+        "//internal/httptools:go_default_library",
         "//internal/sitemap-storage:go_default_library",
         "//internal/parsers:go_default_library",
         "//internal/semaphore:go_default_library",

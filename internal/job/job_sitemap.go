@@ -95,7 +95,7 @@ func ExecSiteMap(schedulerID string, timeout int32, config *scheduler_config_sto
 			_, _, errSem = httpTools.SendRequestTimeoutStatusCode(rq, helpers.DurationFromSecond(timeout), http.StatusOK)
 
 			if errSem != nil {
-				return err
+				return errSem
 			}
 
 			return nil
