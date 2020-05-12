@@ -11,14 +11,14 @@ import (
 
 func TestExecTcp(t *testing.T) {
 	t.Run("Test: Testing tcp health_check:", func(t *testing.T) {
-		t.Run("Should: return wrongConnectConfigError", func(t *testing.T) {
+		t.Run("Should: return errWrongConnectConfigError", func(t *testing.T) {
 			server, _ := net.Listen("tcp", "localhost:10003")
 			defer server.Close()
-			job := ExecTcp("", 0, &scheduler_config_storage.TcpConfig{
+			job := ExecTCP("", 0, &scheduler_config_storage.TCPConfig{
 				Host: "localhost",
 				Port: 10002,
 			})
-			assert.Equal(t, wrongConnectConfigError.Error(), job.GetLogData().Error.Message)
+			assert.Equal(t, errWrongConnectConfigError.Error(), job.GetLogData().Error.Message)
 		})
 		t.Run("Should: return nil", func(t *testing.T) {
 			server, err := net.Listen("tcp", "localhost:10003")
@@ -27,7 +27,7 @@ func TestExecTcp(t *testing.T) {
 				_, _ = server.Accept()
 			}()
 			defer server.Close()
-			job := ExecTcp("", 0, &scheduler_config_storage.TcpConfig{
+			job := ExecTCP("", 0, &scheduler_config_storage.TCPConfig{
 				Host: "localhost",
 				Port: 10003,
 			})
@@ -40,7 +40,7 @@ func TestExecTcp(t *testing.T) {
 				_, _ = server.Accept()
 				defer server.Close()
 			}()
-			job := ExecTcp("", 1, &scheduler_config_storage.TcpConfig{
+			job := ExecTCP("", 1, &scheduler_config_storage.TCPConfig{
 				Host: "localhost",
 				Port: 10004,
 			})

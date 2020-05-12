@@ -7,7 +7,7 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
 	"log"
-	"squzy/internal/grpcTools"
+	"squzy/internal/grpctools"
 	"squzy/internal/job"
 	"time"
 )
@@ -23,11 +23,11 @@ const (
 )
 
 var (
-	connectionExternalStorageError = errors.New("CANT_CONNECT_TO_EXTERNAL_STORAGE")
-	storageNotSaveLog              = errors.New("EXTERNAL_STORAGE_NOT_SAVE_LOG")
+	errConnectionExternalStorageError = errors.New("CANT_CONNECT_TO_EXTERNAL_STORAGE")
+	errStorageNotSaveLog              = errors.New("EXTERNAL_STORAGE_NOT_SAVE_LOG")
 )
 
-func NewExternalStorage(grpcTools grpcTools.GrpcTool, address string, timeout time.Duration, fallBack Storage, options ...grpc.DialOption) Storage {
+func NewExternalStorage(grpcTools grpctools.GrpcTool, address string, timeout time.Duration, fallBack Storage, options ...grpc.DialOption) Storage {
 	conn, err := grpcTools.GetConnection(address, timeout, options...)
 	if err != nil {
 		log.Println("Will wrote to in memory storage")
@@ -50,7 +50,7 @@ func (s *externalStorage) Write(checkerLog job.CheckError) error {
 		if s.fallback != nil {
 			_ = s.fallback.Write(checkerLog)
 		}
-		return connectionExternalStorageError
+		return errConnectionExternalStorageError
 	}
 	return nil
 }

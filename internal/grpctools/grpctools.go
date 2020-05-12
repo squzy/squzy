@@ -1,4 +1,4 @@
-package grpcTools
+package grpctools
 
 import (
 	"context"

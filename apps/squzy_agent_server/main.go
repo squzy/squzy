@@ -11,14 +11,13 @@ import (
 	"squzy/apps/squzy_agent_server/database"
 	_ "squzy/apps/squzy_agent_server/version"
 	"squzy/internal/helpers"
-	"time"
 )
 
 func main() {
 	cfg := config.New()
-	ctx, cancel := helpers.TimeoutContext(context.Background(), time.Second*10)
+	ctx, cancel := helpers.TimeoutContext(context.Background(), 0)
 	defer cancel()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.GetMongoUri()))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.GetMongoURI()))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -61,11 +61,11 @@ func (m mockError) CreateRequest(method string, url string, headers *map[string]
 
 func TestExecHttpValue(t *testing.T) {
 	t.Run("Should: return error on http request", func(t *testing.T) {
-		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{Method: http.MethodGet, Headers: map[string]string{}}, &mockError{})
+		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}}, &mockError{})
 		assert.Equal(t, apiPb.SchedulerResponseCode_Error, s.GetLogData().Code)
 	})
 	t.Run("Should: return error because value not exist", func(t *testing.T) {
-		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
+		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_String,
 				Path: "asfasf",
@@ -75,11 +75,11 @@ func TestExecHttpValue(t *testing.T) {
 		assert.Equal(t, "", s.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: not return error because selectors is missing", func(t *testing.T) {
-		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{Method: http.MethodGet, Headers: map[string]string{}}, &mockSuccess{})
+		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}}, &mockSuccess{})
 		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
 	})
 	t.Run("Should: parse single bool value", func(t *testing.T) {
-		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
+		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_Bool,
 				Path: "success",
@@ -89,7 +89,7 @@ func TestExecHttpValue(t *testing.T) {
 		assert.Equal(t, true, s.GetLogData().Meta.Value.GetBoolValue())
 	})
 	t.Run("Should: parse single string value", func(t *testing.T) {
-		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
+		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_String,
 				Path: "name",
@@ -99,7 +99,7 @@ func TestExecHttpValue(t *testing.T) {
 		assert.Equal(t, "John", s.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: parse single number value", func(t *testing.T) {
-		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
+		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_Number,
 				Path: "age",
@@ -109,7 +109,7 @@ func TestExecHttpValue(t *testing.T) {
 		assert.Equal(t, float64(31), s.GetLogData().Meta.Value.GetNumberValue())
 	})
 	t.Run("Should: parse single any value", func(t *testing.T) {
-		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
+		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_Any,
 				Path: "age",
@@ -119,7 +119,7 @@ func TestExecHttpValue(t *testing.T) {
 		assert.Equal(t, "31", s.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: parse single raw value", func(t *testing.T) {
-		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
+		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_Raw,
 				Path: "raw",
@@ -129,7 +129,7 @@ func TestExecHttpValue(t *testing.T) {
 		assert.Equal(t, `{"name":"ahha"}`, s.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: parse single time value", func(t *testing.T) {
-		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
+		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_Time,
 				Path: "time",
@@ -139,7 +139,7 @@ func TestExecHttpValue(t *testing.T) {
 		assert.Equal(t, "2012-04-23T18:25:43Z", s.GetLogData().Meta.Value.GetStringValue())
 	})
 	t.Run("Should: parse multipile value", func(t *testing.T) {
-		s := ExecHttpValue("", 0, &scheduler_config_storage.HttpValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
+		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
 				Type: apiPb.HttpJsonValueConfig_Time,
 				Path: "time",

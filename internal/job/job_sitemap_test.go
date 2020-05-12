@@ -45,7 +45,7 @@ type siteMapStorageIgnore struct {
 
 func (s siteMapStorageIgnore) Get(url string) (*parsers.SiteMap, error) {
 	return &parsers.SiteMap{
-		UrlSet: []parsers.SiteMapUrl{
+		URLSet: []parsers.SiteMapURL{
 			{
 				Location: "localhost",
 				Ignore:   true,
@@ -60,7 +60,7 @@ func (s siteMapStorageIgnore) Get(url string) (*parsers.SiteMap, error) {
 
 func (s siteMapStorage) Get(url string) (*parsers.SiteMap, error) {
 	return &parsers.SiteMap{
-		UrlSet: []parsers.SiteMapUrl{
+		URLSet: []parsers.SiteMapURL{
 			{
 				Location: "localhost",
 				Ignore:   false,
@@ -85,7 +85,7 @@ type siteMapStorageEmptyIgnore struct {
 
 func (s siteMapStorageEmptyIgnore) Get(url string) (*parsers.SiteMap, error) {
 	return &parsers.SiteMap{
-		UrlSet: []parsers.SiteMapUrl{},
+		URLSet: []parsers.SiteMapURL{},
 	}, nil
 }
 
@@ -141,21 +141,21 @@ func TestExecSiteMap(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
 		t.Run("Because mock with 200", func(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
-				Url:         "",
+				URL:         "",
 				Concurrency: -1,
 			}, &siteMapStorage{}, &mockHttpTools{}, successFactory)
 			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
 		})
 		t.Run("Because ignore url", func(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
-				Url:         "",
+				URL:         "",
 				Concurrency: 5,
 			}, &siteMapStorageIgnore{}, &mockHttpToolsWithError{}, successFactory)
 			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
 		})
 		t.Run("Because: empty sitemap", func(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
-				Url:         "",
+				URL:         "",
 				Concurrency: 5,
 			}, &siteMapStorageEmptyIgnore{}, &mockHttpToolsWithError{}, successFactory)
 			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
@@ -164,21 +164,21 @@ func TestExecSiteMap(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		t.Run("Because Acquire error", func(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
-				Url:         "",
+				URL:         "",
 				Concurrency: 5,
 			}, &siteMapStorage{}, &mockHttpToolsWithError{}, errorFactory)
 			assert.IsType(t, apiPb.SchedulerResponseCode_Error, job.GetLogData().Code)
 		})
 		t.Run("Because return 500", func(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
-				Url:         "",
+				URL:         "",
 				Concurrency: 5,
 			}, &siteMapStorage{}, &mockHttpToolsWithError{}, successFactory)
 			assert.IsType(t, apiPb.SchedulerResponseCode_Error, job.GetLogData().Code)
 		})
 		t.Run("Because sitemapError", func(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
-				Url:         "",
+				URL:         "",
 				Concurrency: 5,
 			}, &siteMapStorageError{}, &mockHttpTools{}, successFactory)
 			assert.IsType(t, apiPb.SchedulerResponseCode_Error, job.GetLogData().Code)

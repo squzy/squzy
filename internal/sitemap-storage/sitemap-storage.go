@@ -2,7 +2,7 @@ package sitemap_storage
 
 import (
 	"net/http"
-	"squzy/internal/httpTools"
+	"squzy/internal/httptools"
 	"squzy/internal/parsers"
 	"sync"
 	"time"
@@ -13,7 +13,7 @@ type SiteMapStorage interface {
 }
 
 type storage struct {
-	httpTools     httpTools.HttpTool
+	httpTools     httptools.HTTPTool
 	duration      time.Duration
 	kv            map[string]*StorageItem
 	mutex         sync.RWMutex
@@ -48,7 +48,7 @@ func (s *storage) Get(url string) (*parsers.SiteMap, error) {
 	return siteMap, nil
 }
 
-func New(duration time.Duration, httpTools httpTools.HttpTool, siteMapParser parsers.SiteMapParser) SiteMapStorage {
+func New(duration time.Duration, httpTools httptools.HTTPTool, siteMapParser parsers.SiteMapParser) SiteMapStorage {
 	return &storage{
 		duration:      duration,
 		kv:            make(map[string]*StorageItem),

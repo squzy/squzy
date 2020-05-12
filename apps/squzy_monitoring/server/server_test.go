@@ -14,47 +14,47 @@ import (
 
 var (
 	successTcpConfig = &scheduler_config_storage.SchedulerConfig{
-		Id:       primitive.ObjectID{},
+		ID:       primitive.ObjectID{},
 		Type:     apiPb.SchedulerType_Tcp,
 		Status:   0,
 		Interval: 0,
 		Timeout:  0,
-		TcpConfig: &scheduler_config_storage.TcpConfig{
+		TCPConfig: &scheduler_config_storage.TCPConfig{
 			Host: "",
 			Port: 0,
 		},
 	}
 
 	successHttpConfig = &scheduler_config_storage.SchedulerConfig{
-		Id:       primitive.NewObjectID(),
+		ID:       primitive.NewObjectID(),
 		Type:     apiPb.SchedulerType_Http,
 		Status:   0,
 		Interval: 0,
 		Timeout:  0,
-		HttpConfig: &scheduler_config_storage.HttpConfig{
+		HTTPConfig: &scheduler_config_storage.HTTPConfig{
 			Method:     "",
-			Url:        "",
+			URL:        "",
 			Headers:    nil,
 			StatusCode: 0,
 		},
 	}
 
 	successHttpValueConfig = &scheduler_config_storage.SchedulerConfig{
-		Id:       primitive.NewObjectID(),
+		ID:       primitive.NewObjectID(),
 		Type:     apiPb.SchedulerType_HttpJsonValue,
 		Status:   0,
 		Interval: 0,
 		Timeout:  0,
-		HttpValueConfig: &scheduler_config_storage.HttpValueConfig{
+		HTTPValueConfig: &scheduler_config_storage.HTTPValueConfig{
 			Method:    "",
-			Url:       "",
+			URL:       "",
 			Headers:   nil,
 			Selectors: nil,
 		},
 	}
 
 	successGrpcConfig = &scheduler_config_storage.SchedulerConfig{
-		Id:       primitive.NewObjectID(),
+		ID:       primitive.NewObjectID(),
 		Type:     apiPb.SchedulerType_Grpc,
 		Status:   0,
 		Interval: 0,
@@ -67,19 +67,19 @@ var (
 	}
 
 	successSiteMapConfig = &scheduler_config_storage.SchedulerConfig{
-		Id:       primitive.NewObjectID(),
+		ID:       primitive.NewObjectID(),
 		Type:     apiPb.SchedulerType_SiteMap,
 		Status:   0,
 		Interval: 0,
 		Timeout:  0,
 		SiteMapConfig: &scheduler_config_storage.SiteMapConfig{
-			Url:         "",
+			URL:         "",
 			Concurrency: 0,
 		},
 	}
 
 	errorConfig = &scheduler_config_storage.SchedulerConfig{
-		Id:       primitive.NewObjectID(),
+		ID:       primitive.NewObjectID(),
 		Type:     11111,
 		Status:   0,
 		Interval: 0,
@@ -87,12 +87,12 @@ var (
 	}
 
 	cfgMap = map[primitive.ObjectID]*scheduler_config_storage.SchedulerConfig{
-		successTcpConfig.Id:       successTcpConfig,
-		successGrpcConfig.Id:      successGrpcConfig,
-		successHttpConfig.Id:      successHttpConfig,
-		successHttpValueConfig.Id: successHttpValueConfig,
-		successSiteMapConfig.Id:   successSiteMapConfig,
-		errorConfig.Id:            errorConfig,
+		successTcpConfig.ID:       successTcpConfig,
+		successGrpcConfig.ID:      successGrpcConfig,
+		successHttpConfig.ID:      successHttpConfig,
+		successHttpValueConfig.ID: successHttpValueConfig,
+		successSiteMapConfig.ID:   successSiteMapConfig,
+		errorConfig.ID:            errorConfig,
 	}
 
 	rqMap = map[apiPb.SchedulerType]*apiPb.AddRequest{
@@ -164,11 +164,11 @@ var (
 type schedulerMock struct {
 }
 
-func (s schedulerMock) GetId() string {
+func (s schedulerMock) GetID() string {
 	panic("implement me")
 }
 
-func (s schedulerMock) GetIdBson() primitive.ObjectID {
+func (s schedulerMock) GetIDBson() primitive.ObjectID {
 	panic("implement me")
 }
 
@@ -238,7 +238,7 @@ func (m mockConfigStorageOk) Stop(ctx context.Context, schedulerId primitive.Obj
 func (m mockConfigStorageOk) GetAll(ctx context.Context) ([]*scheduler_config_storage.SchedulerConfig, error) {
 	return []*scheduler_config_storage.SchedulerConfig{
 		{
-			Id: successGrpcConfig.Id,
+			ID: successGrpcConfig.ID,
 		},
 	}, nil
 }
@@ -273,7 +273,7 @@ func (m mockConfigStorageErrorSingle) Stop(ctx context.Context, schedulerId prim
 func (m mockConfigStorageErrorSingle) GetAll(ctx context.Context) ([]*scheduler_config_storage.SchedulerConfig, error) {
 	return []*scheduler_config_storage.SchedulerConfig{
 		{
-			Id: primitive.NewObjectID(),
+			ID: primitive.NewObjectID(),
 		},
 	}, nil
 }
@@ -349,42 +349,42 @@ func TestServer_GetSchedulerById(t *testing.T) {
 	t.Run("Should: return tcp config", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageOk{})
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
-			Id: successTcpConfig.Id.Hex(),
+			Id: successTcpConfig.ID.Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return grpc config", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageOk{})
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
-			Id: successGrpcConfig.Id.Hex(),
+			Id: successGrpcConfig.ID.Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return http config", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageOk{})
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
-			Id: successHttpConfig.Id.Hex(),
+			Id: successHttpConfig.ID.Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return sitemap config", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageOk{})
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
-			Id: successSiteMapConfig.Id.Hex(),
+			Id: successSiteMapConfig.ID.Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return httpValue config", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageOk{})
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
-			Id: successHttpValueConfig.Id.Hex(),
+			Id: successHttpValueConfig.ID.Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return error because not correct typw", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageOk{})
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
-			Id: errorConfig.Id.Hex(),
+			Id: errorConfig.ID.Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})

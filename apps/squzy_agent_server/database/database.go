@@ -13,9 +13,9 @@ import (
 
 type Database interface {
 	Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, error)
-	UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus, time *timestamp.Timestamp) error
+	UpdateStatus(ctx context.Context, agentID primitive.ObjectID, status apiPb.AgentStatus, time *timestamp.Timestamp) error
 	GetAll(ctx context.Context, filter bson.M) ([]*apiPb.AgentItem, error)
-	GetById(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error)
+	GetByID(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error)
 }
 
 type db struct {
@@ -23,7 +23,7 @@ type db struct {
 }
 
 type AgentDao struct {
-	Id        primitive.ObjectID `bson:"_id"`
+	ID        primitive.ObjectID `bson:"_id"`
 	AgentName string             `bson:"agentName,omitempty"`
 	Status    apiPb.AgentStatus  `bson:"status"`
 	HostInfo  *HostInfo          `bson:"hostInfo,omitempty"`
@@ -49,7 +49,7 @@ type HistoryItem struct {
 
 func dbToPb(agent *AgentDao) *apiPb.AgentItem {
 	a := &apiPb.AgentItem{
-		Id:        agent.Id.Hex(),
+		Id:        agent.ID.Hex(),
 		AgentName: agent.AgentName,
 		Status:    agent.Status,
 	}
@@ -78,7 +78,7 @@ func (d *db) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, err
 	}
 
 	agentData := &AgentDao{
-		Id:        id,
+		ID:        id,
 		AgentName: agent.AgentName,
 		Status:    apiPb.AgentStatus_REGISTRED,
 		History: []*HistoryItem{
@@ -123,7 +123,7 @@ func (d *db) GetAll(ctx context.Context, filter bson.M) ([]*apiPb.AgentItem, err
 	return res, nil
 }
 
-func (d *db) GetById(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error) {
+func (d *db) GetByID(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error) {
 	agentDao := &AgentDao{}
 	err := d.connector.FindOne(ctx, bson.M{
 		"_id": bson.M{
@@ -136,7 +136,7 @@ func (d *db) GetById(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentIt
 	return dbToPb(agentDao), nil
 }
 
-func (d *db) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus, time *timestamp.Timestamp) error {
+func (d *db) UpdateStatus(ctx context.Context, agentID primitive.ObjectID, status apiPb.AgentStatus, time *timestamp.Timestamp) error {
 	agentTime, err := ptypes.Timestamp(time)
 
 	if err != nil {
@@ -144,7 +144,7 @@ func (d *db) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, statu
 	}
 
 	historyItems := []*HistoryItem{
-		&HistoryItem{
+		{
 			Status:    status,
 			Timestamp: agentTime,
 		},
@@ -152,7 +152,7 @@ func (d *db) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, statu
 
 	filter := bson.M{
 		"_id": bson.M{
-			"$eq": agentId,
+			"$eq": agentID,
 		},
 	}
 
@@ -173,7 +173,7 @@ func (d *db) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, statu
 	if status == apiPb.AgentStatus_DISCONNECTED {
 		filter = bson.M{
 			"_id": bson.M{
-				"$eq": agentId,
+				"$eq": agentID,
 			},
 			"status": bson.M{
 				"$ne": apiPb.AgentStatus_UNREGISTRED,

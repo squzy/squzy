@@ -10,13 +10,13 @@ import (
 	"squzy/apps/squzy_api/handlers"
 	"squzy/apps/squzy_api/router"
 	_ "squzy/apps/squzy_api/version"
-	"squzy/internal/grpcTools"
+	"squzy/internal/grpctools"
 )
 
 func main() {
 	cfg := config.New()
 	gin.SetMode(gin.ReleaseMode)
-	tools := grpcTools.New()
+	tools := grpctools.New()
 	agentServerConn, err := tools.GetConnection(cfg.GetAgentServerAddress(), 0, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)

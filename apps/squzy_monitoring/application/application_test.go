@@ -92,14 +92,14 @@ func (m mockConfigStorageOk) GetAll(ctx context.Context) ([]*scheduler_config_st
 func (m mockConfigStorageOk) GetAllForSync(ctx context.Context) ([]*scheduler_config_storage.SchedulerConfig, error) {
 	return []*scheduler_config_storage.SchedulerConfig{
 		{
-			Id:       primitive.ObjectID{},
+			ID:       primitive.ObjectID{},
 			Type:     0,
 			Status:   apiPb.SchedulerStatus_STOPPED,
 			Interval: 1,
 			Timeout:  1,
 		},
 		{
-			Id:       primitive.ObjectID{},
+			ID:       primitive.ObjectID{},
 			Type:     0,
 			Status:   apiPb.SchedulerStatus_RUNNED,
 			Interval: 1,
@@ -162,7 +162,7 @@ func TestApp_SyncOne(t *testing.T) {
 	t.Run("Should: return error because config wrong", func(t *testing.T) {
 		app := New(&mockStorageOk{}, &mockExecuter{}, nil)
 		err := app.SyncOne(&scheduler_config_storage.SchedulerConfig{
-			Id:       primitive.ObjectID{},
+			ID:       primitive.ObjectID{},
 			Type:     0,
 			Status:   0,
 			Interval: 0,
@@ -173,7 +173,7 @@ func TestApp_SyncOne(t *testing.T) {
 	t.Run("Should: return error because cant set in storage", func(t *testing.T) {
 		app := New(&mockStorageError{}, &mockExecuter{}, nil)
 		err := app.SyncOne(&scheduler_config_storage.SchedulerConfig{
-			Id:       primitive.ObjectID{},
+			ID:       primitive.ObjectID{},
 			Type:     0,
 			Status:   0,
 			Interval: 1,
@@ -184,7 +184,7 @@ func TestApp_SyncOne(t *testing.T) {
 	t.Run("Should: return nil because status stopped", func(t *testing.T) {
 		app := New(&mockStorageOk{}, &mockExecuter{}, nil)
 		err := app.SyncOne(&scheduler_config_storage.SchedulerConfig{
-			Id:       primitive.ObjectID{},
+			ID:       primitive.ObjectID{},
 			Type:     0,
 			Status:   apiPb.SchedulerStatus_STOPPED,
 			Interval: 1,
@@ -195,7 +195,7 @@ func TestApp_SyncOne(t *testing.T) {
 	t.Run("Should: return nil because status runned, ", func(t *testing.T) {
 		app := New(&mockStorageOk{}, &mockExecuter{}, nil)
 		err := app.SyncOne(&scheduler_config_storage.SchedulerConfig{
-			Id:       primitive.ObjectID{},
+			ID:       primitive.ObjectID{},
 			Type:     0,
 			Status:   apiPb.SchedulerStatus_RUNNED,
 			Interval: 1,

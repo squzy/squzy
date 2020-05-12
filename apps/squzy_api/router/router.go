@@ -48,8 +48,8 @@ func (r *router) GetEngine() *gin.Engine {
 		successWrap(context, http.StatusOK, list)
 	})
 	agents.GET(":agentId", func(context *gin.Context) {
-		agentId := context.Param("agentId")
-		agent, err := r.handlers.GetAgentById(context, agentId)
+		agentID := context.Param("agentId")
+		agent, err := r.handlers.GetAgentByID(context, agentID)
 		if err != nil {
 			errWrap(context, http.StatusNotFound, err)
 			return
@@ -61,6 +61,6 @@ func (r *router) GetEngine() *gin.Engine {
 
 func New(handlers handlers.Handlers) Router {
 	return &router{
-		handlers,
+		handlers: handlers,
 	}
 }

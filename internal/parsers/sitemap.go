@@ -6,10 +6,10 @@ import (
 
 type SiteMap struct {
 	XMLName xml.Name     `xml:"urlset"`
-	UrlSet  []SiteMapUrl `xml:"url"`
+	URLSet  []SiteMapURL `xml:"url"`
 }
 
-type SiteMapUrl struct {
+type SiteMapURL struct {
 	XMLName  xml.Name `xml:"url"`
 	Location string   `xml:"loc"`
 	Ignore   bool     `xml:"ignore"`

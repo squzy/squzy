@@ -84,12 +84,12 @@ func (a *application) Run() error {
 
 	a.client = a.getClient(grpc.WithInsecure(), grpc.WithBlock())
 
-	agentId := a.register(hostStat)
+	agentID := a.register(hostStat)
 
 	signal.Notify(a.interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer signal.Stop(a.interrupt)
 
-	log.Printf("Registred with ID=%s", agentId)
+	log.Printf("Registred with ID=%s", agentID)
 
 	st := a.getStream()
 
@@ -97,7 +97,7 @@ func (a *application) Run() error {
 		a.isStreamAvail = true
 
 		for stat := range a.executor.Execute() {
-			stat.AgentId = agentId
+			stat.AgentId = agentID
 			stat.AgentName = a.config.GetAgentName()
 			// what we should do if squzy server cant get msg
 
@@ -132,7 +132,7 @@ func (a *application) Run() error {
 	_ = st.Send(&apiPb.SendMetricsRequest{
 		Msg: &apiPb.SendMetricsRequest_Disconnect_{
 			Disconnect: &apiPb.SendMetricsRequest_Disconnect{
-				AgentId: agentId,
+				AgentId: agentID,
 				Time:    ptypes.TimestampNow(),
 			},
 		},
@@ -144,7 +144,7 @@ func (a *application) Run() error {
 	defer cancelClose()
 
 	_, _ = a.client.UnRegister(ctxClose, &apiPb.UnRegisterRequest{
-		Id:   agentId,
+		Id:   agentID,
 		Time: ptypes.TimestampNow(),
 	})
 

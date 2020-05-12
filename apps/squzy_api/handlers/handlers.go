@@ -9,7 +9,7 @@ import (
 
 type Handlers interface {
 	GetAgentList(ctx context.Context) ([]*apiPb.AgentItem, error)
-	GetAgentById(ctx context.Context, id string) (*apiPb.AgentItem, error)
+	GetAgentByID(ctx context.Context, id string) (*apiPb.AgentItem, error)
 }
 
 type handlers struct {
@@ -27,7 +27,7 @@ func (h *handlers) GetAgentList(ctx context.Context) ([]*apiPb.AgentItem, error)
 	return list.Agents, nil
 }
 
-func (h *handlers) GetAgentById(ctx context.Context, id string) (*apiPb.AgentItem, error) {
+func (h *handlers) GetAgentByID(ctx context.Context, id string) (*apiPb.AgentItem, error) {
 	c, cancel := helpers.TimeoutContext(ctx, 0)
 	defer cancel()
 	agent, err := h.agentClient.GetAgentById(c, &apiPb.GetAgentByIdRequest{

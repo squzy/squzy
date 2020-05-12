@@ -11,7 +11,7 @@ import (
 )
 
 type tcpError struct {
-	schedulerId string
+	schedulerID string
 	startTime   *timestamp.Timestamp
 	endTime     *timestamp.Timestamp
 	code        apiPb.SchedulerResponseCode
@@ -26,7 +26,7 @@ func (s *tcpError) GetLogData() *apiPb.SchedulerResponse {
 		}
 	}
 	return &apiPb.SchedulerResponse{
-		SchedulerId: s.schedulerId,
+		SchedulerId: s.schedulerID,
 		Code:        s.code,
 		Error:       err,
 		Type:        apiPb.SchedulerType_Tcp,
@@ -37,9 +37,9 @@ func (s *tcpError) GetLogData() *apiPb.SchedulerResponse {
 	}
 }
 
-func newTcpError(schedulerId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string) CheckError {
+func newTCPError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string) CheckError {
 	return &tcpError{
-		schedulerId: schedulerId,
+		schedulerID: schedulerID,
 		startTime:   startTime,
 		endTime:     endTime,
 		code:        code,
@@ -47,16 +47,16 @@ func newTcpError(schedulerId string, startTime *timestamp.Timestamp, endTime *ti
 	}
 }
 
-func ExecTcp(schedulerId string, timeout int32, config *scheduler_config_storage.TcpConfig) CheckError {
+func ExecTCP(schedulerID string, timeout int32, config *scheduler_config_storage.TCPConfig) CheckError {
 	startTime := ptypes.TimestampNow()
 	conn, err := net.DialTimeout("tcp", net.JoinHostPort(config.Host, fmt.Sprintf("%d", config.Port)), helpers.DurationFromSecond(timeout))
 	if err != nil {
-		return newTcpError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, wrongConnectConfigError.Error())
+		return newTCPError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, errWrongConnectConfigError.Error())
 	}
 	if conn != nil {
 		defer func() {
 			_ = conn.Close()
 		}()
 	}
-	return newTcpError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "")
+	return newTCPError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "")
 }

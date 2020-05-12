@@ -9,11 +9,11 @@ import (
 type schedulerMock struct {
 }
 
-func (s schedulerMock) GetIdBson() primitive.ObjectID {
+func (s schedulerMock) GetIDBson() primitive.ObjectID {
 	panic("implement me")
 }
 
-func (s schedulerMock) GetId() string {
+func (s schedulerMock) GetID() string {
 	return "1"
 }
 
@@ -36,12 +36,12 @@ func TestNew(t *testing.T) {
 }
 
 func TestStorage_Get(t *testing.T) {
-	t.Run("Should: return error notExistError", func(t *testing.T) {
+	t.Run("Should: return error errNotExistError", func(t *testing.T) {
 		s := New()
 		err := s.Set(&schedulerMock{})
 		assert.Equal(t, nil, err)
 		_, err = s.Get("0")
-		assert.Equal(t, notExistError, err)
+		assert.Equal(t, errNotExistError, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := New()
@@ -53,19 +53,19 @@ func TestStorage_Get(t *testing.T) {
 }
 
 func TestStorage_Set(t *testing.T) {
-	t.Run("Should: return error storageKeyAlreadyExistError", func(t *testing.T) {
+	t.Run("Should: return error errStorageKeyAlreadyExistError", func(t *testing.T) {
 		s := New()
 		err := s.Set(&schedulerMock{})
 		assert.Equal(t, nil, err)
 		err = s.Set(&schedulerMock{})
-		assert.Equal(t, storageKeyAlreadyExistError, err)
+		assert.Equal(t, errStorageKeyAlreadyExistError, err)
 	})
-	t.Run("Should: return error notExistError", func(t *testing.T) {
+	t.Run("Should: return error errNotExistError", func(t *testing.T) {
 		s := New()
 		err := s.Set(&schedulerMock{})
 		assert.Equal(t, nil, err)
 		_, err = s.Get("0")
-		assert.Equal(t, notExistError, err)
+		assert.Equal(t, errNotExistError, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := New()
@@ -77,12 +77,12 @@ func TestStorage_Set(t *testing.T) {
 }
 
 func TestStorage_Remove(t *testing.T) {
-	t.Run("Should: return error storageKeyNotExistError", func(t *testing.T) {
+	t.Run("Should: return error errStorageKeyNotExistError", func(t *testing.T) {
 		s := New()
 		err := s.Set(&schedulerMock{})
 		assert.Equal(t, nil, err)
 		err = s.Remove("0")
-		assert.Equal(t, storageKeyNotExistError, err)
+		assert.Equal(t, errStorageKeyNotExistError, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := New()

@@ -22,7 +22,7 @@ type memory struct {
 
 func (m *memory) Write(log job.CheckError) error {
 	logData := log.GetLogData()
-	logId := uuid.New().String()
+	logID := uuid.New().String()
 	startTime, err := ptypes.Timestamp(logData.Meta.StartTime)
 
 	if err != nil {
@@ -40,7 +40,7 @@ func (m *memory) Write(log job.CheckError) error {
 			"SchedulerId: %s, Value: %s, LogId: %s, Status: Ok, Type: %s, startTime: %s, endTime: %s, duration: %s",
 			logData.SchedulerId,
 			logData.Meta.Value,
-			logId,
+			logID,
 			logData.Type.String(),
 			startTime.Format(time.RFC3339),
 			endTime.Format(time.RFC3339),
@@ -51,7 +51,7 @@ func (m *memory) Write(log job.CheckError) error {
 	m.errLogger.Println(fmt.Sprintf(
 		"SchedulerId: %s, LogId: %s, Error msg: %s, Type: %s, startTime: %s, endTime: %s, duration: %s",
 		logData.SchedulerId,
-		logId,
+		logID,
 		logData.Error.Message,
 		logData.Type.String(),
 		startTime.Format(time.RFC3339),

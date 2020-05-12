@@ -12,7 +12,7 @@ func TestNew(t *testing.T) {
 		s := New()
 		assert.Equal(t, s.GetPort(), defaultPort)
 		assert.Equal(t, s.GetClientAddress(), "")
-		assert.Equal(t, s.GetMongoUri(), "")
+		assert.Equal(t, s.GetMongoURI(), "")
 		assert.Equal(t, s.GetMongoDb(), defaultMongoDb)
 		assert.Equal(t, s.GetStorageTimeout(), defaultStorageTimeout)
 		assert.Equal(t, s.GetMongoCollection(), defaultCollection)
@@ -58,6 +58,6 @@ func TestCfg_GetMongoUri(t *testing.T) {
 	t.Run("Should: return from env", func(t *testing.T) {
 		os.Setenv(ENV_MONGO_URI, "11124")
 		s := New()
-		assert.Equal(t, s.GetMongoUri(), "11124")
+		assert.Equal(t, s.GetMongoURI(), "11124")
 	})
 }

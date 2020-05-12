@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	notExistError               = errors.New("SCHEDULER_NOT_EXIST")
-	storageKeyAlreadyExistError = errors.New("STORAGE_KEY_ALREADY_EXIST")
-	storageKeyNotExistError     = errors.New("STORAGE_KEY_NOT_EXIST")
+	errNotExistError               = errors.New("SCHEDULER_NOT_EXIST")
+	errStorageKeyAlreadyExistError = errors.New("STORAGE_KEY_ALREADY_EXIST")
+	errStorageKeyNotExistError     = errors.New("STORAGE_KEY_NOT_EXIST")
 )
 
 type SchedulerStorage interface {
@@ -28,7 +28,7 @@ func (s *storage) Get(id string) (scheduler.Scheduler, error) {
 	defer s.mutex.Unlock()
 	value, exist := s.kv[id]
 	if !exist {
-		return nil, notExistError
+		return nil, errNotExistError
 	}
 	return value, nil
 }
@@ -36,11 +36,11 @@ func (s *storage) Get(id string) (scheduler.Scheduler, error) {
 func (s *storage) Set(schl scheduler.Scheduler) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	id := schl.GetId()
+	id := schl.GetID()
 	_, exist := s.kv[id]
 
 	if exist {
-		return storageKeyAlreadyExistError
+		return errStorageKeyAlreadyExistError
 	}
 	s.kv[id] = schl
 	return nil
@@ -51,7 +51,7 @@ func (s *storage) Remove(id string) error {
 	defer s.mutex.Unlock()
 	_, exist := s.kv[id]
 	if !exist {
-		return storageKeyNotExistError
+		return errStorageKeyNotExistError
 	}
 	// make sure that observer stop before delete
 	s.kv[id].Stop()

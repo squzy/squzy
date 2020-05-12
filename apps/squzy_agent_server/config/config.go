@@ -15,17 +15,17 @@ const (
 	ENV_MONGO_COLLECTION = "MONGO_COLLECTION"
 	ENV_STORAGE_HOST     = "SQUZY_STORAGE_HOST"
 
-	defaultPort           = int32(9091)
-	defaultStorageTimeout = time.Second * 5
-	defaultMongoDb        = "squzy_agent"
-	defaultCollection     = "agents"
+	defaultPort           int32 = 9091
+	defaultStorageTimeout       = time.Second * 5
+	defaultMongoDb              = "squzy_agent"
+	defaultCollection           = "agents"
 )
 
 type cfg struct {
 	port            int32
 	timeout         time.Duration
 	storageAddress  string
-	mongoUri        string
+	mongoURI        string
 	mongoDb         string
 	mongoCollection string
 }
@@ -42,8 +42,8 @@ func (c *cfg) GetStorageTimeout() time.Duration {
 	return c.timeout
 }
 
-func (c *cfg) GetMongoUri() string {
-	return c.mongoUri
+func (c *cfg) GetMongoURI() string {
+	return c.mongoURI
 }
 
 func (c *cfg) GetMongoDb() string {
@@ -58,7 +58,7 @@ type Config interface {
 	GetPort() int32
 	GetStorageAddress() string
 	GetStorageTimeout() time.Duration
-	GetMongoUri() string
+	GetMongoURI() string
 	GetMongoDb() string
 	GetMongoCollection() string
 }
@@ -94,7 +94,7 @@ func New() Config {
 		storageAddress:  os.Getenv(ENV_STORAGE_HOST),
 		timeout:         timeoutStorage,
 		port:            port,
-		mongoUri:        os.Getenv(ENV_MONGO_URI),
+		mongoURI:        os.Getenv(ENV_MONGO_URI),
 		mongoDb:         mongoDb,
 		mongoCollection: collection,
 	}

@@ -240,7 +240,7 @@ func (m mockStreamError) RecvMsg(_ interface{}) error {
 type dbMockOk struct {
 }
 
-func (d dbMockOk) GetById(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error) {
+func (d dbMockOk) GetByID(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error) {
 	return &apiPb.AgentItem{}, nil
 }
 
@@ -259,7 +259,7 @@ func (d dbMockOk) GetAll(ctx context.Context, filter bson.M) ([]*apiPb.AgentItem
 type dbMockError struct {
 }
 
-func (d dbMockError) GetById(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error) {
+func (d dbMockError) GetByID(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error) {
 	return nil, errors.New("")
 }
 

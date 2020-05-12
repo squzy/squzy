@@ -6,9 +6,9 @@ import (
 )
 
 var (
-	grpcNotServing          = errors.New("STATUS_NOT_SERVING")
-	connTimeoutError        = errors.New("CONNECTION_TIMEOUT")
-	wrongConnectConfigError = errors.New("WRONG_CONNECTION_CONFIGURATION")
+	errGrpcNotServing          = errors.New("STATUS_NOT_SERVING")
+	errConnTimeoutError        = errors.New("CONNECTION_TIMEOUT")
+	errWrongConnectConfigError = errors.New("WRONG_CONNECTION_CONFIGURATION")
 )
 
 type CheckError interface {

@@ -47,7 +47,7 @@ func (m mockOk) FindOne(ctx context.Context, filter interface{}, structToDeseria
 func (m mockOk) FindAll(ctx context.Context, predicate bson.M, structToDeserialize interface{}, opts ...*options.FindOptions) error {
 	agents := []*AgentDao{
 		{
-			Id:        primitive.NewObjectID(),
+			ID:        primitive.NewObjectID(),
 			AgentName: "test",
 			Status:    0,
 			HostInfo: &HostInfo{
@@ -62,7 +62,7 @@ func (m mockOk) FindAll(ctx context.Context, predicate bson.M, structToDeseriali
 			History: nil,
 		},
 		{
-			Id:        primitive.NewObjectID(),
+			ID:        primitive.NewObjectID(),
 			AgentName: "",
 			Status:    0,
 			HostInfo:  nil,
@@ -188,12 +188,12 @@ func TestDb_GetAll(t *testing.T) {
 func TestDb_GetById(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := New(&mockError{})
-		_, err := s.GetById(context.Background(), primitive.NewObjectID())
+		_, err := s.GetByID(context.Background(), primitive.NewObjectID())
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return agent", func(t *testing.T) {
 		s := New(&mockOk{})
-		_, err := s.GetById(context.Background(), primitive.NewObjectID())
+		_, err := s.GetByID(context.Background(), primitive.NewObjectID())
 		assert.Equal(t, nil, err)
 	})
 }

@@ -9,14 +9,14 @@ import (
 	"golang.org/x/sync/errgroup"
 	"net/http"
 	"squzy/internal/helpers"
-	"squzy/internal/httpTools"
+	"squzy/internal/httptools"
 	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"squzy/internal/semaphore"
 	sitemap_storage "squzy/internal/sitemap-storage"
 )
 
 type siteMapError struct {
-	schedulerId string
+	schedulerID string
 	startTime   *timestamp.Timestamp
 	endTime     *timestamp.Timestamp
 	code        apiPb.SchedulerResponseCode
@@ -28,11 +28,11 @@ func (s *siteMapError) GetLogData() *apiPb.SchedulerResponse {
 	var err *apiPb.SchedulerResponse_Error
 	if s.code == apiPb.SchedulerResponseCode_Error {
 		err = &apiPb.SchedulerResponse_Error{
-			Message: fmt.Sprintf("Error: %s, Url: %s", s.description, s.location),
+			Message: fmt.Sprintf("Error: %s, URL: %s", s.description, s.location),
 		}
 	}
 	return &apiPb.SchedulerResponse{
-		SchedulerId: s.schedulerId,
+		SchedulerId: s.schedulerID,
 		Code:        s.code,
 		Error:       err,
 		Type:        apiPb.SchedulerType_SiteMap,
@@ -43,9 +43,9 @@ func (s *siteMapError) GetLogData() *apiPb.SchedulerResponse {
 	}
 }
 
-func newSiteMapError(schedulerId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string, location string) CheckError {
+func newSiteMapError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string, location string) CheckError {
 	return &siteMapError{
-		schedulerId: schedulerId,
+		schedulerID: schedulerID,
 		startTime:   startTime,
 		endTime:     endTime,
 		code:        code,
@@ -54,48 +54,47 @@ func newSiteMapError(schedulerId string, startTime *timestamp.Timestamp, endTime
 	}
 }
 
-func ExecSiteMap(schedulerId string, timeout int32, config *scheduler_config_storage.SiteMapConfig, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, semaphoreFactoryFn func(n int) semaphore.Semaphore) CheckError {
+func ExecSiteMap(schedulerID string, timeout int32, config *scheduler_config_storage.SiteMapConfig, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httptools.HTTPTool, semaphoreFactoryFn func(n int) semaphore.Semaphore) CheckError {
 	startTime := ptypes.TimestampNow()
-	siteMap, err := siteMapStorage.Get(config.Url)
+	siteMap, err := siteMapStorage.Get(config.URL)
 	if err != nil {
-		return newSiteMapError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, err.Error(), config.Url)
+		return newSiteMapError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, err.Error(), config.URL)
 	}
 
-	count := len(siteMap.UrlSet)
+	count := len(siteMap.URLSet)
 
 	if count == 0 {
-		return newSiteMapError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "", "")
+		return newSiteMapError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "", "")
 	}
 
 	concurrency := int(config.Concurrency)
 
 	if concurrency <= 0 || concurrency > count {
-		concurrency = len(siteMap.UrlSet)
+		concurrency = len(siteMap.URLSet)
 	}
 
 	sem := semaphoreFactoryFn(concurrency)
 
 	group, ctx := errgroup.WithContext(context.Background())
-	for _, v := range siteMap.UrlSet {
-
+	for _, v := range siteMap.URLSet {
 		if v.Ignore {
 			continue
 		}
 		location := v.Location
 
 		group.Go(func() error {
-			err := sem.Acquire(ctx)
+			errSem := sem.Acquire(ctx)
 
-			if err != nil {
+			if errSem != nil {
 				return err
 			}
 
 			defer sem.Release()
 
-			rq := httpTools.CreateRequest(http.MethodGet, location, nil, schedulerId)
-			_, _, err = httpTools.SendRequestTimeoutStatusCode(rq, helpers.DurationFromSecond(timeout), http.StatusOK)
+			rq := httpTools.CreateRequest(http.MethodGet, location, nil, schedulerID)
+			_, _, errSem = httpTools.SendRequestTimeoutStatusCode(rq, helpers.DurationFromSecond(timeout), http.StatusOK)
 
-			if err != nil {
+			if errSem != nil {
 				return err
 			}
 
@@ -104,7 +103,7 @@ func ExecSiteMap(schedulerId string, timeout int32, config *scheduler_config_sto
 	}
 	err = group.Wait()
 	if err != nil {
-		return newSiteMapError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, err.Error(), config.Url)
+		return newSiteMapError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, err.Error(), config.URL)
 	}
-	return newSiteMapError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "", "")
+	return newSiteMapError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "", "")
 }

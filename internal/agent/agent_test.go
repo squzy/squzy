@@ -134,7 +134,7 @@ func TestAgent_GetStat(t *testing.T) {
 			return &timestamp.Timestamp{}
 		})
 		assert.EqualValues(t, &apiPb.DiskInfo{Disks: map[string]*apiPb.DiskInfo_Disk{
-			"/": &apiPb.DiskInfo_Disk{Used: 6},
+			"/": {Used: 6},
 		}}, a.GetStat().DiskInfo)
 	})
 	t.Run("Should: return net stat", func(t *testing.T) {

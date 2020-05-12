@@ -36,25 +36,25 @@ func New(
 }
 
 func (s *app) SyncOne(config *scheduler_config_storage.SchedulerConfig) error {
-	sched, err := scheduler.New(config.Id, helpers.DurationFromSecond(config.Interval), s.jobExecutor)
+	sched, err := scheduler.New(config.ID, helpers.DurationFromSecond(config.Interval), s.jobExecutor)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf("SchedulerId: %s cant synced, error in config", config.Id.Hex()))
+		fmt.Fprintln(os.Stderr, fmt.Sprintf("SchedulerId: %s cant synced, error in config", config.ID.Hex()))
 		// @TODO logger here
 		return err
 	}
 	err = s.schedulerStorage.Set(sched)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf("SchedulerId: %s cant synced, error in memory storage", config.Id.Hex()))
+		fmt.Fprintln(os.Stderr, fmt.Sprintf("SchedulerId: %s cant synced, error in memory storage", config.ID.Hex()))
 		// @TODO logger here
 		return err
 	}
 	if config.Status == apiPb.SchedulerStatus_STOPPED {
-		fmt.Fprintln(os.Stdout, fmt.Sprintf("SchedulerId: %s synced and STOP", config.Id.Hex()))
+		fmt.Fprintln(os.Stdout, fmt.Sprintf("SchedulerId: %s synced and STOP", config.ID.Hex()))
 		return nil
 	}
 	if config.Status == apiPb.SchedulerStatus_RUNNED {
 		sched.Run()
-		fmt.Fprintln(os.Stdout, fmt.Sprintf("SchedulerId: %s synced and RUN", config.Id.Hex()))
+		fmt.Fprintln(os.Stdout, fmt.Sprintf("SchedulerId: %s synced and RUN", config.ID.Hex()))
 	}
 	return nil
 }

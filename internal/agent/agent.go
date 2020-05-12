@@ -147,7 +147,6 @@ func (a *agent) GetStat() *apiPb.Metric {
 		netStat := make(map[string]*apiPb.NetInfo_Interface)
 
 		for _, netInterface := range nets {
-
 			netStat[netInterface.Name] = &apiPb.NetInfo_Interface{
 				BytesSent:   netInterface.BytesSent,
 				BytesRecv:   netInterface.BytesRecv,

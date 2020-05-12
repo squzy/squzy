@@ -23,7 +23,7 @@ const (
 )
 
 var (
-	intervalLessHalfSecondError = errors.New("INTERVAL_LESS_THAN_HALF_SECOND")
+	errIntervalLessHalfSecondError = errors.New("INTERVAL_LESS_THAN_HALF_SECOND")
 )
 
 func (e *executor) Execute() chan *apiPb.Metric {
@@ -43,7 +43,6 @@ func (e *executor) Execute() chan *apiPb.Metric {
 				close(c)
 				e.executeChan <- true
 			}
-
 		}
 	}()
 	e.executeChan <- true
@@ -52,7 +51,7 @@ func (e *executor) Execute() chan *apiPb.Metric {
 
 func New(agent agent.Agent, interval time.Duration) (AgentExecutor, error) {
 	if interval < minIntervalExecute {
-		return nil, intervalLessHalfSecondError
+		return nil, errIntervalLessHalfSecondError
 	}
 	return &executor{
 		agent:       agent,

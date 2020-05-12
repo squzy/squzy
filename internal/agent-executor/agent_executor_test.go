@@ -38,7 +38,7 @@ func TestNew(t *testing.T) {
 	t.Run("Should: return error if interval less then 500 millisecond", func(t *testing.T) {
 		a, err := New(&mock{}, time.Millisecond)
 		assert.EqualValues(t, nil, a)
-		assert.Equal(t, intervalLessHalfSecondError, err)
+		assert.Equal(t, errIntervalLessHalfSecondError, err)
 	})
 }
 

@@ -19,7 +19,7 @@ func (s *server) GetAgentById(ctx context.Context, rq *apiPb.GetAgentByIdRequest
 	if err != nil {
 		return nil, err
 	}
-	res, err := s.db.GetById(ctx, agentID)
+	res, err := s.db.GetByID(ctx, agentID)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,6 @@ func (s *server) GetAgentList(ctx context.Context, e *empty.Empty) (*apiPb.GetAg
 }
 
 func (s *server) SendMetrics(stream apiPb.AgentServer_SendMetricsServer) error {
-
 	stat, err := stream.Recv()
 
 	if err != nil {
@@ -95,7 +94,6 @@ func (s *server) SendMetrics(stream apiPb.AgentServer_SendMetricsServer) error {
 		_ = s.db.UpdateStatus(context.Background(), id, apiPb.AgentStatus_RUNNED, msg.Metric.Time)
 
 		for {
-
 			incomeMsg, err := stream.Recv()
 
 			if err != nil {
@@ -104,12 +102,11 @@ func (s *server) SendMetrics(stream apiPb.AgentServer_SendMetricsServer) error {
 
 			switch newMsg := incomeMsg.Msg.(type) {
 			case *apiPb.SendMetricsRequest_Metric:
-				// _, _ = s.client.SendResponseFromAgent(context.Background(), stat)
+				continue
 			case *apiPb.SendMetricsRequest_Disconnect_:
 				_ = s.db.UpdateStatus(context.Background(), id, apiPb.AgentStatus_DISCONNECTED, newMsg.Disconnect.Time)
 				return stream.SendAndClose(&empty.Empty{})
 			}
-
 		}
 	default:
 		return stream.SendAndClose(&empty.Empty{})

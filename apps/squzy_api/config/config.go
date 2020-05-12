@@ -34,7 +34,7 @@ const (
 	ENV_AGENT_SERVER      = "AGENT_SERVER_HOST"
 	ENV_MONITORING_SERVER = "MONITORING_SERVER_HOST"
 
-	defaultPort = int32(8080)
+	defaultPort int32 = 8080
 )
 
 func New() Config {

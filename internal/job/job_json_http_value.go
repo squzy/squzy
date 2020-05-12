@@ -8,13 +8,13 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/tidwall/gjson"
 	"squzy/internal/helpers"
-	"squzy/internal/httpTools"
+	"squzy/internal/httptools"
 	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"time"
 )
 
-type jsonHttpError struct {
-	schedulerId string
+type jsonHTTPError struct {
+	schedulerID string
 	startTime   *timestamp.Timestamp
 	endTime     *timestamp.Timestamp
 	code        apiPb.SchedulerResponseCode
@@ -24,11 +24,11 @@ type jsonHttpError struct {
 
 var (
 	valueNotExistErrorFn = func(path string) error {
-		return fmt.Errorf("Value by path=`%s` not exist", path)
+		return fmt.Errorf("value by path=`%s` not exist", path)
 	}
 )
 
-func (e *jsonHttpError) GetLogData() *apiPb.SchedulerResponse {
+func (e *jsonHTTPError) GetLogData() *apiPb.SchedulerResponse {
 	var err *apiPb.SchedulerResponse_Error
 	if e.code == apiPb.SchedulerResponseCode_Error {
 		err = &apiPb.SchedulerResponse_Error{
@@ -36,7 +36,7 @@ func (e *jsonHttpError) GetLogData() *apiPb.SchedulerResponse {
 		}
 	}
 	return &apiPb.SchedulerResponse{
-		SchedulerId: e.schedulerId,
+		SchedulerId: e.schedulerID,
 		Code:        e.code,
 		Error:       err,
 		Type:        apiPb.SchedulerType_HttpJsonValue,
@@ -48,15 +48,15 @@ func (e *jsonHttpError) GetLogData() *apiPb.SchedulerResponse {
 	}
 }
 
-func ExecHttpValue(schedulerId string, timeout int32, config *scheduler_config_storage.HttpValueConfig, httpTool httpTools.HttpTool) CheckError {
+func ExecHTTPValue(schedulerID string, timeout int32, config *scheduler_config_storage.HTTPValueConfig, httpTool httptools.HTTPTool) CheckError {
 	startTime := ptypes.TimestampNow()
-	req := httpTool.CreateRequest(config.Method, config.Url, &config.Headers, schedulerId)
+	req := httpTool.CreateRequest(config.Method, config.URL, &config.Headers, schedulerID)
 
 	_, data, err := httpTool.SendRequestTimeout(req, helpers.DurationFromSecond(timeout))
 
 	if err != nil {
-		return newJsonHttpError(
-			schedulerId,
+		return newJSONHTTPError(
+			schedulerID,
 			startTime,
 			ptypes.TimestampNow(),
 			apiPb.SchedulerResponseCode_Error,
@@ -70,8 +70,8 @@ func ExecHttpValue(schedulerId string, timeout int32, config *scheduler_config_s
 	results := []*structType.Value{}
 
 	if len(config.Selectors) == 0 {
-		return newJsonHttpError(
-			schedulerId,
+		return newJSONHTTPError(
+			schedulerID,
 			startTime,
 			ptypes.TimestampNow(),
 			apiPb.SchedulerResponseCode_OK,
@@ -83,8 +83,8 @@ func ExecHttpValue(schedulerId string, timeout int32, config *scheduler_config_s
 	for _, value := range config.Selectors {
 		res := gjson.Get(jsonString, value.Path)
 		if !res.Exists() {
-			return newJsonHttpError(
-				schedulerId,
+			return newJSONHTTPError(
+				schedulerID,
 				startTime,
 				ptypes.TimestampNow(),
 				apiPb.SchedulerResponseCode_Error,
@@ -133,8 +133,8 @@ func ExecHttpValue(schedulerId string, timeout int32, config *scheduler_config_s
 	}
 
 	if len(config.Selectors) == 1 {
-		return newJsonHttpError(
-			schedulerId,
+		return newJSONHTTPError(
+			schedulerID,
 			startTime,
 			ptypes.TimestampNow(),
 			apiPb.SchedulerResponseCode_OK,
@@ -143,8 +143,8 @@ func ExecHttpValue(schedulerId string, timeout int32, config *scheduler_config_s
 		)
 	}
 
-	return newJsonHttpError(
-		schedulerId,
+	return newJSONHTTPError(
+		schedulerID,
 		startTime,
 		ptypes.TimestampNow(),
 		apiPb.SchedulerResponseCode_OK,
@@ -159,9 +159,9 @@ func ExecHttpValue(schedulerId string, timeout int32, config *scheduler_config_s
 	)
 }
 
-func newJsonHttpError(schedulerId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string, value *structType.Value) CheckError {
-	return &jsonHttpError{
-		schedulerId: schedulerId,
+func newJSONHTTPError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string, value *structType.Value) CheckError {
+	return &jsonHTTPError{
+		schedulerID: schedulerID,
 		startTime:   startTime,
 		endTime:     endTime,
 		code:        code,
