@@ -38,24 +38,51 @@ func (r *router) GetEngine() *gin.Engine {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 	v1 := engine.Group("v1")
-	agents := v1.Group("agents")
-	agents.GET("", func(context *gin.Context) {
-		list, err := r.handlers.GetAgentList(context)
-		if err != nil {
-			errWrap(context, http.StatusInternalServerError, err)
-			return
+	{
+		agents := v1.Group("agents")
+		{
+			agents.GET("", func(context *gin.Context) {
+				list, err := r.handlers.GetAgentList(context)
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+				successWrap(context, http.StatusOK, list)
+			})
+			agents.GET(":agentId", func(context *gin.Context) {
+				agentID := context.Param("agentId")
+				agent, err := r.handlers.GetAgentByID(context, agentID)
+				if err != nil {
+					errWrap(context, http.StatusNotFound, err)
+					return
+				}
+				successWrap(context, http.StatusOK, agent)
+			})
 		}
-		successWrap(context, http.StatusOK, list)
-	})
-	agents.GET(":agentId", func(context *gin.Context) {
-		agentID := context.Param("agentId")
-		agent, err := r.handlers.GetAgentByID(context, agentID)
-		if err != nil {
-			errWrap(context, http.StatusNotFound, err)
-			return
+
+		schedulers := v1.Group("schedulers")
+		{
+			schedulers.GET("", func(context *gin.Context) {
+				list, err := r.handlers.GetSchedulerList(context)
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+				successWrap(context, http.StatusOK, list)
+			})
+			schedulers.GET(":schedulerId", func(context *gin.Context) {
+				schedulerID := context.Param("schedulerId")
+				scheduler, err := r.handlers.GetSchedulerByID(context, schedulerID)
+				if err != nil {
+					errWrap(context, http.StatusNotFound, err)
+					return
+				}
+				successWrap(context, http.StatusOK, scheduler)
+			})
 		}
-		successWrap(context, http.StatusOK, agent)
-	})
+	}
+
+
 	return engine
 }
 

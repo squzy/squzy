@@ -10,11 +10,35 @@ import (
 type Handlers interface {
 	GetAgentList(ctx context.Context) ([]*apiPb.AgentItem, error)
 	GetAgentByID(ctx context.Context, id string) (*apiPb.AgentItem, error)
+	GetSchedulerList(ctx context.Context) ([]*apiPb.Scheduler, error)
+	GetSchedulerByID(ctx context.Context, id string) (*apiPb.Scheduler, error)
 }
 
 type handlers struct {
 	agentClient      apiPb.AgentServerClient
 	monitoringClient apiPb.SchedulersExecutorClient
+}
+
+func (h *handlers) GetSchedulerList(ctx context.Context) ([]*apiPb.Scheduler, error) {
+	c, cancel := helpers.TimeoutContext(ctx, 0)
+	defer cancel()
+	list, err := h.monitoringClient.GetSchedulerList(c, &empty.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	return list.List, nil
+}
+
+func (h *handlers) GetSchedulerByID(ctx context.Context, id string) (*apiPb.Scheduler, error) {
+	c, cancel := helpers.TimeoutContext(ctx, 0)
+	defer cancel()
+	scheduler, err := h.monitoringClient.GetSchedulerById(c, &apiPb.GetSchedulerByIdRequest{
+		Id: id,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return scheduler, nil
 }
 
 func (h *handlers) GetAgentList(ctx context.Context) ([]*apiPb.AgentItem, error) {
