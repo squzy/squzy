@@ -99,6 +99,9 @@ issues:
     - path: agent\.go
       linters:
         - gocyclo
+    - path: router\.go
+      linters:
+        - gocyclo
     - path: config\.go
       linters:
         - stylecheck

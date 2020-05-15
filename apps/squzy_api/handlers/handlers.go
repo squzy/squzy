@@ -12,11 +12,49 @@ type Handlers interface {
 	GetAgentByID(ctx context.Context, id string) (*apiPb.AgentItem, error)
 	GetSchedulerList(ctx context.Context) ([]*apiPb.Scheduler, error)
 	GetSchedulerByID(ctx context.Context, id string) (*apiPb.Scheduler, error)
+	RunScheduler(ctx context.Context, id string) error
+	StopScheduler(ctx context.Context, id string) error
+	RemoveScheduler(ctx context.Context, id string) error
+	AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) error
 }
 
 type handlers struct {
 	agentClient      apiPb.AgentServerClient
 	monitoringClient apiPb.SchedulersExecutorClient
+}
+
+func (h *handlers) RunScheduler(ctx context.Context, id string) error {
+	c, cancel := helpers.TimeoutContext(ctx, 0)
+	defer cancel()
+	_, err := h.monitoringClient.Run(c, &apiPb.RunRequest{
+		Id: id,
+	})
+	return err
+}
+
+func (h *handlers) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) error {
+	c, cancel := helpers.TimeoutContext(ctx, 0)
+	defer cancel()
+	_, err := h.monitoringClient.Add(c, scheduler)
+	return err
+}
+
+func (h *handlers) StopScheduler(ctx context.Context, id string) error {
+	c, cancel := helpers.TimeoutContext(ctx, 0)
+	defer cancel()
+	_, err := h.monitoringClient.Stop(c, &apiPb.StopRequest{
+		Id: id,
+	})
+	return err
+}
+
+func (h *handlers) RemoveScheduler(ctx context.Context, id string) error {
+	c, cancel := helpers.TimeoutContext(ctx, 0)
+	defer cancel()
+	_, err := h.monitoringClient.Remove(c, &apiPb.RemoveRequest{
+		Id: id,
+	})
+	return err
 }
 
 func (h *handlers) GetSchedulerList(ctx context.Context) ([]*apiPb.Scheduler, error) {

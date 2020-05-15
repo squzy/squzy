@@ -1,9 +1,16 @@
 package router
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"net/http"
 	"squzy/apps/squzy_api/handlers"
+)
+
+var (
+	errMissingConfig      = errors.New("missing config of scheduler")
+	errNotFoundConfigType = errors.New("not found config type")
 )
 
 type Router interface {
@@ -20,6 +27,17 @@ type E struct {
 
 type D struct {
 	Data interface{} `json:"data"`
+}
+
+type Scheduler struct {
+	Type            apiPb.SchedulerType        `json:"type" binding:"required"`
+	Interval        int32                      `json:"interval" binding:"required"`
+	Timeout         int32                      `json:"timeout" binding:"required"`
+	HTTPConfig      *apiPb.HttpConfig          `json:"httpConfig"`
+	TCPConfig       *apiPb.TcpConfig           `json:"tcpConfig"`
+	HTTPValueConfig *apiPb.HttpJsonValueConfig `json:"httpValueConfig"`
+	GRPCConfig      *apiPb.GrpcConfig          `json:"grpcConfig"`
+	SiteMapConfig   *apiPb.SiteMapConfig       `json:"siteMapConfig"`
 }
 
 func errWrap(c *gin.Context, status int, err error) {
@@ -70,18 +88,138 @@ func (r *router) GetEngine() *gin.Engine {
 				}
 				successWrap(context, http.StatusOK, list)
 			})
-			schedulers.GET(":schedulerId", func(context *gin.Context) {
-				schedulerID := context.Param("schedulerId")
-				scheduler, err := r.handlers.GetSchedulerByID(context, schedulerID)
+			schedulers.POST("", func(context *gin.Context) {
+				request := new(Scheduler)
+				err := context.ShouldBindJSON(request)
 				if err != nil {
-					errWrap(context, http.StatusNotFound, err)
+					errWrap(context, http.StatusUnprocessableEntity, err)
 					return
 				}
-				successWrap(context, http.StatusOK, scheduler)
+				var addReq *apiPb.AddRequest
+
+				switch request.Type {
+				case apiPb.SchedulerType_Tcp:
+					if request.TCPConfig == nil {
+						errWrap(context, http.StatusUnprocessableEntity, errMissingConfig)
+						return
+					}
+					addReq = &apiPb.AddRequest{
+						Interval: request.Interval,
+						Timeout:  request.Timeout,
+						Config: &apiPb.AddRequest_Tcp{
+							Tcp: request.TCPConfig,
+						},
+					}
+
+				case apiPb.SchedulerType_Grpc:
+					if request.GRPCConfig == nil {
+						errWrap(context, http.StatusUnprocessableEntity, errMissingConfig)
+						return
+					}
+					addReq = &apiPb.AddRequest{
+						Interval: request.Interval,
+						Timeout:  request.Timeout,
+						Config: &apiPb.AddRequest_Grpc{
+							Grpc: request.GRPCConfig,
+						},
+					}
+
+				case apiPb.SchedulerType_Http:
+					if request.HTTPConfig == nil {
+						errWrap(context, http.StatusUnprocessableEntity, errMissingConfig)
+						return
+					}
+					addReq = &apiPb.AddRequest{
+						Interval: request.Interval,
+						Timeout:  request.Timeout,
+						Config: &apiPb.AddRequest_Http{
+							Http: request.HTTPConfig,
+						},
+					}
+
+				case apiPb.SchedulerType_SiteMap:
+					if request.SiteMapConfig == nil {
+						errWrap(context, http.StatusUnprocessableEntity, errMissingConfig)
+						return
+					}
+					addReq = &apiPb.AddRequest{
+						Interval: request.Interval,
+						Timeout:  request.Timeout,
+						Config: &apiPb.AddRequest_Sitemap{
+							Sitemap: request.SiteMapConfig,
+						},
+					}
+
+				case apiPb.SchedulerType_HttpJsonValue:
+					if request.HTTPValueConfig == nil {
+						errWrap(context, http.StatusUnprocessableEntity, errMissingConfig)
+						return
+					}
+					addReq = &apiPb.AddRequest{
+						Interval: request.Interval,
+						Timeout:  request.Timeout,
+						Config: &apiPb.AddRequest_HttpValue{
+							HttpValue: request.HTTPValueConfig,
+						},
+					}
+
+				default:
+					errWrap(context, http.StatusUnprocessableEntity, errNotFoundConfigType)
+					return
+				}
+
+				err = r.handlers.AddScheduler(context, addReq)
+				if err != nil {
+					errWrap(context, http.StatusUnprocessableEntity, err)
+					return
+				}
+				successWrap(context, http.StatusCreated, nil)
 			})
+			scheduler := schedulers.Group(":schedulerId")
+			{
+				// Get by ID
+				scheduler.GET("", func(context *gin.Context) {
+					schedulerID := context.Param("schedulerId")
+					scheduler, err := r.handlers.GetSchedulerByID(context, schedulerID)
+					if err != nil {
+						errWrap(context, http.StatusNotFound, err)
+						return
+					}
+					successWrap(context, http.StatusOK, scheduler)
+				})
+				// Run by ID
+				scheduler.PUT("run", func(context *gin.Context) {
+					schedulerID := context.Param("schedulerId")
+					err := r.handlers.RunScheduler(context, schedulerID)
+					if err != nil {
+						errWrap(context, http.StatusNotFound, err)
+						return
+					}
+					successWrap(context, http.StatusAccepted, nil)
+				})
+				// Remove by ID
+				scheduler.DELETE("", func(context *gin.Context) {
+					schedulerID := context.Param("schedulerId")
+					err := r.handlers.RemoveScheduler(context, schedulerID)
+					if err != nil {
+						errWrap(context, http.StatusNotFound, err)
+						return
+					}
+					successWrap(context, http.StatusAccepted, nil)
+				})
+				// Stop by ID
+				scheduler.PUT("stop", func(context *gin.Context) {
+					schedulerID := context.Param("schedulerId")
+					err := r.handlers.StopScheduler(context, schedulerID)
+					if err != nil {
+						errWrap(context, http.StatusNotFound, err)
+						return
+					}
+					successWrap(context, http.StatusAccepted, nil)
+				})
+			}
 		}
 	}
-
 
 	return engine
 }
