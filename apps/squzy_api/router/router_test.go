@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/go-playground/assert/v2"
+	"github.com/stretchr/testify/assert"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"io"
 	"net/http"
