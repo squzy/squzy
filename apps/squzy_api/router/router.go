@@ -30,7 +30,7 @@ type D struct {
 }
 
 type Scheduler struct {
-	Type            apiPb.SchedulerType        `json:"type" binding:"required"`
+	Type            apiPb.SchedulerType        `json:"type"`
 	Interval        int32                      `json:"interval" binding:"required"`
 	Timeout         int32                      `json:"timeout" binding:"required"`
 	HTTPConfig      *apiPb.HttpConfig          `json:"httpConfig"`
