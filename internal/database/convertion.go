@@ -2,7 +2,6 @@ package database
 
 import (
 	"errors"
-	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 )
@@ -11,9 +10,9 @@ func ConvertToPostgresSnapshot(request *apiPb.SchedulerResponse) (*Snapshot, err
 	return convertToSnapshot(request.GetSnapshot(), request.GetSchedulerId())
 }
 
-func ConvertFromPostgresSnapshots(snapshots []*Snapshot) ([]*apiPb.Snapshot, []error) {
+func ConvertFromPostgresSnapshots(snapshots []*Snapshot) ([]*apiPb.SchedulerSnapshot, []error) {
 	var errorSlice []error
-	var res []*apiPb.Snapshot
+	var res []*apiPb.SchedulerSnapshot
 	for _, v := range snapshots {
 		snap, err := convertFromSnapshot(v)
 		if err != nil {
@@ -25,7 +24,7 @@ func ConvertFromPostgresSnapshots(snapshots []*Snapshot) ([]*apiPb.Snapshot, []e
 	return res, errorSlice
 }
 
-func ConvertToPostgressStatRequest(request *apiPb.SendMetricsRequest) (*StatRequest, error) {
+func ConvertToPostgressStatRequest(request *apiPb.Metric) (*StatRequest, error) {
 	t, err := ptypes.Timestamp(request.GetTime())
 	if err != nil {
 		return nil, err
@@ -39,23 +38,33 @@ func ConvertToPostgressStatRequest(request *apiPb.SendMetricsRequest) (*StatRequ
 	}, nil
 }
 
-func ConvertFromPostgressStatRequest(data *StatRequest) (*apiPb.SendMetricsRequest, error) {
+func ConvertFromPostgressStatRequests(data []*StatRequest) ([]*apiPb.GetAgentInformationResponse_Statistic, error) {
+	var res []*apiPb.GetAgentInformationResponse_Statistic
+	for _, request := range data {
+		stat, err := ConvertFromPostgressStatRequest(request)
+		if err == nil {
+			res = append(res, stat)
+		}
+		//TODO handle error?
+	}
+	return res, nil //TODO: what do with error?
+}
+
+func ConvertFromPostgressStatRequest(data *StatRequest) (*apiPb.GetAgentInformationResponse_Statistic, error) {
 	t, err := ptypes.TimestampProto(data.Time)
 	if err != nil {
 		return nil, err
 	}
-	return &apiPb.SendMetricsRequest{
-		AgentId:       fmt.Sprint(data.ID),
-		AgentUniqName: "", //TODO
-		CpuInfo:       convertFromCpuInfo(data.CpuInfo),
-		MemoryInfo:    convertFromMemoryInfo(data.MemoryInfo),
-		DiskInfo:      convertFromDiskInfo(data.DiskInfo),
-		NetInfo:       convertFromNetInfo(data.NetInfo),
-		Time:          t,
+	return &apiPb.GetAgentInformationResponse_Statistic{
+		CpuInfo:    convertFromCpuInfo(data.CpuInfo),
+		MemoryInfo: convertFromMemoryInfo(data.MemoryInfo),
+		DiskInfo:   convertFromDiskInfo(data.DiskInfo),
+		NetInfo:    convertFromNetInfo(data.NetInfo),
+		Time:       t,
 	}, nil
 }
 
-func convertToSnapshot(request *apiPb.Snapshot, schedulerId string) (*Snapshot, error) {
+func convertToSnapshot(request *apiPb.SchedulerSnapshot, schedulerId string) (*Snapshot, error) {
 	if request == nil {
 		return nil, errors.New("ERROR_SNAPSHOT_IS_EMPTY")
 	}
@@ -75,7 +84,7 @@ func convertToSnapshot(request *apiPb.Snapshot, schedulerId string) (*Snapshot, 
 	return res, nil
 }
 
-func convertToMetaData(request *apiPb.Snapshot_MetaData) (*MetaData, error) {
+func convertToMetaData(request *apiPb.SchedulerSnapshot_MetaData) (*MetaData, error) {
 	if request == nil {
 		return nil, errors.New("EMPTY_META_DATA")
 	}
@@ -94,22 +103,22 @@ func convertToMetaData(request *apiPb.Snapshot_MetaData) (*MetaData, error) {
 	}, nil
 }
 
-func convertFromSnapshot(snapshot *Snapshot) (*apiPb.Snapshot, error) {
+func convertFromSnapshot(snapshot *Snapshot) (*apiPb.SchedulerSnapshot, error) {
 	meta, err := convertFromMetaData(snapshot.Meta)
 	if err != nil {
 		return nil, err
 	}
-	return &apiPb.Snapshot{
-		Code: apiPb.Snapshot_Code(apiPb.SchedulerResponseCode_value[snapshot.Code]),
+	return &apiPb.SchedulerSnapshot{
+		Code: apiPb.SchedulerCode(apiPb.SchedulerCode_value[snapshot.Code]),
 		Type: apiPb.SchedulerType(apiPb.SchedulerType_value[snapshot.Type]),
-		Error: &apiPb.Snapshot_SnapshotError{
+		Error: &apiPb.SchedulerSnapshot_Error{
 			Message: snapshot.Error,
 		},
 		Meta: meta,
 	}, nil
 }
 
-func convertFromMetaData(metaData *MetaData) (*apiPb.Snapshot_MetaData, error) {
+func convertFromMetaData(metaData *MetaData) (*apiPb.SchedulerSnapshot_MetaData, error) {
 	if metaData == nil {
 		return nil, errors.New("EMPTY_META_DATA")
 	}
@@ -121,7 +130,7 @@ func convertFromMetaData(metaData *MetaData) (*apiPb.Snapshot_MetaData, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &apiPb.Snapshot_MetaData{
+	return &apiPb.SchedulerSnapshot_MetaData{
 		StartTime: startTime,
 		EndTime:   endTime,
 		Value:     metaData.Value,

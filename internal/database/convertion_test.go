@@ -17,17 +17,17 @@ func TestConvertToPostgresSnapshot(t *testing.T) {
 	t.Run("Test: error", func(t *testing.T) {
 		_, err := ConvertToPostgresSnapshot(&apiPb.SchedulerResponse{
 			SchedulerId: "id",
-			Snapshot:    &apiPb.Snapshot{},
+			Snapshot:    &apiPb.SchedulerSnapshot{},
 		})
 		assert.Error(t, err)
 	})
 	t.Run("Test: error", func(t *testing.T) {
 		_, err := ConvertToPostgresSnapshot(&apiPb.SchedulerResponse{
 			SchedulerId: "id",
-			Snapshot: &apiPb.Snapshot{
+			Snapshot: &apiPb.SchedulerSnapshot{
 				Code: 0,
 				Type: 0,
-				Meta: &apiPb.Snapshot_MetaData{
+				Meta: &apiPb.SchedulerSnapshot_MetaData{
 					StartTime: nil,
 				},
 			},
@@ -37,10 +37,10 @@ func TestConvertToPostgresSnapshot(t *testing.T) {
 	t.Run("Test: error", func(t *testing.T) {
 		_, err := ConvertToPostgresSnapshot(&apiPb.SchedulerResponse{
 			SchedulerId: "id",
-			Snapshot: &apiPb.Snapshot{
+			Snapshot: &apiPb.SchedulerSnapshot{
 				Code: 0,
 				Type: 0,
-				Meta: &apiPb.Snapshot_MetaData{
+				Meta: &apiPb.SchedulerSnapshot_MetaData{
 					StartTime: correctTime,
 					EndTime:   nil,
 				},
@@ -51,11 +51,11 @@ func TestConvertToPostgresSnapshot(t *testing.T) {
 	t.Run("Test: error", func(t *testing.T) {
 		_, err := ConvertToPostgresSnapshot(&apiPb.SchedulerResponse{
 			SchedulerId: "id",
-			Snapshot: &apiPb.Snapshot{
+			Snapshot: &apiPb.SchedulerSnapshot{
 				Code:  0,
 				Type:  0,
-				Error: &apiPb.Snapshot_SnapshotError{Message: ""},
-				Meta: &apiPb.Snapshot_MetaData{
+				Error: &apiPb.SchedulerSnapshot_Error{Message: ""},
+				Meta: &apiPb.SchedulerSnapshot_MetaData{
 					StartTime: correctTime,
 					EndTime:   correctTime,
 				},
@@ -108,19 +108,19 @@ func TestConvertFromPostgresSnapshots(t *testing.T) {
 
 func TestConvertToPostgressStatRequest(t *testing.T) {
 	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertToPostgressStatRequest(&apiPb.SendMetricsRequest{
+		_, err := ConvertToPostgressStatRequest(&apiPb.Metric{
 			Time: nil,
 		})
 		assert.Error(t, err)
 	})
 	t.Run("Test: no error", func(t *testing.T) {
-		_, err := ConvertToPostgressStatRequest(&apiPb.SendMetricsRequest{
+		_, err := ConvertToPostgressStatRequest(&apiPb.Metric{
 			Time: ptypes.TimestampNow(),
 		})
 		assert.NoError(t, err)
 	})
 	t.Run("Test: no error", func(t *testing.T) {
-		_, err := ConvertToPostgressStatRequest(&apiPb.SendMetricsRequest{
+		_, err := ConvertToPostgressStatRequest(&apiPb.Metric{
 			CpuInfo: &apiPb.CpuInfo{
 				Cpus: []*apiPb.CpuInfo_CPU{{}},
 			},

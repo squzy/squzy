@@ -22,7 +22,7 @@ type Model struct {
 
 type Snapshot struct {
 	gorm.Model
-	SchedulerId string      `gorm:"schedulerId"`
+	SchedulerId string    `gorm:"schedulerId"`
 	Code        string    `gorm:"code"`
 	Type        string    `gorm:"column:type"`
 	Error       string    `gorm:"error"`
@@ -32,8 +32,8 @@ type Snapshot struct {
 type MetaData struct {
 	gorm.Model
 	SnapshotId uint           `gorm:"snapshotId"`
-	StartTime  time.Time     `gorm:"startTime"`
-	EndTime    time.Time     `gorm:"endTime"`
+	StartTime  time.Time      `gorm:"startTime"`
+	EndTime    time.Time      `gorm:"endTime"`
 	Value      *_struct.Value `gorm:"value"` //TODO: google
 }
 
@@ -44,7 +44,7 @@ type StatRequest struct {
 	MemoryInfo *MemoryInfo `gorm:"memoryInfo"`
 	DiskInfo   []*DiskInfo `gorm:"diskInfo"`
 	NetInfo    []*NetInfo  `gorm:"netInfo"`
-	Time       time.Time  `gorm:"time"`
+	Time       time.Time   `gorm:"time"`
 }
 
 type CpuInfo struct {
@@ -149,7 +149,7 @@ func (p *postgres) InsertSnapshot(data *apiPb.SchedulerResponse) error {
 	return nil
 }
 
-func (p *postgres) GetSnapshots(id string) ([]*apiPb.Snapshot, error) {
+func (p *postgres) GetSnapshots(id string) ([]*apiPb.SchedulerSnapshot, error) {
 	var snpashots []*Snapshot
 	if err := p.db.Table(dbSnapshotCollection).Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), id).Find(&snpashots).Error; err != nil {
 		fmt.Println(err.Error()) //TODO: log?
@@ -162,7 +162,7 @@ func (p *postgres) GetSnapshots(id string) ([]*apiPb.Snapshot, error) {
 	return snapshots, nil
 }
 
-func (p *postgres) InsertStatRequest(data *apiPb.SendMetricsRequest) error {
+func (p *postgres) InsertStatRequest(data *apiPb.Metric) error {
 	pgData, err := ConvertToPostgressStatRequest(data)
 	if err != nil {
 		return err
@@ -174,11 +174,30 @@ func (p *postgres) InsertStatRequest(data *apiPb.SendMetricsRequest) error {
 	return nil
 }
 
-func (p *postgres) GetStatRequest(id string) (*apiPb.SendMetricsRequest, error) {
-	statRequest := &StatRequest{}
+func (p *postgres) GetStatRequest(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+	var statRequest []*StatRequest
 	if err := p.db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).First(statRequest).Error; err != nil {
 		fmt.Println(err.Error()) //TODO: log?
-		return nil, errorDataBase
+		return nil, -1, errorDataBase
 	}
-	return ConvertFromPostgressStatRequest(statRequest)
+	count := int32(-1)
+	p.db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).Count(count)
+	res, err := ConvertFromPostgressStatRequests(statRequest)
+	return res, count, err
+}
+
+func (p *postgres) GetCpuInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+	return nil, 0, nil //TODO
+}
+
+func (p *postgres) GetMemoryInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+	return nil, 0, nil //TODO
+}
+
+func (p *postgres) GetDiskInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+	return nil, 0, nil //TODO
+}
+
+func (p *postgres) GetNetInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+	return nil, 0, nil //TODO
 }

@@ -129,6 +129,10 @@ github.com/squzy/mongo_helper v0.0.0-20200502155448-a2e6845a8ba0 h1:4ufoIuMrHwWf
 github.com/squzy/mongo_helper v0.0.0-20200502155448-a2e6845a8ba0/go.mod h1:huDC/gEH+DyCTxygdxFmrdnbBSG7XiB2/fAhTelX0ro=
 github.com/squzy/squzy_generated v1.6.1-0.20200505152411-3634201ccd65 h1:xdSXyPp+D1uL9e75rADjYJpIkTDIMgdGM4JmXz288NE=
 github.com/squzy/squzy_generated v1.6.1-0.20200505152411-3634201ccd65/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.6.1-0.20200516073519-b3779f287916 h1:EREMtvLfxp6R0k4l4W+ypejrpy59O2bRpZQst350QJE=
+github.com/squzy/squzy_generated v1.6.1-0.20200516073519-b3779f287916/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.6.1-0.20200516114122-ed3990be8881 h1:OTfdRKgIFgGyEz4oel7lMTSYc0mWWMDb6YsT+xpj520=
+github.com/squzy/squzy_generated v1.6.1-0.20200516114122-ed3990be8881/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

@@ -69,17 +69,17 @@ func (s *Suite) Test_InsertMetaData() {
 		panic("Time convertion error")
 	}
 	err = postgr.InsertSnapshot(&apiPb.SchedulerResponse{
-		SchedulerId:          "schId",
-		Snapshot:             &apiPb.Snapshot{
-			Code:                 0,
-			Type:                 0,
-			Error:                &apiPb.Snapshot_SnapshotError{
-				Message:              "message",
+		SchedulerId: "schId",
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code: 0,
+			Type: 0,
+			Error: &apiPb.SchedulerSnapshot_Error{
+				Message: "message",
 			},
-			Meta:                 &apiPb.Snapshot_MetaData{
-				StartTime:            correctTime,
-				EndTime:              correctTime,
-				Value:                nil,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: correctTime,
+				EndTime:   correctTime,
+				Value:     nil,
 			},
 		},
 	})
@@ -125,55 +125,22 @@ func (s *Suite) Test_InsertStatRequest() {
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.mock.ExpectCommit()
 
-	statReq, _ := ConvertFromPostgressStatRequest(
-		&StatRequest{
-			CpuInfo: []*CpuInfo{
-				{
-					Load: 0,
-				},
-			},
-			MemoryInfo: &MemoryInfo{
-				StatRequestID: 0,
-				Mem: &Memory{
-					Total:       0,
-					Used:        0,
-					Free:        0,
-					Shared:      0,
-					UsedPercent: 0,
-				},
-				Swap: &Memory{
-					Total:       0,
-					Used:        0,
-					Free:        0,
-					Shared:      0,
-					UsedPercent: 0,
-				},
-			},
-			DiskInfo: []*DiskInfo{
-				{
-					Name:        "",
-					Total:       0,
-					Free:        0,
-					Used:        0,
-					UsedPercent: 0,
-				},
-			},
-			NetInfo:  []*NetInfo{
-				{
-					Name:          "",
-					BytesSent:     0,
-					BytesRecv:     0,
-					PacketsSent:   0,
-					PacketsRecv:   0,
-					ErrIn:         0,
-					ErrOut:        0,
-					DropIn:        0,
-					DropOut:       0,
-				},
-			},
-			Time:     time.Now(),
-		})
-	err := postgr.InsertStatRequest(statReq)
+	err := postgr.InsertStatRequest(&apiPb.Metric{
+		CpuInfo: &apiPb.CpuInfo{
+			Cpus: []*apiPb.CpuInfo_CPU{{}},
+		},
+		MemoryInfo: &apiPb.MemoryInfo{
+			Mem:  &apiPb.MemoryInfo_Memory{},
+			Swap: &apiPb.MemoryInfo_Memory{},
+		},
+		DiskInfo: &apiPb.DiskInfo{
+			Disks: map[string]*apiPb.DiskInfo_Disk{},
+		},
+		NetInfo: &apiPb.NetInfo{
+			Interfaces: map[string]*apiPb.NetInfo_Interface{},
+		},
+		Time: ptypes.TimestampNow(),
+	})
 	require.NoError(s.T(), err)
 }
 
@@ -187,7 +154,7 @@ func (s *Suite) Test_GetStatRequest() {
 		WithArgs(id).
 		WillReturnRows(rows)
 
-	_, err := postgr.GetStatRequest(id)
+	_, _, err := postgr.GetStatRequest(id, nil, nil)
 	require.NoError(s.T(), err)
 }
 
@@ -217,13 +184,13 @@ func TestPostgres_InsertSnapshots(t *testing.T) {
 			panic("Time convertion error")
 		}
 		err = postgrWrong.InsertSnapshot(&apiPb.SchedulerResponse{
-			SchedulerId:          "",
-			Snapshot:             &apiPb.Snapshot{
-				Code:                 0,
-				Type:                 0,
-				Meta:                 &apiPb.Snapshot_MetaData{
-					StartTime:            correctTime,
-					EndTime:              correctTime,
+			SchedulerId: "",
+			Snapshot: &apiPb.SchedulerSnapshot{
+				Code: 0,
+				Type: 0,
+				Meta: &apiPb.SchedulerSnapshot_MetaData{
+					StartTime: correctTime,
+					EndTime:   correctTime,
 				},
 			},
 		})
@@ -240,66 +207,33 @@ func TestPostgres_GetMetaData(t *testing.T) {
 
 func TestPostgres_InsertStatRequest(t *testing.T) {
 	t.Run("Should: return conv error", func(t *testing.T) {
-		err := postgr.InsertStatRequest(&apiPb.SendMetricsRequest{})
+		err := postgr.InsertStatRequest(&apiPb.Metric{})
 		assert.Error(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		statReq, _ := ConvertFromPostgressStatRequest(
-			&StatRequest{
-				CpuInfo: []*CpuInfo{
-					{
-						Load: 0,
-					},
-				},
-				MemoryInfo: &MemoryInfo{
-					StatRequestID: 0,
-					Mem: &Memory{
-						Total:       0,
-						Used:        0,
-						Free:        0,
-						Shared:      0,
-						UsedPercent: 0,
-					},
-					Swap: &Memory{
-						Total:       0,
-						Used:        0,
-						Free:        0,
-						Shared:      0,
-						UsedPercent: 0,
-					},
-				},
-				DiskInfo: []*DiskInfo{
-					{
-						Name:        "",
-						Total:       0,
-						Free:        0,
-						Used:        0,
-						UsedPercent: 0,
-					},
-				},
-				NetInfo:  []*NetInfo{
-					{
-						Name:          "",
-						BytesSent:     0,
-						BytesRecv:     0,
-						PacketsSent:   0,
-						PacketsRecv:   0,
-						ErrIn:         0,
-						ErrOut:        0,
-						DropIn:        0,
-						DropOut:       0,
-					},
-				},
-				Time:     time.Now(),
-			})
-		err := postgrWrong.InsertStatRequest(statReq)
+		err := postgrWrong.InsertStatRequest(&apiPb.Metric{
+			CpuInfo: &apiPb.CpuInfo{
+				Cpus: []*apiPb.CpuInfo_CPU{{}},
+			},
+			MemoryInfo: &apiPb.MemoryInfo{
+				Mem:  &apiPb.MemoryInfo_Memory{},
+				Swap: &apiPb.MemoryInfo_Memory{},
+			},
+			DiskInfo: &apiPb.DiskInfo{
+				Disks: map[string]*apiPb.DiskInfo_Disk{},
+			},
+			NetInfo: &apiPb.NetInfo{
+				Interfaces: map[string]*apiPb.NetInfo_Interface{},
+			},
+			Time: ptypes.TimestampNow(),
+		})
 		assert.Error(t, err)
 	})
 }
 
 func TestPostgres_GetStatRequest(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		_, err := postgrWrong.GetStatRequest("")
+		_, _, err := postgrWrong.GetStatRequest("", nil, nil)
 		assert.Error(t, err)
 	})
 }
