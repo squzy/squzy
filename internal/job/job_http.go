@@ -13,30 +13,32 @@ type httpError struct {
 	schedulerID string
 	startTime   *timestamp.Timestamp
 	endTime     *timestamp.Timestamp
-	code        apiPb.SchedulerResponseCode
+	code        apiPb.SchedulerCode
 	description string
 }
 
 func (e *httpError) GetLogData() *apiPb.SchedulerResponse {
-	var err *apiPb.SchedulerResponse_Error
-	if e.code == apiPb.SchedulerResponseCode_Error {
-		err = &apiPb.SchedulerResponse_Error{
+	var err *apiPb.SchedulerSnapshot_Error
+	if e.code == apiPb.SchedulerCode_Error {
+		err = &apiPb.SchedulerSnapshot_Error{
 			Message: e.description,
 		}
 	}
 	return &apiPb.SchedulerResponse{
 		SchedulerId: e.schedulerID,
-		Code:        e.code,
-		Error:       err,
-		Type:        apiPb.SchedulerType_Http,
-		Meta: &apiPb.SchedulerResponse_MetaData{
-			StartTime: e.startTime,
-			EndTime:   e.endTime,
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code:  e.code,
+			Error: err,
+			Type:  apiPb.SchedulerType_Http,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: e.startTime,
+				EndTime:   e.endTime,
+			},
 		},
 	}
 }
 
-func newHTTPError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string) CheckError {
+func newHTTPError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerCode, description string) CheckError {
 	return &httpError{
 		schedulerID: schedulerID,
 		startTime:   startTime,
@@ -57,7 +59,7 @@ func ExecHTTP(schedulerID string, timeout int32, config *scheduler_config_storag
 			schedulerID,
 			startTime,
 			ptypes.TimestampNow(),
-			apiPb.SchedulerResponseCode_Error,
+			apiPb.SchedulerCode_Error,
 			err.Error(),
 		)
 	}
@@ -66,7 +68,7 @@ func ExecHTTP(schedulerID string, timeout int32, config *scheduler_config_storag
 		schedulerID,
 		startTime,
 		ptypes.TimestampNow(),
-		apiPb.SchedulerResponseCode_OK,
+		apiPb.SchedulerCode_OK,
 		"",
 	)
 }

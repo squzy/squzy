@@ -18,11 +18,27 @@ import (
 type server struct {
 }
 
+func (s server) GetSchedulerInformation(ctx context.Context, request *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
+	panic("implement me")
+}
+
+func (s server) GetAgentInformation(ctx context.Context, request *apiPb.GetAgentInformationRequest) (*apiPb.GetAgentInformationResponse, error) {
+	panic("implement me")
+}
+
 func (s server) SendResponseFromAgent(context.Context, *apiPb.Metric) (*empty.Empty, error) {
 	panic("implement me")
 }
 
 type serverErrorThrow struct {
+}
+
+func (s serverErrorThrow) GetSchedulerInformation(ctx context.Context, request *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
+	panic("implement me")
+}
+
+func (s serverErrorThrow) GetAgentInformation(ctx context.Context, request *apiPb.GetAgentInformationRequest) (*apiPb.GetAgentInformationResponse, error) {
+	panic("implement me")
 }
 
 func (s serverErrorThrow) SendResponseFromScheduler(context.Context, *apiPb.SchedulerResponse) (*empty.Empty, error) {

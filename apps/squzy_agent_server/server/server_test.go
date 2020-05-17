@@ -10,10 +10,30 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"io"
 	"testing"
 )
+
+type storageMock struct {
+}
+
+func (s storageMock) SendResponseFromScheduler(ctx context.Context, in *apiPb.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, nil
+}
+
+func (s storageMock) SendResponseFromAgent(ctx context.Context, in *apiPb.Metric, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, nil
+}
+
+func (s storageMock) GetSchedulerInformation(ctx context.Context, in *apiPb.GetSchedulerInformationRequest, opts ...grpc.CallOption) (*apiPb.GetSchedulerInformationResponse, error) {
+	panic("implement me")
+}
+
+func (s storageMock) GetAgentInformation(ctx context.Context, in *apiPb.GetAgentInformationRequest, opts ...grpc.CallOption) (*apiPb.GetAgentInformationResponse, error) {
+	panic("implement me")
+}
 
 type mockStreamClose struct {
 }
@@ -284,7 +304,7 @@ func TestNew(t *testing.T) {
 
 func TestServer_Register(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(&dbMockError{}, nil)
+		s := New(&dbMockError{}, &storageMock{})
 		_, err := s.Register(context.Background(), &apiPb.RegisterRequest{
 			AgentName: "",
 			HostInfo:  nil,
@@ -292,7 +312,7 @@ func TestServer_Register(t *testing.T) {
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		_, err := s.Register(context.Background(), &apiPb.RegisterRequest{
 			AgentName: "",
 			HostInfo:  nil,
@@ -303,19 +323,19 @@ func TestServer_Register(t *testing.T) {
 
 func TestServer_UnRegister(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(&dbMockError{}, nil)
+		s := New(&dbMockError{}, &storageMock{})
 		_, err := s.UnRegister(context.Background(), &apiPb.UnRegisterRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because id", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		_, err := s.UnRegister(context.Background(), &apiPb.UnRegisterRequest{})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return  error", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		_, err := s.UnRegister(context.Background(), &apiPb.UnRegisterRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
@@ -325,12 +345,12 @@ func TestServer_UnRegister(t *testing.T) {
 
 func TestServer_GetAgentList(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(&dbMockError{}, nil)
+		s := New(&dbMockError{}, &storageMock{})
 		_, err := s.GetAgentList(context.Background(), &empty.Empty{})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		_, err := s.GetAgentList(context.Background(), &empty.Empty{})
 		assert.Equal(t, nil, err)
 	})
@@ -338,12 +358,12 @@ func TestServer_GetAgentList(t *testing.T) {
 
 func TestServer_GetByAgentName(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(&dbMockError{}, nil)
+		s := New(&dbMockError{}, &storageMock{})
 		_, err := s.GetByAgentName(context.Background(), &apiPb.GetByAgentNameRequest{})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		_, err := s.GetByAgentName(context.Background(), &apiPb.GetByAgentNameRequest{})
 		assert.Equal(t, nil, err)
 	})
@@ -351,42 +371,42 @@ func TestServer_GetByAgentName(t *testing.T) {
 
 func TestServer_SendMetrics(t *testing.T) {
 	t.Run("Should: return error if id is wrong", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		assert.NotEqual(t, nil, s.SendMetrics(&mockStreamError{}))
 	})
 	t.Run("Should: close stream without error if error", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		assert.NotEqual(t, nil, s.SendMetrics(&mockInternalStreamError{}))
 	})
 	t.Run("Should: works as excpected", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		assert.Equal(t, nil, s.SendMetrics(&mockStreamOk{}))
 	})
 	t.Run("Should: works as excpected", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		assert.Equal(t, nil, s.SendMetrics(&mockStreamClose{}))
 	})
 	t.Run("Should: works as excpected", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		assert.Equal(t, nil, s.SendMetrics(&mockStreamContinueWork{}))
 	})
 }
 
 func TestServer_GetAgentById(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(&dbMockError{}, nil)
+		s := New(&dbMockError{}, &storageMock{})
 		_, err := s.GetAgentById(context.Background(), &apiPb.GetAgentByIdRequest{
 			AgentId: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because bson", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		_, err := s.GetAgentById(context.Background(), &apiPb.GetAgentByIdRequest{})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		_, err := s.GetAgentById(context.Background(), &apiPb.GetAgentByIdRequest{
 			AgentId: primitive.NewObjectID().Hex(),
 		})

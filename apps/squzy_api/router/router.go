@@ -2,10 +2,13 @@ package router
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/protobuf/ptypes"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"net/http"
 	"squzy/apps/squzy_api/handlers"
+	"time"
 )
 
 var (
@@ -27,6 +30,14 @@ type E struct {
 
 type D struct {
 	Data interface{} `json:"data"`
+}
+
+type HistoryFilterRequest struct {
+	DateFrom *time.Time          `form:"dateFrom" time_format:"2006-01-02T15:04:05Z07:00"`
+	DateTo   *time.Time          `form:"dateTo" time_format:"2006-01-02T15:04:05Z07:00"`
+	Page     int32               `form:"page"`
+	Limit    int32               `form:"limit"`
+	Type     apiPb.TypeAgentStat `form:"type"`
 }
 
 type Scheduler struct {
@@ -67,15 +78,51 @@ func (r *router) GetEngine() *gin.Engine {
 				}
 				successWrap(context, http.StatusOK, list)
 			})
-			agents.GET(":agentId", func(context *gin.Context) {
-				agentID := context.Param("agentId")
-				agent, err := r.handlers.GetAgentByID(context, agentID)
-				if err != nil {
-					errWrap(context, http.StatusNotFound, err)
-					return
-				}
-				successWrap(context, http.StatusOK, agent)
-			})
+			agent := agents.Group(":agentId")
+			{
+				agent.GET("", func(context *gin.Context) {
+					agentID := context.Param("agentId")
+					agent, err := r.handlers.GetAgentByID(context, agentID)
+					if err != nil {
+						errWrap(context, http.StatusNotFound, err)
+						return
+					}
+					successWrap(context, http.StatusOK, agent)
+				})
+				//History
+				agent.GET("/history", func(context *gin.Context) {
+					agentID := context.Param("agentId")
+					rq := HistoryFilterRequest{
+						DateFrom: nil,
+						DateTo:   nil,
+						Page:     0,
+						Limit:    100,
+					}
+
+					err := context.ShouldBind(&rq)
+					if err != nil {
+						errWrap(context, http.StatusInternalServerError, err)
+						return
+					}
+					pagination, timeRange, err := GetFilters(&rq)
+					if err != nil {
+						errWrap(context, http.StatusUnprocessableEntity, err)
+						return
+					}
+					res, err := r.handlers.GetAgentHistoryByID(context, &apiPb.GetAgentInformationRequest{
+						AgentId:    agentID,
+						Pagination: pagination,
+						TimeRange:  timeRange,
+						Type:       rq.Type,
+					})
+
+					if err != nil {
+						errWrap(context, http.StatusInternalServerError, err)
+						return
+					}
+					successWrap(context, http.StatusOK, res)
+				})
+			}
 		}
 
 		schedulers := v1.Group("schedulers")
@@ -217,11 +264,74 @@ func (r *router) GetEngine() *gin.Engine {
 					}
 					successWrap(context, http.StatusAccepted, nil)
 				})
+
+				//History
+				scheduler.GET("/history", func(context *gin.Context) {
+					schedulerID := context.Param("schedulerId")
+					rq := HistoryFilterRequest{
+						DateFrom: nil,
+						DateTo:   nil,
+						Page:     0,
+						Limit:    100,
+					}
+					err := context.ShouldBind(&rq)
+					fmt.Println(err)
+					if err != nil {
+						errWrap(context, http.StatusInternalServerError, err)
+						return
+					}
+					pagination, timeRange, err := GetFilters(&rq)
+
+					if err != nil {
+						errWrap(context, http.StatusUnprocessableEntity, err)
+						return
+					}
+
+					res, err := r.handlers.GetSchedulerHistoryByID(context, &apiPb.GetSchedulerInformationRequest{
+						SchedulerId: schedulerID,
+						Pagination:  pagination,
+						TimeRange:   timeRange,
+					})
+
+					if err != nil {
+						errWrap(context, http.StatusInternalServerError, err)
+						return
+					}
+					successWrap(context, http.StatusOK, res)
+				})
 			}
 		}
 	}
 
 	return engine
+}
+
+func GetFilters(rq *HistoryFilterRequest) (*apiPb.Pagination, *apiPb.TimeFilter, error) {
+	pagination := &apiPb.Pagination{
+		Page:  rq.Page,
+		Limit: rq.Limit,
+	}
+
+	if rq.DateFrom != nil || rq.DateTo != nil {
+		timeFilter := &apiPb.TimeFilter{}
+		if rq.DateFrom != nil {
+			t, err := ptypes.TimestampProto(*rq.DateFrom)
+			if err != nil {
+				return nil, nil, err
+			}
+			timeFilter.From = t
+		}
+		if rq.DateTo != nil {
+			t, err := ptypes.TimestampProto(*rq.DateTo)
+			if err != nil {
+				return nil, nil, err
+			}
+			timeFilter.To = t
+		}
+		return pagination, timeFilter, nil
+	}
+
+	return pagination, nil, nil
 }
 
 func New(handlers handlers.Handlers) Router {

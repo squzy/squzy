@@ -14,30 +14,32 @@ type tcpError struct {
 	schedulerID string
 	startTime   *timestamp.Timestamp
 	endTime     *timestamp.Timestamp
-	code        apiPb.SchedulerResponseCode
+	code        apiPb.SchedulerCode
 	description string
 }
 
 func (s *tcpError) GetLogData() *apiPb.SchedulerResponse {
-	var err *apiPb.SchedulerResponse_Error
-	if s.code == apiPb.SchedulerResponseCode_Error {
-		err = &apiPb.SchedulerResponse_Error{
+	var err *apiPb.SchedulerSnapshot_Error
+	if s.code == apiPb.SchedulerCode_Error {
+		err = &apiPb.SchedulerSnapshot_Error{
 			Message: s.description,
 		}
 	}
 	return &apiPb.SchedulerResponse{
 		SchedulerId: s.schedulerID,
-		Code:        s.code,
-		Error:       err,
-		Type:        apiPb.SchedulerType_Tcp,
-		Meta: &apiPb.SchedulerResponse_MetaData{
-			StartTime: s.startTime,
-			EndTime:   s.endTime,
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code:  s.code,
+			Error: err,
+			Type:  apiPb.SchedulerType_Tcp,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: s.startTime,
+				EndTime:   s.endTime,
+			},
 		},
 	}
 }
 
-func newTCPError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string) CheckError {
+func newTCPError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerCode, description string) CheckError {
 	return &tcpError{
 		schedulerID: schedulerID,
 		startTime:   startTime,
@@ -51,12 +53,12 @@ func ExecTCP(schedulerID string, timeout int32, config *scheduler_config_storage
 	startTime := ptypes.TimestampNow()
 	conn, err := net.DialTimeout("tcp", net.JoinHostPort(config.Host, fmt.Sprintf("%d", config.Port)), helpers.DurationFromSecond(timeout))
 	if err != nil {
-		return newTCPError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, errWrongConnectConfigError.Error())
+		return newTCPError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_Error, errWrongConnectConfigError.Error())
 	}
 	if conn != nil {
 		defer func() {
 			_ = conn.Close()
 		}()
 	}
-	return newTCPError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "")
+	return newTCPError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_OK, "")
 }

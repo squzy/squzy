@@ -1,11 +1,41 @@
 package application
 
 import (
+	"context"
+	"github.com/golang/protobuf/ptypes/empty"
+	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"net"
 	"testing"
 	"time"
 )
+
+type mock struct {
+}
+
+func (m mock) Register(ctx context.Context, request *apiPb.RegisterRequest) (*apiPb.RegisterResponse, error) {
+	panic("implement me")
+}
+
+func (m mock) GetByAgentName(ctx context.Context, request *apiPb.GetByAgentNameRequest) (*apiPb.GetAgentListResponse, error) {
+	panic("implement me")
+}
+
+func (m mock) GetAgentById(ctx context.Context, request *apiPb.GetAgentByIdRequest) (*apiPb.AgentItem, error) {
+	panic("implement me")
+}
+
+func (m mock) UnRegister(ctx context.Context, request *apiPb.UnRegisterRequest) (*apiPb.UnRegisterResponse, error) {
+	panic("implement me")
+}
+
+func (m mock) GetAgentList(ctx context.Context, empty *empty.Empty) (*apiPb.GetAgentListResponse, error) {
+	panic("implement me")
+}
+
+func (m mock) SendMetrics(server apiPb.AgentServer_SendMetricsServer) error {
+	panic("implement me")
+}
 
 func TestNew(t *testing.T) {
 	t.Run("Should: not be nil", func(t *testing.T) {
@@ -16,7 +46,7 @@ func TestNew(t *testing.T) {
 
 func TestApp_Run(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		app := New(nil)
+		app := New(&mock{})
 		go func() {
 			_ = app.Run(11101)
 		}()

@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"squzy/apps/squzy_agent_server/database"
+	"squzy/internal/helpers"
 )
 
 type server struct {
@@ -102,9 +103,14 @@ func (s *server) SendMetrics(stream apiPb.AgentServer_SendMetricsServer) error {
 
 			switch newMsg := incomeMsg.Msg.(type) {
 			case *apiPb.SendMetricsRequest_Metric:
+				ctx, cancel := helpers.TimeoutContext(context.Background(), 0)
+				defer cancel()
+				_, _ = s.client.SendResponseFromAgent(ctx, newMsg.Metric)
 				continue
 			case *apiPb.SendMetricsRequest_Disconnect_:
-				_ = s.db.UpdateStatus(context.Background(), id, apiPb.AgentStatus_DISCONNECTED, newMsg.Disconnect.Time)
+				ctx, cancel := helpers.TimeoutContext(context.Background(), 0)
+				defer cancel()
+				_ = s.db.UpdateStatus(ctx, id, apiPb.AgentStatus_DISCONNECTED, newMsg.Disconnect.Time)
 				return stream.SendAndClose(&empty.Empty{})
 			}
 		}

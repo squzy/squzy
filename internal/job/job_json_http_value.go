@@ -17,7 +17,7 @@ type jsonHTTPError struct {
 	schedulerID string
 	startTime   *timestamp.Timestamp
 	endTime     *timestamp.Timestamp
-	code        apiPb.SchedulerResponseCode
+	code        apiPb.SchedulerCode
 	description string
 	value       *structType.Value
 }
@@ -29,21 +29,23 @@ var (
 )
 
 func (e *jsonHTTPError) GetLogData() *apiPb.SchedulerResponse {
-	var err *apiPb.SchedulerResponse_Error
-	if e.code == apiPb.SchedulerResponseCode_Error {
-		err = &apiPb.SchedulerResponse_Error{
+	var err *apiPb.SchedulerSnapshot_Error
+	if e.code == apiPb.SchedulerCode_Error {
+		err = &apiPb.SchedulerSnapshot_Error{
 			Message: e.description,
 		}
 	}
 	return &apiPb.SchedulerResponse{
 		SchedulerId: e.schedulerID,
-		Code:        e.code,
-		Error:       err,
-		Type:        apiPb.SchedulerType_HttpJsonValue,
-		Meta: &apiPb.SchedulerResponse_MetaData{
-			StartTime: e.startTime,
-			EndTime:   e.endTime,
-			Value:     e.value,
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code:  e.code,
+			Error: err,
+			Type:  apiPb.SchedulerType_HttpJsonValue,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: e.startTime,
+				EndTime:   e.endTime,
+				Value:     e.value,
+			},
 		},
 	}
 }
@@ -59,7 +61,7 @@ func ExecHTTPValue(schedulerID string, timeout int32, config *scheduler_config_s
 			schedulerID,
 			startTime,
 			ptypes.TimestampNow(),
-			apiPb.SchedulerResponseCode_Error,
+			apiPb.SchedulerCode_Error,
 			err.Error(),
 			nil,
 		)
@@ -74,7 +76,7 @@ func ExecHTTPValue(schedulerID string, timeout int32, config *scheduler_config_s
 			schedulerID,
 			startTime,
 			ptypes.TimestampNow(),
-			apiPb.SchedulerResponseCode_OK,
+			apiPb.SchedulerCode_OK,
 			"",
 			nil,
 		)
@@ -87,7 +89,7 @@ func ExecHTTPValue(schedulerID string, timeout int32, config *scheduler_config_s
 				schedulerID,
 				startTime,
 				ptypes.TimestampNow(),
-				apiPb.SchedulerResponseCode_Error,
+				apiPb.SchedulerCode_Error,
 				valueNotExistErrorFn(value.Path).Error(),
 				nil,
 			)
@@ -137,7 +139,7 @@ func ExecHTTPValue(schedulerID string, timeout int32, config *scheduler_config_s
 			schedulerID,
 			startTime,
 			ptypes.TimestampNow(),
-			apiPb.SchedulerResponseCode_OK,
+			apiPb.SchedulerCode_OK,
 			"",
 			results[0],
 		)
@@ -147,7 +149,7 @@ func ExecHTTPValue(schedulerID string, timeout int32, config *scheduler_config_s
 		schedulerID,
 		startTime,
 		ptypes.TimestampNow(),
-		apiPb.SchedulerResponseCode_OK,
+		apiPb.SchedulerCode_OK,
 		"",
 		&structType.Value{
 			Kind: &structType.Value_ListValue{
@@ -159,7 +161,7 @@ func ExecHTTPValue(schedulerID string, timeout int32, config *scheduler_config_s
 	)
 }
 
-func newJSONHTTPError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string, value *structType.Value) CheckError {
+func newJSONHTTPError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerCode, description string, value *structType.Value) CheckError {
 	return &jsonHTTPError{
 		schedulerID: schedulerID,
 		startTime:   startTime,

@@ -144,21 +144,21 @@ func TestExecSiteMap(t *testing.T) {
 				URL:         "",
 				Concurrency: -1,
 			}, &siteMapStorage{}, &mockHttpTools{}, successFactory)
-			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerCode_OK, job.GetLogData().Snapshot.Code)
 		})
 		t.Run("Because ignore url", func(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
 				URL:         "",
 				Concurrency: 5,
 			}, &siteMapStorageIgnore{}, &mockHttpToolsWithError{}, successFactory)
-			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerCode_OK, job.GetLogData().Snapshot.Code)
 		})
 		t.Run("Because: empty sitemap", func(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
 				URL:         "",
 				Concurrency: 5,
 			}, &siteMapStorageEmptyIgnore{}, &mockHttpToolsWithError{}, successFactory)
-			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerCode_OK, job.GetLogData().Snapshot.Code)
 		})
 	})
 	t.Run("Should: return error", func(t *testing.T) {
@@ -167,21 +167,21 @@ func TestExecSiteMap(t *testing.T) {
 				URL:         "",
 				Concurrency: 5,
 			}, &siteMapStorage{}, &mockHttpToolsWithError{}, errorFactory)
-			assert.IsType(t, apiPb.SchedulerResponseCode_Error, job.GetLogData().Code)
+			assert.IsType(t, apiPb.SchedulerCode_Error, job.GetLogData().Snapshot.Code)
 		})
 		t.Run("Because return 500", func(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
 				URL:         "",
 				Concurrency: 5,
 			}, &siteMapStorage{}, &mockHttpToolsWithError{}, successFactory)
-			assert.IsType(t, apiPb.SchedulerResponseCode_Error, job.GetLogData().Code)
+			assert.IsType(t, apiPb.SchedulerCode_Error, job.GetLogData().Snapshot.Code)
 		})
 		t.Run("Because sitemapError", func(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
 				URL:         "",
 				Concurrency: 5,
 			}, &siteMapStorageError{}, &mockHttpTools{}, successFactory)
-			assert.IsType(t, apiPb.SchedulerResponseCode_Error, job.GetLogData().Code)
+			assert.IsType(t, apiPb.SchedulerCode_Error, job.GetLogData().Snapshot.Code)
 		})
 	})
 }

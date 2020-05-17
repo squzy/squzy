@@ -88,7 +88,7 @@ func TestExecGrpc(t *testing.T) {
 				Host:    "localhost",
 				Port:    9090,
 			}, grpc.WithInsecure())
-			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerCode_OK, job.GetLogData().Snapshot.Code)
 			grpcServer.Stop()
 		})
 
@@ -104,7 +104,7 @@ func TestExecGrpc(t *testing.T) {
 				Host:    "localhost",
 				Port:    9090,
 			}, grpc.WithInsecure())
-			assert.Equal(t, apiPb.SchedulerResponseCode_Error, job.GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerCode_Error, job.GetLogData().Snapshot.Code)
 			grpcServer.Stop()
 		})
 
@@ -120,18 +120,18 @@ func TestExecGrpc(t *testing.T) {
 				Host:    "localhost",
 				Port:    9090,
 			}, grpc.WithInsecure())
-			assert.Equal(t, errGrpcNotServing.Error(), job.GetLogData().Error.Message)
+			assert.Equal(t, errGrpcNotServing.Error(), job.GetLogData().Snapshot.Error.Message)
 			grpcServer.Stop()
 		})
 
 		t.Run("Should: Return errConnTimeoutError error", func(t *testing.T) {
 			job := ExecGrpc("", 0, &scheduler_config_storage.GrpcConfig{Service: "test", Host: "localhost", Port: 9091}, grpc.WithInsecure())
-			assert.Equal(t, errConnTimeoutError.Error(), job.GetLogData().Error.Message)
+			assert.Equal(t, errConnTimeoutError.Error(), job.GetLogData().Snapshot.Error.Message)
 		})
 
 		t.Run("Should: Return errWrongConnectConfigError error", func(t *testing.T) {
 			job := ExecGrpc("", 0, &scheduler_config_storage.GrpcConfig{Service: "test", Host: "localhost", Port: 9091}, grpc.WithInsecure(), grpc.WithBlock())
-			assert.Equal(t, errWrongConnectConfigError.Error(), job.GetLogData().Error.Message)
+			assert.Equal(t, errWrongConnectConfigError.Error(), job.GetLogData().Snapshot.Error.Message)
 		})
 	})
 }

@@ -69,20 +69,20 @@ func (h httpToolsMock) SendRequestWithStatusCode(req *http.Request, expectedCode
 func TestExecHttp(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := ExecHTTP("", 0, &scheduler_config_storage.HTTPConfig{Method: http.MethodGet, Headers: map[string]string{}, StatusCode: http.StatusOK}, &httpToolsMock{})
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
+		assert.Equal(t, apiPb.SchedulerCode_OK, s.GetLogData().Snapshot.Code)
 	})
 	t.Run("Should: return error because long request", func(t *testing.T) {
 		s := ExecHTTP("", 0, &scheduler_config_storage.HTTPConfig{Method: http.MethodGet, Headers: map[string]string{}, StatusCode: http.StatusOK}, &httpToolsMock{})
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
+		assert.Equal(t, apiPb.SchedulerCode_OK, s.GetLogData().Snapshot.Code)
 	})
 	t.Run("Should: not return error with headers", func(t *testing.T) {
 		s := ExecHTTP("", 0, &scheduler_config_storage.HTTPConfig{Method: http.MethodGet, Headers: map[string]string{
 			"test": "asf",
 		}, StatusCode: http.StatusOK}, &httpToolsMock{})
-		assert.Equal(t, apiPb.SchedulerResponseCode_OK, s.GetLogData().Code)
+		assert.Equal(t, apiPb.SchedulerCode_OK, s.GetLogData().Snapshot.Code)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
 		s := ExecHTTP("", 0, &scheduler_config_storage.HTTPConfig{Method: http.MethodGet, Headers: map[string]string{}, StatusCode: http.StatusOK}, &httpToolsMockError{})
-		assert.Equal(t, apiPb.SchedulerResponseCode_Error, s.GetLogData().Code)
+		assert.Equal(t, apiPb.SchedulerCode_Error, s.GetLogData().Snapshot.Code)
 	})
 }

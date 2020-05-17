@@ -18,7 +18,7 @@ func TestExecTcp(t *testing.T) {
 				Host: "localhost",
 				Port: 10002,
 			})
-			assert.Equal(t, errWrongConnectConfigError.Error(), job.GetLogData().Error.Message)
+			assert.Equal(t, errWrongConnectConfigError.Error(), job.GetLogData().Snapshot.Error.Message)
 		})
 		t.Run("Should: return nil", func(t *testing.T) {
 			server, err := net.Listen("tcp", "localhost:10003")
@@ -31,7 +31,7 @@ func TestExecTcp(t *testing.T) {
 				Host: "localhost",
 				Port: 10003,
 			})
-			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerCode_OK, job.GetLogData().Snapshot.Code)
 		})
 		t.Run("Should: return error because timeout", func(t *testing.T) {
 			go func() {
@@ -44,7 +44,7 @@ func TestExecTcp(t *testing.T) {
 				Host: "localhost",
 				Port: 10004,
 			})
-			assert.Equal(t, apiPb.SchedulerResponseCode_Error, job.GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerCode_Error, job.GetLogData().Snapshot.Code)
 		})
 	})
 }

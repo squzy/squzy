@@ -12,6 +12,8 @@ type Handlers interface {
 	GetAgentByID(ctx context.Context, id string) (*apiPb.AgentItem, error)
 	GetSchedulerList(ctx context.Context) ([]*apiPb.Scheduler, error)
 	GetSchedulerByID(ctx context.Context, id string) (*apiPb.Scheduler, error)
+	GetSchedulerHistoryByID(ctx context.Context, rq *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error)
+	GetAgentHistoryByID(ctx context.Context, rq *apiPb.GetAgentInformationRequest) (*apiPb.GetAgentInformationResponse, error)
 	RunScheduler(ctx context.Context, id string) error
 	StopScheduler(ctx context.Context, id string) error
 	RemoveScheduler(ctx context.Context, id string) error
@@ -21,6 +23,27 @@ type Handlers interface {
 type handlers struct {
 	agentClient      apiPb.AgentServerClient
 	monitoringClient apiPb.SchedulersExecutorClient
+	storageClient    apiPb.StorageClient
+}
+
+func (h *handlers) GetSchedulerHistoryByID(ctx context.Context, rq *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
+	c, cancel := helpers.TimeoutContext(ctx, 0)
+	defer cancel()
+	r, err := h.storageClient.GetSchedulerInformation(c, rq)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func (h *handlers) GetAgentHistoryByID(ctx context.Context, rq *apiPb.GetAgentInformationRequest) (*apiPb.GetAgentInformationResponse, error) {
+	c, cancel := helpers.TimeoutContext(ctx, 0)
+	defer cancel()
+	r, err := h.storageClient.GetAgentInformation(c, rq)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
 }
 
 func (h *handlers) RunScheduler(ctx context.Context, id string) error {

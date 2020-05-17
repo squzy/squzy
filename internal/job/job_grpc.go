@@ -21,30 +21,32 @@ type grpcError struct {
 	schedulerID string
 	startTime   *timestamp.Timestamp
 	endTime     *timestamp.Timestamp
-	code        apiPb.SchedulerResponseCode
+	code        apiPb.SchedulerCode
 	description string
 }
 
 func (s *grpcError) GetLogData() *apiPb.SchedulerResponse {
-	var err *apiPb.SchedulerResponse_Error
-	if s.code == apiPb.SchedulerResponseCode_Error {
-		err = &apiPb.SchedulerResponse_Error{
+	var err *apiPb.SchedulerSnapshot_Error
+	if s.code == apiPb.SchedulerCode_Error {
+		err = &apiPb.SchedulerSnapshot_Error{
 			Message: s.description,
 		}
 	}
 	return &apiPb.SchedulerResponse{
 		SchedulerId: s.schedulerID,
-		Code:        s.code,
-		Error:       err,
-		Type:        apiPb.SchedulerType_Grpc,
-		Meta: &apiPb.SchedulerResponse_MetaData{
-			StartTime: s.startTime,
-			EndTime:   s.endTime,
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code:  s.code,
+			Error: err,
+			Type:  apiPb.SchedulerType_Grpc,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: s.startTime,
+				EndTime:   s.endTime,
+			},
 		},
 	}
 }
 
-func newGrpcError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string) CheckError {
+func newGrpcError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerCode, description string) CheckError {
 	return &grpcError{
 		schedulerID: schedulerID,
 		startTime:   startTime,
@@ -64,7 +66,7 @@ func ExecGrpc(schedulerID string, timeout int32, config *scheduler_config_storag
 	conn, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%d", config.Host, config.Port), opts...)
 
 	if err != nil {
-		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, errWrongConnectConfigError.Error())
+		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_Error, errWrongConnectConfigError.Error())
 	}
 
 	defer func() {
@@ -80,11 +82,11 @@ func ExecGrpc(schedulerID string, timeout int32, config *scheduler_config_storag
 	res, err := client.Check(metadata.NewOutgoingContext(ctx, md), &health_check.HealthCheckRequest{Service: config.Service})
 
 	if err != nil {
-		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, errConnTimeoutError.Error())
+		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_Error, errConnTimeoutError.Error())
 	}
 
 	if res.Status != health_check.HealthCheckResponse_SERVING {
-		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, errGrpcNotServing.Error())
+		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_Error, errGrpcNotServing.Error())
 	}
-	return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "")
+	return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_OK, "")
 }

@@ -23,25 +23,25 @@ type memory struct {
 func (m *memory) Write(log job.CheckError) error {
 	logData := log.GetLogData()
 	logID := uuid.New().String()
-	startTime, err := ptypes.Timestamp(logData.Meta.StartTime)
+	startTime, err := ptypes.Timestamp(logData.Snapshot.Meta.StartTime)
 
 	if err != nil {
 		return err
 	}
 
-	endTime, err := ptypes.Timestamp(logData.Meta.EndTime)
+	endTime, err := ptypes.Timestamp(logData.Snapshot.Meta.EndTime)
 
 	if err != nil {
 		return err
 	}
 
-	if logData.Code == apiPb.SchedulerResponseCode_OK {
+	if logData.Snapshot.Code == apiPb.SchedulerCode_OK {
 		m.infoLogger.Println(fmt.Sprintf(
 			"SchedulerId: %s, Value: %s, LogId: %s, Status: Ok, Type: %s, startTime: %s, endTime: %s, duration: %s",
 			logData.SchedulerId,
-			logData.Meta.Value,
+			logData.Snapshot.Meta.Value,
 			logID,
-			logData.Type.String(),
+			logData.Snapshot.Type.String(),
 			startTime.Format(time.RFC3339),
 			endTime.Format(time.RFC3339),
 			fmt.Sprintf("%f", endTime.Sub(startTime).Seconds()),
@@ -52,8 +52,8 @@ func (m *memory) Write(log job.CheckError) error {
 		"SchedulerId: %s, LogId: %s, Error msg: %s, Type: %s, startTime: %s, endTime: %s, duration: %s",
 		logData.SchedulerId,
 		logID,
-		logData.Error.Message,
-		logData.Type.String(),
+		logData.Snapshot.Error.Message,
+		logData.Snapshot.Type.String(),
 		startTime.Format(time.RFC3339),
 		endTime.Format(time.RFC3339),
 		fmt.Sprintf("%f", endTime.Sub(startTime).Seconds()),
