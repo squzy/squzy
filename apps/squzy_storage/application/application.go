@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jinzhu/gorm"
@@ -71,26 +72,21 @@ func (s *service) GetAgentInformation(ctx context.Context, request *apiPb.GetAge
 	switch request.GetType() {
 	case apiPb.TypeAgentStat_ALL:
 		res, count, err = s.database.GetStatRequest(request.GetAgentId(), request.GetPagination(), request.GetTimeRange())
-		err = wrapError(err)
 	case apiPb.TypeAgentStat_CPU:
 		res, count, err = s.database.GetCpuInfo(request.GetAgentId(), request.GetPagination(), request.GetTimeRange())
-		err = wrapError(err)
 	case apiPb.TypeAgentStat_MEMORY:
 		res, count, err = s.database.GetMemoryInfo(request.GetAgentId(), request.GetPagination(), request.GetTimeRange())
-		err = wrapError(err)
 	case apiPb.TypeAgentStat_DISK:
 		res, count, err = s.database.GetDiskInfo(request.GetAgentId(), request.GetPagination(), request.GetTimeRange())
-		err = wrapError(err)
 	case apiPb.TypeAgentStat_NET:
 		res, count, err = s.database.GetNetInfo(request.GetAgentId(), request.GetPagination(), request.GetTimeRange())
-		err = wrapError(err)
 	default:
-		err = grpcStatus.Errorf(codes.InvalidArgument, "Invalid type")
+		err = errors.New("Invalid type")
 	}
 	return &apiPb.GetAgentInformationResponse{
 		Stats:                res,
 		Count:                count,
-	}, err
+	}, wrapError(err)
 }
 
 func wrapError(err error) error {

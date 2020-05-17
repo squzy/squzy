@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/golang/protobuf/ptypes"
 	_struct "github.com/golang/protobuf/ptypes/struct"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -46,6 +47,15 @@ type StatRequest struct {
 	NetInfo    []*NetInfo  `gorm:"netInfo"`
 	Time       time.Time   `gorm:"time"`
 }
+
+
+const (
+	cpuInfoKey = "cpuInfo"
+	memoryInfoKey = "memoryInfo"
+	diskInfoKey = "diskInfo"
+	netInfoKey = "netInfo"
+)
+
 
 type CpuInfo struct {
 	gorm.Model
@@ -175,29 +185,81 @@ func (p *postgres) InsertStatRequest(data *apiPb.Metric) error {
 }
 
 func (p *postgres) GetStatRequest(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	var statRequest []*StatRequest
-	if err := p.db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).First(statRequest).Error; err != nil {
+	var statRequests []*StatRequest
+	if err := p.db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).Find(&statRequests).Error; err != nil {
 		fmt.Println(err.Error()) //TODO: log?
 		return nil, -1, errorDataBase
 	}
 	count := int32(-1)
 	p.db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).Count(count)
-	res, err := ConvertFromPostgressStatRequests(statRequest)
+	res, err := ConvertFromPostgressStatRequests(statRequests)
 	return res, count, err
 }
 
 func (p *postgres) GetCpuInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, 0, nil //TODO
+	return p.getSpecialRecords(id, pagination, filter, cpuInfoKey)
 }
 
 func (p *postgres) GetMemoryInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, 0, nil //TODO
+	return p.getSpecialRecords(id, pagination, filter, memoryInfoKey)
 }
 
 func (p *postgres) GetDiskInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, 0, nil //TODO
+	return p.getSpecialRecords(id, pagination, filter, diskInfoKey)
 }
 
 func (p *postgres) GetNetInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, 0, nil //TODO
+	return p.getSpecialRecords(id, pagination, filter, netInfoKey)
+}
+
+func (p *postgres) getSpecialRecords(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter, key string) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+	timeFrom, timeTo, err := getTime(filter)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	count := int32(-1)
+	if err := p.db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).Select(key).Count(count).Error; err != nil {
+		return nil, -1, err
+	}
+
+	offset := int32(0)
+	limit := count
+	if pagination != nil {
+		offset = pagination.GetLimit() * pagination.GetPage()
+		limit = pagination.GetLimit()
+	}
+
+	//TODO: test if it works
+	var statRequests []*StatRequest
+	if err := p.db.Table(dbStatRequestCollection).
+		Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).
+		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
+		Select("%s, time", key).
+		Order("time").
+		Offset(offset).
+		Limit(limit).
+		Find(&statRequests).Error;
+		err != nil {
+
+		fmt.Println(err.Error()) //TODO: log?
+		return nil, -1, errorDataBase
+	}
+	res, err := ConvertFromPostgressStatRequests(statRequests)
+	return res, count, err
+}
+
+func getTime(filter *apiPb.TimeFilter) (time.Time, time.Time, error) {
+	timeFrom := time.Unix(0, 0)
+	timeTo := time.Now()
+	var err error
+	if filter != nil {
+		if filter.GetFrom() != nil {
+			timeFrom, err = ptypes.Timestamp(filter.From)
+		}
+		if filter.GetTo() != nil {
+			timeFrom, err = ptypes.Timestamp(filter.From)
+		}
+	}
+	return timeFrom, timeTo, err
 }
