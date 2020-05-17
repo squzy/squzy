@@ -9,7 +9,6 @@ import (
 var (
 	errNotExistError               = errors.New("SCHEDULER_NOT_EXIST")
 	errStorageKeyAlreadyExistError = errors.New("STORAGE_KEY_ALREADY_EXIST")
-	errStorageKeyNotExistError     = errors.New("STORAGE_KEY_NOT_EXIST")
 )
 
 type SchedulerStorage interface {
@@ -51,7 +50,7 @@ func (s *storage) Remove(id string) error {
 	defer s.mutex.Unlock()
 	_, exist := s.kv[id]
 	if !exist {
-		return errStorageKeyNotExistError
+		return nil
 	}
 	// make sure that observer stop before delete
 	s.kv[id].Stop()

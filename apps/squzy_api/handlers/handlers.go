@@ -127,7 +127,7 @@ func (h *handlers) GetAgentByID(ctx context.Context, id string) (*apiPb.AgentIte
 func New(
 	agentClient apiPb.AgentServerClient,
 	monitoringClient apiPb.SchedulersExecutorClient,
-	storageClient    apiPb.StorageClient,
+	storageClient apiPb.StorageClient,
 ) Handlers {
 	return &handlers{
 		agentClient:      agentClient,

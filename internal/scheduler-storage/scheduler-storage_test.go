@@ -77,12 +77,12 @@ func TestStorage_Set(t *testing.T) {
 }
 
 func TestStorage_Remove(t *testing.T) {
-	t.Run("Should: return error errStorageKeyNotExistError", func(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
 		s := New()
 		err := s.Set(&schedulerMock{})
 		assert.Equal(t, nil, err)
 		err = s.Remove("0")
-		assert.Equal(t, errStorageKeyNotExistError, err)
+		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := New()
