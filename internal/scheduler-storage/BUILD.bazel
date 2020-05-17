@@ -6,6 +6,7 @@ go_library(
      importpath = "squzy/internal/scheduler-storage",
      visibility = ["//visibility:public"],
      deps = [
+     	"@org_mongodb_go_mongo_driver//bson/primitive:go_default_library",
         "//internal/scheduler:go_default_library",
      ],
 
