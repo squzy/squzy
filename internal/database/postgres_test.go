@@ -134,10 +134,14 @@ func (s *Suite) Test_InsertStatRequest() {
 			Swap: &apiPb.MemoryInfo_Memory{},
 		},
 		DiskInfo: &apiPb.DiskInfo{
-			Disks: map[string]*apiPb.DiskInfo_Disk{},
+			Disks: map[string]*apiPb.DiskInfo_Disk{
+				"":{},
+			},
 		},
 		NetInfo: &apiPb.NetInfo{
-			Interfaces: map[string]*apiPb.NetInfo_Interface{},
+			Interfaces: map[string]*apiPb.NetInfo_Interface{
+				"":{},
+			},
 		},
 		Time: ptypes.TimestampNow(),
 	})
