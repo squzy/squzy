@@ -1,0 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+     name = "go_default_library",
+     srcs = ["router.go"],
+     importpath = "squzy/apps/squzy_api/router",
+     visibility = ["//visibility:public"],
+     deps = [
+         "//internal/helpers:go_default_library",
+         "//apps/squzy_api/handlers:go_default_library",
+         "@com_github_golang_protobuf//ptypes:go_default_library",
+         "@com_github_gin_gonic_gin//:go_default_library",
+         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
+     ]
+)
+
+go_test(
+    name = "go_default_test",
+    embed = [":go_default_library"],
+    srcs = [
+        "router_test.go",
+    ],
+    deps =[
+    	"@org_golang_google_grpc//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library"
+    ]
+)

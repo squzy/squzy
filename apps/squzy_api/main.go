@@ -27,9 +27,14 @@ func main() {
 		log.Fatal(err)
 	}
 	monitoringClient := apiPb.NewSchedulersExecutorClient(monitoringConn)
+	storageConn, err := tools.GetConnection(cfg.GetMonitoringServerAddress(), 0, grpc.WithInsecure())
+	if err != nil {
+		log.Fatal(err)
+	}
+	storageClient := apiPb.NewStorageClient(storageConn)
 	log.Fatal(
 		router.New(
-			handlers.New(agentServerClient, monitoringClient),
+			handlers.New(agentServerClient, monitoringClient, storageClient),
 		).GetEngine().Run(fmt.Sprintf(":%d", cfg.GetPort())),
 	)
 }
