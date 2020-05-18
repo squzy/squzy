@@ -3,43 +3,21 @@ package application
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/jinzhu/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc/codes"
 	grpcStatus "google.golang.org/grpc/status"
-	"os"
-	"squzy/apps/squzy_storage/config"
 	"squzy/internal/database"
 )
 
 type service struct {
 	database database.Database
-	config   config.Config
 }
 
-func NewService(cnfg config.Config) (apiPb.StorageServer, error) {
-	db, err := database.New(func() (db *gorm.DB, e error) {
-		return gorm.Open(
-			"postgres",
-			fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s connect_timeout=10 sslmode=disable",
-				cnfg.GetDbHost(),
-				cnfg.GetDbPort(),
-				cnfg.GetDbName(),
-				cnfg.GetDbUser(),
-				cnfg.GetDbPassword(),
-			))
-	})
-	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf("Error connect to database"))
-		//TODO: logger
-		return nil, err
-	}
+func NewService(db database.Database) apiPb.StorageServer {
 	return &service{
 		database: db,
-		config:   cnfg,
-	}, nil
+	}
 }
 
 func (s *service) SendResponseFromScheduler(ctx context.Context, request *apiPb.SchedulerResponse) (*empty.Empty, error) {
