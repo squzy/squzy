@@ -257,7 +257,7 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"interval": 10,
 							"timeout": 10,
-							"type": 0,
+							"type": 1,
 							"tcpConfig": {
 								"host": "GET",
 								"port": 32
@@ -275,7 +275,7 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"interval": 10,
 							"timeout": 10,
-							"type": 1,
+							"type": 2,
 							"grpcConfig": {
 								"host": "GET",
 								"port": 3
@@ -293,7 +293,7 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"interval": 10,
 							"timeout": 10,
-							"type": 2,
+							"type": 3,
 							"httpConfig": {
 								"method": "GET",
 								"url": "https://google.ru"
@@ -311,7 +311,7 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"interval": 10,
 							"timeout": 10,
-							"type": 3
+							"type": 4
 						}
 					`,
 				)),
@@ -325,7 +325,7 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"interval": 10,
 							"timeout": 10,
-							"type": 4
+							"type": 5
 						}
 					`,
 				)),
@@ -422,7 +422,7 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"interval": 10,
 							"timeout": 10,
-							"type": 0,
+							"type": 1,
 							"tcpConfig": {
 								"host": "GET",
 								"port": 32
@@ -440,7 +440,7 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"interval": 10,
 							"timeout": 10,
-							"type": 1,
+							"type": 2,
 							"grpcConfig": {
 								"host": "GET",
 								"port": 3
@@ -458,7 +458,7 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"interval": 10,
 							"timeout": 10,
-							"type": 2,
+							"type": 3,
 							"httpConfig": {
 								"method": "GET",
 								"url": "https://google.ru"
@@ -476,7 +476,7 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"interval": 10,
 							"timeout": 10,
-							"type": 3,
+							"type": 4,
 							"siteMapConfig": {}
 						}
 					`,
@@ -491,7 +491,7 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"interval": 10,
 							"timeout": 10,
-							"type": 4,
+							"type": 5,
 							"httpValueConfig": {}
 						}
 					`,

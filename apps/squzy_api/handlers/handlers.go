@@ -87,7 +87,7 @@ func (h *handlers) GetSchedulerList(ctx context.Context) ([]*apiPb.Scheduler, er
 	if err != nil {
 		return nil, err
 	}
-	return list.List, nil
+	return list.Lists, nil
 }
 
 func (h *handlers) GetSchedulerByID(ctx context.Context, id string) (*apiPb.Scheduler, error) {

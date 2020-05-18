@@ -145,7 +145,7 @@ func (r *router) GetEngine() *gin.Engine {
 				var addReq *apiPb.AddRequest
 
 				switch request.Type {
-				case apiPb.SchedulerType_Tcp:
+				case apiPb.SchedulerType_TCP:
 					if request.TCPConfig == nil {
 						errWrap(context, http.StatusUnprocessableEntity, errMissingConfig)
 						return
@@ -158,7 +158,7 @@ func (r *router) GetEngine() *gin.Engine {
 						},
 					}
 
-				case apiPb.SchedulerType_Grpc:
+				case apiPb.SchedulerType_GRPC:
 					if request.GRPCConfig == nil {
 						errWrap(context, http.StatusUnprocessableEntity, errMissingConfig)
 						return
@@ -171,7 +171,7 @@ func (r *router) GetEngine() *gin.Engine {
 						},
 					}
 
-				case apiPb.SchedulerType_Http:
+				case apiPb.SchedulerType_HTTP:
 					if request.HTTPConfig == nil {
 						errWrap(context, http.StatusUnprocessableEntity, errMissingConfig)
 						return
@@ -184,7 +184,7 @@ func (r *router) GetEngine() *gin.Engine {
 						},
 					}
 
-				case apiPb.SchedulerType_SiteMap:
+				case apiPb.SchedulerType_SITE_MAP:
 					if request.SiteMapConfig == nil {
 						errWrap(context, http.StatusUnprocessableEntity, errMissingConfig)
 						return
@@ -197,7 +197,7 @@ func (r *router) GetEngine() *gin.Engine {
 						},
 					}
 
-				case apiPb.SchedulerType_HttpJsonValue:
+				case apiPb.SchedulerType_HTTP_JSON_VALUE:
 					if request.HTTPValueConfig == nil {
 						errWrap(context, http.StatusUnprocessableEntity, errMissingConfig)
 						return

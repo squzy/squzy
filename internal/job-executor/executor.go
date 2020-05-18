@@ -59,19 +59,19 @@ func (e *executor) Execute(schedulerID primitive.ObjectID) {
 	}
 	id := schedulerID.Hex()
 	switch config.Type {
-	case apiPb.SchedulerType_Tcp:
+	case apiPb.SchedulerType_TCP:
 		_ = e.externalStorage.Write(e.execTCP(id, config.Timeout, config.TCPConfig))
 		// @TODO logger
-	case apiPb.SchedulerType_Grpc:
+	case apiPb.SchedulerType_GRPC:
 		_ = e.externalStorage.Write(e.execGrpc(id, config.Timeout, config.GrpcConfig, grpc.WithInsecure()))
 		// @TODO logger
-	case apiPb.SchedulerType_Http:
+	case apiPb.SchedulerType_HTTP:
 		_ = e.externalStorage.Write(e.execHTTP(id, config.Timeout, config.HTTPConfig, e.httpTool))
 		// @TODO logger
-	case apiPb.SchedulerType_SiteMap:
+	case apiPb.SchedulerType_SITE_MAP:
 		_ = e.externalStorage.Write(e.execSiteMap(id, config.Timeout, config.SiteMapConfig, e.siteMapStorage, e.httpTool, e.semaphoreFactoryFn))
 		// @TODO logger
-	case apiPb.SchedulerType_HttpJsonValue:
+	case apiPb.SchedulerType_HTTP_JSON_VALUE:
 		_ = e.externalStorage.Write(e.execHTTPValue(id, config.Timeout, config.HTTPValueConfig, e.httpTool))
 		// @TODO logger
 	default:

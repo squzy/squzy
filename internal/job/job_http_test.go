@@ -83,6 +83,6 @@ func TestExecHttp(t *testing.T) {
 	})
 	t.Run("Should: return error", func(t *testing.T) {
 		s := ExecHTTP("", 0, &scheduler_config_storage.HTTPConfig{Method: http.MethodGet, Headers: map[string]string{}, StatusCode: http.StatusOK}, &httpToolsMockError{})
-		assert.Equal(t, apiPb.SchedulerCode_Error, s.GetLogData().Snapshot.Code)
+		assert.Equal(t, apiPb.SchedulerCode_ERROR, s.GetLogData().Snapshot.Code)
 	})
 }

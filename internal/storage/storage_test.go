@@ -51,7 +51,7 @@ type mockError struct {
 func (m mockError) GetLogData() *apiPb.SchedulerResponse {
 	return &apiPb.SchedulerResponse{
 		Snapshot: &apiPb.SchedulerSnapshot{
-			Code: apiPb.SchedulerCode_Error,
+			Code: apiPb.SchedulerCode_ERROR,
 			Error: &apiPb.SchedulerSnapshot_Error{
 				Message: "",
 			},

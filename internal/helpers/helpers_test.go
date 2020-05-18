@@ -43,12 +43,12 @@ func TestSelectorsToDb(t *testing.T) {
 	t.Run("Should: convert correct", func(t *testing.T) {
 		assert.EqualValues(t, []*scheduler_config_storage.Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_String,
+				Type: apiPb.HttpJsonValueConfig_STRING,
 				Path: "select",
 			},
 		}, SelectorsToDb([]*apiPb.HttpJsonValueConfig_Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_String,
+				Type: apiPb.HttpJsonValueConfig_STRING,
 				Path: "select",
 			},
 		}))
@@ -59,12 +59,12 @@ func TestSelectorsToProto(t *testing.T) {
 	t.Run("Should: convert correct", func(t *testing.T) {
 		assert.EqualValues(t, []*apiPb.HttpJsonValueConfig_Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_String,
+				Type: apiPb.HttpJsonValueConfig_STRING,
 				Path: "select",
 			},
 		}, SelectorsToProto([]*scheduler_config_storage.Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_String,
+				Type: apiPb.HttpJsonValueConfig_STRING,
 				Path: "select",
 			},
 		}))

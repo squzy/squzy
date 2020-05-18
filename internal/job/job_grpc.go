@@ -27,7 +27,7 @@ type grpcError struct {
 
 func (s *grpcError) GetLogData() *apiPb.SchedulerResponse {
 	var err *apiPb.SchedulerSnapshot_Error
-	if s.code == apiPb.SchedulerCode_Error {
+	if s.code == apiPb.SchedulerCode_ERROR {
 		err = &apiPb.SchedulerSnapshot_Error{
 			Message: s.description,
 		}
@@ -37,7 +37,7 @@ func (s *grpcError) GetLogData() *apiPb.SchedulerResponse {
 		Snapshot: &apiPb.SchedulerSnapshot{
 			Code:  s.code,
 			Error: err,
-			Type:  apiPb.SchedulerType_Grpc,
+			Type:  apiPb.SchedulerType_GRPC,
 			Meta: &apiPb.SchedulerSnapshot_MetaData{
 				StartTime: s.startTime,
 				EndTime:   s.endTime,
@@ -66,7 +66,7 @@ func ExecGrpc(schedulerID string, timeout int32, config *scheduler_config_storag
 	conn, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%d", config.Host, config.Port), opts...)
 
 	if err != nil {
-		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_Error, errWrongConnectConfigError.Error())
+		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, errWrongConnectConfigError.Error())
 	}
 
 	defer func() {
@@ -82,11 +82,11 @@ func ExecGrpc(schedulerID string, timeout int32, config *scheduler_config_storag
 	res, err := client.Check(metadata.NewOutgoingContext(ctx, md), &health_check.HealthCheckRequest{Service: config.Service})
 
 	if err != nil {
-		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_Error, errConnTimeoutError.Error())
+		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, errConnTimeoutError.Error())
 	}
 
 	if res.Status != health_check.HealthCheckResponse_SERVING {
-		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_Error, errGrpcNotServing.Error())
+		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, errGrpcNotServing.Error())
 	}
 	return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_OK, "")
 }

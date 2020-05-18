@@ -15,7 +15,7 @@ import (
 var (
 	successTcpConfig = &scheduler_config_storage.SchedulerConfig{
 		ID:       primitive.ObjectID{},
-		Type:     apiPb.SchedulerType_Tcp,
+		Type:     apiPb.SchedulerType_TCP,
 		Status:   0,
 		Interval: 0,
 		Timeout:  0,
@@ -27,7 +27,7 @@ var (
 
 	successHttpConfig = &scheduler_config_storage.SchedulerConfig{
 		ID:       primitive.NewObjectID(),
-		Type:     apiPb.SchedulerType_Http,
+		Type:     apiPb.SchedulerType_HTTP,
 		Status:   0,
 		Interval: 0,
 		Timeout:  0,
@@ -41,7 +41,7 @@ var (
 
 	successHttpValueConfig = &scheduler_config_storage.SchedulerConfig{
 		ID:       primitive.NewObjectID(),
-		Type:     apiPb.SchedulerType_HttpJsonValue,
+		Type:     apiPb.SchedulerType_HTTP_JSON_VALUE,
 		Status:   0,
 		Interval: 0,
 		Timeout:  0,
@@ -55,7 +55,7 @@ var (
 
 	successGrpcConfig = &scheduler_config_storage.SchedulerConfig{
 		ID:       primitive.NewObjectID(),
-		Type:     apiPb.SchedulerType_Grpc,
+		Type:     apiPb.SchedulerType_GRPC,
 		Status:   0,
 		Interval: 0,
 		Timeout:  0,
@@ -68,7 +68,7 @@ var (
 
 	successSiteMapConfig = &scheduler_config_storage.SchedulerConfig{
 		ID:       primitive.NewObjectID(),
-		Type:     apiPb.SchedulerType_SiteMap,
+		Type:     apiPb.SchedulerType_SITE_MAP,
 		Status:   0,
 		Interval: 0,
 		Timeout:  0,
@@ -96,7 +96,7 @@ var (
 	}
 
 	rqMap = map[apiPb.SchedulerType]*apiPb.AddRequest{
-		apiPb.SchedulerType_Tcp: {
+		apiPb.SchedulerType_TCP: {
 			Interval: 10,
 			Timeout:  0,
 			Config: &apiPb.AddRequest_Tcp{
@@ -109,7 +109,7 @@ var (
 				},
 			},
 		},
-		apiPb.SchedulerType_Http: {
+		apiPb.SchedulerType_HTTP: {
 			Interval: 10,
 			Timeout:  0,
 			Config: &apiPb.AddRequest_Http{
@@ -121,7 +121,7 @@ var (
 				},
 			},
 		},
-		apiPb.SchedulerType_HttpJsonValue: {
+		apiPb.SchedulerType_HTTP_JSON_VALUE: {
 			Interval: 10,
 			Timeout:  0,
 			Config: &apiPb.AddRequest_HttpValue{
@@ -133,7 +133,7 @@ var (
 				},
 			},
 		},
-		apiPb.SchedulerType_SiteMap: {
+		apiPb.SchedulerType_SITE_MAP: {
 			Interval: 10,
 			Timeout:  0,
 			Config: &apiPb.AddRequest_Sitemap{
@@ -143,7 +143,7 @@ var (
 				},
 			},
 		},
-		apiPb.SchedulerType_Grpc: {
+		apiPb.SchedulerType_GRPC: {
 			Interval: 10,
 			Timeout:  0,
 			Config: &apiPb.AddRequest_Grpc{
@@ -500,37 +500,37 @@ func TestServer_Add(t *testing.T) {
 	})
 	t.Run("Should: return error because cant add to DB", func(t *testing.T) {
 		s := New(&mockStorageOk{}, nil, &mockConfigStorageErrorSingle{})
-		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_Tcp])
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_TCP])
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because cant add to in memory", func(t *testing.T) {
 		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{})
-		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_Tcp])
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_TCP])
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: add tcp check without error", func(t *testing.T) {
 		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
-		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_Tcp])
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_TCP])
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: add grcp check without error", func(t *testing.T) {
 		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
-		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_Grpc])
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_GRPC])
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: add sitemap check without error", func(t *testing.T) {
 		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
-		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_SiteMap])
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_SITE_MAP])
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: add httpValue check without error", func(t *testing.T) {
 		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
-		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_HttpJsonValue])
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_HTTP_JSON_VALUE])
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: add http check without error", func(t *testing.T) {
 		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
-		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_Http])
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_HTTP])
 		assert.Equal(t, nil, err)
 	})
 }

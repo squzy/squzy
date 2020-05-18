@@ -30,7 +30,7 @@ var (
 
 func (e *jsonHTTPError) GetLogData() *apiPb.SchedulerResponse {
 	var err *apiPb.SchedulerSnapshot_Error
-	if e.code == apiPb.SchedulerCode_Error {
+	if e.code == apiPb.SchedulerCode_ERROR {
 		err = &apiPb.SchedulerSnapshot_Error{
 			Message: e.description,
 		}
@@ -40,7 +40,7 @@ func (e *jsonHTTPError) GetLogData() *apiPb.SchedulerResponse {
 		Snapshot: &apiPb.SchedulerSnapshot{
 			Code:  e.code,
 			Error: err,
-			Type:  apiPb.SchedulerType_HttpJsonValue,
+			Type:  apiPb.SchedulerType_HTTP_JSON_VALUE,
 			Meta: &apiPb.SchedulerSnapshot_MetaData{
 				StartTime: e.startTime,
 				EndTime:   e.endTime,
@@ -61,7 +61,7 @@ func ExecHTTPValue(schedulerID string, timeout int32, config *scheduler_config_s
 			schedulerID,
 			startTime,
 			ptypes.TimestampNow(),
-			apiPb.SchedulerCode_Error,
+			apiPb.SchedulerCode_ERROR,
 			err.Error(),
 			nil,
 		)
@@ -89,43 +89,43 @@ func ExecHTTPValue(schedulerID string, timeout int32, config *scheduler_config_s
 				schedulerID,
 				startTime,
 				ptypes.TimestampNow(),
-				apiPb.SchedulerCode_Error,
+				apiPb.SchedulerCode_ERROR,
 				valueNotExistErrorFn(value.Path).Error(),
 				nil,
 			)
 		}
 		switch value.Type {
-		case apiPb.HttpJsonValueConfig_String:
+		case apiPb.HttpJsonValueConfig_STRING:
 			results = append(results, &structType.Value{
 				Kind: &structType.Value_StringValue{
 					StringValue: res.String(),
 				},
 			})
-		case apiPb.HttpJsonValueConfig_Bool:
+		case apiPb.HttpJsonValueConfig_BOOL:
 			results = append(results, &structType.Value{
 				Kind: &structType.Value_BoolValue{
 					BoolValue: res.Bool(),
 				},
 			})
-		case apiPb.HttpJsonValueConfig_Number:
+		case apiPb.HttpJsonValueConfig_NUMBER:
 			results = append(results, &structType.Value{
 				Kind: &structType.Value_NumberValue{
 					NumberValue: res.Float(),
 				},
 			})
-		case apiPb.HttpJsonValueConfig_Time:
+		case apiPb.HttpJsonValueConfig_TIME:
 			results = append(results, &structType.Value{
 				Kind: &structType.Value_StringValue{
 					StringValue: res.Time().Format(time.RFC3339),
 				},
 			})
-		case apiPb.HttpJsonValueConfig_Any:
+		case apiPb.HttpJsonValueConfig_ANY:
 			results = append(results, &structType.Value{
 				Kind: &structType.Value_StringValue{
 					StringValue: fmt.Sprintf("%v", res.Value()),
 				},
 			})
-		case apiPb.HttpJsonValueConfig_Raw:
+		case apiPb.HttpJsonValueConfig_RAW:
 			results = append(results, &structType.Value{
 				Kind: &structType.Value_StringValue{
 					StringValue: res.Raw,

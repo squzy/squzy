@@ -19,7 +19,7 @@ type httpError struct {
 
 func (e *httpError) GetLogData() *apiPb.SchedulerResponse {
 	var err *apiPb.SchedulerSnapshot_Error
-	if e.code == apiPb.SchedulerCode_Error {
+	if e.code == apiPb.SchedulerCode_ERROR {
 		err = &apiPb.SchedulerSnapshot_Error{
 			Message: e.description,
 		}
@@ -29,7 +29,7 @@ func (e *httpError) GetLogData() *apiPb.SchedulerResponse {
 		Snapshot: &apiPb.SchedulerSnapshot{
 			Code:  e.code,
 			Error: err,
-			Type:  apiPb.SchedulerType_Http,
+			Type:  apiPb.SchedulerType_HTTP,
 			Meta: &apiPb.SchedulerSnapshot_MetaData{
 				StartTime: e.startTime,
 				EndTime:   e.endTime,
@@ -59,7 +59,7 @@ func ExecHTTP(schedulerID string, timeout int32, config *scheduler_config_storag
 			schedulerID,
 			startTime,
 			ptypes.TimestampNow(),
-			apiPb.SchedulerCode_Error,
+			apiPb.SchedulerCode_ERROR,
 			err.Error(),
 		)
 	}

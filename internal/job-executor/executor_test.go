@@ -161,7 +161,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			&configStorageMockOk{
-				apiPb.SchedulerType_Tcp,
+				apiPb.SchedulerType_TCP,
 			},
 			fnMock.TcpMock,
 			nil,
@@ -180,7 +180,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			&configStorageMockOk{
-				apiPb.SchedulerType_Grpc,
+				apiPb.SchedulerType_GRPC,
 			},
 			nil,
 			fnMock.GrpcMock,
@@ -199,7 +199,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			&configStorageMockOk{
-				apiPb.SchedulerType_Http,
+				apiPb.SchedulerType_HTTP,
 			},
 			nil,
 			nil,
@@ -218,7 +218,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			&configStorageMockOk{
-				apiPb.SchedulerType_SiteMap,
+				apiPb.SchedulerType_SITE_MAP,
 			},
 			nil,
 			nil,
@@ -237,7 +237,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			&configStorageMockOk{
-				apiPb.SchedulerType_HttpJsonValue,
+				apiPb.SchedulerType_HTTP_JSON_VALUE,
 			},
 			nil,
 			nil,

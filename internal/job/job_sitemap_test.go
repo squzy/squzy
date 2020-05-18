@@ -167,21 +167,21 @@ func TestExecSiteMap(t *testing.T) {
 				URL:         "",
 				Concurrency: 5,
 			}, &siteMapStorage{}, &mockHttpToolsWithError{}, errorFactory)
-			assert.IsType(t, apiPb.SchedulerCode_Error, job.GetLogData().Snapshot.Code)
+			assert.IsType(t, apiPb.SchedulerCode_ERROR, job.GetLogData().Snapshot.Code)
 		})
 		t.Run("Because return 500", func(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
 				URL:         "",
 				Concurrency: 5,
 			}, &siteMapStorage{}, &mockHttpToolsWithError{}, successFactory)
-			assert.IsType(t, apiPb.SchedulerCode_Error, job.GetLogData().Snapshot.Code)
+			assert.IsType(t, apiPb.SchedulerCode_ERROR, job.GetLogData().Snapshot.Code)
 		})
 		t.Run("Because sitemapError", func(t *testing.T) {
 			job := ExecSiteMap("", 0, &scheduler_config_storage.SiteMapConfig{
 				URL:         "",
 				Concurrency: 5,
 			}, &siteMapStorageError{}, &mockHttpTools{}, successFactory)
-			assert.IsType(t, apiPb.SchedulerCode_Error, job.GetLogData().Snapshot.Code)
+			assert.IsType(t, apiPb.SchedulerCode_ERROR, job.GetLogData().Snapshot.Code)
 		})
 	})
 }

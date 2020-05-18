@@ -26,7 +26,7 @@ type siteMapError struct {
 
 func (s *siteMapError) GetLogData() *apiPb.SchedulerResponse {
 	var err *apiPb.SchedulerSnapshot_Error
-	if s.code == apiPb.SchedulerCode_Error {
+	if s.code == apiPb.SchedulerCode_ERROR {
 		err = &apiPb.SchedulerSnapshot_Error{
 			Message: fmt.Sprintf("Error: %s, URL: %s", s.description, s.location),
 		}
@@ -36,7 +36,7 @@ func (s *siteMapError) GetLogData() *apiPb.SchedulerResponse {
 		Snapshot: &apiPb.SchedulerSnapshot{
 			Code:  s.code,
 			Error: err,
-			Type:  apiPb.SchedulerType_SiteMap,
+			Type:  apiPb.SchedulerType_SITE_MAP,
 			Meta: &apiPb.SchedulerSnapshot_MetaData{
 				StartTime: s.startTime,
 				EndTime:   s.endTime,
@@ -60,7 +60,7 @@ func ExecSiteMap(schedulerID string, timeout int32, config *scheduler_config_sto
 	startTime := ptypes.TimestampNow()
 	siteMap, err := siteMapStorage.Get(config.URL)
 	if err != nil {
-		return newSiteMapError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_Error, err.Error(), config.URL)
+		return newSiteMapError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, err.Error(), config.URL)
 	}
 
 	count := len(siteMap.URLSet)
@@ -105,7 +105,7 @@ func ExecSiteMap(schedulerID string, timeout int32, config *scheduler_config_sto
 	}
 	err = group.Wait()
 	if err != nil {
-		return newSiteMapError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_Error, err.Error(), config.URL)
+		return newSiteMapError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, err.Error(), config.URL)
 	}
 	return newSiteMapError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_OK, "", "")
 }

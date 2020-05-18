@@ -51,7 +51,7 @@ func (s *server) GetSchedulerList(ctx context.Context, rq *empty.Empty) (*apiPb.
 	}
 
 	return &apiPb.GetSchedulerListResponse{
-		List: arr,
+		Lists: arr,
 	}, nil
 }
 
@@ -66,10 +66,10 @@ func (s *server) GetSchedulerById(ctx context.Context, rq *apiPb.GetSchedulerByI
 		return nil, err
 	}
 	switch config.Type {
-	case apiPb.SchedulerType_Tcp:
+	case apiPb.SchedulerType_TCP:
 		return &apiPb.Scheduler{
 			Id:       id,
-			Type:     config.Type,
+			Type:     apiPb.SchedulerType_TCP,
 			Status:   config.Status,
 			Interval: config.Interval,
 			Timeout:  config.Timeout,
@@ -80,10 +80,10 @@ func (s *server) GetSchedulerById(ctx context.Context, rq *apiPb.GetSchedulerByI
 				},
 			},
 		}, nil
-	case apiPb.SchedulerType_Grpc:
+	case apiPb.SchedulerType_GRPC:
 		return &apiPb.Scheduler{
 			Id:       id,
-			Type:     config.Type,
+			Type:     apiPb.SchedulerType_GRPC,
 			Status:   config.Status,
 			Interval: config.Interval,
 			Timeout:  config.Timeout,
@@ -95,10 +95,10 @@ func (s *server) GetSchedulerById(ctx context.Context, rq *apiPb.GetSchedulerByI
 				},
 			},
 		}, nil
-	case apiPb.SchedulerType_Http:
+	case apiPb.SchedulerType_HTTP:
 		return &apiPb.Scheduler{
 			Id:       id,
-			Type:     config.Type,
+			Type:     apiPb.SchedulerType_HTTP,
 			Status:   config.Status,
 			Interval: config.Interval,
 			Timeout:  config.Timeout,
@@ -111,10 +111,10 @@ func (s *server) GetSchedulerById(ctx context.Context, rq *apiPb.GetSchedulerByI
 				},
 			},
 		}, nil
-	case apiPb.SchedulerType_SiteMap:
+	case apiPb.SchedulerType_SITE_MAP:
 		return &apiPb.Scheduler{
 			Id:       id,
-			Type:     config.Type,
+			Type:     apiPb.SchedulerType_SITE_MAP,
 			Status:   config.Status,
 			Interval: config.Interval,
 			Timeout:  config.Timeout,
@@ -125,10 +125,10 @@ func (s *server) GetSchedulerById(ctx context.Context, rq *apiPb.GetSchedulerByI
 				},
 			},
 		}, nil
-	case apiPb.SchedulerType_HttpJsonValue:
+	case apiPb.SchedulerType_HTTP_JSON_VALUE:
 		return &apiPb.Scheduler{
 			Id:       id,
-			Type:     config.Type,
+			Type:     apiPb.SchedulerType_HTTP_JSON_VALUE,
 			Status:   config.Status,
 			Interval: config.Interval,
 			Timeout:  config.Timeout,
@@ -220,7 +220,7 @@ func (s *server) Add(ctx context.Context, rq *apiPb.AddRequest) (*apiPb.AddRespo
 	case *apiPb.AddRequest_Tcp:
 		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
 			ID:       schld.GetIDBson(),
-			Type:     apiPb.SchedulerType_Tcp,
+			Type:     apiPb.SchedulerType_TCP,
 			Status:   apiPb.SchedulerStatus_STOPPED,
 			Interval: rq.Interval,
 			Timeout:  rq.Timeout,
@@ -232,7 +232,7 @@ func (s *server) Add(ctx context.Context, rq *apiPb.AddRequest) (*apiPb.AddRespo
 	case *apiPb.AddRequest_Sitemap:
 		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
 			ID:       schld.GetIDBson(),
-			Type:     apiPb.SchedulerType_SiteMap,
+			Type:     apiPb.SchedulerType_SITE_MAP,
 			Status:   apiPb.SchedulerStatus_STOPPED,
 			Interval: rq.Interval,
 			Timeout:  rq.Timeout,
@@ -244,7 +244,7 @@ func (s *server) Add(ctx context.Context, rq *apiPb.AddRequest) (*apiPb.AddRespo
 	case *apiPb.AddRequest_Grpc:
 		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
 			ID:       schld.GetIDBson(),
-			Type:     apiPb.SchedulerType_Grpc,
+			Type:     apiPb.SchedulerType_GRPC,
 			Status:   apiPb.SchedulerStatus_STOPPED,
 			Interval: rq.Interval,
 			Timeout:  rq.Timeout,
@@ -257,7 +257,7 @@ func (s *server) Add(ctx context.Context, rq *apiPb.AddRequest) (*apiPb.AddRespo
 	case *apiPb.AddRequest_Http:
 		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
 			ID:       schld.GetIDBson(),
-			Type:     apiPb.SchedulerType_Http,
+			Type:     apiPb.SchedulerType_HTTP,
 			Status:   apiPb.SchedulerStatus_STOPPED,
 			Interval: rq.Interval,
 			Timeout:  rq.Timeout,
@@ -271,7 +271,7 @@ func (s *server) Add(ctx context.Context, rq *apiPb.AddRequest) (*apiPb.AddRespo
 	case *apiPb.AddRequest_HttpValue:
 		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
 			ID:       schld.GetIDBson(),
-			Type:     apiPb.SchedulerType_HttpJsonValue,
+			Type:     apiPb.SchedulerType_HTTP_JSON_VALUE,
 			Status:   apiPb.SchedulerStatus_STOPPED,
 			Interval: rq.Interval,
 			Timeout:  rq.Timeout,

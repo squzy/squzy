@@ -62,16 +62,16 @@ func (m mockError) CreateRequest(method string, url string, headers *map[string]
 func TestExecHttpValue(t *testing.T) {
 	t.Run("Should: return error on http request", func(t *testing.T) {
 		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}}, &mockError{})
-		assert.Equal(t, apiPb.SchedulerCode_Error, s.GetLogData().Snapshot.Code)
+		assert.Equal(t, apiPb.SchedulerCode_ERROR, s.GetLogData().Snapshot.Code)
 	})
 	t.Run("Should: return error because value not exist", func(t *testing.T) {
 		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_String,
+				Type: apiPb.HttpJsonValueConfig_STRING,
 				Path: "asfasf",
 			},
 		}}, &mockSuccess{})
-		assert.Equal(t, apiPb.SchedulerCode_Error, s.GetLogData().Snapshot.Code)
+		assert.Equal(t, apiPb.SchedulerCode_ERROR, s.GetLogData().Snapshot.Code)
 		assert.Equal(t, "", s.GetLogData().Snapshot.Meta.Value.GetStringValue())
 	})
 	t.Run("Should: not return error because selectors is missing", func(t *testing.T) {
@@ -81,7 +81,7 @@ func TestExecHttpValue(t *testing.T) {
 	t.Run("Should: parse single bool value", func(t *testing.T) {
 		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_Bool,
+				Type: apiPb.HttpJsonValueConfig_BOOL,
 				Path: "success",
 			},
 		}}, &mockSuccess{})
@@ -91,7 +91,7 @@ func TestExecHttpValue(t *testing.T) {
 	t.Run("Should: parse single string value", func(t *testing.T) {
 		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_String,
+				Type: apiPb.HttpJsonValueConfig_STRING,
 				Path: "name",
 			},
 		}}, &mockSuccess{})
@@ -101,7 +101,7 @@ func TestExecHttpValue(t *testing.T) {
 	t.Run("Should: parse single number value", func(t *testing.T) {
 		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_Number,
+				Type: apiPb.HttpJsonValueConfig_NUMBER,
 				Path: "age",
 			},
 		}}, &mockSuccess{})
@@ -111,7 +111,7 @@ func TestExecHttpValue(t *testing.T) {
 	t.Run("Should: parse single any value", func(t *testing.T) {
 		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_Any,
+				Type: apiPb.HttpJsonValueConfig_ANY,
 				Path: "age",
 			},
 		}}, &mockSuccess{})
@@ -121,7 +121,7 @@ func TestExecHttpValue(t *testing.T) {
 	t.Run("Should: parse single raw value", func(t *testing.T) {
 		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_Raw,
+				Type: apiPb.HttpJsonValueConfig_RAW,
 				Path: "raw",
 			},
 		}}, &mockSuccess{})
@@ -131,7 +131,7 @@ func TestExecHttpValue(t *testing.T) {
 	t.Run("Should: parse single time value", func(t *testing.T) {
 		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_Time,
+				Type: apiPb.HttpJsonValueConfig_TIME,
 				Path: "time",
 			},
 		}}, &mockSuccess{})
@@ -141,11 +141,11 @@ func TestExecHttpValue(t *testing.T) {
 	t.Run("Should: parse multipile value", func(t *testing.T) {
 		s := ExecHTTPValue("", 0, &scheduler_config_storage.HTTPValueConfig{Method: http.MethodGet, Headers: map[string]string{}, Selectors: []*scheduler_config_storage.Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_Time,
+				Type: apiPb.HttpJsonValueConfig_TIME,
 				Path: "time",
 			},
 			{
-				Type: apiPb.HttpJsonValueConfig_Number,
+				Type: apiPb.HttpJsonValueConfig_NUMBER,
 				Path: "age",
 			},
 		}}, &mockSuccess{})

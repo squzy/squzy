@@ -44,7 +44,7 @@ func TestExecTcp(t *testing.T) {
 				Host: "localhost",
 				Port: 10004,
 			})
-			assert.Equal(t, apiPb.SchedulerCode_Error, job.GetLogData().Snapshot.Code)
+			assert.Equal(t, apiPb.SchedulerCode_ERROR, job.GetLogData().Snapshot.Code)
 		})
 	})
 }
