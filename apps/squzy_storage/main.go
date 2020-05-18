@@ -1,0 +1,1 @@
+package squzy_storage

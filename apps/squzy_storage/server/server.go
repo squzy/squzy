@@ -15,24 +15,19 @@ type Server interface {
 }
 
 type server struct {
-	config    config.Config
-	newServer func(cnfg config.Config) (apiPb.StorageServer, error)
+	config  config.Config
+	apiServ apiPb.StorageServer
 }
 
-func NewServer(cnfg config.Config, newServer func(cnfg config.Config) (apiPb.StorageServer, error)) Server {
+func NewServer(cnfg config.Config, apiServ apiPb.StorageServer) Server {
 	return &server{
-		config:    cnfg,
-		newServer: newServer,
+		config:  cnfg,
+		apiServ: apiServ,
 	}
 }
 
 func (s *server) Run() error {
-	serv, err := s.newServer(s.config) //call in main.go НАХУЙ НЕ НУЖНА
-	if err != nil {
-		return err
-	}
-
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", s.config.GetPort()))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.config.GetPort()))
 	if err != nil {
 		return err
 	}
@@ -47,6 +42,6 @@ func (s *server) Run() error {
 		),
 		),
 	)
-	apiPb.RegisterStorageServer(grpcServer, serv)
+	apiPb.RegisterStorageServer(grpcServer, s.apiServ)
 	return grpcServer.Serve(lis)
 }

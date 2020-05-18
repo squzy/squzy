@@ -29,7 +29,7 @@ func TestCfg_GetPort(t *testing.T) {
 			panic("Error writing os env")
 		}
 		s := New()
-		assert.Equal(t, s.GetPort(), "11124")
+		assert.Equal(t, s.GetPort(), int32(11124))
 	})
 }
 

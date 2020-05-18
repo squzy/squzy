@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strconv"
 )
 
 const (
@@ -13,11 +14,11 @@ const (
 	ENV_DB_USER     = "DB_USER"
 	ENV_DB_PASSWORD = "DB_PASSWORD"
 
-	defaultPort = "9090"
+	defaultPort = int32(9090)
 )
 
 type cfg struct {
-	port       string
+	port       int32
 	dbHost     string
 	dbPort     string
 	dbName     string
@@ -25,7 +26,7 @@ type cfg struct {
 	dbPassword string
 }
 
-func (c *cfg) GetPort() string {
+func (c *cfg) GetPort() int32 {
 	return c.port
 }
 
@@ -50,7 +51,7 @@ func (c *cfg) GetDbPassword() string {
 }
 
 type Config interface {
-	GetPort() string
+	GetPort() int32
 	GetDbHost() string
 	GetDbPort() string
 	GetDbName() string
@@ -63,7 +64,10 @@ func New() Config {
 	portValue := os.Getenv(ENV_PORT)
 	port := defaultPort
 	if portValue != "" {
-		port = os.Getenv(ENV_PORT)
+		i, err := strconv.ParseInt(portValue, 10, 32)
+		if err == nil {
+			port = int32(i)
+		}
 	}
 	return &cfg{
 		port:       port,
