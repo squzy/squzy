@@ -218,8 +218,8 @@ go_repository(
 go_repository(
     name = "org_golang_x_crypto",
     importpath = "golang.org/x/crypto",
-    sum = "h1:8dUaAV7K4uHsF56JQWkprecIQKdPHtR9jCHF5nB8uzc=",
-    version = "v0.0.0-20190530122614-20be4c3c3ed5",
+    sum = "h1:GGJVjV8waZKRHrgwvtH66z9ZGVurTD1MT0n1Bb+q4aM=",
+    version = "v0.0.0-20191205180655-e7c4368fe9dd",
 )
 
 go_repository(
@@ -288,8 +288,8 @@ go_repository(
 go_repository(
     name = "com_github_squzy_squzy_generated",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:Uj2VvrQp8tbeT3sMhFhNZmhwJTOdANDP7t37yJzmC4Q=",
-    version = "v1.6.0",
+    sum = "h1:OTfdRKgIFgGyEz4oel7lMTSYc0mWWMDb6YsT+xpj520=",
+    version = "v1.6.1-0.20200516114122-ed3990be8881",
 )
 
 go_repository(
@@ -733,7 +733,6 @@ go_repository(
     version = "v0.0.0-20190618225709-2cfd321de3ee",
 )
 
-
 go_repository(
     name = "com_github_data_dog_go_sqlmock",
     importpath = "github.com/DATA-DOG/go-sqlmock",
@@ -802,4 +801,11 @@ go_repository(
     importpath = "github.com/mattn/go-sqlite3",
     sum = "h1:xQ15muvnzGBHpIpdrNi1DA5x0+TcBZzsIDwmw9uTHzw=",
     version = "v2.0.1+incompatible",
+)
+
+go_repository(
+    name = "com_github_kazegusuri_grpc_panic_handler",
+    importpath = "github.com/kazegusuri/grpc-panic-handler",
+    sum = "h1:oW3n7kE84CWfrnc9rcK3mBy3XtSLy2VNuI4pQFD+IKc=",
+    version = "v0.0.0-20160502122501-093ec776affc",
 )
