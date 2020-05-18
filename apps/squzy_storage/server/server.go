@@ -3,7 +3,7 @@ package server
 import (
 	"fmt"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	panichandler "github.com/kazegusuri/grpc-panic-handler"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
 	"net"
@@ -11,7 +11,7 @@ import (
 )
 
 type Server interface {
-	Run(opts ...grpc.DialOption) error
+	Run() error
 }
 
 type server struct {
@@ -26,8 +26,8 @@ func NewServer(cnfg config.Config, newServer func(cnfg config.Config) (apiPb.Sto
 	}
 }
 
-func (s *server) Run(opts ...grpc.DialOption) error {
-	serv, err := s.newServer(s.config)
+func (s *server) Run() error {
+	serv, err := s.newServer(s.config) //call in main.go НАХУЙ НЕ НУЖНА
 	if err != nil {
 		return err
 	}
@@ -38,11 +38,13 @@ func (s *server) Run(opts ...grpc.DialOption) error {
 	}
 
 	grpcServer := grpc.NewServer(
-		grpc_middleware.WithUnaryServerChain(
-			panichandler.UnaryPanicHandler,
+		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
+			grpc_recovery.StreamServerInterceptor(),
 		),
-		grpc_middleware.WithStreamServerChain(
-			panichandler.StreamPanicHandler,
+		),
+		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			grpc_recovery.UnaryServerInterceptor(),
+		),
 		),
 	)
 	apiPb.RegisterStorageServer(grpcServer, serv)

@@ -4,7 +4,6 @@ import (
 	"errors"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
-	"google.golang.org/grpc"
 	"os"
 	"squzy/apps/squzy_storage/config"
 	"testing"
@@ -28,7 +27,7 @@ func TestServer_Run(t *testing.T) {
 		assert.Error(t, s.Run())
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		err := os.Setenv("PORT", ":::2019")
+		err := os.Setenv("PORT", "1000000")
 		if err != nil {
 			panic("Error writing os env")
 		}
@@ -36,6 +35,17 @@ func TestServer_Run(t *testing.T) {
 			config:    config.New(),
 			newServer: func(config.Config) (apiPb.StorageServer, error) { return nil, nil },
 		}
-		assert.Error(t, s.Run(grpc.WithInsecure()))
+		assert.Error(t, s.Run())
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		err := os.Setenv("PORT", "1000000")
+		if err != nil {
+			panic("Error writing os env")
+		}
+		s := &server{
+			config:    config.New(),
+			newServer: func(config.Config) (apiPb.StorageServer, error) { return nil, nil },
+		}
+		assert.Error(t, s.Run())
 	})
 }

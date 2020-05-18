@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/golang/protobuf/ptypes"
+	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/jinzhu/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
@@ -157,8 +158,127 @@ func (s *Suite) Test_GetStatRequest() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(id).
 		WillReturnRows(rows)
+	query = fmt.Sprintf(`SELECT count(*) FROM "%s" WHERE "%s"."deleted_at" IS NULL`, dbStatRequestCollection, dbStatRequestCollection)
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id).
+		WillReturnRows(rows)
 
 	_, _, err := postgr.GetStatRequest(id, nil, nil)
+	require.NoError(s.T(), err)
+}
+
+func (s *Suite) Test_GetCpuInfo() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT cpuInfo, time FROM "%s"`, dbStatRequestCollection)
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, _, err := postgr.GetCpuInfo(id, nil, nil)
+	require.NoError(s.T(), err)
+}
+
+//Based on fact, that if request is not mocked, it will return error
+func (s *Suite) Test_GetCpuInfo_Count_Error() {
+	var (
+		id = "1"
+	)
+
+	_, _, err := postgr.GetCpuInfo(id, nil, nil)
+	require.Error(s.T(), err)
+}
+
+
+//Based on fact, that if request is not mocked, it will return error
+func (s *Suite) Test_GetCpuInfo_Select_Error() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id).
+		WillReturnRows(rows)
+
+	_, _, err := postgr.GetCpuInfo(id, &apiPb.Pagination{
+		Page:                 1, //random value
+		Limit:                2, //random value
+	}, nil)
+	require.Error(s.T(), err)
+}
+
+func (s *Suite) Test_GetMemoryInfo() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT memoryInfo, time FROM "%s"`, dbStatRequestCollection)
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, _, err := postgr.GetMemoryInfo(id, nil, nil)
+	require.NoError(s.T(), err)
+}
+
+func (s *Suite) Test_GetDiskInfo() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT diskInfo, time FROM "%s"`, dbStatRequestCollection)
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, _, err := postgr.GetDiskInfo(id, nil, nil)
+	require.NoError(s.T(), err)
+}
+
+func (s *Suite) Test_GetNetInfo() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT netInfo, time FROM "%s"`, dbStatRequestCollection)
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, _, err := postgr.GetNetInfo(id, nil, nil)
 	require.NoError(s.T(), err)
 }
 
@@ -238,6 +358,20 @@ func TestPostgres_InsertStatRequest(t *testing.T) {
 func TestPostgres_GetStatRequest(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		_, _, err := postgrWrong.GetStatRequest("", nil, nil)
+		assert.Error(t, err)
+	})
+}
+
+
+//Time errors in getSpecialRecords
+func TestPostgres_GetCpuInfo(t *testing.T) {
+	//Time for invalid timestamp
+	maxValidSeconds := 253402300800
+	t.Run("Should: return error", func(t *testing.T) {
+		_, _, err := postgrWrong.GetCpuInfo("", nil, &apiPb.TimeFilter{
+			From:                 &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+			To:                    &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+		})
 		assert.Error(t, err)
 	})
 }

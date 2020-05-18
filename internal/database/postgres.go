@@ -41,6 +41,7 @@ type MetaData struct {
 //Agent gorm description
 type StatRequest struct {
 	gorm.Model
+	//TODO: agent ID
 	CpuInfo    []*CpuInfo  `gorm:"cpuInfo"`
 	MemoryInfo *MemoryInfo `gorm:"memoryInfo"`
 	DiskInfo   []*DiskInfo `gorm:"diskInfo"`
@@ -186,12 +187,16 @@ func (p *postgres) InsertStatRequest(data *apiPb.Metric) error {
 
 func (p *postgres) GetStatRequest(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
 	var statRequests []*StatRequest
-	if err := p.db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).Find(&statRequests).Error; err != nil {
+	count := int32(-1)
+	if err := p.db.Table(dbStatRequestCollection).
+		Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).
+		Find(&statRequests).
+		Count(&count).Error; err != nil {
+
 		fmt.Println(err.Error()) //TODO: log?
 		return nil, -1, errorDataBase
 	}
-	count := int32(-1)
-	p.db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).Count(count)
+	//p.db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id)
 	res, err := ConvertFromPostgressStatRequests(statRequests)
 	return res, count, err
 }
@@ -218,13 +223,16 @@ func (p *postgres) getSpecialRecords(id string, pagination *apiPb.Pagination, fi
 		return nil, -1, err
 	}
 
-	count := int32(-1)
-	if err := p.db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).Select(key).Count(count).Error; err != nil {
+	var count int
+	if err := p.db.Table(dbStatRequestCollection).
+		Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).
+		Count(&count).Error; err != nil {
 		return nil, -1, err
 	}
 
+
 	offset := int32(0)
-	limit := count
+	limit := int32(count)
 	if pagination != nil {
 		offset = pagination.GetLimit() * pagination.GetPage()
 		limit = pagination.GetLimit()
@@ -235,7 +243,7 @@ func (p *postgres) getSpecialRecords(id string, pagination *apiPb.Pagination, fi
 	if err := p.db.Table(dbStatRequestCollection).
 		Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).
 		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
-		Select("%s, time", key).
+		Select(fmt.Sprintf("%s, time", key)).
 		Order("time").
 		Offset(offset).
 		Limit(limit).
@@ -246,7 +254,7 @@ func (p *postgres) getSpecialRecords(id string, pagination *apiPb.Pagination, fi
 		return nil, -1, errorDataBase
 	}
 	res, err := ConvertFromPostgressStatRequests(statRequests)
-	return res, count, err
+	return res, int32(count), nil
 }
 
 func getTime(filter *apiPb.TimeFilter) (time.Time, time.Time, error) {
