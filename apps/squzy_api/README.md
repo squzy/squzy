@@ -15,8 +15,7 @@ Bold is required
 	ENV_MONITORING_SERVER = "MONITORING_SERVER_HOST"
 	ENV_STORAGE_SERVER    = "STORAGE_SERVER_HOST"
 
-- **MONGO_URI** - mongo URI
 - PORT(8080) - port for listening
-- AGENT_SERVER_HOST - host for agent server
-- MONITORING_SERVER_HOST - host for monitoring server
-- STORAGE_SERVER_HOST - host for storage server
+- **AGENT_SERVER_HOST** - host for agent server
+- **MONITORING_SERVER_HOST** - host for monitoring server
+- **STORAGE_SERVER_HOST** - host for storage server

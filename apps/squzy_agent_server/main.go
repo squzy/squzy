@@ -38,6 +38,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer func() {
+		_ = client.Disconnect(context.Background())
+	}()
 	connector := mongo_helper.New(client.Database(cfg.GetMongoDb()).Collection(cfg.GetMongoCollection()))
 	app := application.New(server.New(database.New(connector), storageClient))
 	log.Fatal(app.Run(cfg.GetPort()))

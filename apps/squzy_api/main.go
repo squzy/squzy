@@ -21,17 +21,27 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer func() {
+		_ = agentServerConn.Close()
+	}()
 	agentServerClient := apiPb.NewAgentServerClient(agentServerConn)
 	monitoringConn, err := tools.GetConnection(cfg.GetMonitoringServerAddress(), 0, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer func() {
+		_ = monitoringConn.Close()
+	}()
 	monitoringClient := apiPb.NewSchedulersExecutorClient(monitoringConn)
 	storageConn, err := tools.GetConnection(cfg.GetMonitoringServerAddress(), 0, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer func() {
+		_ = storageConn.Close()
+	}()
 	storageClient := apiPb.NewStorageClient(storageConn)
+
 	log.Fatal(
 		router.New(
 			handlers.New(agentServerClient, monitoringClient, storageClient),

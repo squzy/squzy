@@ -40,6 +40,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer func() {
+		_ = client.Disconnect(context.Background())
+	}()
 	connector := mongo_helper.New(client.Database(cfg.GetMongoDb()).Collection(cfg.GetMongoCollection()))
 	httpPackage := httptools.New(version.GetVersion())
 	grpcTool := grpctools.New()
