@@ -10,18 +10,16 @@ func ConvertToPostgresSnapshot(request *apiPb.SchedulerResponse) (*Snapshot, err
 	return convertToSnapshot(request.GetSnapshot(), request.GetSchedulerId())
 }
 
-func ConvertFromPostgresSnapshots(snapshots []*Snapshot) ([]*apiPb.SchedulerSnapshot, []error) {
-	var errorSlice []error
+func ConvertFromPostgresSnapshots(snapshots []*Snapshot) []*apiPb.SchedulerSnapshot {
 	var res []*apiPb.SchedulerSnapshot
 	for _, v := range snapshots {
 		snap, err := convertFromSnapshot(v)
-		if err != nil {
-			errorSlice = append(errorSlice, err)
-		} else {
+		if err == nil {
 			res = append(res, snap)
 		}
+		//TODO: log if error
 	}
-	return res, errorSlice
+	return res
 }
 
 func ConvertToPostgressStatRequest(request *apiPb.Metric) (*StatRequest, error) {
@@ -40,16 +38,16 @@ func ConvertToPostgressStatRequest(request *apiPb.Metric) (*StatRequest, error) 
 	}, nil
 }
 
-func ConvertFromPostgressStatRequests(data []*StatRequest) ([]*apiPb.GetAgentInformationResponse_Statistic, error) {
+func ConvertFromPostgressStatRequests(data []*StatRequest) []*apiPb.GetAgentInformationResponse_Statistic {
 	var res []*apiPb.GetAgentInformationResponse_Statistic
 	for _, request := range data {
 		stat, err := ConvertFromPostgressStatRequest(request)
 		if err == nil {
 			res = append(res, stat)
 		}
-		//TODO handle error?
+		//TODO: log if error
 	}
-	return res, nil //TODO: what do with error?
+	return res
 }
 
 func ConvertFromPostgressStatRequest(data *StatRequest) (*apiPb.GetAgentInformationResponse_Statistic, error) {

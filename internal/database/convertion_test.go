@@ -67,12 +67,12 @@ func TestConvertToPostgresSnapshot(t *testing.T) {
 
 func TestConvertFromPostgresSnapshots(t *testing.T) {
 	wrongTime := time.Unix(-62135596888, -100000000) //Protobuf validate this seconds aas error
-	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertFromPostgresSnapshots([]*Snapshot{{}})
-		assert.NotEmpty(t, err)
+	t.Run("Test: error in convertation", func(t *testing.T) {
+		res := ConvertFromPostgresSnapshots([]*Snapshot{{}})
+		assert.Nil(t, res)
 	})
-	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertFromPostgresSnapshots([]*Snapshot{
+	t.Run("Test: error in convertation", func(t *testing.T) {
+		res := ConvertFromPostgresSnapshots([]*Snapshot{
 			{
 				Meta: &MetaData{
 					StartTime: wrongTime,
@@ -80,10 +80,10 @@ func TestConvertFromPostgresSnapshots(t *testing.T) {
 				},
 			},
 		})
-		assert.NotEmpty(t, err)
+		assert.Nil(t, res)
 	})
 	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertFromPostgresSnapshots([]*Snapshot{
+		res := ConvertFromPostgresSnapshots([]*Snapshot{
 			{
 				Meta: &MetaData{
 					StartTime: time.Time{},
@@ -91,10 +91,10 @@ func TestConvertFromPostgresSnapshots(t *testing.T) {
 				},
 			},
 		})
-		assert.NotEmpty(t, err)
+		assert.Nil(t, res)
 	})
 	t.Run("Test: no error", func(t *testing.T) {
-		_, err := ConvertFromPostgresSnapshots([]*Snapshot{
+		res := ConvertFromPostgresSnapshots([]*Snapshot{
 			{
 				Meta: &MetaData{
 					StartTime: time.Time{},
@@ -102,7 +102,7 @@ func TestConvertFromPostgresSnapshots(t *testing.T) {
 				},
 			},
 		})
-		assert.Empty(t, err)
+		assert.NotNil(t, res)
 	})
 }
 

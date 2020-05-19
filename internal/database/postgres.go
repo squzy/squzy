@@ -146,12 +146,7 @@ func (p *postgres) GetSnapshots(id string) ([]*apiPb.SchedulerSnapshot, error) {
 		//TODO: log?
 		return nil, errorDataBase
 	}
-	snapshots, err := ConvertFromPostgresSnapshots(dbSnapshots)
-	if len(err) > 0 {
-		// @TODO add err cheking
-		return snapshots, nil
-	}
-	return snapshots, nil
+	return ConvertFromPostgresSnapshots(dbSnapshots), nil
 }
 
 func (p *postgres) InsertStatRequest(data *apiPb.Metric) error {
@@ -175,8 +170,7 @@ func (p *postgres) GetStatRequest(id string, pagination *apiPb.Pagination, filte
 		Count(&count).Error; err != nil {
 		return nil, -1, errorDataBase
 	}
-	res, err := ConvertFromPostgressStatRequests(statRequests)
-	return res, count, err
+	return ConvertFromPostgressStatRequests(statRequests), count, nil
 }
 
 func (p *postgres) GetCPUInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
@@ -232,11 +226,7 @@ func (p *postgres) getSpecialRecords(id string, pagination *apiPb.Pagination, fi
 		return nil, -1, errorDataBase
 	}
 
-	res, err := ConvertFromPostgressStatRequests(statRequests)
-	if err != nil {
-		return nil, -1, errorDataBase
-	}
-	return res, int32(count), nil
+	return ConvertFromPostgressStatRequests(statRequests), int32(count), nil
 }
 
 func getTime(filter *apiPb.TimeFilter) (time.Time, time.Time, error) {
