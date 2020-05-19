@@ -30,6 +30,8 @@ func ConvertToPostgressStatRequest(request *apiPb.Metric) (*StatRequest, error) 
 		return nil, err
 	}
 	return &StatRequest{
+		AgentID:    request.GetAgentId(),
+		AgentName:  request.GetAgentName(),
 		CPUInfo:    convertToCPUInfo(request.GetCpuInfo()),
 		MemoryInfo: convertToMemoryInfo(request.GetMemoryInfo()),
 		DiskInfo:   convertToDiskInfo(request.GetDiskInfo()),

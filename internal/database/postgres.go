@@ -35,7 +35,8 @@ type MetaData struct {
 //Agent gorm description
 type StatRequest struct {
 	gorm.Model
-	//TODO: agent ID
+	AgentID    string      `gorm:"agentID"`
+	AgentName  string      `gorm:"agentName"`
 	CPUInfo    []*CPUInfo  `gorm:"cpuInfo"`
 	MemoryInfo *MemoryInfo `gorm:"memoryInfo"`
 	DiskInfo   []*DiskInfo `gorm:"diskInfo"`
@@ -169,12 +170,11 @@ func (p *postgres) GetStatRequest(id string, pagination *apiPb.Pagination, filte
 	var statRequests []*StatRequest
 	count := int32(-1)
 	if err := p.db.Table(dbStatRequestCollection).
-		Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).
+		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), id).
 		Find(&statRequests).
 		Count(&count).Error; err != nil {
 		return nil, -1, errorDataBase
 	}
-	//p.db.Table(dbStatRequestCollection).Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id)
 	res, err := ConvertFromPostgressStatRequests(statRequests)
 	return res, count, err
 }
@@ -220,7 +220,7 @@ func (p *postgres) getSpecialRecords(id string, pagination *apiPb.Pagination, fi
 	//TODO: test if it works
 	var statRequests []*StatRequest
 	err = p.db.Table(dbStatRequestCollection).
-		Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).
+		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), id).
 		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
 		Select(fmt.Sprintf("%s, time", key)).
 		Order("time").
