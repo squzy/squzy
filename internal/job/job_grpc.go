@@ -18,35 +18,37 @@ const (
 )
 
 type grpcError struct {
-	schedulerId string
+	schedulerID string
 	startTime   *timestamp.Timestamp
 	endTime     *timestamp.Timestamp
-	code        apiPb.SchedulerResponseCode
+	code        apiPb.SchedulerCode
 	description string
 }
 
 func (s *grpcError) GetLogData() *apiPb.SchedulerResponse {
-	var err *apiPb.SchedulerResponse_Error
-	if s.code == apiPb.SchedulerResponseCode_Error {
-		err = &apiPb.SchedulerResponse_Error{
+	var err *apiPb.SchedulerSnapshot_Error
+	if s.code == apiPb.SchedulerCode_ERROR {
+		err = &apiPb.SchedulerSnapshot_Error{
 			Message: s.description,
 		}
 	}
 	return &apiPb.SchedulerResponse{
-		SchedulerId: s.schedulerId,
-		Code:        s.code,
-		Error:       err,
-		Type:        apiPb.SchedulerType_Grpc,
-		Meta: &apiPb.SchedulerResponse_MetaData{
-			StartTime: s.startTime,
-			EndTime:   s.endTime,
+		SchedulerId: s.schedulerID,
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code:  s.code,
+			Error: err,
+			Type:  apiPb.SchedulerType_GRPC,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: s.startTime,
+				EndTime:   s.endTime,
+			},
 		},
 	}
 }
 
-func newGrpcError(schedulerId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string) CheckError {
+func newGrpcError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerCode, description string) CheckError {
 	return &grpcError{
-		schedulerId: schedulerId,
+		schedulerID: schedulerID,
 		startTime:   startTime,
 		endTime:     endTime,
 		code:        code,
@@ -54,7 +56,7 @@ func newGrpcError(schedulerId string, startTime *timestamp.Timestamp, endTime *t
 	}
 }
 
-func ExecGrpc(schedulerId string, timeout int32, config *scheduler_config_storage.GrpcConfig, opts ...grpc.DialOption) CheckError {
+func ExecGrpc(schedulerID string, timeout int32, config *scheduler_config_storage.GrpcConfig, opts ...grpc.DialOption) CheckError {
 	startTime := ptypes.TimestampNow()
 
 	ctx, cancel := helpers.TimeoutContext(context.Background(), helpers.DurationFromSecond(timeout))
@@ -64,7 +66,7 @@ func ExecGrpc(schedulerId string, timeout int32, config *scheduler_config_storag
 	conn, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%d", config.Host, config.Port), opts...)
 
 	if err != nil {
-		return newGrpcError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, wrongConnectConfigError.Error())
+		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, errWrongConnectConfigError.Error())
 	}
 
 	defer func() {
@@ -74,17 +76,17 @@ func ExecGrpc(schedulerId string, timeout int32, config *scheduler_config_storag
 	client := health_check.NewHealthClient(conn)
 
 	md := metadata.New(map[string]string{
-		logMetaData: schedulerId,
+		logMetaData: schedulerID,
 	})
 
 	res, err := client.Check(metadata.NewOutgoingContext(ctx, md), &health_check.HealthCheckRequest{Service: config.Service})
 
 	if err != nil {
-		return newGrpcError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, connTimeoutError.Error())
+		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, errConnTimeoutError.Error())
 	}
 
 	if res.Status != health_check.HealthCheckResponse_SERVING {
-		return newGrpcError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_Error, grpcNotServing.Error())
+		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, errGrpcNotServing.Error())
 	}
-	return newGrpcError(schedulerId, startTime, ptypes.TimestampNow(), apiPb.SchedulerResponseCode_OK, "")
+	return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_OK, "")
 }

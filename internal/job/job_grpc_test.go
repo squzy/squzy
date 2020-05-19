@@ -88,7 +88,7 @@ func TestExecGrpc(t *testing.T) {
 				Host:    "localhost",
 				Port:    9090,
 			}, grpc.WithInsecure())
-			assert.Equal(t, apiPb.SchedulerResponseCode_OK, job.GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerCode_OK, job.GetLogData().Snapshot.Code)
 			grpcServer.Stop()
 		})
 
@@ -104,11 +104,11 @@ func TestExecGrpc(t *testing.T) {
 				Host:    "localhost",
 				Port:    9090,
 			}, grpc.WithInsecure())
-			assert.Equal(t, apiPb.SchedulerResponseCode_Error, job.GetLogData().Code)
+			assert.Equal(t, apiPb.SchedulerCode_ERROR, job.GetLogData().Snapshot.Code)
 			grpcServer.Stop()
 		})
 
-		t.Run("Should: Return grpcNotServing error", func(t *testing.T) {
+		t.Run("Should: Return errGrpcNotServing error", func(t *testing.T) {
 			lis, _ := net.Listen("tcp", ":9090")
 			grpcServer := grpc.NewServer()
 			health_check.RegisterHealthServer(grpcServer, &errorServer{})
@@ -120,18 +120,18 @@ func TestExecGrpc(t *testing.T) {
 				Host:    "localhost",
 				Port:    9090,
 			}, grpc.WithInsecure())
-			assert.Equal(t, grpcNotServing.Error(), job.GetLogData().Error.Message)
+			assert.Equal(t, errGrpcNotServing.Error(), job.GetLogData().Snapshot.Error.Message)
 			grpcServer.Stop()
 		})
 
-		t.Run("Should: Return connTimeoutError error", func(t *testing.T) {
+		t.Run("Should: Return errConnTimeoutError error", func(t *testing.T) {
 			job := ExecGrpc("", 0, &scheduler_config_storage.GrpcConfig{Service: "test", Host: "localhost", Port: 9091}, grpc.WithInsecure())
-			assert.Equal(t, connTimeoutError.Error(), job.GetLogData().Error.Message)
+			assert.Equal(t, errConnTimeoutError.Error(), job.GetLogData().Snapshot.Error.Message)
 		})
 
-		t.Run("Should: Return wrongConnectConfigError error", func(t *testing.T) {
+		t.Run("Should: Return errWrongConnectConfigError error", func(t *testing.T) {
 			job := ExecGrpc("", 0, &scheduler_config_storage.GrpcConfig{Service: "test", Host: "localhost", Port: 9091}, grpc.WithInsecure(), grpc.WithBlock())
-			assert.Equal(t, wrongConnectConfigError.Error(), job.GetLogData().Error.Message)
+			assert.Equal(t, errWrongConnectConfigError.Error(), job.GetLogData().Snapshot.Error.Message)
 		})
 	})
 }

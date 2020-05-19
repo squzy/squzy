@@ -12,14 +12,16 @@ type mockStartTimeErrorMock struct {
 
 func (m mockStartTimeErrorMock) GetLogData() *apiPb.SchedulerResponse {
 	return &apiPb.SchedulerResponse{
-		Code: 0,
-		Error: &apiPb.SchedulerResponse_Error{
-			Message: "",
-		},
-		Type: 0,
-		Meta: &apiPb.SchedulerResponse_MetaData{
-			StartTime: nil,
-			EndTime:   nil,
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code: 0,
+			Error: &apiPb.SchedulerSnapshot_Error{
+				Message: "",
+			},
+			Type: 0,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: nil,
+				EndTime:   nil,
+			},
 		},
 	}
 }
@@ -29,14 +31,16 @@ type mockEndTimeErrorMock struct {
 
 func (m mockEndTimeErrorMock) GetLogData() *apiPb.SchedulerResponse {
 	return &apiPb.SchedulerResponse{
-		Code: 0,
-		Error: &apiPb.SchedulerResponse_Error{
-			Message: "",
-		},
-		Type: 0,
-		Meta: &apiPb.SchedulerResponse_MetaData{
-			StartTime: ptypes.TimestampNow(),
-			EndTime:   nil,
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code: 0,
+			Error: &apiPb.SchedulerSnapshot_Error{
+				Message: "",
+			},
+			Type: 0,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: ptypes.TimestampNow(),
+				EndTime:   nil,
+			},
 		},
 	}
 }
@@ -46,14 +50,16 @@ type mockError struct {
 
 func (m mockError) GetLogData() *apiPb.SchedulerResponse {
 	return &apiPb.SchedulerResponse{
-		Code: apiPb.SchedulerResponseCode_Error,
-		Error: &apiPb.SchedulerResponse_Error{
-			Message: "",
-		},
-		Type: 0,
-		Meta: &apiPb.SchedulerResponse_MetaData{
-			StartTime: ptypes.TimestampNow(),
-			EndTime:   ptypes.TimestampNow(),
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code: apiPb.SchedulerCode_ERROR,
+			Error: &apiPb.SchedulerSnapshot_Error{
+				Message: "",
+			},
+			Type: 0,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: ptypes.TimestampNow(),
+				EndTime:   ptypes.TimestampNow(),
+			},
 		},
 	}
 }
@@ -63,12 +69,14 @@ type mockOk struct {
 
 func (m mockOk) GetLogData() *apiPb.SchedulerResponse {
 	return &apiPb.SchedulerResponse{
-		Code:  apiPb.SchedulerResponseCode_OK,
-		Error: nil,
-		Type:  0,
-		Meta: &apiPb.SchedulerResponse_MetaData{
-			StartTime: ptypes.TimestampNow(),
-			EndTime:   ptypes.TimestampNow(),
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code:  apiPb.SchedulerCode_OK,
+			Error: nil,
+			Type:  0,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: ptypes.TimestampNow(),
+				EndTime:   ptypes.TimestampNow(),
+			},
 		},
 	}
 }

@@ -51,7 +51,7 @@ func TestAgent_GetStat(t *testing.T) {
 		}, func() *timestamp.Timestamp {
 			return &timestamp.Timestamp{}
 		})
-		assert.IsType(t, &apiPb.SendMetricsRequest{}, a.GetStat())
+		assert.IsType(t, &apiPb.Metric{}, a.GetStat())
 	})
 	t.Run("Should: return cpu info", func(t *testing.T) {
 		a := New(func(duration time.Duration, b bool) (float64s []float64, err error) {
@@ -134,7 +134,7 @@ func TestAgent_GetStat(t *testing.T) {
 			return &timestamp.Timestamp{}
 		})
 		assert.EqualValues(t, &apiPb.DiskInfo{Disks: map[string]*apiPb.DiskInfo_Disk{
-			"/": &apiPb.DiskInfo_Disk{Used: 6},
+			"/": {Used: 6},
 		}}, a.GetStat().DiskInfo)
 	})
 	t.Run("Should: return net stat", func(t *testing.T) {
@@ -181,7 +181,7 @@ func TestAgent_GetStat(t *testing.T) {
 		}, func() *timestamp.Timestamp {
 			return &timestamp.Timestamp{}
 		})
-		assert.EqualValues(t, &apiPb.SendMetricsRequest{
+		assert.EqualValues(t, &apiPb.Metric{
 			CpuInfo:    &apiPb.CpuInfo{},
 			MemoryInfo: &apiPb.MemoryInfo{},
 			DiskInfo:   &apiPb.DiskInfo{},
@@ -206,7 +206,7 @@ func TestAgent_GetStat(t *testing.T) {
 		}, func() *timestamp.Timestamp {
 			return &timestamp.Timestamp{}
 		})
-		assert.Equal(t, &apiPb.SendMetricsRequest{
+		assert.Equal(t, &apiPb.Metric{
 			CpuInfo:    &apiPb.CpuInfo{},
 			MemoryInfo: &apiPb.MemoryInfo{},
 			NetInfo:    &apiPb.NetInfo{},

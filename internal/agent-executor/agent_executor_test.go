@@ -16,18 +16,18 @@ type mockMoreSecond struct {
 type mockLessSecond struct {
 }
 
-func (m mockLessSecond) GetStat() *apiPb.SendMetricsRequest {
+func (m mockLessSecond) GetStat() *apiPb.Metric {
 	time.Sleep(time.Millisecond * 500)
-	return &apiPb.SendMetricsRequest{}
+	return &apiPb.Metric{}
 }
 
-func (m mockMoreSecond) GetStat() *apiPb.SendMetricsRequest {
+func (m mockMoreSecond) GetStat() *apiPb.Metric {
 	time.Sleep(time.Second * 2)
-	return &apiPb.SendMetricsRequest{}
+	return &apiPb.Metric{}
 }
 
-func (m mock) GetStat() *apiPb.SendMetricsRequest {
-	return &apiPb.SendMetricsRequest{}
+func (m mock) GetStat() *apiPb.Metric {
+	return &apiPb.Metric{}
 }
 
 func TestNew(t *testing.T) {
@@ -38,7 +38,7 @@ func TestNew(t *testing.T) {
 	t.Run("Should: return error if interval less then 500 millisecond", func(t *testing.T) {
 		a, err := New(&mock{}, time.Millisecond)
 		assert.EqualValues(t, nil, a)
-		assert.Equal(t, intervalLessHalfSecondError, err)
+		assert.Equal(t, errIntervalLessHalfSecondError, err)
 	})
 }
 
@@ -47,9 +47,9 @@ func TestExecutor_Execute(t *testing.T) {
 		a, _ := New(&mock{}, time.Second)
 		channel := a.Execute()
 		value := <-channel
-		assert.EqualValues(t, &apiPb.SendMetricsRequest{}, value)
+		assert.EqualValues(t, &apiPb.Metric{}, value)
 		value2 := <-channel
-		assert.EqualValues(t, &apiPb.SendMetricsRequest{}, value2)
+		assert.EqualValues(t, &apiPb.Metric{}, value2)
 	})
 	t.Run("Should: not get value, if job execute more that inteval", func(t *testing.T) {
 		a, _ := New(&mockMoreSecond{}, time.Second)
@@ -66,7 +66,7 @@ func TestExecutor_Execute(t *testing.T) {
 		channel := a.Execute()
 		select {
 		case value := <-channel:
-			assert.EqualValues(t, &apiPb.SendMetricsRequest{}, value)
+			assert.EqualValues(t, &apiPb.Metric{}, value)
 		case <-time.After(time.Second):
 			assert.FailNow(t, "Job execute less than second")
 		}

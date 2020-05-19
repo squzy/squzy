@@ -9,12 +9,13 @@ go_library(
      importpath = "squzy/internal/storage",
      visibility = ["//visibility:public"],
      deps = [
-        "@com_github_golang_protobuf//ptypes:go_default_library",
-        "//internal/grpcTools:go_default_library",
+        "//internal/grpctools:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
         "//internal/job:go_default_library",
         "@com_github_google_uuid//:go_default_library",
+        "@com_github_golang_protobuf//ptypes:go_default_library",
+        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
      ],
 
 )

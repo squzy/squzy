@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
-	"squzy/internal/httpTools"
+	"squzy/internal/httptools"
 	"squzy/internal/job"
 	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"squzy/internal/semaphore"
@@ -28,7 +28,7 @@ type configStorageMockOk struct {
 
 func (c configStorageMockOk) Get(ctx context.Context, schedulerId primitive.ObjectID) (*scheduler_config_storage.SchedulerConfig, error) {
 	return &scheduler_config_storage.SchedulerConfig{
-		Id:   primitive.NewObjectID(),
+		ID:   primitive.NewObjectID(),
 		Type: c.typeOfChecker,
 	}, nil
 }
@@ -92,12 +92,12 @@ type fnMock struct {
 	executed bool
 }
 
-func (m *fnMock) TcpMock(schedulerId string, timeout int32, config *scheduler_config_storage.TcpConfig) job.CheckError {
+func (m *fnMock) TcpMock(schedulerId string, timeout int32, config *scheduler_config_storage.TCPConfig) job.CheckError {
 	m.executed = true
 	return nil
 }
 
-func (m *fnMock) SiteMapMock(schedulerId string, timeout int32, config *scheduler_config_storage.SiteMapConfig, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, semaphoreFactoryFn func(n int) semaphore.Semaphore) job.CheckError {
+func (m *fnMock) SiteMapMock(schedulerId string, timeout int32, config *scheduler_config_storage.SiteMapConfig, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httptools.HTTPTool, semaphoreFactoryFn func(n int) semaphore.Semaphore) job.CheckError {
 	m.executed = true
 	return nil
 }
@@ -107,12 +107,12 @@ func (m *fnMock) GrpcMock(schedulerId string, timeout int32, config *scheduler_c
 	return nil
 }
 
-func (m *fnMock) HttpMock(schedulerId string, timeout int32, config *scheduler_config_storage.HttpConfig, httpTool httpTools.HttpTool) job.CheckError {
+func (m *fnMock) HttpMock(schedulerId string, timeout int32, config *scheduler_config_storage.HTTPConfig, httpTool httptools.HTTPTool) job.CheckError {
 	m.executed = true
 	return nil
 }
 
-func (m *fnMock) HttpValueMock(schedulerId string, timeout int32, config *scheduler_config_storage.HttpValueConfig, httpTool httpTools.HttpTool) job.CheckError {
+func (m *fnMock) HttpValueMock(schedulerId string, timeout int32, config *scheduler_config_storage.HTTPValueConfig, httpTool httptools.HTTPTool) job.CheckError {
 	m.executed = true
 	return nil
 }
@@ -161,7 +161,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			&configStorageMockOk{
-				apiPb.SchedulerType_Tcp,
+				apiPb.SchedulerType_TCP,
 			},
 			fnMock.TcpMock,
 			nil,
@@ -180,7 +180,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			&configStorageMockOk{
-				apiPb.SchedulerType_Grpc,
+				apiPb.SchedulerType_GRPC,
 			},
 			nil,
 			fnMock.GrpcMock,
@@ -199,7 +199,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			&configStorageMockOk{
-				apiPb.SchedulerType_Http,
+				apiPb.SchedulerType_HTTP,
 			},
 			nil,
 			nil,
@@ -218,7 +218,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			&configStorageMockOk{
-				apiPb.SchedulerType_SiteMap,
+				apiPb.SchedulerType_SITE_MAP,
 			},
 			nil,
 			nil,
@@ -237,7 +237,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			&configStorageMockOk{
-				apiPb.SchedulerType_HttpJsonValue,
+				apiPb.SchedulerType_HTTP_JSON_VALUE,
 			},
 			nil,
 			nil,

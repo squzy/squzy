@@ -16,9 +16,9 @@ go_library(
         "//apps/agent_client/version:go_default_library",
         "//internal/agent:go_default_library",
         "//apps/agent_client/application:go_default_library",
-        "@com_github_golang_protobuf//ptypes:go_default_library",
         "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
         "//internal/agent-executor:go_default_library",
+        "@com_github_golang_protobuf//ptypes:go_default_library",
     ]
 )
 

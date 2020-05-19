@@ -1,4 +1,4 @@
-package grpcTools
+package grpctools
 
 import (
 	"github.com/stretchr/testify/assert"

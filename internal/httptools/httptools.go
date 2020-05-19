@@ -1,4 +1,4 @@
-package httpTools
+package httptools
 
 import (
 	"context"
@@ -25,36 +25,36 @@ const (
 )
 
 var (
-	notExpectedStatusCode   = errors.New("NOT_EXPECTED_STATUS_CODE")
-	notExpectedStatusCodeFn = func(url string, statusCode int, expectedStatusCode int) error {
+	errNotExpectedStatusCode = errors.New("NOT_EXPECTED_STATUS_CODE")
+	notExpectedStatusCodeFn  = func(url string, statusCode int, expectedStatusCode int) error {
 		return fmt.Errorf(
 			"ErrCode: %s, Location: %s, StatusCode: %d, ExpectedStatusCode: %d, Port: %d",
-			notExpectedStatusCode,
+			errNotExpectedStatusCode,
 			url,
 			statusCode,
 			expectedStatusCode,
-			helpers.GetPortByUrl(url),
+			helpers.GetPortByURL(url),
 		)
 	}
-	defaultTimeout = helpers.DurationFromSecond(10)
+	defaultTimeout = helpers.DurationFromSecond(RequestTimeout)
 )
 
-type HttpTool interface {
+type HTTPTool interface {
 	SendRequest(req *http.Request) (int, []byte, error)
 	SendRequestTimeout(req *http.Request, timeout time.Duration) (int, []byte, error)
 	SendRequestWithStatusCode(req *http.Request, expectedCode int) (int, []byte, error)
 	SendRequestTimeoutStatusCode(req *http.Request, timeout time.Duration, expectedCode int) (int, []byte, error)
-	CreateRequest(method string, url string, headers *map[string]string, schedulerId string) *http.Request
+	CreateRequest(method string, url string, headers *map[string]string, schedulerID string) *http.Request
 }
 
-func (h *httpTool) CreateRequest(method string, url string, headers *map[string]string, logId string) *http.Request {
+func (h *httpTool) CreateRequest(method string, url string, headers *map[string]string, logID string) *http.Request {
 	req, _ := http.NewRequest(method, url, nil)
 
 	// Set user agent
 	req.Header.Set(userAgentHeaderKey, h.userAgent)
 
-	if logId != "" {
-		req.Header.Set(logHeader, logId)
+	if logID != "" {
+		req.Header.Set(logHeader, logID)
 	}
 
 	if headers == nil {
@@ -125,7 +125,7 @@ func getUserAgent(version string) string {
 	return fmt.Sprintf("%s_%s", userAgentPrefix, version)
 }
 
-func New(userAgentVersion string) HttpTool {
+func New(userAgentVersion string) HTTPTool {
 	return &httpTool{
 		userAgent: getUserAgent(userAgentVersion),
 		client: &http.Client{

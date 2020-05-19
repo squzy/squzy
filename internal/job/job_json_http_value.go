@@ -8,58 +8,60 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/tidwall/gjson"
 	"squzy/internal/helpers"
-	"squzy/internal/httpTools"
+	"squzy/internal/httptools"
 	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"time"
 )
 
-type jsonHttpError struct {
-	schedulerId string
+type jsonHTTPError struct {
+	schedulerID string
 	startTime   *timestamp.Timestamp
 	endTime     *timestamp.Timestamp
-	code        apiPb.SchedulerResponseCode
+	code        apiPb.SchedulerCode
 	description string
 	value       *structType.Value
 }
 
 var (
 	valueNotExistErrorFn = func(path string) error {
-		return fmt.Errorf("Value by path=`%s` not exist", path)
+		return fmt.Errorf("value by path=`%s` not exist", path)
 	}
 )
 
-func (e *jsonHttpError) GetLogData() *apiPb.SchedulerResponse {
-	var err *apiPb.SchedulerResponse_Error
-	if e.code == apiPb.SchedulerResponseCode_Error {
-		err = &apiPb.SchedulerResponse_Error{
+func (e *jsonHTTPError) GetLogData() *apiPb.SchedulerResponse {
+	var err *apiPb.SchedulerSnapshot_Error
+	if e.code == apiPb.SchedulerCode_ERROR {
+		err = &apiPb.SchedulerSnapshot_Error{
 			Message: e.description,
 		}
 	}
 	return &apiPb.SchedulerResponse{
-		SchedulerId: e.schedulerId,
-		Code:        e.code,
-		Error:       err,
-		Type:        apiPb.SchedulerType_HttpJsonValue,
-		Meta: &apiPb.SchedulerResponse_MetaData{
-			StartTime: e.startTime,
-			EndTime:   e.endTime,
-			Value:     e.value,
+		SchedulerId: e.schedulerID,
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code:  e.code,
+			Error: err,
+			Type:  apiPb.SchedulerType_HTTP_JSON_VALUE,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: e.startTime,
+				EndTime:   e.endTime,
+				Value:     e.value,
+			},
 		},
 	}
 }
 
-func ExecHttpValue(schedulerId string, timeout int32, config *scheduler_config_storage.HttpValueConfig, httpTool httpTools.HttpTool) CheckError {
+func ExecHTTPValue(schedulerID string, timeout int32, config *scheduler_config_storage.HTTPValueConfig, httpTool httptools.HTTPTool) CheckError {
 	startTime := ptypes.TimestampNow()
-	req := httpTool.CreateRequest(config.Method, config.Url, &config.Headers, schedulerId)
+	req := httpTool.CreateRequest(config.Method, config.URL, &config.Headers, schedulerID)
 
 	_, data, err := httpTool.SendRequestTimeout(req, helpers.DurationFromSecond(timeout))
 
 	if err != nil {
-		return newJsonHttpError(
-			schedulerId,
+		return newJSONHTTPError(
+			schedulerID,
 			startTime,
 			ptypes.TimestampNow(),
-			apiPb.SchedulerResponseCode_Error,
+			apiPb.SchedulerCode_ERROR,
 			err.Error(),
 			nil,
 		)
@@ -70,11 +72,11 @@ func ExecHttpValue(schedulerId string, timeout int32, config *scheduler_config_s
 	results := []*structType.Value{}
 
 	if len(config.Selectors) == 0 {
-		return newJsonHttpError(
-			schedulerId,
+		return newJSONHTTPError(
+			schedulerID,
 			startTime,
 			ptypes.TimestampNow(),
-			apiPb.SchedulerResponseCode_OK,
+			apiPb.SchedulerCode_OK,
 			"",
 			nil,
 		)
@@ -83,47 +85,47 @@ func ExecHttpValue(schedulerId string, timeout int32, config *scheduler_config_s
 	for _, value := range config.Selectors {
 		res := gjson.Get(jsonString, value.Path)
 		if !res.Exists() {
-			return newJsonHttpError(
-				schedulerId,
+			return newJSONHTTPError(
+				schedulerID,
 				startTime,
 				ptypes.TimestampNow(),
-				apiPb.SchedulerResponseCode_Error,
+				apiPb.SchedulerCode_ERROR,
 				valueNotExistErrorFn(value.Path).Error(),
 				nil,
 			)
 		}
 		switch value.Type {
-		case apiPb.HttpJsonValueConfig_String:
+		case apiPb.HttpJsonValueConfig_STRING:
 			results = append(results, &structType.Value{
 				Kind: &structType.Value_StringValue{
 					StringValue: res.String(),
 				},
 			})
-		case apiPb.HttpJsonValueConfig_Bool:
+		case apiPb.HttpJsonValueConfig_BOOL:
 			results = append(results, &structType.Value{
 				Kind: &structType.Value_BoolValue{
 					BoolValue: res.Bool(),
 				},
 			})
-		case apiPb.HttpJsonValueConfig_Number:
+		case apiPb.HttpJsonValueConfig_NUMBER:
 			results = append(results, &structType.Value{
 				Kind: &structType.Value_NumberValue{
 					NumberValue: res.Float(),
 				},
 			})
-		case apiPb.HttpJsonValueConfig_Time:
+		case apiPb.HttpJsonValueConfig_TIME:
 			results = append(results, &structType.Value{
 				Kind: &structType.Value_StringValue{
 					StringValue: res.Time().Format(time.RFC3339),
 				},
 			})
-		case apiPb.HttpJsonValueConfig_Any:
+		case apiPb.HttpJsonValueConfig_ANY:
 			results = append(results, &structType.Value{
 				Kind: &structType.Value_StringValue{
 					StringValue: fmt.Sprintf("%v", res.Value()),
 				},
 			})
-		case apiPb.HttpJsonValueConfig_Raw:
+		case apiPb.HttpJsonValueConfig_RAW:
 			results = append(results, &structType.Value{
 				Kind: &structType.Value_StringValue{
 					StringValue: res.Raw,
@@ -133,21 +135,21 @@ func ExecHttpValue(schedulerId string, timeout int32, config *scheduler_config_s
 	}
 
 	if len(config.Selectors) == 1 {
-		return newJsonHttpError(
-			schedulerId,
+		return newJSONHTTPError(
+			schedulerID,
 			startTime,
 			ptypes.TimestampNow(),
-			apiPb.SchedulerResponseCode_OK,
+			apiPb.SchedulerCode_OK,
 			"",
 			results[0],
 		)
 	}
 
-	return newJsonHttpError(
-		schedulerId,
+	return newJSONHTTPError(
+		schedulerID,
 		startTime,
 		ptypes.TimestampNow(),
-		apiPb.SchedulerResponseCode_OK,
+		apiPb.SchedulerCode_OK,
 		"",
 		&structType.Value{
 			Kind: &structType.Value_ListValue{
@@ -159,9 +161,9 @@ func ExecHttpValue(schedulerId string, timeout int32, config *scheduler_config_s
 	)
 }
 
-func newJsonHttpError(schedulerId string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerResponseCode, description string, value *structType.Value) CheckError {
-	return &jsonHttpError{
-		schedulerId: schedulerId,
+func newJSONHTTPError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerCode, description string, value *structType.Value) CheckError {
+	return &jsonHTTPError{
+		schedulerID: schedulerID,
 		startTime:   startTime,
 		endTime:     endTime,
 		code:        code,

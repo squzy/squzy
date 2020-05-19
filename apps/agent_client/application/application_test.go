@@ -13,15 +13,16 @@ import (
 	"net"
 	"os"
 	"sync"
+	"syscall"
 	"testing"
 	"time"
 )
 
 type executorMock struct {
-	ch chan *apiPb.SendMetricsRequest
+	ch chan *apiPb.Metric
 }
 
-func (e *executorMock) Execute() chan *apiPb.SendMetricsRequest {
+func (e *executorMock) Execute() chan *apiPb.Metric {
 	return e.ch
 }
 
@@ -40,6 +41,10 @@ type serverSuccess struct {
 	ch    chan *apiPb.SendMetricsRequest
 	count int
 	mutex sync.Mutex
+}
+
+func (s *serverSuccess) GetAgentById(ctx context.Context, request *apiPb.GetAgentByIdRequest) (*apiPb.AgentItem, error) {
+	panic("implement me")
 }
 
 func (s *serverSuccess) GetByAgentName(context.Context, *apiPb.GetByAgentNameRequest) (*apiPb.GetAgentListResponse, error) {
@@ -164,7 +169,7 @@ func TestApplication_Run(t *testing.T) {
 			assert.Equal(t, nil, err)
 		}()
 
-		ch := make(chan *apiPb.SendMetricsRequest)
+		ch := make(chan *apiPb.Metric)
 		inter := make(chan os.Signal, 1)
 		a := New(&executorMock{
 			ch: ch,
@@ -179,18 +184,19 @@ func TestApplication_Run(t *testing.T) {
 			assert.Equal(t, nil, err)
 			wg.Done()
 		}()
-		ch <- &apiPb.SendMetricsRequest{
+		ch <- &apiPb.Metric{
 			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
 				Load: 5,
 			}}},
 		}
 		value := <-msgChan
+
 		assert.EqualValues(t, []*apiPb.CpuInfo_CPU{{
 			Load: 5,
-		}}, value.CpuInfo.Cpus)
+		}}, (value.Msg).(*apiPb.SendMetricsRequest_Metric).Metric.CpuInfo.Cpus)
 
 		grpcServer.Stop()
-		ch <- &apiPb.SendMetricsRequest{
+		ch <- &apiPb.Metric{
 			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
 				Load: 5,
 			}}},
@@ -206,7 +212,7 @@ func TestApplication_Run(t *testing.T) {
 			assert.Equal(t, nil, err)
 		}()
 
-		ch <- &apiPb.SendMetricsRequest{
+		ch <- &apiPb.Metric{
 			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
 				Load: 5,
 			}}},
@@ -214,15 +220,19 @@ func TestApplication_Run(t *testing.T) {
 		value = <-msgChan
 		assert.EqualValues(t, []*apiPb.CpuInfo_CPU{{
 			Load: 5,
-		}}, value.CpuInfo.Cpus)
+		}}, (value.Msg).(*apiPb.SendMetricsRequest_Metric).Metric.CpuInfo.Cpus)
 
-		inter <- os.Interrupt
+		inter <- syscall.SIGTERM
 		wg.Wait()
 		assert.Equal(t, 5, s.count)
 	})
 }
 
 type client struct {
+}
+
+func (c client) GetAgentById(ctx context.Context, in *apiPb.GetAgentByIdRequest, opts ...grpc.CallOption) (*apiPb.AgentItem, error) {
+	panic("implement me")
 }
 
 func (c client) GetByAgentName(ctx context.Context, in *apiPb.GetByAgentNameRequest, opts ...grpc.CallOption) (*apiPb.GetAgentListResponse, error) {
@@ -246,6 +256,10 @@ func (c client) UnRegister(ctx context.Context, in *apiPb.UnRegisterRequest, opt
 }
 
 type clientError struct {
+}
+
+func (c clientError) GetAgentById(ctx context.Context, in *apiPb.GetAgentByIdRequest, opts ...grpc.CallOption) (*apiPb.AgentItem, error) {
+	panic("implement me")
 }
 
 func (c clientError) GetByAgentName(ctx context.Context, in *apiPb.GetByAgentNameRequest, opts ...grpc.CallOption) (*apiPb.GetAgentListResponse, error) {

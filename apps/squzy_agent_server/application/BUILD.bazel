@@ -12,6 +12,7 @@ go_library(
         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
         "//apps/squzy_agent_server/server:go_default_library",
         "//apps/squzy_agent_server/database:go_default_library",
+        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
      ]
 )
 

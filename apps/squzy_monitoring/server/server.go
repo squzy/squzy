@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	invalidTypeError = errors.New("Invalid type of config")
+	errInvalidTypeError = errors.New("invalid type of config")
 )
 
 type server struct {
@@ -34,11 +34,11 @@ func (s *server) GetSchedulerList(ctx context.Context, rq *empty.Empty) (*apiPb.
 	for i := range list {
 		index := i
 		errGroup.Go(func() error {
-			res, err := s.GetSchedulerById(ctx, &apiPb.GetSchedulerByIdRequest{
-				Id: list[index].Id.Hex(),
+			res, errG := s.GetSchedulerById(ctx, &apiPb.GetSchedulerByIdRequest{
+				Id: list[index].ID.Hex(),
 			})
-			if err != nil {
-				return err
+			if errG != nil {
+				return errG
 			}
 			arr[index] = res
 			return nil
@@ -51,7 +51,7 @@ func (s *server) GetSchedulerList(ctx context.Context, rq *empty.Empty) (*apiPb.
 	}
 
 	return &apiPb.GetSchedulerListResponse{
-		List: arr,
+		Lists: arr,
 	}, nil
 }
 
@@ -66,24 +66,24 @@ func (s *server) GetSchedulerById(ctx context.Context, rq *apiPb.GetSchedulerByI
 		return nil, err
 	}
 	switch config.Type {
-	case apiPb.SchedulerType_Tcp:
+	case apiPb.SchedulerType_TCP:
 		return &apiPb.Scheduler{
 			Id:       id,
-			Type:     config.Type,
+			Type:     apiPb.SchedulerType_TCP,
 			Status:   config.Status,
 			Interval: config.Interval,
 			Timeout:  config.Timeout,
 			Config: &apiPb.Scheduler_Tcp{
 				Tcp: &apiPb.TcpConfig{
-					Host: config.TcpConfig.Host,
-					Port: config.TcpConfig.Port,
+					Host: config.TCPConfig.Host,
+					Port: config.TCPConfig.Port,
 				},
 			},
 		}, nil
-	case apiPb.SchedulerType_Grpc:
+	case apiPb.SchedulerType_GRPC:
 		return &apiPb.Scheduler{
 			Id:       id,
-			Type:     config.Type,
+			Type:     apiPb.SchedulerType_GRPC,
 			Status:   config.Status,
 			Interval: config.Interval,
 			Timeout:  config.Timeout,
@@ -95,54 +95,54 @@ func (s *server) GetSchedulerById(ctx context.Context, rq *apiPb.GetSchedulerByI
 				},
 			},
 		}, nil
-	case apiPb.SchedulerType_Http:
+	case apiPb.SchedulerType_HTTP:
 		return &apiPb.Scheduler{
 			Id:       id,
-			Type:     config.Type,
+			Type:     apiPb.SchedulerType_HTTP,
 			Status:   config.Status,
 			Interval: config.Interval,
 			Timeout:  config.Timeout,
 			Config: &apiPb.Scheduler_Http{
 				Http: &apiPb.HttpConfig{
-					Method:     config.HttpConfig.Method,
-					Url:        config.HttpConfig.Url,
-					Headers:    config.HttpConfig.Headers,
-					StatusCode: config.HttpConfig.StatusCode,
+					Method:     config.HTTPConfig.Method,
+					Url:        config.HTTPConfig.URL,
+					Headers:    config.HTTPConfig.Headers,
+					StatusCode: config.HTTPConfig.StatusCode,
 				},
 			},
 		}, nil
-	case apiPb.SchedulerType_SiteMap:
+	case apiPb.SchedulerType_SITE_MAP:
 		return &apiPb.Scheduler{
 			Id:       id,
-			Type:     config.Type,
+			Type:     apiPb.SchedulerType_SITE_MAP,
 			Status:   config.Status,
 			Interval: config.Interval,
 			Timeout:  config.Timeout,
 			Config: &apiPb.Scheduler_Sitemap{
 				Sitemap: &apiPb.SiteMapConfig{
-					Url:         config.SiteMapConfig.Url,
+					Url:         config.SiteMapConfig.URL,
 					Concurrency: config.SiteMapConfig.Concurrency,
 				},
 			},
 		}, nil
-	case apiPb.SchedulerType_HttpJsonValue:
+	case apiPb.SchedulerType_HTTP_JSON_VALUE:
 		return &apiPb.Scheduler{
 			Id:       id,
-			Type:     config.Type,
+			Type:     apiPb.SchedulerType_HTTP_JSON_VALUE,
 			Status:   config.Status,
 			Interval: config.Interval,
 			Timeout:  config.Timeout,
 			Config: &apiPb.Scheduler_HttpValue{
 				HttpValue: &apiPb.HttpJsonValueConfig{
-					Method:    config.HttpValueConfig.Method,
-					Url:       config.HttpValueConfig.Url,
-					Headers:   config.HttpValueConfig.Headers,
-					Selectors: helpers.SelectorsToProto(config.HttpValueConfig.Selectors),
+					Method:    config.HTTPValueConfig.Method,
+					Url:       config.HTTPValueConfig.URL,
+					Headers:   config.HTTPValueConfig.Headers,
+					Selectors: helpers.SelectorsToProto(config.HTTPValueConfig.Selectors),
 				},
 			},
 		}, nil
 	default:
-		return nil, invalidTypeError
+		return nil, errInvalidTypeError
 	}
 }
 
@@ -219,32 +219,32 @@ func (s *server) Add(ctx context.Context, rq *apiPb.AddRequest) (*apiPb.AddRespo
 	switch config := rq.Config.(type) {
 	case *apiPb.AddRequest_Tcp:
 		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
-			Id:       schld.GetIdBson(),
-			Type:     apiPb.SchedulerType_Tcp,
+			ID:       schld.GetIDBson(),
+			Type:     apiPb.SchedulerType_TCP,
 			Status:   apiPb.SchedulerStatus_STOPPED,
 			Interval: rq.Interval,
 			Timeout:  rq.Timeout,
-			TcpConfig: &scheduler_config_storage.TcpConfig{
+			TCPConfig: &scheduler_config_storage.TCPConfig{
 				Host: config.Tcp.Host,
 				Port: config.Tcp.Port,
 			},
 		}
 	case *apiPb.AddRequest_Sitemap:
 		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
-			Id:       schld.GetIdBson(),
-			Type:     apiPb.SchedulerType_SiteMap,
+			ID:       schld.GetIDBson(),
+			Type:     apiPb.SchedulerType_SITE_MAP,
 			Status:   apiPb.SchedulerStatus_STOPPED,
 			Interval: rq.Interval,
 			Timeout:  rq.Timeout,
 			SiteMapConfig: &scheduler_config_storage.SiteMapConfig{
-				Url:         config.Sitemap.Url,
+				URL:         config.Sitemap.Url,
 				Concurrency: config.Sitemap.Concurrency,
 			},
 		}
 	case *apiPb.AddRequest_Grpc:
 		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
-			Id:       schld.GetIdBson(),
-			Type:     apiPb.SchedulerType_Grpc,
+			ID:       schld.GetIDBson(),
+			Type:     apiPb.SchedulerType_GRPC,
 			Status:   apiPb.SchedulerStatus_STOPPED,
 			Interval: rq.Interval,
 			Timeout:  rq.Timeout,
@@ -256,34 +256,34 @@ func (s *server) Add(ctx context.Context, rq *apiPb.AddRequest) (*apiPb.AddRespo
 		}
 	case *apiPb.AddRequest_Http:
 		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
-			Id:       schld.GetIdBson(),
-			Type:     apiPb.SchedulerType_Http,
+			ID:       schld.GetIDBson(),
+			Type:     apiPb.SchedulerType_HTTP,
 			Status:   apiPb.SchedulerStatus_STOPPED,
 			Interval: rq.Interval,
 			Timeout:  rq.Timeout,
-			HttpConfig: &scheduler_config_storage.HttpConfig{
+			HTTPConfig: &scheduler_config_storage.HTTPConfig{
 				Method:     config.Http.Method,
-				Url:        config.Http.Url,
+				URL:        config.Http.Url,
 				Headers:    config.Http.Headers,
 				StatusCode: config.Http.StatusCode,
 			},
 		}
 	case *apiPb.AddRequest_HttpValue:
 		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
-			Id:       schld.GetIdBson(),
-			Type:     apiPb.SchedulerType_HttpJsonValue,
+			ID:       schld.GetIDBson(),
+			Type:     apiPb.SchedulerType_HTTP_JSON_VALUE,
 			Status:   apiPb.SchedulerStatus_STOPPED,
 			Interval: rq.Interval,
 			Timeout:  rq.Timeout,
-			HttpValueConfig: &scheduler_config_storage.HttpValueConfig{
+			HTTPValueConfig: &scheduler_config_storage.HTTPValueConfig{
 				Method:    config.HttpValue.Method,
-				Url:       config.HttpValue.Url,
+				URL:       config.HttpValue.Url,
 				Headers:   config.HttpValue.Headers,
 				Selectors: helpers.SelectorsToDb(config.HttpValue.Selectors),
 			},
 		}
 	default:
-		return nil, invalidTypeError
+		return nil, errInvalidTypeError
 	}
 	err = s.configStorage.Add(ctx, schedulerConfig)
 	if err != nil {
@@ -294,7 +294,7 @@ func (s *server) Add(ctx context.Context, rq *apiPb.AddRequest) (*apiPb.AddRespo
 		return nil, err
 	}
 	return &apiPb.AddResponse{
-		Id: schld.GetId(),
+		Id: schld.GetID(),
 	}, nil
 }
 
