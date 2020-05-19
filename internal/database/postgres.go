@@ -161,60 +161,75 @@ func (p *postgres) InsertStatRequest(data *apiPb.Metric) error {
 	return nil
 }
 
-func (p *postgres) GetStatRequest(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	var statRequests []*StatRequest
-	count := int32(-1)
-	if err := p.db.Table(dbStatRequestCollection).
-		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), id).
-		Find(&statRequests).
-		Count(&count).Error; err != nil {
-		return nil, -1, errorDataBase
-	}
-	return ConvertFromPostgressStatRequests(statRequests), count, nil
-}
-
-func (p *postgres) GetCPUInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return p.getSpecialRecords(id, pagination, filter, cpuInfoKey)
-}
-
-func (p *postgres) GetMemoryInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return p.getSpecialRecords(id, pagination, filter, memoryInfoKey)
-}
-
-func (p *postgres) GetDiskInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return p.getSpecialRecords(id, pagination, filter, diskInfoKey)
-}
-
-func (p *postgres) GetNetInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return p.getSpecialRecords(id, pagination, filter, netInfoKey)
-}
-
-func (p *postgres) getSpecialRecords(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter, key string) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+func (p *postgres) GetStatRequest(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
 	timeFrom, timeTo, err := getTime(filter)
 	if err != nil {
 		return nil, -1, err
 	}
 
 	var count int
-
 	err = p.db.Table(dbStatRequestCollection).
-		Where(fmt.Sprintf(`"%s"."id" = ?`, dbStatRequestCollection), id).
+		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
 		Count(&count).Error
 	if err != nil {
 		return nil, -1, err
 	}
 
-	offset := int32(0)
-	limit := int32(count)
-	if pagination != nil {
-		offset = pagination.GetLimit() * pagination.GetPage()
-		limit = pagination.GetLimit()
-	}
+	offset, limit := getOffsetAndLimit(count, pagination)
 
 	//TODO: test if it works
 	var statRequests []*StatRequest
 	err = p.db.Table(dbStatRequestCollection).
-		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), id).
+		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
+		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
+		Order("time").
+		Offset(offset).
+		Limit(limit).
+		Find(&statRequests).Error
+
+	if err != nil {
+		return nil, -1, errorDataBase
+	}
+
+	return ConvertFromPostgressStatRequests(statRequests), int32(count), nil
+}
+
+func (p *postgres) GetCPUInfo(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+	return p.getSpecialRecords(agentID, pagination, filter, cpuInfoKey)
+}
+
+func (p *postgres) GetMemoryInfo(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+	return p.getSpecialRecords(agentID, pagination, filter, memoryInfoKey)
+}
+
+func (p *postgres) GetDiskInfo(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+	return p.getSpecialRecords(agentID, pagination, filter, diskInfoKey)
+}
+
+func (p *postgres) GetNetInfo(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+	return p.getSpecialRecords(agentID, pagination, filter, netInfoKey)
+}
+
+func (p *postgres) getSpecialRecords(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter, key string) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+	timeFrom, timeTo, err := getTime(filter)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	var count int
+	err = p.db.Table(dbStatRequestCollection).
+		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
+		Count(&count).Error
+	if err != nil {
+		return nil, -1, err
+	}
+
+	offset, limit := getOffsetAndLimit(count, pagination)
+
+	//TODO: test if it works
+	var statRequests []*StatRequest
+	err = p.db.Table(dbStatRequestCollection).
+		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
 		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
 		Select(fmt.Sprintf("%s, time", key)).
 		Order("time").
@@ -242,4 +257,14 @@ func getTime(filter *apiPb.TimeFilter) (time.Time, time.Time, error) {
 		}
 	}
 	return timeFrom, timeTo, err
+}
+
+func getOffsetAndLimit(count int, pagination *apiPb.Pagination) (int32, int32) {
+	offset := int32(0)
+	limit := int32(count)
+	if pagination != nil {
+		offset = pagination.GetLimit() * pagination.GetPage()
+		limit = pagination.GetLimit()
+	}
+	return offset, limit
 }

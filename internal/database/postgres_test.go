@@ -147,19 +147,41 @@ func (s *Suite) Test_GetStatRequest() {
 	var (
 		id = "1"
 	)
-	query := fmt.Sprintf(`SELECT * FROM "%s" WHERE "%s"."deleted_at" IS NULL`, dbStatRequestCollection, dbStatRequestCollection)
-	rows := sqlmock.NewRows([]string{"id"}).AddRow("1")
-	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id).
-		WillReturnRows(rows)
-	query = fmt.Sprintf(`SELECT count(*) FROM "%s" WHERE "%s"."deleted_at" IS NULL`, dbStatRequestCollection, dbStatRequestCollection)
-	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(id).
 		WillReturnRows(rows)
 
+	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbStatRequestCollection)
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
 	_, _, err := postgr.GetStatRequest(id, nil, nil)
 	require.NoError(s.T(), err)
+}
+
+
+//Based on fact, that if request is not mocked, it will return error
+func (s *Suite) Test_GetStatRequest_Select_Error() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id).
+		WillReturnRows(rows)
+
+	_, _, err := postgr.GetStatRequest(id, &apiPb.Pagination{
+		Page:  1, //random value
+		Limit: 2, //random value
+	}, nil)
+	require.Error(s.T(), err)
 }
 
 func (s *Suite) Test_GetCpuInfo() {
@@ -184,6 +206,7 @@ func (s *Suite) Test_GetCpuInfo() {
 }
 
 //Based on fact, that if request is not mocked, it will return error
+//Is used for getSpecialRecords test
 func (s *Suite) Test_GetCpuInfo_Count_Error() {
 	var (
 		id = "1"
@@ -194,6 +217,7 @@ func (s *Suite) Test_GetCpuInfo_Count_Error() {
 }
 
 //Based on fact, that if request is not mocked, it will return error
+//Is used for getSpecialRecords test
 func (s *Suite) Test_GetCpuInfo_Select_Error() {
 	var (
 		id = "1"
@@ -349,6 +373,15 @@ func TestPostgres_InsertStatRequest(t *testing.T) {
 }
 
 func TestPostgres_GetStatRequest(t *testing.T) {
+	//Time for invalid timestamp
+	maxValidSeconds := 253402300800
+	t.Run("Should: return error", func(t *testing.T) {
+		_, _, err := postgrWrong.GetStatRequest("", nil, &apiPb.TimeFilter{
+			From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+			To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+		})
+		assert.Error(t, err)
+	})
 	t.Run("Should: return error", func(t *testing.T) {
 		_, _, err := postgrWrong.GetStatRequest("", nil, nil)
 		assert.Error(t, err)
