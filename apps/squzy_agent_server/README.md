@@ -4,7 +4,7 @@
 
 ## About
 
-That storage implement this [API](https://github.com/squzy/squzy_proto/blob/master/proto/v1/squzy_agent_server.proto#L10)
+This storage implement this [API](https://github.com/squzy/squzy_proto/blob/master/proto/v1/squzy_agent_server.proto#L10)
 
 ## Environment variables
 
