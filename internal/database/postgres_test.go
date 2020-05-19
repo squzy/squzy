@@ -81,18 +81,46 @@ func (s *Suite) Test_InsertMetaData() {
 	require.NoError(s.T(), err)
 }
 
-func (s *Suite) Test_GetMetaData() {
+func (s *Suite) Test_GetSnapshots() {
 	var (
 		id = "1"
 	)
-	query := fmt.Sprintf(`SELECT * FROM "%s" WHERE "%s"."deleted_at" IS NULL`, dbSnapshotCollection, dbSnapshotCollection)
-	rows := sqlmock.NewRows([]string{"id"}).AddRow("1")
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(id).
 		WillReturnRows(rows)
 
-	_, err := postgr.GetSnapshots(id)
+	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbSnapshotCollection)
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, _, err := postgr.GetSnapshots(id, nil, nil)
 	require.NoError(s.T(), err)
+}
+
+
+
+//Based on fact, that if request is not mocked, it will return error
+func (s *Suite) Test_GetSnapshots_Select_Error() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id).
+		WillReturnRows(rows)
+
+	_, _, err := postgr.GetSnapshots(id, &apiPb.Pagination{
+		Page:  1, //random value
+		Limit: 2, //random value
+	}, nil)
+	require.Error(s.T(), err)
 }
 
 func (s *Suite) Test_InsertStatRequest() {
@@ -163,7 +191,6 @@ func (s *Suite) Test_GetStatRequest() {
 	_, _, err := postgr.GetStatRequest(id, nil, nil)
 	require.NoError(s.T(), err)
 }
-
 
 //Based on fact, that if request is not mocked, it will return error
 func (s *Suite) Test_GetStatRequest_Select_Error() {
@@ -307,7 +334,7 @@ func TestInit(t *testing.T) {
 	suite.Run(t, new(Suite))
 }
 
-func TestPostgres_Migrate(t *testing.T) {
+func TestPostgres_Migrate_error(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		err := postgrWrong.Migrate()
 		assert.Error(t, err)
@@ -339,9 +366,18 @@ func TestPostgres_InsertSnapshots(t *testing.T) {
 	})
 }
 
-func TestPostgres_GetMetaData(t *testing.T) {
+func TestPostgres_GetSnapshots(t *testing.T) {
+	//Time for invalid timestamp
+	maxValidSeconds := 253402300800
 	t.Run("Should: return error", func(t *testing.T) {
-		_, err := postgrWrong.GetSnapshots("")
+		_, _, err := postgrWrong.GetSnapshots("", nil, &apiPb.TimeFilter{
+			From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+			To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+		})
+		assert.Error(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		_, _, err := postgrWrong.GetSnapshots("", nil, nil)
 		assert.Error(t, err)
 	})
 }

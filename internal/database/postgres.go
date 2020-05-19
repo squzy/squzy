@@ -119,14 +119,12 @@ func (p *postgres) Migrate() error {
 		&NetInfo{},
 	}
 
+	var err error
 	for _, model := range models {
-		err := p.db.AutoMigrate(model).Error // migrate models one-by-one
-		if err != nil {
-			return err
-		}
+		err = p.db.AutoMigrate(model).Error // migrate models one-by-one
 	}
 
-	return nil
+	return err
 }
 
 func (p *postgres) InsertSnapshot(data *apiPb.SchedulerResponse) error {
@@ -140,13 +138,37 @@ func (p *postgres) InsertSnapshot(data *apiPb.SchedulerResponse) error {
 	return nil
 }
 
-func (p *postgres) GetSnapshots(id string) ([]*apiPb.SchedulerSnapshot, error) {
-	var dbSnapshots []*Snapshot
-	if err := p.db.Table(dbSnapshotCollection).Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), id).Find(&dbSnapshots).Error; err != nil {
-		//TODO: log?
-		return nil, errorDataBase
+func (p *postgres) GetSnapshots(schedulerId string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.SchedulerSnapshot, int32, error) {
+	timeFrom, timeTo, err := getTime(filter)
+	if err != nil {
+		return nil, -1, err
 	}
-	return ConvertFromPostgresSnapshots(dbSnapshots), nil
+
+	var count int
+	err = p.db.Table(dbSnapshotCollection).
+		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), schedulerId).
+		Count(&count).Error
+	if err != nil {
+		return nil, -1, err
+	}
+
+	offset, limit := getOffsetAndLimit(count, pagination)
+
+	//TODO: test if it works
+	var dbSnapshots []*Snapshot
+	err = p.db.Table(dbSnapshotCollection).
+		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), schedulerId).
+		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+		Order("time").
+		Offset(offset).
+		Limit(limit).
+		Find(&dbSnapshots).Error
+
+	if err != nil {
+		return nil, -1, errorDataBase
+	}
+
+	return ConvertFromPostgresSnapshots(dbSnapshots), int32(count), nil
 }
 
 func (p *postgres) InsertStatRequest(data *apiPb.Metric) error {

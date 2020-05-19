@@ -37,9 +37,10 @@ func (s *service) SendResponseFromAgent(ctx context.Context, request *apiPb.Metr
 }
 
 func (s *service) GetSchedulerInformation(ctx context.Context, request *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
-	snapshots, err := s.database.GetSnapshots(request.SchedulerId)
+	snapshots, count, err := s.database.GetSnapshots(request.SchedulerId, request.GetPagination(), request.GetTimeRange())
 	return &apiPb.GetSchedulerInformationResponse{
 		Snapshots: snapshots,
+		Count:     count,
 	}, wrapError(err)
 }
 
