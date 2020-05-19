@@ -19,8 +19,8 @@ func (*dbErrorMock) InsertSnapshot(data *apiPb.SchedulerResponse) error {
 	return errors.New("error")
 }
 
-func (*dbErrorMock) GetSnapshots(id string) ([]*apiPb.SchedulerSnapshot, error) {
-	return nil, errors.New("error")
+func (*dbErrorMock) GetSnapshots(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.SchedulerSnapshot, int32, error) {
+	return nil, -1, errors.New("error")
 }
 
 func (*dbErrorMock) InsertStatRequest(data *apiPb.Metric) error {
@@ -58,8 +58,8 @@ func (*dbMock) InsertSnapshot(data *apiPb.SchedulerResponse) error {
 	return nil
 }
 
-func (*dbMock) GetSnapshots(id string) ([]*apiPb.SchedulerSnapshot, error) {
-	return nil, nil
+func (*dbMock) GetSnapshots(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.SchedulerSnapshot, int32, error) {
+	return nil, -1, nil
 }
 
 func (*dbMock) InsertStatRequest(data *apiPb.Metric) error {
