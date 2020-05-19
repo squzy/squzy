@@ -1,15 +1,15 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "application",
+     name = "go_default_library",
      srcs = ["application.go"],
      importpath = "squzy/apps/agent_client/application",
      visibility = ["//visibility:public"],
      deps = [
          "@org_golang_google_grpc//:go_default_library",
-          "//internal/agent-executor:agent-executor",
-          "//apps/agent_client/config:config",
-          "//internal/grpcTools:grpcTools",
+          "//internal/agent-executor:go_default_library",
+          "//apps/agent_client/config:go_default_library",
+          "//internal/helpers:go_default_library",
           "@com_github_shirou_gopsutil//host:go_default_library",
           "@com_github_golang_protobuf//ptypes/empty:go_default_library",
           "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
@@ -18,11 +18,11 @@ go_library(
 )
 
 go_test(
-    name = "application_test",
+    name = "go_default_test",
     srcs = [
         "application_test.go",
     ],
-    embed = [":application"],
+    embed = [":go_default_library"],
     deps = [
         "@com_github_stretchr_testify//assert:go_default_library",
     ]

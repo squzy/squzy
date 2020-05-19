@@ -34,6 +34,5 @@ Some times later we will provide our implementation
 Bold is required
 
 - **SQUZY_AGENT_SERVER_HOST** - agent server host
-- SQUZY_AGENT_SERVER_TIMEOUT(5s) - timeout for get connection to host
 - SQUZY_AGENT_INTERVAL(5s) - how offen get metric
 - SQUZY_AGENT_NAME - uniq name for define strict agent

@@ -2,23 +2,18 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
      name = "go_default_library",
-     srcs = ["helpers.go"],
-     importpath = "squzy/internal/helpers",
+     srcs = ["version.go"],
+    importpath = "squzy/apps/squzy_agent_server/version",
      visibility = ["//visibility:public"],
-     deps = [
-        "//internal/scheduler-config-storage:go_default_library",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-     ],
-
 )
 
 go_test(
     name = "go_default_test",
     srcs = [
-        "helpers_test.go",
+        "version_test.go",
     ],
     embed = [":go_default_library"],
     deps = [
         "@com_github_stretchr_testify//assert:go_default_library"
-    ]
+    ],
 )
