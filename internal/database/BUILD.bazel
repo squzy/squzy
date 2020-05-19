@@ -1,7 +1,7 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "database",
+     name = "go_default_library",
      srcs = [
          "convertion.go",
          "database.go",
@@ -20,18 +20,18 @@ go_library(
 )
 
 go_test(
-    name = "database_test",
+    name = "go_default_test",
     srcs = [
         "convertion_test.go",
         "database_test.go",
         "postgres_test.go",
     ],
-    embed = [":database"],
+    embed = [":go_default_library"],
     deps = [
-        "@com_github_stretchr_testify//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
+        "@com_github_stretchr_testify//require:go_default_library",
+        "@com_github_stretchr_testify//suite:go_default_library",
         "@com_github_data_dog_go_sqlmock//:go_default_library",
-        "@com_github_jinzhu_gorm//:go_default_library",
-        "@com_github_golang_protobuf//ptypes:go_default_library",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
+        "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
     ]
 )

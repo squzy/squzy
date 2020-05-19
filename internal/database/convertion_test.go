@@ -153,7 +153,7 @@ func TestConvertFromPostgressStatRequest(t *testing.T) {
 	})
 	t.Run("Test: no error", func(t *testing.T) {
 		_, err := ConvertFromPostgressStatRequest(&StatRequest{
-			CpuInfo:    nil,
+			CPUInfo:    nil,
 			MemoryInfo: nil,
 			DiskInfo:   nil,
 			NetInfo:    nil,
@@ -163,14 +163,14 @@ func TestConvertFromPostgressStatRequest(t *testing.T) {
 	})
 	t.Run("Test: no error", func(t *testing.T) {
 		_, err := ConvertFromPostgressStatRequest(&StatRequest{
-			CpuInfo:    []*CpuInfo{{}},
+			CPUInfo: []*CPUInfo{{}},
 			MemoryInfo: &MemoryInfo{
-				Mem:           &Memory{},
-				Swap:          &Memory{},
+				Mem:  &Memory{},
+				Swap: &Memory{},
 			},
-			DiskInfo:   []*DiskInfo{{}},
-			NetInfo:    []*NetInfo{{}},
-			Time:       time.Time{},
+			DiskInfo: []*DiskInfo{{}},
+			NetInfo:  []*NetInfo{{}},
+			Time:     time.Time{},
 		})
 		assert.NoError(t, err)
 	})

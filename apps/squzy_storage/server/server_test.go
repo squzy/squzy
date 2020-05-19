@@ -41,7 +41,7 @@ type configMock struct {
 }
 
 func (*configMock) GetPort() int32 {
-	return 11111
+	return 23233
 }
 
 func (*configMock) GetDbHost() string {
@@ -107,7 +107,7 @@ func TestServer_Run(t *testing.T) {
 			_ = s.Run()
 		}()
 		time.Sleep(time.Second)
-		_, err := net.Dial("tcp", "localhost:11111")
+		_, err := net.Dial("tcp", "localhost:23233")
 		assert.Equal(t, nil, err)
 	})
 }

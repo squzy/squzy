@@ -1,4 +1,4 @@
-package squzy_storage
+package main
 
 import (
 	"fmt"
@@ -10,19 +10,25 @@ import (
 	"squzy/internal/database"
 )
 
-func main()  {
+func main() {
 	cnfg := config.New()
-	db, err := database.New(func() (db *gorm.DB, e error) {
-		return gorm.Open(
-			"postgres",
-			fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s connect_timeout=10 sslmode=disable",
-				cnfg.GetDbHost(),
-				cnfg.GetDbPort(),
-				cnfg.GetDbName(),
-				cnfg.GetDbUser(),
-				cnfg.GetDbPassword(),
-			))
-	})
+	postgresDb, err := gorm.Open(
+		"postgres",
+		fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s connect_timeout=10 sslmode=disable",
+			cnfg.GetDbHost(),
+			cnfg.GetDbPort(),
+			cnfg.GetDbName(),
+			cnfg.GetDbUser(),
+			cnfg.GetDbPassword(),
+		))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db := database.New(postgresDb.LogMode(false))
+
+	err = db.Migrate()
 	if err != nil {
 		log.Fatal(err)
 	}

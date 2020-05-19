@@ -30,7 +30,7 @@ func ConvertToPostgressStatRequest(request *apiPb.Metric) (*StatRequest, error) 
 		return nil, err
 	}
 	return &StatRequest{
-		CpuInfo:    convertToCpuInfo(request.GetCpuInfo()),
+		CPUInfo:    convertToCPUInfo(request.GetCpuInfo()),
 		MemoryInfo: convertToMemoryInfo(request.GetMemoryInfo()),
 		DiskInfo:   convertToDiskInfo(request.GetDiskInfo()),
 		NetInfo:    convertToNetInfo(request.GetNetInfo()),
@@ -56,7 +56,7 @@ func ConvertFromPostgressStatRequest(data *StatRequest) (*apiPb.GetAgentInformat
 		return nil, err
 	}
 	return &apiPb.GetAgentInformationResponse_Statistic{
-		CpuInfo:    convertFromCpuInfo(data.CpuInfo),
+		CpuInfo:    convertFromCPUInfo(data.CPUInfo),
 		MemoryInfo: convertFromMemoryInfo(data.MemoryInfo),
 		DiskInfo:   convertFromDiskInfo(data.DiskInfo),
 		NetInfo:    convertFromNetInfo(data.NetInfo),
@@ -64,7 +64,7 @@ func ConvertFromPostgressStatRequest(data *StatRequest) (*apiPb.GetAgentInformat
 	}, nil
 }
 
-func convertToSnapshot(request *apiPb.SchedulerSnapshot, schedulerId string) (*Snapshot, error) {
+func convertToSnapshot(request *apiPb.SchedulerSnapshot, schedulerID string) (*Snapshot, error) {
 	if request == nil {
 		return nil, errors.New("ERROR_SNAPSHOT_IS_EMPTY")
 	}
@@ -73,7 +73,7 @@ func convertToSnapshot(request *apiPb.SchedulerSnapshot, schedulerId string) (*S
 		return nil, err
 	}
 	res := &Snapshot{
-		SchedulerId: schedulerId,
+		SchedulerID: schedulerID,
 		Code:        request.GetCode().String(),
 		Type:        request.GetType().String(),
 		Meta:        metaData,
@@ -137,13 +137,13 @@ func convertFromMetaData(metaData *MetaData) (*apiPb.SchedulerSnapshot_MetaData,
 	}, nil
 }
 
-func convertToCpuInfo(request *apiPb.CpuInfo) []*CpuInfo {
-	var res []*CpuInfo
+func convertToCPUInfo(request *apiPb.CpuInfo) []*CPUInfo {
+	var res []*CPUInfo
 	if request == nil {
 		return res
 	}
 	for _, v := range request.Cpus {
-		res = append(res, &CpuInfo{Load: v.GetLoad()})
+		res = append(res, &CPUInfo{Load: v.GetLoad()})
 	}
 	return res
 }
@@ -212,14 +212,14 @@ func convertToNetInfo(request *apiPb.NetInfo) []*NetInfo {
 	return res
 }
 
-func convertFromCpuInfo(data []*CpuInfo) *apiPb.CpuInfo {
+func convertFromCPUInfo(data []*CPUInfo) *apiPb.CpuInfo {
 	var cpus []*apiPb.CpuInfo_CPU
 	for _, v := range data {
 		cpus = append(cpus, &apiPb.CpuInfo_CPU{
 			Load: v.Load,
 		})
 	}
-	return &apiPb.CpuInfo{Cpus: cpus,}
+	return &apiPb.CpuInfo{Cpus: cpus}
 }
 
 func convertFromMemoryInfo(data *MemoryInfo) *apiPb.MemoryInfo {
@@ -261,7 +261,7 @@ func convertFromDiskInfo(data []*DiskInfo) *apiPb.DiskInfo {
 			UsedPercent: v.UsedPercent,
 		}
 	}
-	return &apiPb.DiskInfo{Disks: disks,}
+	return &apiPb.DiskInfo{Disks: disks}
 }
 
 func convertFromNetInfo(data []*NetInfo) *apiPb.NetInfo {
@@ -278,5 +278,5 @@ func convertFromNetInfo(data []*NetInfo) *apiPb.NetInfo {
 			DropOut:     v.DropOut,
 		}
 	}
-	return &apiPb.NetInfo{Interfaces: interfaces,}
+	return &apiPb.NetInfo{Interfaces: interfaces}
 }

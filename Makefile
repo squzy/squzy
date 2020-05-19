@@ -6,7 +6,11 @@ build_agent_server: .build_agent_server
 
 build_agent: .build_agent
 
+build_bin_api: .build_bin_api
+
 build_bin_squzy: .build_bin_squzy
+
+build_bin_storage: .build_bin_storage
 
 run_agent: .run_agent
 
@@ -38,6 +42,12 @@ default: build
 
 .build_bin_squzy:
 	./build.bash squzy_monitoring squzy_monitoring_$(version) $(version)
+
+.build_bin_storage:
+	./build.bash squzy_storage squzy_storage_$(version) $(version)
+
+.build_bin_api:
+	./build.bash squzy_api squzy_api_$(version) $(version)
 
 .build_agent_server:
 	./build.bash squzy_agent_server squzy_agent_server_$(version) $(version)

@@ -18,8 +18,13 @@ import (
 
 //docker run -d --rm --name postgres -e POSTGRES_USER="user" -e POSTGRES_PASSWORD="password" -e POSTGRES_DB="database" -p 5432:5432 postgres
 var (
-	postgr      = &postgres{}
-	postgrWrong = &postgres{}
+	postgr = &postgres{}
+	db, _  = gorm.Open(
+		"postgres",
+		fmt.Sprintf("host=lkl port=00 user=us dbname=dbn password=ps connect_timeout=10 sslmode=disable"))
+	postgrWrong = &postgres{
+		db,
+	}
 )
 
 type Suite struct {
@@ -42,17 +47,6 @@ func (s *Suite) SetupSuite() {
 	postgr.db = s.DB
 
 	s.DB.LogMode(true)
-}
-
-func TestPostgres_NewClient(t *testing.T) {
-	t.Run("wrongPostgress", func(t *testing.T) {
-		err := postgrWrong.newClient(func() (db *gorm.DB, e error) {
-			return gorm.Open(
-				"postgres",
-				fmt.Sprintf("host=lkl port=00 user=us dbname=dbn password=ps connect_timeout=10 sslmode=disable"))
-		})
-		assert.Error(t, err)
-	})
 }
 
 func (s *Suite) Test_InsertMetaData() {
@@ -136,12 +130,12 @@ func (s *Suite) Test_InsertStatRequest() {
 		},
 		DiskInfo: &apiPb.DiskInfo{
 			Disks: map[string]*apiPb.DiskInfo_Disk{
-				"":{},
+				"": {},
 			},
 		},
 		NetInfo: &apiPb.NetInfo{
 			Interfaces: map[string]*apiPb.NetInfo_Interface{
-				"":{},
+				"": {},
 			},
 		},
 		Time: ptypes.TimestampNow(),
@@ -185,7 +179,7 @@ func (s *Suite) Test_GetCpuInfo() {
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	_, _, err := postgr.GetCpuInfo(id, nil, nil)
+	_, _, err := postgr.GetCPUInfo(id, nil, nil)
 	require.NoError(s.T(), err)
 }
 
@@ -195,10 +189,9 @@ func (s *Suite) Test_GetCpuInfo_Count_Error() {
 		id = "1"
 	)
 
-	_, _, err := postgr.GetCpuInfo(id, nil, nil)
+	_, _, err := postgr.GetCPUInfo(id, nil, nil)
 	require.Error(s.T(), err)
 }
-
 
 //Based on fact, that if request is not mocked, it will return error
 func (s *Suite) Test_GetCpuInfo_Select_Error() {
@@ -212,9 +205,9 @@ func (s *Suite) Test_GetCpuInfo_Select_Error() {
 		WithArgs(id).
 		WillReturnRows(rows)
 
-	_, _, err := postgr.GetCpuInfo(id, &apiPb.Pagination{
-		Page:                 1, //random value
-		Limit:                2, //random value
+	_, _, err := postgr.GetCPUInfo(id, &apiPb.Pagination{
+		Page:  1, //random value
+		Limit: 2, //random value
 	}, nil)
 	require.Error(s.T(), err)
 }
@@ -362,15 +355,14 @@ func TestPostgres_GetStatRequest(t *testing.T) {
 	})
 }
 
-
 //Time errors in getSpecialRecords
 func TestPostgres_GetCpuInfo(t *testing.T) {
 	//Time for invalid timestamp
 	maxValidSeconds := 253402300800
 	t.Run("Should: return error", func(t *testing.T) {
-		_, _, err := postgrWrong.GetCpuInfo("", nil, &apiPb.TimeFilter{
-			From:                 &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
-			To:                    &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+		_, _, err := postgrWrong.GetCPUInfo("", nil, &apiPb.TimeFilter{
+			From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+			To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
 		})
 		assert.Error(t, err)
 	})

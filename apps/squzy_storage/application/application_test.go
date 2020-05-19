@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"errors"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
@@ -8,6 +9,10 @@ import (
 )
 
 type dbErrorMock struct {
+}
+
+func (*dbErrorMock) Migrate() error {
+	return nil
 }
 
 func (*dbErrorMock) InsertSnapshot(data *apiPb.SchedulerResponse) error {
@@ -26,7 +31,7 @@ func (*dbErrorMock) GetStatRequest(id string, pagination *apiPb.Pagination, filt
 	return nil, -1, errors.New("error")
 }
 
-func (*dbErrorMock) GetCpuInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+func (*dbErrorMock) GetCPUInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
 	return nil, -1, errors.New("error")
 }
 
@@ -45,6 +50,10 @@ func (*dbErrorMock) GetNetInfo(id string, pagination *apiPb.Pagination, filter *
 type dbMock struct {
 }
 
+func (*dbMock) Migrate() error {
+	return nil
+}
+
 func (*dbMock) InsertSnapshot(data *apiPb.SchedulerResponse) error {
 	return nil
 }
@@ -61,7 +70,7 @@ func (*dbMock) GetStatRequest(id string, pagination *apiPb.Pagination, filter *a
 	return nil, -1, nil
 }
 
-func (*dbMock) GetCpuInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
+func (*dbMock) GetCPUInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
 	return nil, -1, nil
 }
 
@@ -88,14 +97,14 @@ func TestService_SendResponseFromScheduler(t *testing.T) {
 		s := service{
 			database: &dbErrorMock{},
 		}
-		_, err := s.SendResponseFromScheduler(nil, nil)
+		_, err := s.SendResponseFromScheduler(context.Background(), nil)
 		assert.Error(t, err)
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := service{
 			database: &dbMock{},
 		}
-		_, err := s.SendResponseFromScheduler(nil, nil)
+		_, err := s.SendResponseFromScheduler(context.Background(), nil)
 		assert.NoError(t, err)
 	})
 }
@@ -105,14 +114,14 @@ func TestService_SendResponseFromAgent(t *testing.T) {
 		s := service{
 			database: &dbErrorMock{},
 		}
-		_, err := s.SendResponseFromAgent(nil, nil)
+		_, err := s.SendResponseFromAgent(context.Background(), nil)
 		assert.Error(t, err)
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := service{
 			database: &dbMock{},
 		}
-		_, err := s.SendResponseFromAgent(nil, nil)
+		_, err := s.SendResponseFromAgent(context.Background(), nil)
 		assert.NoError(t, err)
 	})
 }
@@ -122,14 +131,14 @@ func TestService_GetSchedulerInformation(t *testing.T) {
 		s := service{
 			database: &dbErrorMock{},
 		}
-		_, err := s.GetSchedulerInformation(nil, &apiPb.GetSchedulerInformationRequest{})
+		_, err := s.GetSchedulerInformation(context.Background(), &apiPb.GetSchedulerInformationRequest{})
 		assert.Error(t, err)
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := service{
 			database: &dbMock{},
 		}
-		_, err := s.GetSchedulerInformation(nil, &apiPb.GetSchedulerInformationRequest{})
+		_, err := s.GetSchedulerInformation(context.Background(), &apiPb.GetSchedulerInformationRequest{})
 		assert.NoError(t, err)
 	})
 }
@@ -139,42 +148,42 @@ func TestService_GetAgentInformation(t *testing.T) {
 		s := service{
 			database: &dbErrorMock{},
 		}
-		_, err := s.GetAgentInformation(nil, &apiPb.GetAgentInformationRequest{Type:-1})
+		_, err := s.GetAgentInformation(context.Background(), &apiPb.GetAgentInformationRequest{Type: -1})
 		assert.Error(t, err)
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := service{
 			database: &dbMock{},
 		}
-		_, err := s.GetAgentInformation(nil, &apiPb.GetAgentInformationRequest{Type:apiPb.TypeAgentStat_ALL})
+		_, err := s.GetAgentInformation(context.Background(), &apiPb.GetAgentInformationRequest{Type: apiPb.TypeAgentStat_ALL})
 		assert.NoError(t, err)
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := service{
 			database: &dbMock{},
 		}
-		_, err := s.GetAgentInformation(nil, &apiPb.GetAgentInformationRequest{Type:apiPb.TypeAgentStat_CPU})
+		_, err := s.GetAgentInformation(context.Background(), &apiPb.GetAgentInformationRequest{Type: apiPb.TypeAgentStat_CPU})
 		assert.NoError(t, err)
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := service{
 			database: &dbMock{},
 		}
-		_, err := s.GetAgentInformation(nil, &apiPb.GetAgentInformationRequest{Type:apiPb.TypeAgentStat_MEMORY})
+		_, err := s.GetAgentInformation(context.Background(), &apiPb.GetAgentInformationRequest{Type: apiPb.TypeAgentStat_MEMORY})
 		assert.NoError(t, err)
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := service{
 			database: &dbMock{},
 		}
-		_, err := s.GetAgentInformation(nil, &apiPb.GetAgentInformationRequest{Type:apiPb.TypeAgentStat_DISK})
+		_, err := s.GetAgentInformation(context.Background(), &apiPb.GetAgentInformationRequest{Type: apiPb.TypeAgentStat_DISK})
 		assert.NoError(t, err)
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := service{
 			database: &dbMock{},
 		}
-		_, err := s.GetAgentInformation(nil, &apiPb.GetAgentInformationRequest{Type:apiPb.TypeAgentStat_NET})
+		_, err := s.GetAgentInformation(context.Background(), &apiPb.GetAgentInformationRequest{Type: apiPb.TypeAgentStat_NET})
 		assert.NoError(t, err)
 	})
 }

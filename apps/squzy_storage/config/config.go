@@ -14,7 +14,7 @@ const (
 	ENV_DB_USER     = "DB_USER"
 	ENV_DB_PASSWORD = "DB_PASSWORD"
 
-	defaultPort = int32(9090)
+	defaultPort int32 = 9090
 )
 
 type cfg struct {

@@ -6,19 +6,19 @@ import (
 )
 
 type Database interface {
-	InsertSnapshot(data *apiPb.SchedulerResponse) error //TODO: fix
+	InsertSnapshot(data *apiPb.SchedulerResponse) error         //TODO: fix
 	GetSnapshots(id string) ([]*apiPb.SchedulerSnapshot, error) //TODO: fix
 	InsertStatRequest(data *apiPb.Metric) error
 	GetStatRequest(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error)
-	GetCpuInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error)
+	GetCPUInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error)
 	GetMemoryInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error)
 	GetDiskInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error)
 	GetNetInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error)
+	Migrate() error
 }
 
-func New(getDB func() (*gorm.DB, error)) (Database, error) {
-	db := &postgres{
+func New(pgDb *gorm.DB) Database {
+	return &postgres{
+		db: pgDb,
 	}
-	err := db.newClient(getDB)
-	return db, err
 }

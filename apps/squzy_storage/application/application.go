@@ -51,7 +51,7 @@ func (s *service) GetAgentInformation(ctx context.Context, request *apiPb.GetAge
 	case apiPb.TypeAgentStat_ALL:
 		res, count, err = s.database.GetStatRequest(request.GetAgentId(), request.GetPagination(), request.GetTimeRange())
 	case apiPb.TypeAgentStat_CPU:
-		res, count, err = s.database.GetCpuInfo(request.GetAgentId(), request.GetPagination(), request.GetTimeRange())
+		res, count, err = s.database.GetCPUInfo(request.GetAgentId(), request.GetPagination(), request.GetTimeRange())
 	case apiPb.TypeAgentStat_MEMORY:
 		res, count, err = s.database.GetMemoryInfo(request.GetAgentId(), request.GetPagination(), request.GetTimeRange())
 	case apiPb.TypeAgentStat_DISK:
@@ -59,11 +59,11 @@ func (s *service) GetAgentInformation(ctx context.Context, request *apiPb.GetAge
 	case apiPb.TypeAgentStat_NET:
 		res, count, err = s.database.GetNetInfo(request.GetAgentId(), request.GetPagination(), request.GetTimeRange())
 	default:
-		err = errors.New("Invalid type")
+		err = errors.New("invalid type")
 	}
 	return &apiPb.GetAgentInformationResponse{
-		Stats:                res,
-		Count:                count,
+		Stats: res,
+		Count: count,
 	}, wrapError(err)
 }
 
