@@ -11,7 +11,9 @@ go_library(
      visibility = ["//visibility:public"],
      deps = [
         "@com_github_jinzhu_gorm//:go_default_library",
+        "@com_github_jinzhu_gorm//dialects/postgres:go_default_library",
         "@com_github_golang_protobuf//ptypes:go_default_library",
+        "@com_github_golang_protobuf//ptypes/struct:go_default_library",
         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
      ],
 

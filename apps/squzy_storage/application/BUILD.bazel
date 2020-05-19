@@ -4,7 +4,6 @@ go_library(
      name = "application",
      srcs = [
          "application.go",
-         "postgres.go",
      ],
      importpath = "squzy/apps/squzy_storage/application",
      visibility = ["//visibility:public"],
@@ -21,7 +20,6 @@ go_test(
     name = "application_test",
     srcs = [
          "application_test.go",
-         "postgres_test.go",
     ],
     embed = [":application"],
     deps = [
