@@ -2,7 +2,6 @@ package router
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/ptypes"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
@@ -275,7 +274,7 @@ func (r *router) GetEngine() *gin.Engine {
 						Limit:    100,
 					}
 					err := context.ShouldBind(&rq)
-					fmt.Println(err)
+
 					if err != nil {
 						errWrap(context, http.StatusInternalServerError, err)
 						return

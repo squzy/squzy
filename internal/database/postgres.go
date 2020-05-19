@@ -159,7 +159,7 @@ func (p *postgres) InsertStatRequest(data *apiPb.Metric) error {
 		return err
 	}
 	if err := p.db.Table(dbStatRequestCollection).Create(pgData).Error; err != nil {
-		fmt.Println(err.Error()) //TODO: log?
+		//TODO: log?
 		return errorDataBase
 	}
 	return nil
