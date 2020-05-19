@@ -67,7 +67,7 @@ func (s *Suite) Test_InsertMetaData() {
 
 	correctTime, err := ptypes.TimestampProto(time.Now())
 	if err != nil {
-		panic("Time convertion error")
+		require.NotNil(s.T(), nil)
 	}
 	err = postgr.InsertSnapshot(&apiPb.SchedulerResponse{
 		SchedulerId: "schId",
@@ -305,7 +305,7 @@ func TestPostgres_InsertSnapshots(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		correctTime, err := ptypes.TimestampProto(time.Now())
 		if err != nil {
-			panic("Time convertion error")
+			assert.NotNil(t, nil)
 		}
 		err = postgrWrong.InsertSnapshot(&apiPb.SchedulerResponse{
 			SchedulerId: "",
