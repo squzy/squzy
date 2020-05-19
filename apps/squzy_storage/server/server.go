@@ -31,7 +31,6 @@ func (s *server) Run() error {
 	if err != nil {
 		return err
 	}
-
 	grpcServer := grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
 			grpc_recovery.StreamServerInterceptor(),

@@ -33,7 +33,7 @@ func main() {
 		_ = monitoringConn.Close()
 	}()
 	monitoringClient := apiPb.NewSchedulersExecutorClient(monitoringConn)
-	storageConn, err := tools.GetConnection(cfg.GetMonitoringServerAddress(), 0, grpc.WithInsecure())
+	storageConn, err := tools.GetConnection(cfg.GetStorageServerAddress(), 0, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
 	}
