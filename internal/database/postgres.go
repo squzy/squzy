@@ -159,7 +159,7 @@ func (p *postgres) GetSnapshots(schedulerId string, pagination *apiPb.Pagination
 		Set("gorm:auto_preload", true).
 		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), schedulerId).
 		Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
-		Order("time").
+		Order("created_at").
 		Offset(offset).
 		Limit(limit).
 		Find(&dbSnapshots).Error
@@ -310,7 +310,7 @@ func getTime(filter *apiPb.TimeFilter) (time.Time, time.Time, error) {
 			timeFrom, err = ptypes.Timestamp(filter.From)
 		}
 		if filter.GetTo() != nil {
-			timeFrom, err = ptypes.Timestamp(filter.From)
+			timeTo, err = ptypes.Timestamp(filter.To)
 		}
 	}
 	return timeFrom, timeTo, err
