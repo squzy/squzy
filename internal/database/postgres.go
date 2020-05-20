@@ -159,7 +159,7 @@ func (p *postgres) GetSnapshots(schedulerId string, pagination *apiPb.Pagination
 		Set("gorm:auto_preload", true).
 		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), schedulerId).
 		Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
-		Order("time").
+		Order("created_at").
 		Offset(offset).
 		Limit(limit).
 		Find(&dbSnapshots).Error
