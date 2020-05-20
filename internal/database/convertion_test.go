@@ -1,13 +1,10 @@
 package database
 
 import (
-	"bytes"
-	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes"
 	_struct "github.com/golang/protobuf/ptypes/struct"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
-	"fmt"
 	"testing"
 	"time"
 )
@@ -75,8 +72,8 @@ func TestConvertToPostgresSnapshot(t *testing.T) {
 }
 
 func TestConvertFromPostgresSnapshots(t *testing.T) {
-	/*wrongTime := time.Unix(-62135596888, -100000000) //Protobuf validate this seconds aas error
-	/t.Run("Test: error in convertation", func(t *testing.T) {
+	wrongTime := time.Unix(-62135596888, -100000000) //Protobuf validate this seconds aas error
+	t.Run("Test: error in convertation", func(t *testing.T) {
 		res := ConvertFromPostgresSnapshots([]*Snapshot{{}})
 		assert.Nil(t, res)
 	})
@@ -101,32 +98,17 @@ func TestConvertFromPostgresSnapshots(t *testing.T) {
 			},
 		})
 		assert.Nil(t, res)
-	})*/
+	})
 	t.Run("Test: no error", func(t *testing.T) {
-		tmp := &_struct.Value{
-			Kind: &_struct.Value_StringValue{
-				StringValue: "HUY",
-			},
-		}
-		b := bytes.Buffer{}
-		err := (&jsonpb.Marshaler{}).Marshal(&b, tmp)
-		if err != nil {
-			panic(err)
-		}
-
 		res := ConvertFromPostgresSnapshots([]*Snapshot{
 			{
 				Meta: &MetaData{
 					StartTime: time.Time{},
 					EndTime:   time.Time{},
-					Value: b.Bytes(),
-	//				Value: `{"stringValue":"HUY"}`,
+					Value:     []byte(`{"stringValue":"HUY"}`),
 				},
 			},
 		})
-		fmt.Println(res)
-		fmt.Println(res[0])
-		panic(res[0].Meta.Value.String())
 		assert.NotNil(t, res)
 	})
 }

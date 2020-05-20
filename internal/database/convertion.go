@@ -3,7 +3,7 @@ package database
 import (
 	"bytes"
 	"errors"
-	"github.com/gogo/protobuf/jsonpb"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes"
 	_struct "github.com/golang/protobuf/ptypes/struct"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
@@ -99,20 +99,18 @@ func convertToMetaData(request *apiPb.SchedulerSnapshot_MetaData) (*MetaData, er
 	if err != nil {
 		return nil, err
 	}
-	if request.GetValue() != nil {
-		var b bytes.Buffer
-		if err := (&jsonpb.Marshaler{}).Marshal(&b, request.GetValue()); err != nil {
-			return nil, err
-		}
+
+	var b bytes.Buffer
+	if err := (&jsonpb.Marshaler{}).Marshal(&b, request.GetValue()); err != nil {
 		return &MetaData{
 			StartTime: startTime,
 			EndTime:   endTime,
-			Value:     b.Bytes(),
 		}, nil
 	}
 	return &MetaData{
 		StartTime: startTime,
 		EndTime:   endTime,
+		Value:     b.Bytes(),
 	}, nil
 }
 
@@ -143,22 +141,18 @@ func convertFromMetaData(metaData *MetaData) (*apiPb.SchedulerSnapshot_MetaData,
 	if err != nil {
 		return nil, err
 	}
-	if len(metaData.Value) > 0 {
 		str := &_struct.Value{}
 		if err := jsonpb.Unmarshal(bytes.NewReader(metaData.Value), str); err != nil {
-			panic(err)
-			return nil, err
+			return &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: startTime,
+				EndTime:   endTime,
+			}, nil
 		}
 		return &apiPb.SchedulerSnapshot_MetaData{
 			StartTime: startTime,
 			EndTime:   endTime,
 			Value:     str,
 		}, nil
-	}
-	return &apiPb.SchedulerSnapshot_MetaData{
-		StartTime: startTime,
-		EndTime:   endTime,
-	}, nil
 }
 
 func convertToCPUInfo(request *apiPb.CpuInfo) []*CPUInfo {
