@@ -141,18 +141,18 @@ func convertFromMetaData(metaData *MetaData) (*apiPb.SchedulerSnapshot_MetaData,
 	if err != nil {
 		return nil, err
 	}
-		str := &_struct.Value{}
-		if err := jsonpb.Unmarshal(bytes.NewReader(metaData.Value), str); err != nil {
-			return &apiPb.SchedulerSnapshot_MetaData{
-				StartTime: startTime,
-				EndTime:   endTime,
-			}, nil
-		}
+	str := &_struct.Value{}
+	if err := jsonpb.Unmarshal(bytes.NewReader(metaData.Value), str); err != nil {
 		return &apiPb.SchedulerSnapshot_MetaData{
 			StartTime: startTime,
 			EndTime:   endTime,
-			Value:     str,
 		}, nil
+	}
+	return &apiPb.SchedulerSnapshot_MetaData{
+		StartTime: startTime,
+		EndTime:   endTime,
+		Value:     str,
+	}, nil
 }
 
 func convertToCPUInfo(request *apiPb.CpuInfo) []*CPUInfo {

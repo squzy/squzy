@@ -25,10 +25,10 @@ type Snapshot struct {
 
 type MetaData struct {
 	gorm.Model
-	SnapshotID uint           `gorm:"column:snapshotId"`
-	StartTime  time.Time      `gorm:"column:startTime"`
-	EndTime    time.Time      `gorm:"column:endTime"`
-	Value      []byte `gorm:"column:value"` //TODO: google
+	SnapshotID uint      `gorm:"column:snapshotId"`
+	StartTime  time.Time `gorm:"column:startTime"`
+	EndTime    time.Time `gorm:"column:endTime"`
+	Value      []byte    `gorm:"column:value"` //TODO: google
 }
 
 //Agent gorm description
@@ -158,7 +158,7 @@ func (p *postgres) GetSnapshots(schedulerId string, pagination *apiPb.Pagination
 		Table(dbSnapshotCollection).
 		Set("gorm:auto_preload", true).
 		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), schedulerId).
-		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+		Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 		Order("time").
 		Offset(offset).
 		Limit(limit).

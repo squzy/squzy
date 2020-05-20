@@ -105,6 +105,18 @@ func TestConvertFromPostgresSnapshots(t *testing.T) {
 				Meta: &MetaData{
 					StartTime: time.Time{},
 					EndTime:   time.Time{},
+					Value:     nil,
+				},
+			},
+		})
+		assert.NotNil(t, res)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		res := ConvertFromPostgresSnapshots([]*Snapshot{
+			{
+				Meta: &MetaData{
+					StartTime: time.Time{},
+					EndTime:   time.Time{},
 					Value:     []byte(`{"stringValue":"HUY"}`),
 				},
 			},
