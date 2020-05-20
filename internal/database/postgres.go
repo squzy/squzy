@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
-	_struct "github.com/golang/protobuf/ptypes/struct"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
@@ -29,14 +28,14 @@ type MetaData struct {
 	SnapshotID uint           `gorm:"column:snapshotId"`
 	StartTime  time.Time      `gorm:"column:startTime"`
 	EndTime    time.Time      `gorm:"column:endTime"`
-	Value      *_struct.Value `gorm:"column:value"` //TODO: google
+	Value      []byte `gorm:"column:value"` //TODO: google
 }
 
 //Agent gorm description
 type StatRequest struct {
 	gorm.Model
-	AgentID    string      `gorm:"column:agentID"`
-	AgentName  string      `gorm:"column:agentName"`
+	AgentID    string `gorm:"column:agentID"`
+	AgentName  string `gorm:"column:agentName"`
 	CPUInfo    []*CPUInfo
 	MemoryInfo *MemoryInfo `gorm:"column:memoryInfo"`
 	DiskInfo   []*DiskInfo `gorm:"column:diskInfo"`
@@ -45,10 +44,9 @@ type StatRequest struct {
 }
 
 const (
-	cpuInfoKey    = "CPUInfo"
-	memoryInfoKey = "MemoryInfo"
-	diskInfoKey   = "DiskInfo"
-	netInfoKey    = "NetInfo"
+	cpuInfoKey  = "CPUInfo"
+	diskInfoKey = "DiskInfo"
+	netInfoKey  = "NetInfo"
 )
 
 type CPUInfo struct {
@@ -284,7 +282,7 @@ func (p *postgres) getSpecialRecords(agentID string, pagination *apiPb.Paginatio
 
 	offset, limit := getOffsetAndLimit(count, pagination)
 
-  	//TODO: test if it works
+	//TODO: test if it works
 	var statRequests []*StatRequest
 	err = p.db.
 		Preload(key).
