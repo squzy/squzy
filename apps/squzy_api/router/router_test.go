@@ -53,8 +53,8 @@ func (m mockOk) RemoveScheduler(ctx context.Context, id string) error {
 	return nil
 }
 
-func (m mockOk) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) error {
-	return nil
+func (m mockOk) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) (*apiPb.AddResponse, error) {
+	return &apiPb.AddResponse{}, nil
 }
 
 type mockError struct {
@@ -96,8 +96,8 @@ func (m mockError) RemoveScheduler(ctx context.Context, id string) error {
 	return errors.New("")
 }
 
-func (m mockError) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) error {
-	return errors.New("")
+func (m mockError) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) (*apiPb.AddResponse, error) {
+	return nil, errors.New("")
 }
 
 func TestNew(t *testing.T) {

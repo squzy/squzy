@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/ptypes"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
@@ -42,7 +43,7 @@ type HistoryFilterRequest struct {
 type Scheduler struct {
 	Type            apiPb.SchedulerType        `json:"type"`
 	Interval        int32                      `json:"interval" binding:"required"`
-	Timeout         int32                      `json:"timeout" binding:"required"`
+	Timeout         int32                      `json:"timeout"`
 	HTTPConfig      *apiPb.HttpConfig          `json:"httpConfig"`
 	TCPConfig       *apiPb.TcpConfig           `json:"tcpConfig"`
 	HTTPValueConfig *apiPb.HttpJsonValueConfig `json:"httpValueConfig"`
@@ -138,6 +139,7 @@ func (r *router) GetEngine() *gin.Engine {
 				request := new(Scheduler)
 				err := context.ShouldBindJSON(request)
 				if err != nil {
+					fmt.Println(err)
 					errWrap(context, http.StatusUnprocessableEntity, err)
 					return
 				}
@@ -214,12 +216,12 @@ func (r *router) GetEngine() *gin.Engine {
 					return
 				}
 
-				err = r.handlers.AddScheduler(context, addReq)
+				res, err := r.handlers.AddScheduler(context, addReq)
 				if err != nil {
 					errWrap(context, http.StatusUnprocessableEntity, err)
 					return
 				}
-				successWrap(context, http.StatusCreated, nil)
+				successWrap(context, http.StatusCreated, res)
 			})
 			scheduler := schedulers.Group(":schedulerId")
 			{

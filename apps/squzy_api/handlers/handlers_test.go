@@ -166,12 +166,12 @@ func TestNew(t *testing.T) {
 func TestHandlers_AddScheduler(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := New(nil, &mockMonitoringOk{}, nil)
-		err := s.AddScheduler(context.Background(), &apiPb.AddRequest{})
+		_, err := s.AddScheduler(context.Background(), &apiPb.AddRequest{})
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
 		s := New(nil, &mockMonitoringError{}, nil)
-		err := s.AddScheduler(context.Background(), &apiPb.AddRequest{})
+		_, err := s.AddScheduler(context.Background(), &apiPb.AddRequest{})
 		assert.NotNil(t, err)
 	})
 }

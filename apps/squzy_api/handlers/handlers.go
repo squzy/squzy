@@ -17,7 +17,7 @@ type Handlers interface {
 	RunScheduler(ctx context.Context, id string) error
 	StopScheduler(ctx context.Context, id string) error
 	RemoveScheduler(ctx context.Context, id string) error
-	AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) error
+	AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) (*apiPb.AddResponse, error)
 }
 
 type handlers struct {
@@ -55,11 +55,14 @@ func (h *handlers) RunScheduler(ctx context.Context, id string) error {
 	return err
 }
 
-func (h *handlers) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) error {
+func (h *handlers) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) (*apiPb.AddResponse, error) {
 	c, cancel := helpers.TimeoutContext(ctx, 0)
 	defer cancel()
-	_, err := h.monitoringClient.Add(c, scheduler)
-	return err
+	res, err := h.monitoringClient.Add(c, scheduler)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (h *handlers) StopScheduler(ctx context.Context, id string) error {
