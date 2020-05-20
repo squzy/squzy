@@ -316,12 +316,13 @@ func getTime(filter *apiPb.TimeFilter) (time.Time, time.Time, error) {
 	return timeFrom, timeTo, err
 }
 
+//Return offset and limit
 func getOffsetAndLimit(count int, pagination *apiPb.Pagination) (int32, int32) {
-	offset := int32(0)
-	limit := int32(count)
 	if pagination != nil {
-		offset = pagination.GetLimit() * pagination.GetPage()
-		limit = pagination.GetLimit()
+		if pagination.Page == -1 {
+			return int32(count) - 1, 1
+		}
+		return pagination.GetLimit() * pagination.GetPage(), pagination.GetLimit()
 	}
-	return offset, limit
+	return int32(0), int32(count)
 }
