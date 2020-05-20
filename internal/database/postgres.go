@@ -17,85 +17,85 @@ type postgres struct {
 
 type Snapshot struct {
 	gorm.Model
-	SchedulerID string    `gorm:"schedulerId"`
-	Code        string    `gorm:"code"`
+	SchedulerID string    `gorm:"column:schedulerId"`
+	Code        string    `gorm:"column:code"`
 	Type        string    `gorm:"column:type"`
-	Error       string    `gorm:"error"`
-	Meta        *MetaData `gorm:"meta"`
+	Error       string    `gorm:"column:error"`
+	Meta        *MetaData `gorm:"column:meta"`
 }
 
 type MetaData struct {
 	gorm.Model
-	SnapshotID uint           `gorm:"snapshotId"`
-	StartTime  time.Time      `gorm:"startTime"`
-	EndTime    time.Time      `gorm:"endTime"`
-	Value      *_struct.Value `gorm:"value"` //TODO: google
+	SnapshotID uint           `gorm:"column:snapshotId"`
+	StartTime  time.Time      `gorm:"column:startTime"`
+	EndTime    time.Time      `gorm:"column:endTime"`
+	Value      *_struct.Value `gorm:"column:value"` //TODO: google
 }
 
 //Agent gorm description
 type StatRequest struct {
 	gorm.Model
-	AgentID    string      `gorm:"agentID"`
-	AgentName  string      `gorm:"agentName"`
-	CPUInfo    []*CPUInfo  `gorm:"cpuInfo"`
-	MemoryInfo *MemoryInfo `gorm:"memoryInfo"`
-	DiskInfo   []*DiskInfo `gorm:"diskInfo"`
-	NetInfo    []*NetInfo  `gorm:"netInfo"`
-	Time       time.Time   `gorm:"time"`
+	AgentID    string      `gorm:"column:agentID"`
+	AgentName  string      `gorm:"column:agentName"`
+	CPUInfo    []*CPUInfo
+	MemoryInfo *MemoryInfo `gorm:"column:memoryInfo"`
+	DiskInfo   []*DiskInfo `gorm:"column:diskInfo"`
+	NetInfo    []*NetInfo  `gorm:"column:netInfo"`
+	Time       time.Time   `gorm:"column:time"`
 }
 
 const (
-	cpuInfoKey    = "cpuInfo"
-	memoryInfoKey = "memoryInfo"
-	diskInfoKey   = "diskInfo"
-	netInfoKey    = "netInfo"
+	cpuInfoKey    = "CPUInfo"
+	memoryInfoKey = "MemoryInfo"
+	diskInfoKey   = "DiskInfo"
+	netInfoKey    = "NetInfo"
 )
 
 type CPUInfo struct {
 	gorm.Model
-	StatRequestID uint    `gorm:"statRequestId"`
-	Load          float64 `gorm:"load"`
+	StatRequestID uint    `gorm:"column:statRequestId"`
+	Load          float64 `gorm:"column:load"`
 }
 
 type MemoryInfo struct {
 	gorm.Model
-	StatRequestID uint    `gorm:"statRequestId"`
-	Mem           *Memory `gorm:"mem"`
-	Swap          *Memory `gorm:"swap"`
+	StatRequestID uint    `gorm:"column:statRequestId"`
+	Mem           *Memory `gorm:"column:mem"`
+	Swap          *Memory `gorm:"column:swap"`
 }
 
 type Memory struct { ///Will we need check for Total = used + free + shared?
 	gorm.Model
-	MemoryInfoID uint    `gorm:"memoryInfoId"`
-	Total        uint64  `gorm:"total"`
-	Used         uint64  `gorm:"used"`
-	Free         uint64  `gorm:"free"`
-	Shared       uint64  `gorm:"shared"`
-	UsedPercent  float64 `gorm:"usedPercent"`
+	MemoryInfoID uint    `gorm:"column:memoryInfoId"`
+	Total        uint64  `gorm:"column:total"`
+	Used         uint64  `gorm:"column:used"`
+	Free         uint64  `gorm:"column:free"`
+	Shared       uint64  `gorm:"column:shared"`
+	UsedPercent  float64 `gorm:"column:usedPercent"`
 }
 
 type DiskInfo struct { ///Will we need check for Total = used + free?
 	gorm.Model
-	StatRequestID uint    `gorm:"statRequestId"`
-	Name          string  `gorm:"name"`
-	Total         uint64  `gorm:"total"`
-	Free          uint64  `gorm:"free"`
-	Used          uint64  `gorm:"used"`
-	UsedPercent   float64 `gorm:"usedPercent"`
+	StatRequestID uint    `gorm:"column:statRequestId"`
+	Name          string  `gorm:"column:name"`
+	Total         uint64  `gorm:"column:total"`
+	Free          uint64  `gorm:"column:free"`
+	Used          uint64  `gorm:"column:used"`
+	UsedPercent   float64 `gorm:"column:usedPercent"`
 }
 
 type NetInfo struct {
 	gorm.Model
-	StatRequestID uint   `gorm:"statRequestId"`
-	Name          string `gorm:"name"`
-	BytesSent     uint64 `gorm:"bytesSent"`
-	BytesRecv     uint64 `gorm:"bytesRecv"`
-	PacketsSent   uint64 `gorm:"packetsSent"`
-	PacketsRecv   uint64 `gorm:"packetsRecv"`
-	ErrIn         uint64 `gorm:"errIn"`
-	ErrOut        uint64 `gorm:"errOut"`
-	DropIn        uint64 `gorm:"dropIn"`
-	DropOut       uint64 `gorm:"dropOut"`
+	StatRequestID uint   `gorm:"column:statRequestId"`
+	Name          string `gorm:"column:name"`
+	BytesSent     uint64 `gorm:"column:bytesSent"`
+	BytesRecv     uint64 `gorm:"column:bytesRecv"`
+	PacketsSent   uint64 `gorm:"column:packetsSent"`
+	PacketsRecv   uint64 `gorm:"column:packetsRecv"`
+	ErrIn         uint64 `gorm:"column:errIn"`
+	ErrOut        uint64 `gorm:"column:errOut"`
+	DropIn        uint64 `gorm:"column:dropIn"`
+	DropOut       uint64 `gorm:"column:dropOut"`
 }
 
 const (
@@ -156,7 +156,9 @@ func (p *postgres) GetSnapshots(schedulerId string, pagination *apiPb.Pagination
 
 	//TODO: test if it works
 	var dbSnapshots []*Snapshot
-	err = p.db.Table(dbSnapshotCollection).
+	err = p.db.
+		Table(dbSnapshotCollection).
+		Set("gorm:auto_preload", true).
 		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), schedulerId).
 		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 		Order("time").
@@ -201,7 +203,9 @@ func (p *postgres) GetStatRequest(agentID string, pagination *apiPb.Pagination, 
 
 	//TODO: test if it works
 	var statRequests []*StatRequest
-	err = p.db.Table(dbStatRequestCollection).
+	err = p.db.
+		Set("gorm:auto_preload", true).
+		//Preload("disk_infos").
 		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
 		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
 		Order("time").
@@ -221,7 +225,39 @@ func (p *postgres) GetCPUInfo(agentID string, pagination *apiPb.Pagination, filt
 }
 
 func (p *postgres) GetMemoryInfo(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return p.getSpecialRecords(agentID, pagination, filter, memoryInfoKey)
+	timeFrom, timeTo, err := getTime(filter)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	var count int
+	err = p.db.Table(dbStatRequestCollection).
+		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
+		Count(&count).Error
+	if err != nil {
+		return nil, -1, err
+	}
+
+	offset, limit := getOffsetAndLimit(count, pagination)
+
+	//TODO: test if it works
+	var statRequests []*StatRequest
+	err = p.db.
+		Preload("MemoryInfo").
+		Preload("MemoryInfo.Mem").
+		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
+		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
+		Order("time").
+		Offset(offset).
+		Limit(limit).
+		Find(&statRequests).
+		Error
+
+	if err != nil {
+		return nil, -1, errorDataBase
+	}
+
+	return ConvertFromPostgressStatRequests(statRequests), int32(count), nil
 }
 
 func (p *postgres) GetDiskInfo(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
@@ -248,16 +284,17 @@ func (p *postgres) getSpecialRecords(agentID string, pagination *apiPb.Paginatio
 
 	offset, limit := getOffsetAndLimit(count, pagination)
 
-	//TODO: test if it works
+  	//TODO: test if it works
 	var statRequests []*StatRequest
-	err = p.db.Table(dbStatRequestCollection).
+	err = p.db.
+		Preload(key).
 		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
 		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
-		Select(fmt.Sprintf("%s, time", key)).
 		Order("time").
 		Offset(offset).
 		Limit(limit).
-		Find(&statRequests).Error
+		Find(&statRequests).
+		Error
 
 	if err != nil {
 		return nil, -1, errorDataBase

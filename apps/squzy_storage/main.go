@@ -7,8 +7,8 @@ import (
 	"squzy/apps/squzy_storage/application"
 	"squzy/apps/squzy_storage/config"
 	"squzy/apps/squzy_storage/server"
-	"squzy/internal/database"
 	_ "squzy/apps/squzy_storage/version"
+	"squzy/internal/database"
 )
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	db := database.New(postgresDb.LogMode(false))
+	db := database.New(postgresDb.LogMode(true))
 
 	err = db.Migrate()
 	if err != nil {
