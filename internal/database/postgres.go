@@ -57,12 +57,12 @@ type CPUInfo struct {
 
 type MemoryInfo struct {
 	gorm.Model
-	StatRequestID uint    `gorm:"column:statRequestId"`
-	Mem           *Memory `gorm:"column:mem"`
-	Swap          *Memory `gorm:"column:swap"`
+	StatRequestID uint         `gorm:"column:statRequestId"`
+	Mem           *MemoryMem  `gorm:"column:mem"`
+	Swap          *MemorySwap `gorm:"column:swap"`
 }
 
-type Memory struct { ///Will we need check for Total = used + free + shared?
+type MemoryMem struct {
 	gorm.Model
 	MemoryInfoID uint    `gorm:"column:memoryInfoId"`
 	Total        uint64  `gorm:"column:total"`
@@ -72,7 +72,17 @@ type Memory struct { ///Will we need check for Total = used + free + shared?
 	UsedPercent  float64 `gorm:"column:usedPercent"`
 }
 
-type DiskInfo struct { ///Will we need check for Total = used + free?
+type MemorySwap struct {
+	gorm.Model
+	MemoryInfoID uint    `gorm:"column:memoryInfoId"`
+	Total        uint64  `gorm:"column:total"`
+	Used         uint64  `gorm:"column:used"`
+	Free         uint64  `gorm:"column:free"`
+	Shared       uint64  `gorm:"column:shared"`
+	UsedPercent  float64 `gorm:"column:usedPercent"`
+}
+
+type DiskInfo struct {
 	gorm.Model
 	StatRequestID uint    `gorm:"column:statRequestId"`
 	Name          string  `gorm:"column:name"`
@@ -112,7 +122,8 @@ func (p *postgres) Migrate() error {
 		&StatRequest{},
 		&CPUInfo{},
 		&MemoryInfo{},
-		&Memory{},
+		&MemoryMem{},
+		&MemorySwap{},
 		&DiskInfo{},
 		&NetInfo{},
 	}
@@ -243,6 +254,7 @@ func (p *postgres) GetMemoryInfo(agentID string, pagination *apiPb.Pagination, f
 	err = p.db.
 		Preload("MemoryInfo").
 		Preload("MemoryInfo.Mem").
+		Preload("MemoryInfo.Swap").
 		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
 		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
 		Order("time").

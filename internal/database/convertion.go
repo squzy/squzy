@@ -172,7 +172,7 @@ func convertToMemoryInfo(reqest *apiPb.MemoryInfo) *MemoryInfo {
 	}
 	res := &MemoryInfo{}
 	if reqest.GetMem() != nil {
-		res.Mem = &Memory{
+		res.Mem = &MemoryMem{
 			Total:       reqest.GetMem().GetTotal(),
 			Used:        reqest.GetMem().GetUsed(),
 			Free:        reqest.GetMem().GetFree(),
@@ -181,7 +181,7 @@ func convertToMemoryInfo(reqest *apiPb.MemoryInfo) *MemoryInfo {
 		}
 	}
 	if reqest.GetSwap() != nil {
-		res.Swap = &Memory{
+		res.Swap = &MemorySwap{
 			Total:       reqest.GetSwap().GetTotal(),
 			Used:        reqest.GetSwap().GetUsed(),
 			Free:        reqest.GetSwap().GetFree(),
@@ -237,6 +237,9 @@ func convertFromCPUInfo(data []*CPUInfo) *apiPb.CpuInfo {
 			Load: v.Load,
 		})
 	}
+	if len(cpus) == 0 {
+		return nil
+	}
 	return &apiPb.CpuInfo{Cpus: cpus}
 }
 
@@ -266,6 +269,9 @@ func convertFromMemoryInfo(data *MemoryInfo) *apiPb.MemoryInfo {
 			UsedPercent: data.Swap.UsedPercent,
 		}
 	}
+	if res.Mem == nil && res.Swap == nil {
+		return nil
+	}
 	return res
 }
 
@@ -278,6 +284,9 @@ func convertFromDiskInfo(data []*DiskInfo) *apiPb.DiskInfo {
 			Used:        v.Used,
 			UsedPercent: v.UsedPercent,
 		}
+	}
+	if len(disks) == 0 {
+		return nil
 	}
 	return &apiPb.DiskInfo{Disks: disks}
 }
@@ -295,6 +304,9 @@ func convertFromNetInfo(data []*NetInfo) *apiPb.NetInfo {
 			DropIn:      v.DropIn,
 			DropOut:     v.DropOut,
 		}
+	}
+	if len(interfaces) == 0 {
+		return nil
 	}
 	return &apiPb.NetInfo{Interfaces: interfaces}
 }

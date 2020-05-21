@@ -211,10 +211,10 @@ func (s *Suite) Test_InsertStatRequest() {
 	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "memory_infos")).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
-	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "memories")).
+	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "memory_mems")).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
-	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "memories")).
+	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "memory_swaps")).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "disk_infos")).
@@ -276,12 +276,12 @@ func (s *Suite) Test_GetStatRequest() {
 		WillReturnRows(rows)
 
 	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
-	s.mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "memories"`)).
+	s.mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "memory_mems"`)).
 		WithArgs(sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
-	s.mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "memories"`)).
+	s.mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "memory_swaps"`)).
 		WithArgs(sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
