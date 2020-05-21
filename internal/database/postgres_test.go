@@ -153,7 +153,7 @@ func (s *Suite) Test_GetSnapshots_Select_Error() {
 
 	_, _, err := postgr.GetSnapshots(id, &apiPb.Pagination{
 		Page:  -1, //random value
-		Limit: 2, //random value
+		Limit: 2,  //random value
 	}, nil)
 	require.Error(s.T(), err)
 }

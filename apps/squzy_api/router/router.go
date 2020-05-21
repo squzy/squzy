@@ -96,7 +96,7 @@ func (r *router) GetEngine() *gin.Engine {
 						DateFrom: nil,
 						DateTo:   nil,
 						Page:     0,
-						Limit:    100,
+						Limit:    0,
 					}
 
 					err := context.ShouldBind(&rq)
@@ -120,6 +120,7 @@ func (r *router) GetEngine() *gin.Engine {
 						errWrap(context, http.StatusInternalServerError, err)
 						return
 					}
+
 					successWrap(context, http.StatusOK, res)
 				})
 			}
@@ -273,7 +274,7 @@ func (r *router) GetEngine() *gin.Engine {
 						DateFrom: nil,
 						DateTo:   nil,
 						Page:     0,
-						Limit:    100,
+						Limit:    0,
 					}
 					err := context.ShouldBind(&rq)
 
@@ -311,6 +312,10 @@ func GetFilters(rq *HistoryFilterRequest) (*apiPb.Pagination, *apiPb.TimeFilter,
 	pagination := &apiPb.Pagination{
 		Page:  rq.Page,
 		Limit: rq.Limit,
+	}
+
+	if rq.Page == 0 && rq.Limit == 0 {
+		pagination = nil
 	}
 
 	if rq.DateFrom != nil || rq.DateTo != nil {

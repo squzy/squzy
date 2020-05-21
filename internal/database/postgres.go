@@ -57,7 +57,7 @@ type CPUInfo struct {
 
 type MemoryInfo struct {
 	gorm.Model
-	StatRequestID uint         `gorm:"column:statRequestId"`
+	StatRequestID uint        `gorm:"column:statRequestId"`
 	Mem           *MemoryMem  `gorm:"column:mem"`
 	Swap          *MemorySwap `gorm:"column:swap"`
 }
@@ -147,7 +147,7 @@ func (p *postgres) InsertSnapshot(data *apiPb.SchedulerResponse) error {
 	return nil
 }
 
-func (p *postgres) GetSnapshots(schedulerId string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.SchedulerSnapshot, int32, error) {
+func (p *postgres) GetSnapshots(schedulerID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.SchedulerSnapshot, int32, error) {
 	timeFrom, timeTo, err := getTime(filter)
 	if err != nil {
 		return nil, -1, err
@@ -155,7 +155,7 @@ func (p *postgres) GetSnapshots(schedulerId string, pagination *apiPb.Pagination
 
 	var count int
 	err = p.db.Table(dbSnapshotCollection).
-		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), schedulerId).
+		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), schedulerID).
 		Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 		Count(&count).Error
 	if err != nil {
@@ -169,7 +169,7 @@ func (p *postgres) GetSnapshots(schedulerId string, pagination *apiPb.Pagination
 	err = p.db.
 		Table(dbSnapshotCollection).
 		Set("gorm:auto_preload", true).
-		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), schedulerId).
+		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), schedulerID).
 		Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 		Order("created_at").
 		Offset(offset).

@@ -3,7 +3,7 @@ package database
 import (
 	"bytes"
 	"errors"
-	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/jsonpb" //nolint:staticcheck
 	"github.com/golang/protobuf/ptypes"
 	_struct "github.com/golang/protobuf/ptypes/struct"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
@@ -101,7 +101,10 @@ func convertToMetaData(request *apiPb.SchedulerSnapshot_MetaData) (*MetaData, er
 	}
 
 	var b bytes.Buffer
-	if err := (&jsonpb.Marshaler{}).Marshal(&b, request.GetValue()); err != nil {
+
+	err = (&jsonpb.Marshaler{}).Marshal(&b, request.GetValue())
+
+	if err != nil {
 		return &MetaData{
 			StartTime: startTime,
 			EndTime:   endTime,
@@ -145,6 +148,7 @@ func convertFromMetaData(metaData *MetaData) (*apiPb.SchedulerSnapshot_MetaData,
 		return nil, err
 	}
 	str := &_struct.Value{}
+
 	if err := jsonpb.Unmarshal(bytes.NewReader(metaData.Value), str); err != nil {
 		return &apiPb.SchedulerSnapshot_MetaData{
 			StartTime: startTime,
