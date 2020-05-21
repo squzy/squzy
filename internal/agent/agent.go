@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"fmt"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"
@@ -62,7 +61,6 @@ func (a *agent) GetStat() *apiPb.Metric {
 		cpuStat, err := a.cpuStatFn(0, true)
 
 		if err != nil || cpuStat == nil {
-			fmt.Println(err, cpuStat)
 			return
 		}
 
