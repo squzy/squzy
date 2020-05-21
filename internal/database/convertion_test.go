@@ -114,6 +114,7 @@ func TestConvertFromPostgresSnapshots(t *testing.T) {
 	t.Run("Test: no error", func(t *testing.T) {
 		res := ConvertFromPostgresSnapshots([]*Snapshot{
 			{
+				Error: "error",
 				Meta: &MetaData{
 					StartTime: time.Time{},
 					EndTime:   time.Time{},

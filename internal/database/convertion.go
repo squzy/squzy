@@ -119,14 +119,17 @@ func convertFromSnapshot(snapshot *Snapshot) (*apiPb.SchedulerSnapshot, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &apiPb.SchedulerSnapshot{
+	res := &apiPb.SchedulerSnapshot{
 		Code: apiPb.SchedulerCode(apiPb.SchedulerCode_value[snapshot.Code]),
 		Type: apiPb.SchedulerType(apiPb.SchedulerType_value[snapshot.Type]),
-		Error: &apiPb.SchedulerSnapshot_Error{
-			Message: snapshot.Error,
-		},
 		Meta: meta,
-	}, nil
+	}
+	if snapshot.Error != "" {
+		res.Error = &apiPb.SchedulerSnapshot_Error{
+			Message: snapshot.Error,
+		}
+	}
+	return res, nil
 }
 
 func convertFromMetaData(metaData *MetaData) (*apiPb.SchedulerSnapshot_MetaData, error) {
