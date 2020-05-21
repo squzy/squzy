@@ -36,11 +36,15 @@ Which information you can get:
 
 Basic implementation for [agent server](https://github.com/squzy/squzy_proto/blob/master/proto/v1/squzy_agent_server.proto#L10)
 
-### [Squzy Storage](https://github.com/squzy/squzy/tree/develop/apps/squzy_api)
+### [Squzy Storage](https://github.com/squzy/squzy/tree/develop/apps/squzy_storage)
 
 [Storage implementation](https://github.com/squzy/squzy_proto/blob/master/proto/v1/squzy_storage.proto#L13) will get all information from every product and store that
 
 ### [Squzy Dashboard](https://github.com/squzy/squzy-dashboard)
+
+Squzy Web GUI - helps interact with squzy.
+
+### [Squzy API](https://github.com/squzy/squzy/tree/develop/apps/squzy_api)
 
 Squzy Web GUI - helps interact with squzy.
 
