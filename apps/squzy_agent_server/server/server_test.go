@@ -3,14 +3,137 @@ package server
 import (
 	"context"
 	"errors"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	"io"
 	"testing"
 )
+
+type storageMock struct {
+}
+
+func (s storageMock) SendResponseFromScheduler(ctx context.Context, in *apiPb.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, nil
+}
+
+func (s storageMock) SendResponseFromAgent(ctx context.Context, in *apiPb.Metric, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, nil
+}
+
+func (s storageMock) GetSchedulerInformation(ctx context.Context, in *apiPb.GetSchedulerInformationRequest, opts ...grpc.CallOption) (*apiPb.GetSchedulerInformationResponse, error) {
+	panic("implement me")
+}
+
+func (s storageMock) GetAgentInformation(ctx context.Context, in *apiPb.GetAgentInformationRequest, opts ...grpc.CallOption) (*apiPb.GetAgentInformationResponse, error) {
+	panic("implement me")
+}
+
+type mockStreamClose struct {
+}
+
+func (m mockStreamClose) SendAndClose(e *empty.Empty) error {
+	return nil
+}
+
+type mockStreamContinueWork struct {
+	count int
+}
+
+func (m mockStreamContinueWork) SendAndClose(e *empty.Empty) error {
+	return nil
+}
+
+func (m *mockStreamContinueWork) Recv() (*apiPb.SendMetricsRequest, error) {
+	defer func() {
+		m.count += 1
+	}()
+	if m.count == 3 {
+		return nil, io.EOF
+	}
+	if m.count == 2 {
+		return &apiPb.SendMetricsRequest{
+			Msg: &apiPb.SendMetricsRequest_Disconnect_{
+				Disconnect: &apiPb.SendMetricsRequest_Disconnect{
+					AgentId: primitive.NewObjectID().Hex(),
+					Time:    ptypes.TimestampNow(),
+				},
+			},
+		}, nil
+	}
+	return &apiPb.SendMetricsRequest{
+		Msg: &apiPb.SendMetricsRequest_Metric{
+			Metric: &apiPb.Metric{
+				AgentId: primitive.NewObjectID().Hex(),
+			},
+		},
+	}, nil
+}
+
+func (m mockStreamContinueWork) SetHeader(md metadata.MD) error {
+	panic("implement me")
+}
+
+func (m mockStreamContinueWork) SendHeader(md metadata.MD) error {
+	panic("implement me")
+}
+
+func (m mockStreamContinueWork) SetTrailer(md metadata.MD) {
+	panic("implement me")
+}
+
+func (m mockStreamContinueWork) Context() context.Context {
+	panic("implement me")
+}
+
+func (mockStreamContinueWork) SendMsg(m interface{}) error {
+	panic("implement me")
+}
+
+func (mockStreamContinueWork) RecvMsg(m interface{}) error {
+	panic("implement me")
+}
+
+func (m mockStreamClose) Recv() (*apiPb.SendMetricsRequest, error) {
+	return &apiPb.SendMetricsRequest{
+		Msg: &apiPb.SendMetricsRequest_Disconnect_{
+			Disconnect: &apiPb.SendMetricsRequest_Disconnect{
+				AgentId: primitive.NewObjectID().Hex(),
+				Time:    ptypes.TimestampNow(),
+			},
+		},
+	}, nil
+}
+
+func (m mockStreamClose) SetHeader(md metadata.MD) error {
+	panic("implement me")
+}
+
+func (m mockStreamClose) SendHeader(md metadata.MD) error {
+	panic("implement me")
+}
+
+func (m mockStreamClose) SetTrailer(md metadata.MD) {
+	panic("implement me")
+}
+
+func (m mockStreamClose) Context() context.Context {
+	panic("implement me")
+}
+
+func (mockStreamClose) SendMsg(m interface{}) error {
+	panic("implement me")
+}
+
+func (mockStreamClose) RecvMsg(m interface{}) error {
+	panic("implement me")
+}
 
 type mockStreamOk struct {
 	exec bool
@@ -26,7 +149,11 @@ func (m *mockStreamOk) Recv() (*apiPb.SendMetricsRequest, error) {
 	}
 	m.exec = true
 	return &apiPb.SendMetricsRequest{
-		AgentId: primitive.NewObjectID().Hex(),
+		Msg: &apiPb.SendMetricsRequest_Metric{
+			Metric: &apiPb.Metric{
+				AgentId: primitive.NewObjectID().Hex(),
+			},
+		},
 	}, nil
 }
 
@@ -98,7 +225,11 @@ func (m mockStreamError) SendAndClose(*empty.Empty) error {
 
 func (m mockStreamError) Recv() (*apiPb.SendMetricsRequest, error) {
 	return &apiPb.SendMetricsRequest{
-		AgentId: "asf",
+		Msg: &apiPb.SendMetricsRequest_Metric{
+			Metric: &apiPb.Metric{
+				AgentId: "asf",
+			},
+		},
 	}, nil
 }
 
@@ -129,11 +260,15 @@ func (m mockStreamError) RecvMsg(_ interface{}) error {
 type dbMockOk struct {
 }
 
+func (d dbMockOk) GetByID(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error) {
+	return &apiPb.AgentItem{}, nil
+}
+
 func (d dbMockOk) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, error) {
 	return "", nil
 }
 
-func (d dbMockOk) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus) error {
+func (d dbMockOk) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus, time *timestamp.Timestamp) error {
 	return nil
 }
 
@@ -144,11 +279,15 @@ func (d dbMockOk) GetAll(ctx context.Context, filter bson.M) ([]*apiPb.AgentItem
 type dbMockError struct {
 }
 
+func (d dbMockError) GetByID(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentItem, error) {
+	return nil, errors.New("")
+}
+
 func (d dbMockError) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, error) {
 	return "", errors.New("")
 }
 
-func (d dbMockError) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus) error {
+func (d dbMockError) UpdateStatus(ctx context.Context, agentId primitive.ObjectID, status apiPb.AgentStatus, time *timestamp.Timestamp) error {
 	return errors.New("")
 }
 
@@ -165,7 +304,7 @@ func TestNew(t *testing.T) {
 
 func TestServer_Register(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(&dbMockError{}, nil)
+		s := New(&dbMockError{}, &storageMock{})
 		_, err := s.Register(context.Background(), &apiPb.RegisterRequest{
 			AgentName: "",
 			HostInfo:  nil,
@@ -173,7 +312,7 @@ func TestServer_Register(t *testing.T) {
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		_, err := s.Register(context.Background(), &apiPb.RegisterRequest{
 			AgentName: "",
 			HostInfo:  nil,
@@ -184,19 +323,19 @@ func TestServer_Register(t *testing.T) {
 
 func TestServer_UnRegister(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(&dbMockError{}, nil)
+		s := New(&dbMockError{}, &storageMock{})
 		_, err := s.UnRegister(context.Background(), &apiPb.UnRegisterRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because id", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		_, err := s.UnRegister(context.Background(), &apiPb.UnRegisterRequest{})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return  error", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		_, err := s.UnRegister(context.Background(), &apiPb.UnRegisterRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
@@ -206,12 +345,12 @@ func TestServer_UnRegister(t *testing.T) {
 
 func TestServer_GetAgentList(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(&dbMockError{}, nil)
+		s := New(&dbMockError{}, &storageMock{})
 		_, err := s.GetAgentList(context.Background(), &empty.Empty{})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		_, err := s.GetAgentList(context.Background(), &empty.Empty{})
 		assert.Equal(t, nil, err)
 	})
@@ -219,12 +358,12 @@ func TestServer_GetAgentList(t *testing.T) {
 
 func TestServer_GetByAgentName(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(&dbMockError{}, nil)
+		s := New(&dbMockError{}, &storageMock{})
 		_, err := s.GetByAgentName(context.Background(), &apiPb.GetByAgentNameRequest{})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		_, err := s.GetByAgentName(context.Background(), &apiPb.GetByAgentNameRequest{})
 		assert.Equal(t, nil, err)
 	})
@@ -232,15 +371,45 @@ func TestServer_GetByAgentName(t *testing.T) {
 
 func TestServer_SendMetrics(t *testing.T) {
 	t.Run("Should: return error if id is wrong", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		assert.NotEqual(t, nil, s.SendMetrics(&mockStreamError{}))
 	})
 	t.Run("Should: close stream without error if error", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		assert.NotEqual(t, nil, s.SendMetrics(&mockInternalStreamError{}))
 	})
 	t.Run("Should: works as excpected", func(t *testing.T) {
-		s := New(&dbMockOk{}, nil)
+		s := New(&dbMockOk{}, &storageMock{})
 		assert.Equal(t, nil, s.SendMetrics(&mockStreamOk{}))
+	})
+	t.Run("Should: works as excpected", func(t *testing.T) {
+		s := New(&dbMockOk{}, &storageMock{})
+		assert.Equal(t, nil, s.SendMetrics(&mockStreamClose{}))
+	})
+	t.Run("Should: works as excpected", func(t *testing.T) {
+		s := New(&dbMockOk{}, &storageMock{})
+		assert.Equal(t, nil, s.SendMetrics(&mockStreamContinueWork{}))
+	})
+}
+
+func TestServer_GetAgentById(t *testing.T) {
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(&dbMockError{}, &storageMock{})
+		_, err := s.GetAgentById(context.Background(), &apiPb.GetAgentByIdRequest{
+			AgentId: primitive.NewObjectID().Hex(),
+		})
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: return error because bson", func(t *testing.T) {
+		s := New(&dbMockOk{}, &storageMock{})
+		_, err := s.GetAgentById(context.Background(), &apiPb.GetAgentByIdRequest{})
+		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(&dbMockOk{}, &storageMock{})
+		_, err := s.GetAgentById(context.Background(), &apiPb.GetAgentByIdRequest{
+			AgentId: primitive.NewObjectID().Hex(),
+		})
+		assert.Equal(t, nil, err)
 	})
 }

@@ -8,14 +8,14 @@ import (
 )
 
 var (
-	intervalLessHalfSecondError = errors.New("INTERVAL_LESS_THAN_HALF_SECOND")
+	errIntervalLessHalfSecondError = errors.New("INTERVAL_LESS_THAN_HALF_SECOND")
 )
 
 type Scheduler interface {
 	// Should return id
-	GetId() string
+	GetID() string
 	//Get ID bson
-	GetIdBson() primitive.ObjectID
+	GetIDBson() primitive.ObjectID
 	// Should run Scheduler every tick
 	Run()
 	// Should stop Scheduler
@@ -35,7 +35,7 @@ type schl struct {
 
 func New(id primitive.ObjectID, interval time.Duration, jobExecutor job_executor.JobExecutor) (Scheduler, error) {
 	if interval < time.Millisecond*500 {
-		return nil, intervalLessHalfSecondError
+		return nil, errIntervalLessHalfSecondError
 	}
 	return &schl{
 		id:          id,
@@ -73,11 +73,11 @@ func (s *schl) IsRun() bool {
 	return !s.isStopped
 }
 
-func (s *schl) GetId() string {
+func (s *schl) GetID() string {
 	return s.id.Hex()
 }
 
-func (s *schl) GetIdBson() primitive.ObjectID {
+func (s *schl) GetIDBson() primitive.ObjectID {
 	return s.id
 }
 

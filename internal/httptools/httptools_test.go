@@ -1,4 +1,4 @@
-package httpTools
+package httptools
 
 import (
 	"github.com/stretchr/testify/assert"

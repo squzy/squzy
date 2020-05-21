@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"net"
-	"squzy/internal/grpcTools"
+	"squzy/internal/grpctools"
 	"squzy/internal/job"
 	"testing"
 	"time"
@@ -18,18 +18,34 @@ import (
 type server struct {
 }
 
-func (s server) SendResponseFromAgent(context.Context, *apiPb.SendMetricsRequest) (*empty.Empty, error) {
+func (s server) GetSchedulerInformation(ctx context.Context, request *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
+	panic("implement me")
+}
+
+func (s server) GetAgentInformation(ctx context.Context, request *apiPb.GetAgentInformationRequest) (*apiPb.GetAgentInformationResponse, error) {
+	panic("implement me")
+}
+
+func (s server) SendResponseFromAgent(context.Context, *apiPb.Metric) (*empty.Empty, error) {
 	panic("implement me")
 }
 
 type serverErrorThrow struct {
 }
 
+func (s serverErrorThrow) GetSchedulerInformation(ctx context.Context, request *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
+	panic("implement me")
+}
+
+func (s serverErrorThrow) GetAgentInformation(ctx context.Context, request *apiPb.GetAgentInformationRequest) (*apiPb.GetAgentInformationResponse, error) {
+	panic("implement me")
+}
+
 func (s serverErrorThrow) SendResponseFromScheduler(context.Context, *apiPb.SchedulerResponse) (*empty.Empty, error) {
 	return nil, errors.New("saf")
 }
 
-func (s serverErrorThrow) SendResponseFromAgent(context.Context, *apiPb.SendMetricsRequest) (*empty.Empty, error) {
+func (s serverErrorThrow) SendResponseFromAgent(context.Context, *apiPb.Metric) (*empty.Empty, error) {
 	panic("implement me")
 }
 
@@ -44,7 +60,7 @@ type mockStorageError struct {
 }
 
 func (m mockStorageError) Write(log job.CheckError) error {
-	return storageNotSaveLog
+	return errStorageNotSaveLog
 }
 
 func (m mockStorage) Write(log job.CheckError) error {
@@ -85,9 +101,9 @@ func TestExternalStorage_Write(t *testing.T) {
 		assert.Equal(t, nil, s.Write(&mock{}))
 	})
 
-	t.Run("Should: return storageNotSaveLog", func(t *testing.T) {
+	t.Run("Should: return errStorageNotSaveLog", func(t *testing.T) {
 		s := NewExternalStorage(&grpcMockError{}, "", time.Second, &mockStorageError{}, grpc.WithInsecure(), grpc.WithBlock())
-		assert.Equal(t, storageNotSaveLog, s.Write(&mock{}))
+		assert.Equal(t, errStorageNotSaveLog, s.Write(&mock{}))
 	})
 	t.Run("Should: not return error on write real storage", func(t *testing.T) {
 		lis, _ := net.Listen("tcp", fmt.Sprintf(":%d", 12122))
@@ -97,7 +113,7 @@ func TestExternalStorage_Write(t *testing.T) {
 			_ = grpcServer.Serve(lis)
 		}()
 		time.Sleep(time.Second * 2)
-		s := NewExternalStorage(grpcTools.New(), "localhost:12122", time.Second*2, &mockStorage{}, grpc.WithInsecure(), grpc.WithBlock())
+		s := NewExternalStorage(grpctools.New(), "localhost:12122", time.Second*2, &mockStorage{}, grpc.WithInsecure(), grpc.WithBlock())
 		assert.Equal(t, nil, s.Write(&mock{}))
 	})
 	t.Run("Should: return error connection error on write real storage", func(t *testing.T) {
@@ -108,7 +124,7 @@ func TestExternalStorage_Write(t *testing.T) {
 			_ = grpcServer.Serve(lis)
 		}()
 		time.Sleep(time.Second * 2)
-		s := NewExternalStorage(grpcTools.New(), "localhost:12124", time.Second*2, &mockStorage{}, grpc.WithInsecure(), grpc.WithBlock())
-		assert.Equal(t, connectionExternalStorageError, s.Write(&mock{}))
+		s := NewExternalStorage(grpctools.New(), "localhost:12124", time.Second*2, &mockStorage{}, grpc.WithInsecure(), grpc.WithBlock())
+		assert.Equal(t, errConnectionExternalStorageError, s.Write(&mock{}))
 	})
 }

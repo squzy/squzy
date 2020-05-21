@@ -9,16 +9,22 @@ go_library(
     ],
     importpath = "squzy/apps/agent_server",
     deps = [
+		"@org_mongodb_go_mongo_driver//bson/primitive:go_default_library",
+		"@org_mongodb_go_mongo_driver//bson:go_default_library",
+		"@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
+		"@com_github_golang_protobuf//ptypes:go_default_library",
         "@com_github_squzy_mongo_helper//:go_default_library",
         "@org_mongodb_go_mongo_driver//mongo:go_default_library",
         "@org_mongodb_go_mongo_driver//mongo/options:go_default_library",
         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
         "//internal/helpers:go_default_library",
+         "//internal/grpctools:go_default_library",
         "//apps/squzy_agent_server/application:go_default_library",
         "//apps/squzy_agent_server/server:go_default_library",
         "//apps/squzy_agent_server/database:go_default_library",
         "//apps/squzy_agent_server/version:go_default_library",
         "//apps/squzy_agent_server/config:go_default_library",
+        "@org_golang_google_grpc//:go_default_library",
     ]
 )
 

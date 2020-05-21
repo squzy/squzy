@@ -12,6 +12,8 @@ go_library(
         "@org_mongodb_go_mongo_driver//bson:go_default_library",
         "@com_github_squzy_mongo_helper//:go_default_library",
         "//apps/squzy_agent_server/database:go_default_library",
+        "//internal/helpers:go_default_library",
+        "@org_golang_google_grpc//:go_default_library",
      ]
 )
 
@@ -23,6 +25,8 @@ go_test(
     ],
     deps =[
         "@org_golang_google_grpc//metadata:go_default_library",
-        "@com_github_stretchr_testify//assert:go_default_library"
+        "@com_github_stretchr_testify//assert:go_default_library",
+        "@com_github_golang_protobuf//ptypes:go_default_library",
+        "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
     ]
 )

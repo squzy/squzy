@@ -2,18 +2,15 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
      name = "go_default_library",
-     srcs = ["httpTools.go"],
-     importpath = "squzy/internal/httpTools",
+     srcs = ["version.go"],
+    importpath = "squzy/apps/squzy_api/version",
      visibility = ["//visibility:public"],
-     deps = [
-         "//internal/helpers:go_default_library",
-     ],
 )
 
 go_test(
     name = "go_default_test",
     srcs = [
-        "httpTools_test.go",
+        "version_test.go",
     ],
     embed = [":go_default_library"],
     deps = [

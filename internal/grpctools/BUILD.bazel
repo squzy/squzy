@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+     name = "go_default_library",
+     srcs = ["grpctools.go"],
+     importpath = "squzy/internal/grpctools",
+     visibility = ["//visibility:public"],
+     deps = [
+        "@org_golang_google_grpc//:go_default_library",
+         "//internal/helpers:go_default_library",
+     ]
+)
+
+go_test(
+    name = "go_default_test",
+    embed = [":go_default_library"],
+    srcs = [
+        "grpctools_test.go",
+    ],
+    deps = [
+        "@com_github_stretchr_testify//assert:go_default_library"
+    ]
+)

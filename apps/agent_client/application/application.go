@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/shirou/gopsutil/host"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
@@ -46,16 +47,17 @@ func (a *application) register(hostStat *host.InfoStat) string {
 		ctx, cancel := helpers.TimeoutContext(context.Background(), 0)
 		defer cancel()
 		res, err := a.client.Register(ctx, &apiPb.RegisterRequest{
-			AgentName:  a.config.GetAgentName(),
+			AgentName: a.config.GetAgentName(),
 			HostInfo: &apiPb.HostInfo{
 				HostName: hostStat.Hostname,
 				Os:       hostStat.OS,
 				PlatformInfo: &apiPb.PlatformInfo{
 					Name:    hostStat.Platform,
-					Family:  hostStat.PlatformVersion,
+					Family:  hostStat.PlatformFamily,
 					Version: hostStat.PlatformVersion,
 				},
 			},
+			Time: ptypes.TimestampNow(),
 		})
 
 		if err == nil {
@@ -82,9 +84,12 @@ func (a *application) Run() error {
 
 	a.client = a.getClient(grpc.WithInsecure(), grpc.WithBlock())
 
-	agentId := a.register(hostStat)
+	agentID := a.register(hostStat)
 
-	log.Printf("Registred with ID=%s", agentId)
+	signal.Notify(a.interrupt, syscall.SIGTERM, syscall.SIGINT)
+	defer signal.Stop(a.interrupt)
+
+	log.Printf("Registred with ID=%s", agentID)
 
 	st := a.getStream()
 
@@ -92,13 +97,19 @@ func (a *application) Run() error {
 		a.isStreamAvail = true
 
 		for stat := range a.executor.Execute() {
-			stat.AgentId = agentId
+			stat.AgentId = agentID
 			stat.AgentName = a.config.GetAgentName()
 			// what we should do if squzy server cant get msg
-			err = st.Send(stat)
+
+			metric := &apiPb.SendMetricsRequest{
+				Msg: &apiPb.SendMetricsRequest_Metric{
+					Metric: stat,
+				},
+			}
+			err = st.Send(metric)
 
 			if err == io.EOF {
-				a.buffer = append(a.buffer, stat)
+				a.buffer = append(a.buffer, metric)
 				if a.isStreamAvail {
 					a.isStreamAvail = false
 					go func() {
@@ -116,11 +127,16 @@ func (a *application) Run() error {
 		}
 	}()
 
-	// Wait signal from OS
-	signal.Notify(a.interrupt, os.Interrupt, syscall.SIGTERM)
-	defer signal.Stop(a.interrupt)
-
 	<-a.interrupt
+
+	_ = st.Send(&apiPb.SendMetricsRequest{
+		Msg: &apiPb.SendMetricsRequest_Disconnect_{
+			Disconnect: &apiPb.SendMetricsRequest_Disconnect{
+				AgentId: agentID,
+				Time:    ptypes.TimestampNow(),
+			},
+		},
+	})
 
 	_ = st.CloseSend()
 
@@ -128,7 +144,8 @@ func (a *application) Run() error {
 	defer cancelClose()
 
 	_, _ = a.client.UnRegister(ctxClose, &apiPb.UnRegisterRequest{
-		Id: agentId,
+		Id:   agentID,
+		Time: ptypes.TimestampNow(),
 	})
 
 	return nil

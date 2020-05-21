@@ -5,7 +5,7 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
-	"squzy/internal/httpTools"
+	"squzy/internal/httptools"
 	"squzy/internal/job"
 	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"squzy/internal/semaphore"
@@ -13,47 +13,66 @@ import (
 	"squzy/internal/storage"
 )
 
-type HttpExecutor func(schedulerId string, timeout int32, config *scheduler_config_storage.HttpConfig, httpTool httpTools.HttpTool) job.CheckError
-type GrpcExecutor func(schedulerId string, timeout int32, config *scheduler_config_storage.GrpcConfig, opts ...grpc.DialOption) job.CheckError
-type TcpExecutor func(schedulerId string, timeout int32, config *scheduler_config_storage.TcpConfig) job.CheckError
-type SiteMapExecutor func(schedulerId string, timeout int32, config *scheduler_config_storage.SiteMapConfig, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httpTools.HttpTool, semaphoreFactoryFn func(n int) semaphore.Semaphore) job.CheckError
-type HttpValueExecutor func(schedulerId string, timeout int32, config *scheduler_config_storage.HttpValueConfig, httpTool httpTools.HttpTool) job.CheckError
+type HTTPExecutor func(schedulerId string,
+	timeout int32,
+	config *scheduler_config_storage.HTTPConfig,
+	httpTool httptools.HTTPTool) job.CheckError
+
+type GrpcExecutor func(schedulerId string,
+	timeout int32,
+	config *scheduler_config_storage.GrpcConfig,
+	opts ...grpc.DialOption) job.CheckError
+type TCPExecutor func(schedulerId string, timeout int32, config *scheduler_config_storage.TCPConfig) job.CheckError
+
+type SiteMapExecutor func(
+	schedulerId string,
+	timeout int32,
+	config *scheduler_config_storage.SiteMapConfig,
+	siteMapStorage sitemap_storage.SiteMapStorage,
+	httpTools httptools.HTTPTool,
+	semaphoreFactoryFn func(n int) semaphore.Semaphore) job.CheckError
+
+type HTTPValueExecutor func(
+	schedulerId string,
+	timeout int32,
+	config *scheduler_config_storage.HTTPValueConfig,
+	httpTool httptools.HTTPTool) job.CheckError
 
 type executor struct {
 	externalStorage    storage.Storage
 	siteMapStorage     sitemap_storage.SiteMapStorage
-	httpTool           httpTools.HttpTool
+	httpTool           httptools.HTTPTool
 	semaphoreFactoryFn func(n int) semaphore.Semaphore
 	configStorage      scheduler_config_storage.Storage
-	execTcp            TcpExecutor
+	execTCP            TCPExecutor
 	execGrpc           GrpcExecutor
-	execHttp           HttpExecutor
+	execHTTP           HTTPExecutor
 	execSiteMap        SiteMapExecutor
-	execHttpValue      HttpValueExecutor
+	execHTTPValue      HTTPValueExecutor
 }
 
-func (e *executor) Execute(schedulerId primitive.ObjectID) {
-	config, err := e.configStorage.Get(context.Background(), schedulerId)
+func (e *executor) Execute(schedulerID primitive.ObjectID) {
+	config, err := e.configStorage.Get(context.Background(), schedulerID)
 	if err != nil || config == nil {
 		// @TODO log error
 		return
 	}
-	id := schedulerId.Hex()
+	id := schedulerID.Hex()
 	switch config.Type {
-	case apiPb.SchedulerType_Tcp:
-		_ = e.externalStorage.Write(e.execTcp(id, config.Timeout, config.TcpConfig))
+	case apiPb.SchedulerType_TCP:
+		_ = e.externalStorage.Write(e.execTCP(id, config.Timeout, config.TCPConfig))
 		// @TODO logger
-	case apiPb.SchedulerType_Grpc:
+	case apiPb.SchedulerType_GRPC:
 		_ = e.externalStorage.Write(e.execGrpc(id, config.Timeout, config.GrpcConfig, grpc.WithInsecure()))
 		// @TODO logger
-	case apiPb.SchedulerType_Http:
-		_ = e.externalStorage.Write(e.execHttp(id, config.Timeout, config.HttpConfig, e.httpTool))
+	case apiPb.SchedulerType_HTTP:
+		_ = e.externalStorage.Write(e.execHTTP(id, config.Timeout, config.HTTPConfig, e.httpTool))
 		// @TODO logger
-	case apiPb.SchedulerType_SiteMap:
+	case apiPb.SchedulerType_SITE_MAP:
 		_ = e.externalStorage.Write(e.execSiteMap(id, config.Timeout, config.SiteMapConfig, e.siteMapStorage, e.httpTool, e.semaphoreFactoryFn))
 		// @TODO logger
-	case apiPb.SchedulerType_HttpJsonValue:
-		_ = e.externalStorage.Write(e.execHttpValue(id, config.Timeout, config.HttpValueConfig, e.httpTool))
+	case apiPb.SchedulerType_HTTP_JSON_VALUE:
+		_ = e.externalStorage.Write(e.execHTTPValue(id, config.Timeout, config.HTTPValueConfig, e.httpTool))
 		// @TODO logger
 	default:
 		// @TODO log incorrect type
@@ -61,20 +80,20 @@ func (e *executor) Execute(schedulerId primitive.ObjectID) {
 }
 
 type JobExecutor interface {
-	Execute(schedulerId primitive.ObjectID)
+	Execute(schedulerID primitive.ObjectID)
 }
 
 func NewExecutor(
 	externalStorage storage.Storage,
 	siteMapStorage sitemap_storage.SiteMapStorage,
-	httpTool httpTools.HttpTool,
+	httpTool httptools.HTTPTool,
 	semaphoreFactoryFn func(n int) semaphore.Semaphore,
 	configStorage scheduler_config_storage.Storage,
-	execTcp TcpExecutor,
+	execTCP TCPExecutor,
 	execGrpc GrpcExecutor,
-	execHttp HttpExecutor,
+	execHTTP HTTPExecutor,
 	execSiteMap SiteMapExecutor,
-	execHttpValue HttpValueExecutor,
+	execHTTPValue HTTPValueExecutor,
 ) JobExecutor {
 	return &executor{
 		externalStorage:    externalStorage,
@@ -82,10 +101,10 @@ func NewExecutor(
 		httpTool:           httpTool,
 		semaphoreFactoryFn: semaphoreFactoryFn,
 		configStorage:      configStorage,
-		execTcp:            execTcp,
+		execTCP:            execTCP,
 		execGrpc:           execGrpc,
-		execHttp:           execHttp,
+		execHTTP:           execHTTP,
 		execSiteMap:        execSiteMap,
-		execHttpValue:      execHttpValue,
+		execHTTPValue:      execHTTPValue,
 	}
 }

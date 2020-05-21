@@ -21,7 +21,7 @@ System allows monitoring resources with different type of check. It uses MONGO f
 
 ## Storage
 
-It is entity for save results from squzy monitoring
+This is entity for save results from squzy monitoring
 
 You can implement storage by your self via this grpc method [API](https://github.com/squzy/squzy_proto/blob/feat/api-1/proto/v1/squzy_storage.proto#L19)
 

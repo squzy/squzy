@@ -11,10 +11,10 @@ import (
 
 func TestGetPortByUrl(t *testing.T) {
 	t.Run("Should: return int32(80)", func(t *testing.T) {
-		assert.Equal(t, int32(80), GetPortByUrl("http://google.com"))
+		assert.Equal(t, int32(80), GetPortByURL("http://google.com"))
 	})
 	t.Run("Should: return int32(443)", func(t *testing.T) {
-		assert.Equal(t, int32(443), GetPortByUrl("https://google.com"))
+		assert.Equal(t, int32(443), GetPortByURL("https://google.com"))
 	})
 }
 
@@ -43,12 +43,12 @@ func TestSelectorsToDb(t *testing.T) {
 	t.Run("Should: convert correct", func(t *testing.T) {
 		assert.EqualValues(t, []*scheduler_config_storage.Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_String,
+				Type: apiPb.HttpJsonValueConfig_STRING,
 				Path: "select",
 			},
 		}, SelectorsToDb([]*apiPb.HttpJsonValueConfig_Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_String,
+				Type: apiPb.HttpJsonValueConfig_STRING,
 				Path: "select",
 			},
 		}))
@@ -59,12 +59,12 @@ func TestSelectorsToProto(t *testing.T) {
 	t.Run("Should: convert correct", func(t *testing.T) {
 		assert.EqualValues(t, []*apiPb.HttpJsonValueConfig_Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_String,
+				Type: apiPb.HttpJsonValueConfig_STRING,
 				Path: "select",
 			},
 		}, SelectorsToProto([]*scheduler_config_storage.Selectors{
 			{
-				Type: apiPb.HttpJsonValueConfig_String,
+				Type: apiPb.HttpJsonValueConfig_STRING,
 				Path: "select",
 			},
 		}))

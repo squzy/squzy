@@ -9,13 +9,13 @@ import (
 )
 
 const (
-	httpPort               = int32(80)
-	httpsPort              = int32(443)
-	defaultTimeout         = 10
-	defaultTimeoutDuration = time.Second * defaultTimeout
+	httpPort               int32 = 80
+	httpsPort              int32 = 443
+	defaultTimeout               = 10
+	defaultTimeoutDuration       = time.Second * defaultTimeout
 )
 
-func GetPortByUrl(url string) int32 {
+func GetPortByURL(url string) int32 {
 	if strings.HasPrefix(url, "https") {
 		return httpsPort
 	}

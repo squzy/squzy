@@ -10,9 +10,9 @@ import (
 	"squzy/apps/squzy_monitoring/application"
 	"squzy/apps/squzy_monitoring/config"
 	"squzy/apps/squzy_monitoring/version"
-	"squzy/internal/grpcTools"
+	"squzy/internal/grpctools"
 	"squzy/internal/helpers"
-	"squzy/internal/httpTools"
+	"squzy/internal/httptools"
 	"squzy/internal/job"
 	job_executor "squzy/internal/job-executor"
 	"squzy/internal/parsers"
@@ -24,11 +24,15 @@ import (
 	"time"
 )
 
+const (
+	day = time.Hour * 24
+)
+
 func main() {
 	cfg := config.New()
-	ctx, cancel := helpers.TimeoutContext(context.Background(), time.Second*10)
+	ctx, cancel := helpers.TimeoutContext(context.Background(), 0)
 	defer cancel()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.GetMongoUri()))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.GetMongoURI()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,12 +40,21 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer func() {
+		_ = client.Disconnect(context.Background())
+	}()
 	connector := mongo_helper.New(client.Database(cfg.GetMongoDb()).Collection(cfg.GetMongoCollection()))
-	httpPackage := httpTools.New(version.GetVersion())
-	grpcTool := grpcTools.New()
-	externalStorage := storage.NewExternalStorage(grpcTool, cfg.GetClientAddress(), cfg.GetStorageTimeout(), storage.GetInMemoryStorage(), grpc.WithInsecure())
+	httpPackage := httptools.New(version.GetVersion())
+	grpcTool := grpctools.New()
+	externalStorage := storage.NewExternalStorage(
+		grpcTool,
+		cfg.GetClientAddress(),
+		cfg.GetStorageTimeout(),
+		storage.GetInMemoryStorage(),
+		grpc.WithInsecure(),
+	)
 	siteMapStorage := sitemap_storage.New(
-		time.Hour*24,
+		day,
 		httpPackage,
 		parsers.NewSiteMapParser(),
 	)
@@ -52,11 +65,11 @@ func main() {
 		httpPackage,
 		semaphore.NewSemaphore,
 		configStorage,
-		job.ExecTcp,
+		job.ExecTCP,
 		job.ExecGrpc,
-		job.ExecHttp,
+		job.ExecHTTP,
 		job.ExecSiteMap,
-		job.ExecHttpValue,
+		job.ExecHTTPValue,
 	)
 	app := application.New(
 		scheduler_storage.New(),

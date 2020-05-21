@@ -7,7 +7,7 @@ go_library(
      visibility = ["//visibility:public"],
      deps = [
         "//internal/parsers:go_default_library",
-        "//internal/httpTools:go_default_library",
+        "//internal/httptools:go_default_library",
      ],
 
 )

@@ -4,7 +4,7 @@
 
 ## About
 
-It is small application which grab information from host machine
+This is small application which grab information from host machine
 
 Which information you can get:
 1. CPU load per each

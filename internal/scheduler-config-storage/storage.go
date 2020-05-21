@@ -14,16 +14,16 @@ type GrpcConfig struct {
 	Port    int32  `bson:"port"`
 }
 
-type HttpConfig struct {
+type HTTPConfig struct {
 	Method     string            `bson:"string"`
-	Url        string            `bson:"url"`
+	URL        string            `bson:"url"`
 	Headers    map[string]string `bson:"headers"`
 	StatusCode int32             `bson:"statusCode"`
 }
 
-type HttpValueConfig struct {
+type HTTPValueConfig struct {
 	Method    string            `bson:"method"`
-	Url       string            `bson:"url"`
+	URL       string            `bson:"url"`
 	Headers   map[string]string `bson:"headers"`
 	Selectors []*Selectors      `bson:"selectors"`
 }
@@ -33,35 +33,35 @@ type Selectors struct {
 	Path string                                       `bson:"path"`
 }
 
-type TcpConfig struct {
+type TCPConfig struct {
 	Host string `bson:"host"`
 	Port int32  `bson:"port"`
 }
 
 type SiteMapConfig struct {
-	Url         string `bson:"url"`
+	URL         string `bson:"url"`
 	Concurrency int32  `bson:"concurrency"`
 }
 
 type SchedulerConfig struct {
-	Id              primitive.ObjectID    `bson:"_id"`
+	ID              primitive.ObjectID    `bson:"_id"`
 	Type            apiPb.SchedulerType   `bson:"type"`
 	Status          apiPb.SchedulerStatus `bson:"status"`
 	Interval        int32                 `bson:"interval"`
 	Timeout         int32                 `bson:"timeout"`
-	TcpConfig       *TcpConfig            `bson:"tcpConfig,omitempty"`
+	TCPConfig       *TCPConfig            `bson:"tcpConfig,omitempty"`
 	SiteMapConfig   *SiteMapConfig        `bson:"siteMapConfig,omitempty"`
 	GrpcConfig      *GrpcConfig           `bson:"grpcConfig,omitempty"`
-	HttpConfig      *HttpConfig           `bson:"httpConfig,omitempty"`
-	HttpValueConfig *HttpValueConfig      `bson:"httpValueConfig,omitempty"`
+	HTTPConfig      *HTTPConfig           `bson:"httpConfig,omitempty"`
+	HTTPValueConfig *HTTPValueConfig      `bson:"httpValueConfig,omitempty"`
 }
 
 type Storage interface {
-	Get(ctx context.Context, schedulerId primitive.ObjectID) (*SchedulerConfig, error)
+	Get(ctx context.Context, schedulerID primitive.ObjectID) (*SchedulerConfig, error)
 	Add(ctx context.Context, config *SchedulerConfig) error
-	Remove(ctx context.Context, schedulerId primitive.ObjectID) error
-	Run(ctx context.Context, schedulerId primitive.ObjectID) error
-	Stop(ctx context.Context, schedulerId primitive.ObjectID) error
+	Remove(ctx context.Context, schedulerID primitive.ObjectID) error
+	Run(ctx context.Context, schedulerID primitive.ObjectID) error
+	Stop(ctx context.Context, schedulerID primitive.ObjectID) error
 	GetAll(ctx context.Context) ([]*SchedulerConfig, error)
 	GetAllForSync(ctx context.Context) ([]*SchedulerConfig, error)
 }
@@ -104,9 +104,9 @@ func (s *storage) Add(ctx context.Context, config *SchedulerConfig) error {
 	return err
 }
 
-func (s *storage) Remove(ctx context.Context, schedulerId primitive.ObjectID) error {
+func (s *storage) Remove(ctx context.Context, schedulerID primitive.ObjectID) error {
 	_, err := s.connector.UpdateOne(ctx, bson.M{
-		"_id": schedulerId,
+		"_id": schedulerID,
 	}, bson.M{
 		"$set": bson.M{
 			"status": apiPb.SchedulerStatus_REMOVED,
@@ -115,9 +115,9 @@ func (s *storage) Remove(ctx context.Context, schedulerId primitive.ObjectID) er
 	return err
 }
 
-func (s *storage) Run(ctx context.Context, schedulerId primitive.ObjectID) error {
+func (s *storage) Run(ctx context.Context, schedulerID primitive.ObjectID) error {
 	_, err := s.connector.UpdateOne(ctx, bson.M{
-		"_id": schedulerId,
+		"_id": schedulerID,
 		"status": bson.M{
 			"$in": statusForAction,
 		},
@@ -129,9 +129,9 @@ func (s *storage) Run(ctx context.Context, schedulerId primitive.ObjectID) error
 	return err
 }
 
-func (s *storage) Stop(ctx context.Context, schedulerId primitive.ObjectID) error {
+func (s *storage) Stop(ctx context.Context, schedulerID primitive.ObjectID) error {
 	_, err := s.connector.UpdateOne(ctx, bson.M{
-		"_id": schedulerId,
+		"_id": schedulerID,
 		"status": bson.M{
 			"$in": statusForAction,
 		},
@@ -143,10 +143,10 @@ func (s *storage) Stop(ctx context.Context, schedulerId primitive.ObjectID) erro
 	return err
 }
 
-func (s *storage) Get(ctx context.Context, schedulerId primitive.ObjectID) (*SchedulerConfig, error) {
+func (s *storage) Get(ctx context.Context, schedulerID primitive.ObjectID) (*SchedulerConfig, error) {
 	config := &SchedulerConfig{}
 	err := s.connector.FindOne(ctx, bson.M{
-		"_id": schedulerId,
+		"_id": schedulerID,
 	}, config)
 	if err != nil {
 		return nil, err
