@@ -121,7 +121,7 @@ func (s *Suite) Test_GetSnapshots() {
 	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbSnapshotCollection)
@@ -148,7 +148,7 @@ func (s *Suite) Test_GetSnapshots_Select_Error() {
 	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	_, _, err := postgr.GetSnapshots(id, &apiPb.Pagination{
@@ -256,7 +256,7 @@ func (s *Suite) Test_GetStatRequest() {
 	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbStatRequestCollection)
@@ -308,7 +308,7 @@ func (s *Suite) Test_GetStatRequest_Select_Error() {
 	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	_, _, err := postgr.GetStatRequest(id, &apiPb.Pagination{
@@ -342,7 +342,7 @@ func (s *Suite) Test_GetCpuInfo() {
 	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbStatRequestCollection)
@@ -381,7 +381,7 @@ func (s *Suite) Test_GetCpuInfo_Select_Error() {
 	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	_, _, err := postgr.GetCPUInfo(id, &apiPb.Pagination{
@@ -412,7 +412,7 @@ func (s *Suite) Test_GetMemoryInfo() {
 	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbStatRequestCollection)
@@ -439,7 +439,7 @@ func (s *Suite) Test_GetMemoryInfo_Select_Error() {
 	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	_, _, err := postgr.GetMemoryInfo(id, &apiPb.Pagination{
@@ -473,7 +473,7 @@ func (s *Suite) Test_GetDiskInfo() {
 	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbStatRequestCollection)
@@ -499,7 +499,7 @@ func (s *Suite) Test_GetNetInfo() {
 	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbStatRequestCollection)

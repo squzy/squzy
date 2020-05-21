@@ -156,6 +156,7 @@ func (p *postgres) GetSnapshots(schedulerID string, pagination *apiPb.Pagination
 	var count int
 	err = p.db.Table(dbSnapshotCollection).
 		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), schedulerID).
+		Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 		Count(&count).Error
 	if err != nil {
 		return nil, -1, err
@@ -203,6 +204,7 @@ func (p *postgres) GetStatRequest(agentID string, pagination *apiPb.Pagination, 
 	var count int
 	err = p.db.Table(dbStatRequestCollection).
 		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
+		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
 		Count(&count).Error
 	if err != nil {
 		return nil, -1, err
@@ -242,6 +244,7 @@ func (p *postgres) GetMemoryInfo(agentID string, pagination *apiPb.Pagination, f
 	var count int
 	err = p.db.Table(dbStatRequestCollection).
 		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
+		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
 		Count(&count).Error
 	if err != nil {
 		return nil, -1, err
@@ -287,6 +290,7 @@ func (p *postgres) getSpecialRecords(agentID string, pagination *apiPb.Paginatio
 	var count int
 	err = p.db.Table(dbStatRequestCollection).
 		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
+		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
 		Count(&count).Error
 	if err != nil {
 		return nil, -1, err
