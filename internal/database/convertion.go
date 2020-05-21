@@ -1,11 +1,12 @@
 package database
 
 import (
+	"bytes"
 	"errors"
+	"github.com/golang/protobuf/jsonpb" //nolint:staticcheck
 	"github.com/golang/protobuf/ptypes"
 	_struct "github.com/golang/protobuf/ptypes/struct"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func ConvertToPostgresSnapshot(request *apiPb.SchedulerResponse) (*Snapshot, error) {
@@ -99,7 +100,10 @@ func convertToMetaData(request *apiPb.SchedulerSnapshot_MetaData) (*MetaData, er
 		return nil, err
 	}
 
-	buffer, err := protojson.Marshal(request.GetValue())
+	var b bytes.Buffer
+
+	err = (&jsonpb.Marshaler{}).Marshal(&b, request.GetValue())
+
 	if err != nil {
 		return &MetaData{
 			StartTime: startTime,
@@ -109,7 +113,7 @@ func convertToMetaData(request *apiPb.SchedulerSnapshot_MetaData) (*MetaData, er
 	return &MetaData{
 		StartTime: startTime,
 		EndTime:   endTime,
-		Value:     buffer,
+		Value:     b.Bytes(),
 	}, nil
 }
 
@@ -142,7 +146,7 @@ func convertFromMetaData(metaData *MetaData) (*apiPb.SchedulerSnapshot_MetaData,
 	}
 	str := &_struct.Value{}
 
-	if err := protojson.Unmarshal(metaData.Value, str); err != nil {
+	if err := jsonpb.Unmarshal(bytes.NewReader(metaData.Value), str); err != nil {
 		return &apiPb.SchedulerSnapshot_MetaData{
 			StartTime: startTime,
 			EndTime:   endTime,
