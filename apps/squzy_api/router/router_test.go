@@ -519,6 +519,12 @@ func TestRouter_GetEngine(t *testing.T) {
 }
 
 func TestGetFilters(t *testing.T) {
+	t.Run("Should: return all nils", func(t *testing.T) {
+		p, f, err := GetFilters(&HistoryFilterRequest{})
+		assert.Nil(t, p)
+		assert.Nil(t, f)
+		assert.Nil(t, err)
+	})
 	t.Run("Should: return error because dateFrom", func(t *testing.T) {
 		r := time.Unix(-62135596801, 0)
 		_, _, err := GetFilters(&HistoryFilterRequest{
