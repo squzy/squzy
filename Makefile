@@ -8,6 +8,8 @@ build_agent: .build_agent
 
 build_bin_api: .build_bin_api
 
+build_agent_mac: .build_agent_mac
+
 build_bin_squzy: .build_bin_squzy
 
 build_bin_storage: .build_bin_storage
@@ -37,6 +39,7 @@ default: build
 .test:
 	bazel test --cache_test_results=no --define version="local" //...
 
+
 .build_agent:
 	./build.bash agent_client squzy_agent_$(version) $(version)
 
@@ -57,6 +60,9 @@ default: build
 
 .dep:
 	bazel run //:gazelle -- update-repos -from_file=go.mod
+
+.build_agent_mac:
+	env CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -o bin/squzy_agent_$(version)-darwin-amd64 -ldflags "-s -w -X squzy/apps/agent_client/version.Version=$(version)"  apps/agent_client/main.go
 
 .test_cover:
 	# bazel coverage --test_arg="-test.coverprofile=c.out" //apps/...
