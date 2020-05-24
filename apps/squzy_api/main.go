@@ -42,9 +42,18 @@ func main() {
 	}()
 	storageClient := apiPb.NewStorageClient(storageConn)
 
+	appMonConn, err := tools.GetConnection(cfg.GetApplicationMonitoringAddress(), 0, grpc.WithInsecure())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		_ = appMonConn.Close()
+	}()
+	appMonClient := apiPb.NewApplicationMonitoringClient(appMonConn)
+
 	log.Fatal(
 		router.New(
-			handlers.New(agentServerClient, monitoringClient, storageClient),
+			handlers.New(agentServerClient, monitoringClient, storageClient, appMonClient),
 		).GetEngine().Run(fmt.Sprintf(":%d", cfg.GetPort())),
 	)
 }

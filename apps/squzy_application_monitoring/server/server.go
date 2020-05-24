@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -43,7 +44,7 @@ func (s *server) SaveTransaction(ctx context.Context, req *apiPb.TransactionInfo
 	}
 
 	// @TODO pass transaction info into storage
-
+	fmt.Println(req)
 	return &empty.Empty{}, nil
 }
 
