@@ -16,19 +16,52 @@ type Application struct {
 
 type Database interface {
 	FindOrCreate(ctx context.Context, name string, host string) (*Application, error)
+	FindApplicationByName(ctx context.Context, name string) (*Application, error)
+	FindApplicationById(ctx context.Context, id primitive.ObjectID) (*Application, error)
 }
 
 type db struct {
 	connector mongo_helper.Connector
 }
 
-func (d *db) FindOrCreate(ctx context.Context, name string, host string) (*Application, error) {
+func (d *db) FindApplicationById(ctx context.Context, id primitive.ObjectID) (*Application, error) {
+	app, err := d.findApplication(ctx, bson.M{
+		"_id": bson.M{
+			"$eq": id,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return app, nil
+}
+
+func (d *db) findApplication(ctx context.Context, filter bson.M) (*Application, error) {
 	app := &Application{}
-	err := d.connector.FindOne(ctx, bson.M{
+	err := d.connector.FindOne(ctx, filter, app)
+
+	if err != nil {
+		return nil, err
+	}
+	return app, nil
+}
+
+func (d *db) FindApplicationByName(ctx context.Context, name string) (*Application, error) {
+	app, err := d.findApplication(ctx, bson.M{
 		"name": bson.M{
 			"$eq": name,
 		},
-	}, app)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return app, nil
+}
+
+func (d *db) FindOrCreate(ctx context.Context, name string, host string) (*Application, error) {
+	app, err := d.FindApplicationByName(ctx, name)
 
 	if err == nil {
 		return app, nil

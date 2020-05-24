@@ -29,7 +29,7 @@ type E struct {
 }
 
 type D struct {
-	Data interface{} `json:"data"`
+	Data interface{} `json:"data,omitempty"`
 }
 
 type HistoryFilterRequest struct {
@@ -51,6 +51,28 @@ type Scheduler struct {
 	SiteMapConfig   *apiPb.SiteMapConfig       `json:"siteMapConfig"`
 }
 
+type Application struct {
+	Host string `json:"host"`
+	Name string `json:"name" binding:"required"`
+}
+
+type Transaction struct {
+	Id       string                  `json:"id" binding:"required"`
+	ParentID string                  `json:"parentId"`
+	Name     string                  `json:"name" binding:"required"`
+	DateFrom time.Time              `time_format:"2006-01-02T15:04:05Z07:00" binding:"required"`
+	DateTo   time.Time              `time_format:"2006-01-02T15:04:05Z07:00" binding:"required"`
+	Status   apiPb.TransactionStatus `json:"status"`
+	Type     apiPb.TransactionType   `json:"type"`
+	Meta *struct{
+		Host string `json:"host"`
+		Path string `json:"path"`
+	} `json:"meta,omitempty"`
+	Error *struct{
+		Message string `json:"message"`
+	} `json:"error,omitempty"`
+}
+
 func errWrap(c *gin.Context, status int, err error) {
 	c.AbortWithStatusJSON(status, E{
 		Error: err,
@@ -68,6 +90,76 @@ func (r *router) GetEngine() *gin.Engine {
 	engine.Use(gin.Recovery())
 	v1 := engine.Group("v1")
 	{
+		applications := v1.Group("applications")
+		{
+			applications.POST("", func(context *gin.Context) {
+				application := &Application{}
+				err := context.ShouldBindJSON(application)
+				app, err := r.handlers.RegisterApplication(context, &apiPb.ApplicationInfo{
+					Name:     application.Name,
+					HostName: application.Host,
+				})
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+				successWrap(context, http.StatusOK, app)
+			})
+			application := applications.Group(":applicationId")
+			{
+				application.POST("transaction", func(context *gin.Context) {
+					applicationId := context.Param("applicationId")
+					trx := &Transaction{}
+					err := context.ShouldBindJSON(trx)
+					if err != nil {
+						errWrap(context, http.StatusUnprocessableEntity, err)
+						return
+					}
+					timeFrom, err := ptypes.TimestampProto(trx.DateFrom)
+					if err != nil {
+						errWrap(context, http.StatusUnprocessableEntity, err)
+						return
+					}
+					timeTo, err := ptypes.TimestampProto(trx.DateTo)
+					if err != nil {
+						errWrap(context, http.StatusUnprocessableEntity, err)
+						return
+					}
+					var meta *apiPb.TransactionInfo_Meta
+					if trx.Meta != nil {
+						meta = &apiPb.TransactionInfo_Meta{
+							Host:                 trx.Meta.Host,
+							Path:                 trx.Meta.Path,
+						}
+					}
+					var trxError *apiPb.TransactionInfo_Error
+					if trx.Error != nil {
+						trxError = &apiPb.TransactionInfo_Error{
+							Message: trx.Error.Message,
+						}
+					}
+					_, err = r.handlers.SaveTransaction(context, &apiPb.TransactionInfo{
+						Id:            trx.Id,
+						ApplicationId: applicationId,
+						ParentId:      trx.ParentID,
+						Meta: meta,
+						Name: trx.Name,
+						StartTime: timeFrom,
+						EndTime: timeTo,
+						Status: trx.Status,
+						Type:   trx.Type,
+						Error: trxError,
+					})
+					if err != nil {
+						errWrap(context, http.StatusInternalServerError, err)
+						return
+					}
+					successWrap(context, http.StatusAccepted, gin.H{
+						"id": trx.Id,
+					})
+				})
+			}
+		}
 		agents := v1.Group("agents")
 		{
 			agents.GET("", func(context *gin.Context) {

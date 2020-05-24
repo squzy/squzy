@@ -2,26 +2,53 @@ package server
 
 import (
 	"context"
+	"errors"
 	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"squzy/apps/squzy_application_monitoring/database"
 )
 
 type server struct {
-
+	db database.Database
 }
 
-func (s *server) InitializeApplication(ctx context.Context, info *apiPb.ApplicationInfo) (*apiPb.InitializeApplicationResponse, error) {
-	panic("implement me")
+var (
+	errMissingName = errors.New("missing application name")
+)
+
+func (s *server) InitializeApplication(ctx context.Context, req *apiPb.ApplicationInfo) (*apiPb.InitializeApplicationResponse, error) {
+	if req.Name == "" {
+		return nil, errMissingName
+	}
+
+	application, err := s.db.FindOrCreate(ctx, req.Name, req.HostName)
+	if err != nil {
+		return nil, err
+	}
+	return &apiPb.InitializeApplicationResponse{
+		ApplicationId: application.Id.Hex(),
+	}, nil
 }
 
-func (s *server) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {
-	panic("implement me")
+func (s *server) SaveTransaction(ctx context.Context, req *apiPb.TransactionInfo) (*empty.Empty, error) {
+	applicationId, err := primitive.ObjectIDFromHex(req.ApplicationId)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.db.FindApplicationById(ctx, applicationId)
+	if err != nil {
+		return nil, err
+	}
+
+	// @TODO pass transaction info into storage
+
+	return &empty.Empty{}, nil
 }
 
-func (s *server) SaveSegment(ctx context.Context, info *apiPb.SegmentInfo) (*empty.Empty, error) {
-	panic("implement me")
-}
-
-func New() apiPb.ApplicationMonitoringServer {
-	return &server{}
+func New(db database.Database) apiPb.ApplicationMonitoringServer {
+	return &server{
+		db: db,
+	}
 }

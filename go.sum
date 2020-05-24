@@ -173,6 +173,10 @@ github.com/squzy/squzy_generated v1.7.0 h1:1JTyWXHUiASd+ifXn/1zlUDbP+5bA+t1063ez
 github.com/squzy/squzy_generated v1.7.0/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/squzy/squzy_generated v1.7.2-0.20200523153903-16ae0c115df3 h1:9cVjYgMcKnHwwpY1599Lr5isBjKR26oou29xkax/MXU=
 github.com/squzy/squzy_generated v1.7.2-0.20200523153903-16ae0c115df3/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.7.2-0.20200524103926-653f8306a801 h1:6IKat8O2tDU7wq/xGrPc8LREh9R15OCMMIkjTr1wqZo=
+github.com/squzy/squzy_generated v1.7.2-0.20200524103926-653f8306a801/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.7.2-0.20200524131353-4f7fdcb5de0d h1:1lqde3+gh6nxNPaH5f+8bnJxo14pTQ5LyT/XEfaynUs=
+github.com/squzy/squzy_generated v1.7.2-0.20200524131353-4f7fdcb5de0d/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

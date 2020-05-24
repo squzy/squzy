@@ -18,12 +18,25 @@ type Handlers interface {
 	StopScheduler(ctx context.Context, id string) error
 	RemoveScheduler(ctx context.Context, id string) error
 	AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) (*apiPb.AddResponse, error)
+	RegisterApplication(ctx context.Context, rq *apiPb.ApplicationInfo) (*apiPb.InitializeApplicationResponse, error)
+	SaveTransaction(ctx context.Context, rq *apiPb.TransactionInfo) (*empty.Empty, error)
 }
 
 type handlers struct {
 	agentClient      apiPb.AgentServerClient
 	monitoringClient apiPb.SchedulersExecutorClient
 	storageClient    apiPb.StorageClient
+	applicationMonitoringClient apiPb.ApplicationMonitoringClient
+}
+
+func (h *handlers) SaveTransaction(ctx context.Context, rq *apiPb.TransactionInfo) (*empty.Empty, error) {
+	c, cancel := helpers.TimeoutContext(ctx, 0)
+	defer cancel()
+	r, err := h.applicationMonitoringClient.SaveTransaction(c, rq)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
 }
 
 func (h *handlers) GetSchedulerHistoryByID(ctx context.Context, rq *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
@@ -127,14 +140,26 @@ func (h *handlers) GetAgentByID(ctx context.Context, id string) (*apiPb.AgentIte
 	return agent, nil
 }
 
+func (h *handlers) RegisterApplication(ctx context.Context, rq *apiPb.ApplicationInfo) (*apiPb.InitializeApplicationResponse, error) {
+	c, cancel := helpers.TimeoutContext(ctx, 0)
+	defer cancel()
+	app, err := h.applicationMonitoringClient.InitializeApplication(c, rq)
+	if err != nil {
+		return nil, err
+	}
+	return app, err
+}
+
 func New(
 	agentClient apiPb.AgentServerClient,
 	monitoringClient apiPb.SchedulersExecutorClient,
 	storageClient apiPb.StorageClient,
+	applicationMonitoringClient apiPb.ApplicationMonitoringClient,
 ) Handlers {
 	return &handlers{
 		agentClient:      agentClient,
 		monitoringClient: monitoringClient,
 		storageClient:    storageClient,
+		applicationMonitoringClient: applicationMonitoringClient,
 	}
 }
