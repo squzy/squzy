@@ -72,7 +72,7 @@ func (d *db) FindOrCreate(ctx context.Context, name string, host string) (*Appli
 	}
 
 	app = &Application{
-		Id: primitive.NewObjectID(),
+		Id:   primitive.NewObjectID(),
 		Host: host,
 		Name: name,
 	}

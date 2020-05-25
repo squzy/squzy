@@ -23,9 +23,9 @@ type Handlers interface {
 }
 
 type handlers struct {
-	agentClient      apiPb.AgentServerClient
-	monitoringClient apiPb.SchedulersExecutorClient
-	storageClient    apiPb.StorageClient
+	agentClient                 apiPb.AgentServerClient
+	monitoringClient            apiPb.SchedulersExecutorClient
+	storageClient               apiPb.StorageClient
 	applicationMonitoringClient apiPb.ApplicationMonitoringClient
 }
 
@@ -157,9 +157,9 @@ func New(
 	applicationMonitoringClient apiPb.ApplicationMonitoringClient,
 ) Handlers {
 	return &handlers{
-		agentClient:      agentClient,
-		monitoringClient: monitoringClient,
-		storageClient:    storageClient,
+		agentClient:                 agentClient,
+		monitoringClient:            monitoringClient,
+		storageClient:               storageClient,
 		applicationMonitoringClient: applicationMonitoringClient,
 	}
 }

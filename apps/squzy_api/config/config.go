@@ -14,10 +14,10 @@ type Config interface {
 }
 
 type cfg struct {
-	port             int32
-	agentServer      string
-	monitoringServer string
-	storageServer    string
+	port                        int32
+	agentServer                 string
+	monitoringServer            string
+	storageServer               string
 	applicationMonitoringServer string
 }
 
@@ -42,10 +42,10 @@ func (c *cfg) GetPort() int32 {
 }
 
 const (
-	ENV_PORT              = "PORT"
-	ENV_AGENT_SERVER      = "AGENT_SERVER_HOST"
-	ENV_MONITORING_SERVER = "MONITORING_SERVER_HOST"
-	ENV_STORAGE_SERVER    = "STORAGE_SERVER_HOST"
+	ENV_PORT                          = "PORT"
+	ENV_AGENT_SERVER                  = "AGENT_SERVER_HOST"
+	ENV_MONITORING_SERVER             = "MONITORING_SERVER_HOST"
+	ENV_STORAGE_SERVER                = "STORAGE_SERVER_HOST"
 	ENV_APPLICATION_MONITORING_SERVER = "APPLICATION_MONITORING_SERVER_HOST"
 
 	defaultPort int32 = 8080
@@ -61,10 +61,10 @@ func New() Config {
 		}
 	}
 	return &cfg{
-		port:             port,
-		agentServer:      os.Getenv(ENV_AGENT_SERVER),
-		monitoringServer: os.Getenv(ENV_MONITORING_SERVER),
-		storageServer:    os.Getenv(ENV_STORAGE_SERVER),
+		port:                        port,
+		agentServer:                 os.Getenv(ENV_AGENT_SERVER),
+		monitoringServer:            os.Getenv(ENV_MONITORING_SERVER),
+		storageServer:               os.Getenv(ENV_STORAGE_SERVER),
 		applicationMonitoringServer: os.Getenv(ENV_APPLICATION_MONITORING_SERVER),
 	}
 }

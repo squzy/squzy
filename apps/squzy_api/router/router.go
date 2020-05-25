@@ -2,7 +2,6 @@ package router
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/ptypes"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
@@ -60,15 +59,15 @@ type Transaction struct {
 	Id       string                  `json:"id" binding:"required"`
 	ParentID string                  `json:"parentId"`
 	Name     string                  `json:"name" binding:"required"`
-	DateFrom time.Time              `time_format:"2006-01-02T15:04:05Z07:00" binding:"required"`
-	DateTo   time.Time              `time_format:"2006-01-02T15:04:05Z07:00" binding:"required"`
+	DateFrom time.Time               `json:"dateFrom" time_format:"2006-01-02T15:04:05Z07:00" binding:"required"`
+	DateTo   time.Time               `json:"dateTo" time_format:"2006-01-02T15:04:05Z07:00" binding:"required"`
 	Status   apiPb.TransactionStatus `json:"status"`
 	Type     apiPb.TransactionType   `json:"type"`
-	Meta *struct{
+	Meta     *struct {
 		Host string `json:"host"`
 		Path string `json:"path"`
 	} `json:"meta,omitempty"`
-	Error *struct{
+	Error *struct {
 		Message string `json:"message"`
 	} `json:"error,omitempty"`
 }
@@ -103,11 +102,12 @@ func (r *router) GetEngine() *gin.Engine {
 					errWrap(context, http.StatusInternalServerError, err)
 					return
 				}
+
 				successWrap(context, http.StatusOK, app)
 			})
 			application := applications.Group(":applicationId")
 			{
-				application.POST("transaction", func(context *gin.Context) {
+				application.POST("transactions", func(context *gin.Context) {
 					applicationId := context.Param("applicationId")
 					trx := &Transaction{}
 					err := context.ShouldBindJSON(trx)
@@ -128,8 +128,8 @@ func (r *router) GetEngine() *gin.Engine {
 					var meta *apiPb.TransactionInfo_Meta
 					if trx.Meta != nil {
 						meta = &apiPb.TransactionInfo_Meta{
-							Host:                 trx.Meta.Host,
-							Path:                 trx.Meta.Path,
+							Host: trx.Meta.Host,
+							Path: trx.Meta.Path,
 						}
 					}
 					var trxError *apiPb.TransactionInfo_Error
@@ -142,13 +142,13 @@ func (r *router) GetEngine() *gin.Engine {
 						Id:            trx.Id,
 						ApplicationId: applicationId,
 						ParentId:      trx.ParentID,
-						Meta: meta,
-						Name: trx.Name,
-						StartTime: timeFrom,
-						EndTime: timeTo,
-						Status: trx.Status,
-						Type:   trx.Type,
-						Error: trxError,
+						Meta:          meta,
+						Name:          trx.Name,
+						StartTime:     timeFrom,
+						EndTime:       timeTo,
+						Status:        trx.Status,
+						Type:          trx.Type,
+						Error:         trxError,
 					})
 					if err != nil {
 						errWrap(context, http.StatusInternalServerError, err)
@@ -232,7 +232,6 @@ func (r *router) GetEngine() *gin.Engine {
 				request := new(Scheduler)
 				err := context.ShouldBindJSON(request)
 				if err != nil {
-					fmt.Println(err)
 					errWrap(context, http.StatusUnprocessableEntity, err)
 					return
 				}
