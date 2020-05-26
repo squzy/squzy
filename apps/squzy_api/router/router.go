@@ -64,8 +64,9 @@ type Transaction struct {
 	Status   apiPb.TransactionStatus `json:"status"`
 	Type     apiPb.TransactionType   `json:"type"`
 	Meta     *struct {
-		Host string `json:"host"`
-		Path string `json:"path"`
+		Host   string `json:"host"`
+		Path   string `json:"path"`
+		Method string `json:"method"`
 	} `json:"meta,omitempty"`
 	Error *struct {
 		Message string `json:"message"`
@@ -130,6 +131,7 @@ func (r *router) GetEngine() *gin.Engine {
 						meta = &apiPb.TransactionInfo_Meta{
 							Host: trx.Meta.Host,
 							Path: trx.Meta.Path,
+							Method: trx.Meta.Method,
 						}
 					}
 					var trxError *apiPb.TransactionInfo_Error
