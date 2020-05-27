@@ -7,11 +7,13 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"squzy/apps/squzy_application_monitoring/config"
 	"squzy/apps/squzy_application_monitoring/database"
 )
 
 type server struct {
 	db database.Database
+	config config.Config
 }
 
 var (
@@ -29,6 +31,7 @@ func (s *server) InitializeApplication(ctx context.Context, req *apiPb.Applicati
 	}
 	return &apiPb.InitializeApplicationResponse{
 		ApplicationId: application.Id.Hex(),
+		TracingHeader: s.config.GetTracingHeader(),
 	}, nil
 }
 
@@ -48,8 +51,9 @@ func (s *server) SaveTransaction(ctx context.Context, req *apiPb.TransactionInfo
 	return &empty.Empty{}, nil
 }
 
-func New(db database.Database) apiPb.ApplicationMonitoringServer {
+func New(db database.Database, config config.Config) apiPb.ApplicationMonitoringServer {
 	return &server{
 		db: db,
+		config: config,
 	}
 }
