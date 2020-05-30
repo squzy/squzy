@@ -45,6 +45,7 @@ type SiteMapConfig struct {
 
 type SchedulerConfig struct {
 	ID              primitive.ObjectID    `bson:"_id"`
+	Name            string                `bson:"name,omitempty"`
 	Type            apiPb.SchedulerType   `bson:"type"`
 	Status          apiPb.SchedulerStatus `bson:"status"`
 	Interval        int32                 `bson:"interval"`

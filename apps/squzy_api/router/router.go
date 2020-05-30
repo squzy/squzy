@@ -43,6 +43,7 @@ type Scheduler struct {
 	Type            apiPb.SchedulerType        `json:"type"`
 	Interval        int32                      `json:"interval" binding:"required"`
 	Timeout         int32                      `json:"timeout"`
+	Name            string                     `json:"name"`
 	HTTPConfig      *apiPb.HttpConfig          `json:"httpConfig"`
 	TCPConfig       *apiPb.TcpConfig           `json:"tcpConfig"`
 	HTTPValueConfig *apiPb.HttpJsonValueConfig `json:"httpValueConfig"`
@@ -129,8 +130,8 @@ func (r *router) GetEngine() *gin.Engine {
 					var meta *apiPb.TransactionInfo_Meta
 					if trx.Meta != nil {
 						meta = &apiPb.TransactionInfo_Meta{
-							Host: trx.Meta.Host,
-							Path: trx.Meta.Path,
+							Host:   trx.Meta.Host,
+							Path:   trx.Meta.Path,
 							Method: trx.Meta.Method,
 						}
 					}
@@ -246,8 +247,6 @@ func (r *router) GetEngine() *gin.Engine {
 						return
 					}
 					addReq = &apiPb.AddRequest{
-						Interval: request.Interval,
-						Timeout:  request.Timeout,
 						Config: &apiPb.AddRequest_Tcp{
 							Tcp: request.TCPConfig,
 						},
@@ -259,8 +258,6 @@ func (r *router) GetEngine() *gin.Engine {
 						return
 					}
 					addReq = &apiPb.AddRequest{
-						Interval: request.Interval,
-						Timeout:  request.Timeout,
 						Config: &apiPb.AddRequest_Grpc{
 							Grpc: request.GRPCConfig,
 						},
@@ -272,8 +269,6 @@ func (r *router) GetEngine() *gin.Engine {
 						return
 					}
 					addReq = &apiPb.AddRequest{
-						Interval: request.Interval,
-						Timeout:  request.Timeout,
 						Config: &apiPb.AddRequest_Http{
 							Http: request.HTTPConfig,
 						},
@@ -285,8 +280,6 @@ func (r *router) GetEngine() *gin.Engine {
 						return
 					}
 					addReq = &apiPb.AddRequest{
-						Interval: request.Interval,
-						Timeout:  request.Timeout,
 						Config: &apiPb.AddRequest_Sitemap{
 							Sitemap: request.SiteMapConfig,
 						},
@@ -298,8 +291,6 @@ func (r *router) GetEngine() *gin.Engine {
 						return
 					}
 					addReq = &apiPb.AddRequest{
-						Interval: request.Interval,
-						Timeout:  request.Timeout,
 						Config: &apiPb.AddRequest_HttpValue{
 							HttpValue: request.HTTPValueConfig,
 						},
@@ -310,6 +301,9 @@ func (r *router) GetEngine() *gin.Engine {
 					return
 				}
 
+				addReq.Interval = request.Interval
+				addReq.Timeout = request.Timeout
+				addReq.Name = request.Name
 				res, err := r.handlers.AddScheduler(context, addReq)
 				if err != nil {
 					errWrap(context, http.StatusUnprocessableEntity, err)
