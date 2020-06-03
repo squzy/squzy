@@ -25,7 +25,7 @@ func (s storageMockOk) GetTransactions(ctx context.Context, in *apiPb.GetTransac
 	panic("implement me")
 }
 
-func (s storageMockOk) GetTransactionById(ctx context.Context, in *apiPb.GetTransactionByIdRequest, opts ...grpc.CallOption) (*apiPb.TransactionInfo, error) {
+func (s storageMockOk) GetTransactionById(ctx context.Context, in *apiPb.GetTransactionByIdRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionByIdResponse, error) {
 	panic("implement me")
 }
 
@@ -60,7 +60,7 @@ func (s storageMockError) GetTransactions(ctx context.Context, in *apiPb.GetTran
 	panic("implement me")
 }
 
-func (s storageMockError) GetTransactionById(ctx context.Context, in *apiPb.GetTransactionByIdRequest, opts ...grpc.CallOption) (*apiPb.TransactionInfo, error) {
+func (s storageMockError) GetTransactionById(ctx context.Context, in *apiPb.GetTransactionByIdRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionByIdResponse, error) {
 	panic("implement me")
 }
 

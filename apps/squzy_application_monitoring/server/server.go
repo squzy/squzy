@@ -16,6 +16,14 @@ type server struct {
 	config config.Config
 }
 
+func (s *server) GetApplicationById(ctx context.Context, request *apiPb.GetApplicationByIdRequest) (*apiPb.Application, error) {
+	panic("implement me")
+}
+
+func (s *server) GetApplicationList(ctx context.Context, e *empty.Empty) (*apiPb.GetApplicationListResponse, error) {
+	panic("implement me")
+}
+
 var (
 	errMissingName = errors.New("missing application name")
 )

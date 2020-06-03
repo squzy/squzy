@@ -96,7 +96,7 @@ func (m mockApiStorage) GetTransactions(ctx context.Context, request *apiPb.GetT
 	panic("implement me")
 }
 
-func (m mockApiStorage) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.TransactionInfo, error) {
+func (m mockApiStorage) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.GetTransactionByIdResponse, error) {
 	panic("implement me")
 }
 

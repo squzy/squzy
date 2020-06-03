@@ -34,7 +34,7 @@ func (s *service) GetTransactions(ctx context.Context, request *apiPb.GetTransac
 	panic("implement me")
 }
 
-func (s *service) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.TransactionInfo, error) {
+func (s *service) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.GetTransactionByIdResponse, error) {
 	panic("implement me")
 }
 

@@ -30,7 +30,7 @@ func (s server) GetTransactions(ctx context.Context, request *apiPb.GetTransacti
 	panic("implement me")
 }
 
-func (s server) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.TransactionInfo, error) {
+func (s server) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.GetTransactionByIdResponse, error) {
 	panic("implement me")
 }
 
@@ -61,7 +61,7 @@ func (s serverErrorThrow) GetTransactions(ctx context.Context, request *apiPb.Ge
 	panic("implement me")
 }
 
-func (s serverErrorThrow) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.TransactionInfo, error) {
+func (s serverErrorThrow) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.GetTransactionByIdResponse, error) {
 	panic("implement me")
 }
 
