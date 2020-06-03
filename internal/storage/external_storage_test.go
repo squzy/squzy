@@ -18,6 +18,22 @@ import (
 type server struct {
 }
 
+func (s server) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {
+	panic("implement me")
+}
+
+func (s server) GetTransactionsGroup(ctx context.Context, request *apiPb.GetTransactionGroupRequest) (*apiPb.GetTransactionGroupResponse, error) {
+	panic("implement me")
+}
+
+func (s server) GetTransactions(ctx context.Context, request *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error) {
+	panic("implement me")
+}
+
+func (s server) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.TransactionInfo, error) {
+	panic("implement me")
+}
+
 func (s server) GetSchedulerInformation(ctx context.Context, request *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
 	panic("implement me")
 }
@@ -26,11 +42,27 @@ func (s server) GetAgentInformation(ctx context.Context, request *apiPb.GetAgent
 	panic("implement me")
 }
 
-func (s server) SendResponseFromAgent(context.Context, *apiPb.Metric) (*empty.Empty, error) {
+func (s server) SaveResponseFromAgent(context.Context, *apiPb.Metric) (*empty.Empty, error) {
 	panic("implement me")
 }
 
 type serverErrorThrow struct {
+}
+
+func (s serverErrorThrow) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {
+	panic("implement me")
+}
+
+func (s serverErrorThrow) GetTransactionsGroup(ctx context.Context, request *apiPb.GetTransactionGroupRequest) (*apiPb.GetTransactionGroupResponse, error) {
+	panic("implement me")
+}
+
+func (s serverErrorThrow) GetTransactions(ctx context.Context, request *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error) {
+	panic("implement me")
+}
+
+func (s serverErrorThrow) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.TransactionInfo, error) {
+	panic("implement me")
 }
 
 func (s serverErrorThrow) GetSchedulerInformation(ctx context.Context, request *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
@@ -41,15 +73,15 @@ func (s serverErrorThrow) GetAgentInformation(ctx context.Context, request *apiP
 	panic("implement me")
 }
 
-func (s serverErrorThrow) SendResponseFromScheduler(context.Context, *apiPb.SchedulerResponse) (*empty.Empty, error) {
+func (s serverErrorThrow) SaveResponseFromScheduler(context.Context, *apiPb.SchedulerResponse) (*empty.Empty, error) {
 	return nil, errors.New("saf")
 }
 
-func (s serverErrorThrow) SendResponseFromAgent(context.Context, *apiPb.Metric) (*empty.Empty, error) {
+func (s serverErrorThrow) SaveResponseFromAgent(context.Context, *apiPb.Metric) (*empty.Empty, error) {
 	panic("implement me")
 }
 
-func (s server) SendResponseFromScheduler(context.Context, *apiPb.SchedulerResponse) (*empty.Empty, error) {
+func (s server) SaveResponseFromScheduler(context.Context, *apiPb.SchedulerResponse) (*empty.Empty, error) {
 	return &empty.Empty{}, nil
 }
 

@@ -13,11 +13,27 @@ import (
 type storageMockOk struct {
 }
 
-func (s storageMockOk) SendResponseFromScheduler(ctx context.Context, in *apiPb.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (s storageMockOk) SaveTransaction(ctx context.Context, in *apiPb.TransactionInfo, opts ...grpc.CallOption) (*empty.Empty, error) {
 	panic("implement me")
 }
 
-func (s storageMockOk) SendResponseFromAgent(ctx context.Context, in *apiPb.Metric, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (s storageMockOk) GetTransactionsGroup(ctx context.Context, in *apiPb.GetTransactionGroupRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionGroupResponse, error) {
+	panic("implement me")
+}
+
+func (s storageMockOk) GetTransactions(ctx context.Context, in *apiPb.GetTransactionsRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionsResponse, error) {
+	panic("implement me")
+}
+
+func (s storageMockOk) GetTransactionById(ctx context.Context, in *apiPb.GetTransactionByIdRequest, opts ...grpc.CallOption) (*apiPb.TransactionInfo, error) {
+	panic("implement me")
+}
+
+func (s storageMockOk) SaveResponseFromScheduler(ctx context.Context, in *apiPb.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
+	panic("implement me")
+}
+
+func (s storageMockOk) SaveResponseFromAgent(ctx context.Context, in *apiPb.Metric, opts ...grpc.CallOption) (*empty.Empty, error) {
 	panic("implement me")
 }
 
@@ -32,11 +48,27 @@ func (s storageMockOk) GetAgentInformation(ctx context.Context, in *apiPb.GetAge
 type storageMockError struct {
 }
 
-func (s storageMockError) SendResponseFromScheduler(ctx context.Context, in *apiPb.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (s storageMockError) SaveTransaction(ctx context.Context, in *apiPb.TransactionInfo, opts ...grpc.CallOption) (*empty.Empty, error) {
 	panic("implement me")
 }
 
-func (s storageMockError) SendResponseFromAgent(ctx context.Context, in *apiPb.Metric, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (s storageMockError) GetTransactionsGroup(ctx context.Context, in *apiPb.GetTransactionGroupRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionGroupResponse, error) {
+	panic("implement me")
+}
+
+func (s storageMockError) GetTransactions(ctx context.Context, in *apiPb.GetTransactionsRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionsResponse, error) {
+	panic("implement me")
+}
+
+func (s storageMockError) GetTransactionById(ctx context.Context, in *apiPb.GetTransactionByIdRequest, opts ...grpc.CallOption) (*apiPb.TransactionInfo, error) {
+	panic("implement me")
+}
+
+func (s storageMockError) SaveResponseFromScheduler(ctx context.Context, in *apiPb.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
+	panic("implement me")
+}
+
+func (s storageMockError) SaveResponseFromAgent(ctx context.Context, in *apiPb.Metric, opts ...grpc.CallOption) (*empty.Empty, error) {
 	panic("implement me")
 }
 
@@ -158,19 +190,19 @@ func (m mockMonitoringOk) Stop(ctx context.Context, in *apiPb.StopRequest, opts 
 
 func TestNew(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(nil, nil, nil)
+		s := New(nil, nil, nil, nil)
 		assert.NotNil(t, s)
 	})
 }
 
 func TestHandlers_AddScheduler(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(nil, &mockMonitoringOk{}, nil)
+		s := New(nil, &mockMonitoringOk{}, nil, nil)
 		_, err := s.AddScheduler(context.Background(), &apiPb.AddRequest{})
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(nil, &mockMonitoringError{}, nil)
+		s := New(nil, &mockMonitoringError{}, nil, nil)
 		_, err := s.AddScheduler(context.Background(), &apiPb.AddRequest{})
 		assert.NotNil(t, err)
 	})
@@ -178,12 +210,12 @@ func TestHandlers_AddScheduler(t *testing.T) {
 
 func TestHandlers_GetAgentByID(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(&agentMockOk{}, nil, nil)
+		s := New(&agentMockOk{}, nil, nil, nil)
 		_, err := s.GetAgentByID(context.Background(), "")
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(&agentMockError{}, nil, nil)
+		s := New(&agentMockError{}, nil, nil, nil)
 		_, err := s.GetAgentByID(context.Background(), "")
 		assert.NotNil(t, err)
 	})
@@ -191,12 +223,12 @@ func TestHandlers_GetAgentByID(t *testing.T) {
 
 func TestHandlers_GetAgentList(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(&agentMockOk{}, nil, nil)
+		s := New(&agentMockOk{}, nil, nil, nil)
 		_, err := s.GetAgentList(context.Background())
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(&agentMockError{}, nil, nil)
+		s := New(&agentMockError{}, nil, nil, nil)
 		_, err := s.GetAgentList(context.Background())
 		assert.NotNil(t, err)
 	})
@@ -204,12 +236,12 @@ func TestHandlers_GetAgentList(t *testing.T) {
 
 func TestHandlers_GetAgentHistoryByID(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(nil, nil, &storageMockOk{})
+		s := New(nil, nil, &storageMockOk{}, nil)
 		_, err := s.GetAgentHistoryByID(context.Background(), nil)
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(nil, nil, &storageMockError{})
+		s := New(nil, nil, &storageMockError{}, nil)
 		_, err := s.GetAgentHistoryByID(context.Background(), nil)
 		assert.NotNil(t, err)
 	})
@@ -217,12 +249,12 @@ func TestHandlers_GetAgentHistoryByID(t *testing.T) {
 
 func TestHandlers_GetSchedulerHistoryByID(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(nil, nil, &storageMockOk{})
+		s := New(nil, nil, &storageMockOk{}, nil)
 		_, err := s.GetSchedulerHistoryByID(context.Background(), nil)
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(nil, nil, &storageMockError{})
+		s := New(nil, nil, &storageMockError{}, nil)
 		_, err := s.GetSchedulerHistoryByID(context.Background(), nil)
 		assert.NotNil(t, err)
 	})
@@ -230,12 +262,12 @@ func TestHandlers_GetSchedulerHistoryByID(t *testing.T) {
 
 func TestHandlers_GetSchedulerByID(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(nil, &mockMonitoringOk{}, nil)
+		s := New(nil, &mockMonitoringOk{}, nil, nil)
 		_, err := s.GetSchedulerByID(context.Background(), "")
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(nil, &mockMonitoringError{}, nil)
+		s := New(nil, &mockMonitoringError{}, nil, nil)
 		_, err := s.GetSchedulerByID(context.Background(), "")
 		assert.NotNil(t, err)
 	})
@@ -243,12 +275,12 @@ func TestHandlers_GetSchedulerByID(t *testing.T) {
 
 func TestHandlers_GetSchedulerList(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(nil, &mockMonitoringOk{}, nil)
+		s := New(nil, &mockMonitoringOk{}, nil, nil)
 		_, err := s.GetSchedulerList(context.Background())
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(nil, &mockMonitoringError{}, nil)
+		s := New(nil, &mockMonitoringError{}, nil, nil)
 		_, err := s.GetSchedulerList(context.Background())
 		assert.NotNil(t, err)
 	})
@@ -256,12 +288,12 @@ func TestHandlers_GetSchedulerList(t *testing.T) {
 
 func TestHandlers_RemoveScheduler(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(nil, &mockMonitoringOk{}, nil)
+		s := New(nil, &mockMonitoringOk{}, nil, nil)
 		err := s.RemoveScheduler(context.Background(), "nil")
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(nil, &mockMonitoringError{}, nil)
+		s := New(nil, &mockMonitoringError{}, nil, nil)
 		err := s.RemoveScheduler(context.Background(), "nil")
 		assert.NotNil(t, err)
 	})
@@ -269,12 +301,12 @@ func TestHandlers_RemoveScheduler(t *testing.T) {
 
 func TestHandlers_RunScheduler(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(nil, &mockMonitoringOk{}, nil)
+		s := New(nil, &mockMonitoringOk{}, nil, nil)
 		err := s.RunScheduler(context.Background(), "nil")
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(nil, &mockMonitoringError{}, nil)
+		s := New(nil, &mockMonitoringError{}, nil, nil)
 		err := s.RunScheduler(context.Background(), "nil")
 		assert.NotNil(t, err)
 	})
@@ -282,12 +314,12 @@ func TestHandlers_RunScheduler(t *testing.T) {
 
 func TestHandlers_StopScheduler(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(nil, &mockMonitoringOk{}, nil)
+		s := New(nil, &mockMonitoringOk{}, nil, nil)
 		err := s.StopScheduler(context.Background(), "nil")
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(nil, &mockMonitoringError{}, nil)
+		s := New(nil, &mockMonitoringError{}, nil, nil)
 		err := s.StopScheduler(context.Background(), "nil")
 		assert.NotNil(t, err)
 	})

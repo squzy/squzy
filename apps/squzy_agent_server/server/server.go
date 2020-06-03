@@ -105,7 +105,7 @@ func (s *server) SendMetrics(stream apiPb.AgentServer_SendMetricsServer) error {
 			case *apiPb.SendMetricsRequest_Metric:
 				ctx, cancel := helpers.TimeoutContext(context.Background(), 0)
 				defer cancel()
-				_, _ = s.client.SendResponseFromAgent(ctx, newMsg.Metric)
+				_, _ = s.client.SaveResponseFromAgent(ctx, newMsg.Metric)
 				continue
 			case *apiPb.SendMetricsRequest_Disconnect_:
 				ctx, cancel := helpers.TimeoutContext(context.Background(), 0)

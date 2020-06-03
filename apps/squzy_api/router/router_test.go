@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"io"
@@ -15,6 +16,14 @@ import (
 )
 
 type mockOk struct {
+}
+
+func (m mockOk) RegisterApplication(ctx context.Context, rq *apiPb.ApplicationInfo) (*apiPb.InitializeApplicationResponse, error) {
+	panic("implement me")
+}
+
+func (m mockOk) SaveTransaction(ctx context.Context, rq *apiPb.TransactionInfo) (*empty.Empty, error) {
+	panic("implement me")
 }
 
 func (m mockOk) GetSchedulerHistoryByID(ctx context.Context, rq *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
@@ -58,6 +67,14 @@ func (m mockOk) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) (
 }
 
 type mockError struct {
+}
+
+func (m mockError) RegisterApplication(ctx context.Context, rq *apiPb.ApplicationInfo) (*apiPb.InitializeApplicationResponse, error) {
+	panic("implement me")
+}
+
+func (m mockError) SaveTransaction(ctx context.Context, rq *apiPb.TransactionInfo) (*empty.Empty, error) {
+	panic("implement me")
 }
 
 func (m mockError) GetSchedulerHistoryByID(ctx context.Context, rq *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {

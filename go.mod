@@ -14,7 +14,7 @@ require (
 	github.com/shirou/gopsutil v2.19.11+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/squzy/mongo_helper v0.0.0-20200502155448-a2e6845a8ba0
-	github.com/squzy/squzy_generated v1.7.2-0.20200530184113-0f8e4a14c826
+	github.com/squzy/squzy_generated v1.7.2-0.20200603205531-7ac37da861f0
 	github.com/stretchr/testify v1.4.0
 	github.com/tidwall/gjson v1.6.0
 	go.mongodb.org/mongo-driver v1.3.2

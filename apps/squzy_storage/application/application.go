@@ -14,6 +14,30 @@ type service struct {
 	database database.Database
 }
 
+func (s *service) SaveResponseFromScheduler(ctx context.Context, response *apiPb.SchedulerResponse) (*empty.Empty, error) {
+	panic("implement me")
+}
+
+func (s *service) SaveResponseFromAgent(ctx context.Context, metric *apiPb.Metric) (*empty.Empty, error) {
+	panic("implement me")
+}
+
+func (s *service) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {
+	panic("implement me")
+}
+
+func (s *service) GetTransactionsGroup(ctx context.Context, request *apiPb.GetTransactionGroupRequest) (*apiPb.GetTransactionGroupResponse, error) {
+	panic("implement me")
+}
+
+func (s *service) GetTransactions(ctx context.Context, request *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error) {
+	panic("implement me")
+}
+
+func (s *service) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.TransactionInfo, error) {
+	panic("implement me")
+}
+
 func NewService(db database.Database) apiPb.StorageServer {
 	return &service{
 		database: db,

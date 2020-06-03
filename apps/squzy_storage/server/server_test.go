@@ -67,20 +67,37 @@ func (*configMock) GetDbPassword() string {
 type mockApiStorage struct {
 }
 
-func (*mockApiStorage) SendResponseFromScheduler(context.Context, *apiPb.SchedulerResponse) (*empty.Empty, error) {
-	panic("implement me!")
+
+func (m mockApiStorage) SaveResponseFromScheduler(ctx context.Context, response *apiPb.SchedulerResponse) (*empty.Empty, error) {
+	panic("implement me")
 }
 
-func (*mockApiStorage) SendResponseFromAgent(context.Context, *apiPb.Metric) (*empty.Empty, error) {
-	panic("implement me!")
+func (m mockApiStorage) SaveResponseFromAgent(ctx context.Context, metric *apiPb.Metric) (*empty.Empty, error) {
+	panic("implement me")
 }
 
-func (*mockApiStorage) GetSchedulerInformation(context.Context, *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
-	panic("implement me!")
+func (m mockApiStorage) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {
+	panic("implement me")
 }
 
-func (*mockApiStorage) GetAgentInformation(context.Context, *apiPb.GetAgentInformationRequest) (*apiPb.GetAgentInformationResponse, error) {
-	panic("implement me!")
+func (m mockApiStorage) GetSchedulerInformation(ctx context.Context, request *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
+	panic("implement me")
+}
+
+func (m mockApiStorage) GetAgentInformation(ctx context.Context, request *apiPb.GetAgentInformationRequest) (*apiPb.GetAgentInformationResponse, error) {
+	panic("implement me")
+}
+
+func (m mockApiStorage) GetTransactionsGroup(ctx context.Context, request *apiPb.GetTransactionGroupRequest) (*apiPb.GetTransactionGroupResponse, error) {
+	panic("implement me")
+}
+
+func (m mockApiStorage) GetTransactions(ctx context.Context, request *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error) {
+	panic("implement me")
+}
+
+func (m mockApiStorage) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.TransactionInfo, error) {
+	panic("implement me")
 }
 
 func TestNewServer(t *testing.T) {
@@ -111,3 +128,4 @@ func TestServer_Run(t *testing.T) {
 		assert.Equal(t, nil, err)
 	})
 }
+

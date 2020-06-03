@@ -45,7 +45,7 @@ func (s *externalStorage) Write(checkerLog job.CheckError) error {
 	req := checkerLog.GetLogData()
 	ctx, cancel := context.WithTimeout(context.Background(), loggerConnTimeout)
 	defer cancel()
-	_, err := s.client.SendResponseFromScheduler(ctx, req)
+	_, err := s.client.SaveResponseFromScheduler(ctx, req)
 	if err != nil {
 		if s.fallback != nil {
 			_ = s.fallback.Write(checkerLog)
