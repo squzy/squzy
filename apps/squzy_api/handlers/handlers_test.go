@@ -13,6 +13,10 @@ import (
 type storageMockOk struct {
 }
 
+func (s storageMockOk) GetSchedulerUptime(ctx context.Context, in *apiPb.GetSchedulerUptimeRequest, opts ...grpc.CallOption) (*apiPb.GetSchedulerUptimeResponse, error) {
+	panic("implement me")
+}
+
 func (s storageMockOk) SaveTransaction(ctx context.Context, in *apiPb.TransactionInfo, opts ...grpc.CallOption) (*empty.Empty, error) {
 	panic("implement me")
 }
@@ -46,6 +50,10 @@ func (s storageMockOk) GetAgentInformation(ctx context.Context, in *apiPb.GetAge
 }
 
 type storageMockError struct {
+}
+
+func (s storageMockError) GetSchedulerUptime(ctx context.Context, in *apiPb.GetSchedulerUptimeRequest, opts ...grpc.CallOption) (*apiPb.GetSchedulerUptimeResponse, error) {
+	panic("implement me")
 }
 
 func (s storageMockError) SaveTransaction(ctx context.Context, in *apiPb.TransactionInfo, opts ...grpc.CallOption) (*empty.Empty, error) {

@@ -18,6 +18,10 @@ import (
 type server struct {
 }
 
+func (s server) GetSchedulerUptime(ctx context.Context, request *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
+	panic("implement me")
+}
+
 func (s server) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {
 	panic("implement me")
 }
@@ -47,6 +51,10 @@ func (s server) SaveResponseFromAgent(context.Context, *apiPb.Metric) (*empty.Em
 }
 
 type serverErrorThrow struct {
+}
+
+func (s serverErrorThrow) GetSchedulerUptime(ctx context.Context, request *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
+	panic("implement me")
 }
 
 func (s serverErrorThrow) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {

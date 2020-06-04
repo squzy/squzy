@@ -19,6 +19,10 @@ import (
 type storageMock struct {
 }
 
+func (s storageMock) GetSchedulerUptime(ctx context.Context, in *apiPb.GetSchedulerUptimeRequest, opts ...grpc.CallOption) (*apiPb.GetSchedulerUptimeResponse, error) {
+	panic("implement me")
+}
+
 func (s storageMock) SaveTransaction(ctx context.Context, in *apiPb.TransactionInfo, opts ...grpc.CallOption) (*empty.Empty, error) {
 	panic("implement me")
 }

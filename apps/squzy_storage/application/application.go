@@ -14,6 +14,10 @@ type service struct {
 	database database.Database
 }
 
+func (s *service) GetSchedulerUptime(ctx context.Context, request *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
+	panic("implement me")
+}
+
 func (s *service) SaveResponseFromScheduler(ctx context.Context, response *apiPb.SchedulerResponse) (*empty.Empty, error) {
 	panic("implement me")
 }

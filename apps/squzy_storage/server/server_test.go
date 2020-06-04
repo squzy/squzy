@@ -67,6 +67,9 @@ func (*configMock) GetDbPassword() string {
 type mockApiStorage struct {
 }
 
+func (s mockApiStorage) GetSchedulerUptime(ctx context.Context, in *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
+	panic("implement me")
+}
 
 func (m mockApiStorage) SaveResponseFromScheduler(ctx context.Context, response *apiPb.SchedulerResponse) (*empty.Empty, error) {
 	panic("implement me")
