@@ -31,12 +31,23 @@ type D struct {
 	Data interface{} `json:"data,omitempty"`
 }
 
+type SchedulerHistory struct {
+	HistoryFilters *HistoryFilterRequest
+	Status         apiPb.SchedulerCode     `form:"status"`
+	SortDirection  apiPb.SortDirection     `form:"sort_direction"`
+	SortBy         apiPb.SortSchedulerList `form:"sort_by"`
+}
+
+type AgentHistory struct {
+	HistoryFilters *HistoryFilterRequest
+	Type           apiPb.TypeAgentStat `form:"type"`
+}
+
 type HistoryFilterRequest struct {
-	DateFrom *time.Time          `form:"dateFrom" time_format:"2006-01-02T15:04:05Z07:00"`
-	DateTo   *time.Time          `form:"dateTo" time_format:"2006-01-02T15:04:05Z07:00"`
-	Page     int32               `form:"page"`
-	Limit    int32               `form:"limit"`
-	Type     apiPb.TypeAgentStat `form:"type"`
+	DateFrom *time.Time `form:"dateFrom" time_format:"2006-01-02T15:04:05Z07:00"`
+	DateTo   *time.Time `form:"dateTo" time_format:"2006-01-02T15:04:05Z07:00"`
+	Page     int32      `form:"page"`
+	Limit    int32      `form:"limit"`
 }
 
 type Scheduler struct {
@@ -187,11 +198,13 @@ func (r *router) GetEngine() *gin.Engine {
 				//History
 				agent.GET("/history", func(context *gin.Context) {
 					agentID := context.Param("agentId")
-					rq := HistoryFilterRequest{
-						DateFrom: nil,
-						DateTo:   nil,
-						Page:     0,
-						Limit:    0,
+					rq := AgentHistory{
+						HistoryFilters: &HistoryFilterRequest{
+							DateFrom: nil,
+							DateTo:   nil,
+							Page:     0,
+							Limit:    0,
+						},
 					}
 
 					err := context.ShouldBind(&rq)
@@ -199,7 +212,7 @@ func (r *router) GetEngine() *gin.Engine {
 						errWrap(context, http.StatusInternalServerError, err)
 						return
 					}
-					pagination, timeRange, err := GetFilters(&rq)
+					pagination, timeRange, err := GetFilters(rq.HistoryFilters)
 					if err != nil {
 						errWrap(context, http.StatusUnprocessableEntity, err)
 						return
@@ -357,11 +370,13 @@ func (r *router) GetEngine() *gin.Engine {
 				//History
 				scheduler.GET("/history", func(context *gin.Context) {
 					schedulerID := context.Param("schedulerId")
-					rq := HistoryFilterRequest{
-						DateFrom: nil,
-						DateTo:   nil,
-						Page:     0,
-						Limit:    0,
+					rq := SchedulerHistory{
+						HistoryFilters: &HistoryFilterRequest{
+							DateFrom: nil,
+							DateTo:   nil,
+							Page:     0,
+							Limit:    0,
+						},
 					}
 					err := context.ShouldBind(&rq)
 
@@ -369,7 +384,7 @@ func (r *router) GetEngine() *gin.Engine {
 						errWrap(context, http.StatusInternalServerError, err)
 						return
 					}
-					pagination, timeRange, err := GetFilters(&rq)
+					pagination, timeRange, err := GetFilters(rq.HistoryFilters)
 
 					if err != nil {
 						errWrap(context, http.StatusUnprocessableEntity, err)
@@ -380,6 +395,8 @@ func (r *router) GetEngine() *gin.Engine {
 						SchedulerId: schedulerID,
 						Pagination:  pagination,
 						TimeRange:   timeRange,
+						Sort:        GetSchedulerListSorting(rq.SortDirection, rq.SortBy),
+						Status:      rq.Status,
 					})
 
 					if err != nil {
@@ -393,6 +410,16 @@ func (r *router) GetEngine() *gin.Engine {
 	}
 
 	return engine
+}
+
+func GetSchedulerListSorting(direction apiPb.SortDirection, sortBy apiPb.SortSchedulerList) *apiPb.SortingSchedulerList {
+	if sortBy == apiPb.SortSchedulerList_SORT_SCHEDULER_LIST_UNSPECIFIED {
+		return nil
+	}
+	return &apiPb.SortingSchedulerList{
+		Direction: direction,
+		SortBy:    sortBy,
+	}
 }
 
 func GetFilters(rq *HistoryFilterRequest) (*apiPb.Pagination, *apiPb.TimeFilter, error) {

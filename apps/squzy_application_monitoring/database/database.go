@@ -18,6 +18,7 @@ type Database interface {
 	FindOrCreate(ctx context.Context, name string, host string) (*Application, error)
 	FindApplicationByName(ctx context.Context, name string) (*Application, error)
 	FindApplicationById(ctx context.Context, id primitive.ObjectID) (*Application, error)
+	FindAllApplication(ctx context.Context) ([]*Application, error)
 }
 
 type db struct {
@@ -45,6 +46,19 @@ func (d *db) findApplication(ctx context.Context, filter bson.M) (*Application, 
 		return nil, err
 	}
 	return app, nil
+}
+
+func (d *db)  findListApplication(ctx context.Context, filter bson.M) ([]*Application, error) {
+	list := []*Application{}
+	err := d.connector.FindAll(ctx, filter, &list)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
+func (d *db) FindAllApplication(ctx context.Context) ([]*Application, error) {
+	return d.findListApplication(ctx, bson.M{})
 }
 
 func (d *db) FindApplicationByName(ctx context.Context, name string) (*Application, error) {

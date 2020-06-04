@@ -3,25 +3,57 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"squzy/apps/squzy_application_monitoring/config"
 	"squzy/apps/squzy_application_monitoring/database"
+	"squzy/internal/helpers"
 )
 
 type server struct {
 	db database.Database
 	config config.Config
+	storage apiPb.StorageClient
+}
+
+func transformDbApplication(dbApp *database.Application) (*apiPb.Application) {
+	return &apiPb.Application{
+		Id:                   dbApp.Id.Hex(),
+		Name:                 dbApp.Name,
+		HostName:             dbApp.Host,
+	}
 }
 
 func (s *server) GetApplicationById(ctx context.Context, request *apiPb.GetApplicationByIdRequest) (*apiPb.Application, error) {
-	panic("implement me")
+	applicationId, err := primitive.ObjectIDFromHex(request.ApplicationId)
+	if err != nil {
+		return nil, err
+	}
+
+	app, err := s.db.FindApplicationById(ctx, applicationId)
+	if err != nil {
+		return nil, err
+	}
+
+	return transformDbApplication(app), nil
 }
 
 func (s *server) GetApplicationList(ctx context.Context, e *empty.Empty) (*apiPb.GetApplicationListResponse, error) {
-	panic("implement me")
+	list, err := s.db.FindAllApplication(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	appList := []*apiPb.Application{}
+
+	for _, v := range list {
+		appList = append(appList, transformDbApplication(v))
+	}
+
+	return &apiPb.GetApplicationListResponse{
+		Applications: appList,
+	}, nil
 }
 
 var (
@@ -54,14 +86,19 @@ func (s *server) SaveTransaction(ctx context.Context, req *apiPb.TransactionInfo
 		return nil, err
 	}
 
-	// @TODO pass transaction info into storage
-	fmt.Println(req)
+	go func() {
+		reqCtx , cancel := helpers.TimeoutContext(context.Background(), s.config.GetStorageTimeout())
+		defer cancel()
+		_, _ = s.storage.SaveTransaction(reqCtx, req)
+	}()
+
 	return &empty.Empty{}, nil
 }
 
-func New(db database.Database, config config.Config) apiPb.ApplicationMonitoringServer {
+func New(db database.Database, config config.Config, 	storage apiPb.StorageClient) apiPb.ApplicationMonitoringServer {
 	return &server{
 		db: db,
 		config: config,
+		storage: storage,
 	}
 }
