@@ -92,36 +92,36 @@ func TestNewService(t *testing.T) {
 	})
 }
 
-func TestService_SendResponseFromScheduler(t *testing.T) {
+func TestService_SaveResponseFromScheduler(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := service{
 			database: &dbErrorMock{},
 		}
-		_, err := s.SendResponseFromScheduler(context.Background(), nil)
+		_, err := s.SaveResponseFromScheduler(context.Background(), nil)
 		assert.Error(t, err)
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := service{
 			database: &dbMock{},
 		}
-		_, err := s.SendResponseFromScheduler(context.Background(), nil)
+		_, err := s.SaveResponseFromScheduler(context.Background(), nil)
 		assert.NoError(t, err)
 	})
 }
 
-func TestService_SendResponseFromAgent(t *testing.T) {
+func TestService_SaveResponseFromAgent(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := service{
 			database: &dbErrorMock{},
 		}
-		_, err := s.SendResponseFromAgent(context.Background(), nil)
+		_, err := s.SaveResponseFromAgent(context.Background(), nil)
 		assert.Error(t, err)
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := service{
 			database: &dbMock{},
 		}
-		_, err := s.SendResponseFromAgent(context.Background(), nil)
+		_, err := s.SaveResponseFromAgent(context.Background(), nil)
 		assert.NoError(t, err)
 	})
 }

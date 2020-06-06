@@ -18,14 +18,6 @@ func (s *service) GetSchedulerUptime(ctx context.Context, request *apiPb.GetSche
 	panic("implement me")
 }
 
-func (s *service) SaveResponseFromScheduler(ctx context.Context, response *apiPb.SchedulerResponse) (*empty.Empty, error) {
-	panic("implement me")
-}
-
-func (s *service) SaveResponseFromAgent(ctx context.Context, metric *apiPb.Metric) (*empty.Empty, error) {
-	panic("implement me")
-}
-
 func (s *service) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {
 	panic("implement me")
 }
@@ -48,7 +40,7 @@ func NewService(db database.Database) apiPb.StorageServer {
 	}
 }
 
-func (s *service) SendResponseFromScheduler(ctx context.Context, request *apiPb.SchedulerResponse) (*empty.Empty, error) {
+func (s *service) SaveResponseFromScheduler(ctx context.Context, request *apiPb.SchedulerResponse) (*empty.Empty, error) {
 	err := s.database.InsertSnapshot(request)
 	if err != nil {
 		return nil, grpcStatus.Errorf(codes.Internal, err.Error())
@@ -56,7 +48,7 @@ func (s *service) SendResponseFromScheduler(ctx context.Context, request *apiPb.
 	return &empty.Empty{}, nil
 }
 
-func (s *service) SendResponseFromAgent(ctx context.Context, request *apiPb.Metric) (*empty.Empty, error) {
+func (s *service) SaveResponseFromAgent(ctx context.Context, request *apiPb.Metric) (*empty.Empty, error) {
 	err := s.database.InsertStatRequest(request)
 	if err != nil {
 		return nil, grpcStatus.Errorf(codes.Internal, err.Error())
