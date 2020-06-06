@@ -157,11 +157,13 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 	var count int
 	if request.GetStatus() == apiPb.SchedulerCode_SCHEDULER_CODE_UNSPECIFIED {
 		err = p.db.Table(dbSnapshotCollection).
+			Joins(fmt.Sprintf(`"JOIN "%s" ON "%s"."snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
 			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 			Count(&count).Error
 	} else {
 		err = p.db.Table(dbSnapshotCollection).
+			Joins(fmt.Sprintf(`"JOIN "%s" ON "%s"."snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
 			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus().String()).
@@ -174,13 +176,12 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 
 	offset, limit := getOffsetAndLimit(count, request.GetPagination())
 
-	//TODO: test if it works
 	var dbSnapshots []*Snapshot
 	if request.GetStatus() == apiPb.SchedulerCode_SCHEDULER_CODE_UNSPECIFIED {
 		err = p.db.
 			Table(dbSnapshotCollection).
 			Set("gorm:auto_preload", true).
-			Joins(fmt.Sprintf("JOIN %s ON %s.snapshotId = %s.ID", dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
+			Joins(fmt.Sprintf(`"JOIN "%s" ON "%s"."snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
 			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 			Order(getOrder(request.GetSort()) + " " + getDirection(request.GetSort())).
@@ -191,7 +192,7 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 		err = p.db.
 			Table(dbSnapshotCollection).
 			Set("gorm:auto_preload", true).
-			Joins(fmt.Sprintf("JOIN %s ON %s.snapshotId = %s.ID", dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
+			Joins(fmt.Sprintf(`"JOIN "%s" ON "%s"."snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
 			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus().String()).
