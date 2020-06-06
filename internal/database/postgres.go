@@ -180,6 +180,7 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 		err = p.db.
 			Table(dbSnapshotCollection).
 			Set("gorm:auto_preload", true).
+			Joins(fmt.Sprintf("JOIN %s ON %s.snapshotId = %s.ID", dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
 			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 			Order(getOrder(request.GetSort()) + " " + getDirection(request.GetSort())).
@@ -190,6 +191,7 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 		err = p.db.
 			Table(dbSnapshotCollection).
 			Set("gorm:auto_preload", true).
+			Joins(fmt.Sprintf("JOIN %s ON %s.snapshotId = %s.ID", dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
 			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus().String()).
@@ -206,6 +208,36 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 
 	return ConvertFromPostgresSnapshots(dbSnapshots), int32(count), nil
 }
+
+func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) (float64, float64, error) {
+	timeFrom, timeTo, err := getTime(request.GetTimeRange())
+	if err != nil {
+		return -1, -1, err
+	}
+
+	var countOk int
+	err = p.db.Table(dbSnapshotCollection).
+		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
+		Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+		Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), apiPb.SchedulerCode_OK.String()).
+		Count(&countOk).Error
+
+	var countAll int
+	err = p.db.Table(dbSnapshotCollection).
+		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
+		Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+		Count(&countOk).Error
+
+	//TODO: count latency
+
+	if err != nil {
+		return -1, -1, err
+	}
+
+
+	return float64(countOk)/float64(countAll), -1, nil
+}
+
 
 func getOrder(request *apiPb.SortingSchedulerList) string {
 	if request == nil {

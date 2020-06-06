@@ -14,10 +14,6 @@ type service struct {
 	database database.Database
 }
 
-func (s *service) GetSchedulerUptime(ctx context.Context, request *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
-	panic("implement me")
-}
-
 func (s *service) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {
 	panic("implement me")
 }
@@ -61,6 +57,14 @@ func (s *service) GetSchedulerInformation(ctx context.Context, request *apiPb.Ge
 	return &apiPb.GetSchedulerInformationResponse{
 		Snapshots: snapshots,
 		Count:     count,
+	}, wrapError(err)
+}
+
+func (s *service) GetSchedulerUptime(ctx context.Context, request *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
+	uptime, _, err := s.database.GetSnapshotsUptime(request)
+	return &apiPb.GetSchedulerUptimeResponse{
+		Uptime: uptime,
+		//Latency:     latency, //TODO: uncommit
 	}, wrapError(err)
 }
 

@@ -124,7 +124,7 @@ func (s *Suite) Test_GetSnapshots() {
 		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbSnapshotCollection)
+	query = fmt.Sprintf(`SELECT "snapshots".* FROM "%s"`, dbSnapshotCollection)
 	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
@@ -156,7 +156,7 @@ func (s *Suite) Test_GetSnapshots_WithStatus() {
 		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbSnapshotCollection)
+	query = fmt.Sprintf(`SELECT "snapshots".* FROM "%s"`, dbSnapshotCollection)
 	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
