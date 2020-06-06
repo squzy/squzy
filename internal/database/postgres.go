@@ -200,7 +200,6 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 			Offset(offset).
 			Limit(limit).
 			Find(&dbSnapshots).Error
-
 	}
 
 	if err != nil {
@@ -216,6 +215,20 @@ func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) 
 		return -1, -1, err
 	}
 
+	var countAll int
+	err = p.db.Table(dbSnapshotCollection).
+		Joins(fmt.Sprintf(`JOIN "%s" ON "%s"."snapshotId" = "%s"."id"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
+		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
+		Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
+		Count(&countAll).Error
+	if err != nil {
+		return -1, -1, err
+	}
+	
+	if countAll == 0 {
+		return 0, 0, nil
+	}
+
 	var countOk int64
 	err = p.db.Table(dbSnapshotCollection).
 		Joins(fmt.Sprintf(`JOIN "%s" ON "%s"."snapshotId" = "%s"."id"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
@@ -226,15 +239,9 @@ func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) 
 	if err != nil {
 		return -1, -1, err
 	}
-
-	var countAll int
-	err = p.db.Table(dbSnapshotCollection).
-		Joins(fmt.Sprintf(`JOIN "%s" ON "%s"."snapshotId" = "%s"."id"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
-		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-		Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
-		Count(&countOk).Error
-	if err != nil {
-		return -1, -1, err
+	
+	if countAll == 0 {
+		return 0, 0, nil
 	}
 
 	var dbSnapshots []*Snapshot
@@ -257,7 +264,7 @@ func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) 
 			latency += (snapshot.Meta.EndTime.UnixNano() - snapshot.Meta.StartTime.UnixNano()) / int64(time.Millisecond)
 		}
 	}
-
+	
 	return float64(countOk) / float64(countAll), float64(latency) / float64(countOk), nil
 }
 
