@@ -107,6 +107,7 @@ type NetInfo struct {
 }
 
 const (
+	dmMetaDataCollection    = "meta_data"
 	dbSnapshotCollection    = "snapshots"     //TODO: check
 	dbStatRequestCollection = "stat_requests" //TODO: check
 )
@@ -208,18 +209,18 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 
 func getOrder(request *apiPb.SortingSchedulerList) string {
 	if request == nil {
-		return `"meta"."startTime"`
+		return fmt.Sprintf(`"%s"."startTime"`, dmMetaDataCollection)
 	}
 	orderMap := map[apiPb.SortSchedulerList]string{
-		apiPb.SortSchedulerList_SORT_SCHEDULER_LIST_UNSPECIFIED: `"meta"."startTime"`,
-		apiPb.SortSchedulerList_BY_START_TIME:                   `"meta"."startTime"`,
-		apiPb.SortSchedulerList_BY_END_TIME:                     `"meta"."endTime"`,
-		apiPb.SortSchedulerList_BY_LATENCY:                      `"meta"."endTime"-"meta"."startTime"`,
+		apiPb.SortSchedulerList_SORT_SCHEDULER_LIST_UNSPECIFIED: fmt.Sprintf(`"%s"."startTime"`, dmMetaDataCollection),
+		apiPb.SortSchedulerList_BY_START_TIME:                   fmt.Sprintf(`"%s"."startTime"`, dmMetaDataCollection),
+		apiPb.SortSchedulerList_BY_END_TIME:                     fmt.Sprintf(`"%s"."endTime"`, dmMetaDataCollection),
+		apiPb.SortSchedulerList_BY_LATENCY:                      fmt.Sprintf(`"%s"."endTime" - "%s"."startTime"`, dmMetaDataCollection, dmMetaDataCollection),
 	}
 	if res, ok := orderMap[request.GetSortBy()]; ok {
 		return res
 	}
-	return `"meta"."startTime"`
+	return fmt.Sprintf(`"%s"."startTime"`, dmMetaDataCollection)
 }
 
 func getDirection(request *apiPb.SortingSchedulerList) string {
