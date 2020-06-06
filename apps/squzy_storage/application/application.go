@@ -57,7 +57,7 @@ func (s *service) SaveResponseFromAgent(ctx context.Context, request *apiPb.Metr
 }
 
 func (s *service) GetSchedulerInformation(ctx context.Context, request *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
-	snapshots, count, err := s.database.GetSnapshots(request.SchedulerId, request.GetPagination(), request.GetTimeRange())
+	snapshots, count, err := s.database.GetSnapshots(request)
 	return &apiPb.GetSchedulerInformationResponse{
 		Snapshots: snapshots,
 		Count:     count,
