@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"net/http"
 	"squzy/apps/squzy_api/handlers"
@@ -31,23 +32,53 @@ type D struct {
 	Data interface{} `json:"data,omitempty"`
 }
 
+type SchedulerUptimeRequest struct {
+	TimeRange *TimeFilterRequest
+}
+
 type SchedulerHistory struct {
-	HistoryFilters *HistoryFilterRequest
-	Status         apiPb.SchedulerCode     `form:"status"`
-	SortDirection  apiPb.SortDirection     `form:"sort_direction"`
-	SortBy         apiPb.SortSchedulerList `form:"sort_by"`
+	Pagination    *PaginationRequest
+	TimeFilters   *TimeFilterRequest
+	Status        apiPb.SchedulerCode     `form:"status"`
+	SortDirection apiPb.SortDirection     `form:"sort_direction"`
+	SortBy        apiPb.SortSchedulerList `form:"sort_by"`
 }
 
 type AgentHistory struct {
-	HistoryFilters *HistoryFilterRequest
-	Type           apiPb.TypeAgentStat `form:"type"`
+	Pagination  *PaginationRequest  `json:"omitempty"`
+	TimeFilters *TimeFilterRequest  `json:"omitempty"`
+	Type        apiPb.TypeAgentStat `form:"type"`
 }
 
-type HistoryFilterRequest struct {
+type GetTransactionListRequest struct {
+	Pagination        *PaginationRequest
+	TimeFilters       *TimeFilterRequest
+	SortBy            apiPb.SortTransactionList `form:"sort_by"`
+	SortDirection     apiPb.SortDirection       `form:"sort_direction"`
+	TransactionType   apiPb.TransactionType     `form:"transaction_type"`
+	TransactionStatus apiPb.TransactionStatus   `form:"transaction_status"`
+	HostFilter        string                    `form:"host"`
+	NameFilter        string                    `form:"name"`
+	PathFilter        string                    `form:"path"`
+	MethodFilter      string                    `form:"method"`
+}
+
+type GetTransactionGroupRequest struct {
+	Pagination        *PaginationRequest
+	TimeFilters       *TimeFilterRequest
+	GroupType         apiPb.GroupTransaction  `form:"group_by"`
+	TransactionType   apiPb.TransactionType   `form:"transaction_type"`
+	TransactionStatus apiPb.TransactionStatus `form:"transaction_status"`
+}
+
+type TimeFilterRequest struct {
 	DateFrom *time.Time `form:"dateFrom" time_format:"2006-01-02T15:04:05Z07:00"`
 	DateTo   *time.Time `form:"dateTo" time_format:"2006-01-02T15:04:05Z07:00"`
-	Page     int32      `form:"page"`
-	Limit    int32      `form:"limit"`
+}
+
+type PaginationRequest struct {
+	Page  int32 `form:"page"`
+	Limit int32 `form:"limit"`
 }
 
 type Scheduler struct {
@@ -104,9 +135,21 @@ func (r *router) GetEngine() *gin.Engine {
 	{
 		applications := v1.Group("applications")
 		{
+			applications.GET("", func(context *gin.Context) {
+				res, err := r.handlers.GetApplicationList(context)
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+				successWrap(context, http.StatusOK, res)
+			})
 			applications.POST("", func(context *gin.Context) {
 				application := &Application{}
 				err := context.ShouldBindJSON(application)
+				if err != nil {
+					errWrap(context, http.StatusUnprocessableEntity, err)
+					return
+				}
 				app, err := r.handlers.RegisterApplication(context, &apiPb.ApplicationInfo{
 					Name:     application.Name,
 					HostName: application.Host,
@@ -120,58 +163,140 @@ func (r *router) GetEngine() *gin.Engine {
 			})
 			application := applications.Group(":applicationId")
 			{
-				application.POST("transactions", func(context *gin.Context) {
+				application.GET("", func(context *gin.Context) {
 					applicationId := context.Param("applicationId")
-					trx := &Transaction{}
-					err := context.ShouldBindJSON(trx)
-					if err != nil {
-						errWrap(context, http.StatusUnprocessableEntity, err)
-						return
-					}
-					timeFrom, err := ptypes.TimestampProto(trx.DateFrom)
-					if err != nil {
-						errWrap(context, http.StatusUnprocessableEntity, err)
-						return
-					}
-					timeTo, err := ptypes.TimestampProto(trx.DateTo)
-					if err != nil {
-						errWrap(context, http.StatusUnprocessableEntity, err)
-						return
-					}
-					var meta *apiPb.TransactionInfo_Meta
-					if trx.Meta != nil {
-						meta = &apiPb.TransactionInfo_Meta{
-							Host:   trx.Meta.Host,
-							Path:   trx.Meta.Path,
-							Method: trx.Meta.Method,
-						}
-					}
-					var trxError *apiPb.TransactionInfo_Error
-					if trx.Error != nil {
-						trxError = &apiPb.TransactionInfo_Error{
-							Message: trx.Error.Message,
-						}
-					}
-					_, err = r.handlers.SaveTransaction(context, &apiPb.TransactionInfo{
-						Id:            trx.Id,
-						ApplicationId: applicationId,
-						ParentId:      trx.ParentID,
-						Meta:          meta,
-						Name:          trx.Name,
-						StartTime:     timeFrom,
-						EndTime:       timeTo,
-						Status:        trx.Status,
-						Type:          trx.Type,
-						Error:         trxError,
-					})
+					res, err := r.handlers.GetApplicationById(context, applicationId)
 					if err != nil {
 						errWrap(context, http.StatusInternalServerError, err)
 						return
 					}
-					successWrap(context, http.StatusAccepted, gin.H{
-						"id": trx.Id,
-					})
+					successWrap(context, http.StatusOK, res)
 				})
+				transactions := application.Group("transactions")
+				{
+					transactions.GET("list", func(context *gin.Context) {
+						applicationId := context.Param("applicationId")
+						rq := &GetTransactionListRequest{}
+						err := context.ShouldBind(rq)
+						if err != nil {
+							errWrap(context, http.StatusBadRequest, err)
+							return
+						}
+						pagination, timeRange, err := GetFilters(rq.Pagination, rq.TimeFilters)
+						if err != nil {
+							errWrap(context, http.StatusUnprocessableEntity, err)
+							return
+						}
+						res, err := r.handlers.GetTransactionsList(context, &apiPb.GetTransactionsRequest{
+							ApplicationId: applicationId,
+							Pagination:    pagination,
+							TimeRange:     timeRange,
+							Type:          rq.TransactionType,
+							Host:          GetStringValueFromString(rq.HostFilter),
+							Name:          GetStringValueFromString(rq.NameFilter),
+							Path:          GetStringValueFromString(rq.PathFilter),
+							Method:        GetStringValueFromString(rq.MethodFilter),
+							Sort:          GetTransactionListSorting(rq.SortDirection, rq.SortBy),
+						})
+						if err != nil {
+							errWrap(context, http.StatusInternalServerError, err)
+							return
+						}
+						successWrap(context, http.StatusOK, res)
+					})
+					transactions.GET("group", func(context *gin.Context) {
+						applicationId := context.Param("applicationId")
+						rq := &GetTransactionGroupRequest{}
+						err := context.ShouldBind(rq)
+						if err != nil {
+							errWrap(context, http.StatusBadRequest, err)
+							return
+						}
+						pagination, timeRange, err := GetFilters(rq.Pagination, rq.TimeFilters)
+						if err != nil {
+							errWrap(context, http.StatusUnprocessableEntity, err)
+							return
+						}
+
+						res, err := r.handlers.GetTransactionGroups(context, &apiPb.GetTransactionGroupRequest{
+							ApplicationId: applicationId,
+							Pagination:    pagination,
+							TimeRange:     timeRange,
+							GroupType:     rq.GroupType,
+							Type:          rq.TransactionType,
+							Status:        rq.TransactionStatus,
+						})
+						if err != nil {
+							errWrap(context, http.StatusInternalServerError, err)
+							return
+						}
+						successWrap(context, http.StatusOK, res)
+					})
+					transactions.POST("", func(context *gin.Context) {
+						applicationId := context.Param("applicationId")
+						trx := &Transaction{}
+						err := context.ShouldBindJSON(trx)
+						if err != nil {
+							successWrap(context, http.StatusAccepted, nil)
+							return
+						}
+						timeFrom, err := ptypes.TimestampProto(trx.DateFrom)
+						if err != nil {
+							successWrap(context, http.StatusAccepted, nil)
+							return
+						}
+						timeTo, err := ptypes.TimestampProto(trx.DateTo)
+						if err != nil {
+							successWrap(context, http.StatusAccepted, nil)
+							return
+						}
+						var meta *apiPb.TransactionInfo_Meta
+						if trx.Meta != nil {
+							meta = &apiPb.TransactionInfo_Meta{
+								Host:   trx.Meta.Host,
+								Path:   trx.Meta.Path,
+								Method: trx.Meta.Method,
+							}
+						}
+						var trxError *apiPb.TransactionInfo_Error
+						if trx.Error != nil {
+							trxError = &apiPb.TransactionInfo_Error{
+								Message: trx.Error.Message,
+							}
+						}
+						_, err = r.handlers.SaveTransaction(context, &apiPb.TransactionInfo{
+							Id:            trx.Id,
+							ApplicationId: applicationId,
+							ParentId:      trx.ParentID,
+							Meta:          meta,
+							Name:          trx.Name,
+							StartTime:     timeFrom,
+							EndTime:       timeTo,
+							Status:        trx.Status,
+							Type:          trx.Type,
+							Error:         trxError,
+						})
+						if err != nil {
+							// we will skip error here
+							successWrap(context, http.StatusAccepted, nil)
+							return
+						}
+						successWrap(context, http.StatusAccepted, nil)
+					})
+					transaction := transactions.Group("single/:transaction_id")
+					{
+						transaction.GET("", func(context *gin.Context) {
+							trxId := context.Param("transaction_id")
+							res, err := r.handlers.GetTransactionById(context, trxId)
+							if err != nil {
+								// we will skip error here
+								errWrap(context, http.StatusInternalServerError, err)
+								return
+							}
+							successWrap(context, http.StatusOK, res)
+						})
+					}
+				}
 			}
 		}
 		agents := v1.Group("agents")
@@ -198,21 +323,14 @@ func (r *router) GetEngine() *gin.Engine {
 				//History
 				agent.GET("/history", func(context *gin.Context) {
 					agentID := context.Param("agentId")
-					rq := AgentHistory{
-						HistoryFilters: &HistoryFilterRequest{
-							DateFrom: nil,
-							DateTo:   nil,
-							Page:     0,
-							Limit:    0,
-						},
-					}
+					rq := &AgentHistory{}
 
-					err := context.ShouldBind(&rq)
+					err := context.ShouldBind(rq)
 					if err != nil {
 						errWrap(context, http.StatusInternalServerError, err)
 						return
 					}
-					pagination, timeRange, err := GetFilters(rq.HistoryFilters)
+					pagination, timeRange, err := GetFilters(rq.Pagination, rq.TimeFilters)
 					if err != nil {
 						errWrap(context, http.StatusUnprocessableEntity, err)
 						return
@@ -367,24 +485,45 @@ func (r *router) GetEngine() *gin.Engine {
 					successWrap(context, http.StatusAccepted, nil)
 				})
 
-				//History
-				scheduler.GET("/history", func(context *gin.Context) {
+				scheduler.GET("uptime", func(context *gin.Context) {
 					schedulerID := context.Param("schedulerId")
-					rq := SchedulerHistory{
-						HistoryFilters: &HistoryFilterRequest{
-							DateFrom: nil,
-							DateTo:   nil,
-							Page:     0,
-							Limit:    0,
-						},
+					req := &SchedulerUptimeRequest{}
+					err := context.ShouldBind(req)
+
+					if err != nil {
+						errWrap(context, http.StatusUnprocessableEntity, err)
+						return
 					}
-					err := context.ShouldBind(&rq)
+
+					_, timeRange, err := GetFilters(nil, req.TimeRange)
+
+					if err != nil {
+						errWrap(context, http.StatusUnprocessableEntity, err)
+						return
+					}
+					res, err := r.handlers.GetSchedulerUptime(context, &apiPb.GetSchedulerUptimeRequest{
+						SchedulerId: schedulerID,
+						TimeRange:   timeRange,
+					})
 
 					if err != nil {
 						errWrap(context, http.StatusInternalServerError, err)
 						return
 					}
-					pagination, timeRange, err := GetFilters(rq.HistoryFilters)
+					successWrap(context, http.StatusOK, res)
+				})
+
+				//History
+				scheduler.GET("/history", func(context *gin.Context) {
+					schedulerID := context.Param("schedulerId")
+					rq := &SchedulerHistory{}
+					err := context.ShouldBind(rq)
+
+					if err != nil {
+						errWrap(context, http.StatusInternalServerError, err)
+						return
+					}
+					pagination, timeRange, err := GetFilters(rq.Pagination, rq.TimeFilters)
 
 					if err != nil {
 						errWrap(context, http.StatusUnprocessableEntity, err)
@@ -422,33 +561,53 @@ func GetSchedulerListSorting(direction apiPb.SortDirection, sortBy apiPb.SortSch
 	}
 }
 
-func GetFilters(rq *HistoryFilterRequest) (*apiPb.Pagination, *apiPb.TimeFilter, error) {
-	pagination := &apiPb.Pagination{
-		Page:  rq.Page,
-		Limit: rq.Limit,
+func GetTransactionListSorting(direction apiPb.SortDirection, sortBy apiPb.SortTransactionList) *apiPb.SortingTransactionList {
+	if sortBy == apiPb.SortTransactionList_SORT_TRANSACTION_LIST_UNSPECIFIED {
+		return nil
 	}
+	return &apiPb.SortingTransactionList{
+		Direction: direction,
+		SortBy:    sortBy,
+	}
+}
 
-	if rq.Page == 0 && rq.Limit == 0 {
+func GetStringValueFromString(str string) *wrappers.StringValue {
+	if str == "" {
+		return nil
+	}
+	return &wrappers.StringValue{
+		Value: str,
+	}
+}
+
+func GetFilters(paginationFilter *PaginationRequest, timeFilter *TimeFilterRequest, ) (*apiPb.Pagination, *apiPb.TimeFilter, error) {
+	var pagination *apiPb.Pagination
+	if paginationFilter == nil {
 		pagination = nil
+	} else {
+		pagination = &apiPb.Pagination{
+			Page:  paginationFilter.Page,
+			Limit: paginationFilter.Limit,
+		}
 	}
 
-	if rq.DateFrom != nil || rq.DateTo != nil {
-		timeFilter := &apiPb.TimeFilter{}
-		if rq.DateFrom != nil {
-			t, err := ptypes.TimestampProto(*rq.DateFrom)
+	if timeFilter != nil {
+		timeFilters := &apiPb.TimeFilter{}
+		if timeFilter.DateFrom != nil {
+			t, err := ptypes.TimestampProto(*timeFilter.DateFrom)
 			if err != nil {
 				return nil, nil, err
 			}
-			timeFilter.From = t
+			timeFilters.From = t
 		}
-		if rq.DateTo != nil {
-			t, err := ptypes.TimestampProto(*rq.DateTo)
+		if timeFilter.DateTo != nil {
+			t, err := ptypes.TimestampProto(*timeFilter.DateTo)
 			if err != nil {
 				return nil, nil, err
 			}
-			timeFilter.To = t
+			timeFilters.To = t
 		}
-		return pagination, timeFilter, nil
+		return pagination, timeFilters, nil
 	}
 
 	return pagination, nil, nil

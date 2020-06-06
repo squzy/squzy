@@ -10,35 +10,75 @@ import (
 	"testing"
 )
 
+type mockAmOk struct {
+
+}
+
+func (m mockAmOk) InitializeApplication(ctx context.Context, in *apiPb.ApplicationInfo, opts ...grpc.CallOption) (*apiPb.InitializeApplicationResponse, error) {
+	return &apiPb.InitializeApplicationResponse{}, nil
+}
+
+func (m mockAmOk) SaveTransaction(ctx context.Context, in *apiPb.TransactionInfo, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return &empty.Empty{}, nil
+}
+
+func (m mockAmOk) GetApplicationById(ctx context.Context, in *apiPb.GetApplicationByIdRequest, opts ...grpc.CallOption) (*apiPb.Application, error) {
+	return &apiPb.Application{}, nil
+}
+
+func (m mockAmOk) GetApplicationList(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*apiPb.GetApplicationListResponse, error) {
+	return &apiPb.GetApplicationListResponse{}, nil
+}
+
+type mockAmError struct {
+
+}
+
+func (m mockAmError) InitializeApplication(ctx context.Context, in *apiPb.ApplicationInfo, opts ...grpc.CallOption) (*apiPb.InitializeApplicationResponse, error) {
+	return nil, errors.New("")
+}
+
+func (m mockAmError) SaveTransaction(ctx context.Context, in *apiPb.TransactionInfo, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, errors.New("")
+}
+
+func (m mockAmError) GetApplicationById(ctx context.Context, in *apiPb.GetApplicationByIdRequest, opts ...grpc.CallOption) (*apiPb.Application, error) {
+	return nil, errors.New("")
+}
+
+func (m mockAmError) GetApplicationList(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*apiPb.GetApplicationListResponse, error) {
+	return nil, errors.New("")
+}
+
 type storageMockOk struct {
 }
 
 func (s storageMockOk) GetSchedulerUptime(ctx context.Context, in *apiPb.GetSchedulerUptimeRequest, opts ...grpc.CallOption) (*apiPb.GetSchedulerUptimeResponse, error) {
-	panic("implement me")
+	return &apiPb.GetSchedulerUptimeResponse{}, nil
 }
 
 func (s storageMockOk) SaveTransaction(ctx context.Context, in *apiPb.TransactionInfo, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
+	return &empty.Empty{}, nil
 }
 
 func (s storageMockOk) GetTransactionsGroup(ctx context.Context, in *apiPb.GetTransactionGroupRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionGroupResponse, error) {
-	panic("implement me")
+	return &apiPb.GetTransactionGroupResponse{}, nil
 }
 
 func (s storageMockOk) GetTransactions(ctx context.Context, in *apiPb.GetTransactionsRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionsResponse, error) {
-	panic("implement me")
+	return &apiPb.GetTransactionsResponse{}, nil
 }
 
 func (s storageMockOk) GetTransactionById(ctx context.Context, in *apiPb.GetTransactionByIdRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionByIdResponse, error) {
-	panic("implement me")
+	return &apiPb.GetTransactionByIdResponse{}, nil
 }
 
 func (s storageMockOk) SaveResponseFromScheduler(ctx context.Context, in *apiPb.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
+	return &empty.Empty{}, nil
 }
 
 func (s storageMockOk) SaveResponseFromAgent(ctx context.Context, in *apiPb.Metric, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
+	return &empty.Empty{}, nil
 }
 
 func (s storageMockOk) GetSchedulerInformation(ctx context.Context, in *apiPb.GetSchedulerInformationRequest, opts ...grpc.CallOption) (*apiPb.GetSchedulerInformationResponse, error) {
@@ -53,31 +93,31 @@ type storageMockError struct {
 }
 
 func (s storageMockError) GetSchedulerUptime(ctx context.Context, in *apiPb.GetSchedulerUptimeRequest, opts ...grpc.CallOption) (*apiPb.GetSchedulerUptimeResponse, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (s storageMockError) SaveTransaction(ctx context.Context, in *apiPb.TransactionInfo, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (s storageMockError) GetTransactionsGroup(ctx context.Context, in *apiPb.GetTransactionGroupRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionGroupResponse, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (s storageMockError) GetTransactions(ctx context.Context, in *apiPb.GetTransactionsRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionsResponse, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (s storageMockError) GetTransactionById(ctx context.Context, in *apiPb.GetTransactionByIdRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionByIdResponse, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (s storageMockError) SaveResponseFromScheduler(ctx context.Context, in *apiPb.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (s storageMockError) SaveResponseFromAgent(ctx context.Context, in *apiPb.Metric, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (s storageMockError) GetSchedulerInformation(ctx context.Context, in *apiPb.GetSchedulerInformationRequest, opts ...grpc.CallOption) (*apiPb.GetSchedulerInformationResponse, error) {
@@ -329,6 +369,110 @@ func TestHandlers_StopScheduler(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := New(nil, &mockMonitoringError{}, nil, nil)
 		err := s.StopScheduler(context.Background(), "nil")
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_GetApplicationById(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmOk{})
+		_, err := s.GetApplicationById(context.Background(), "nil")
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmError{})
+		_, err := s.GetApplicationById(context.Background(), "nil")
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_GetApplicationList(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmOk{})
+		_, err := s.GetApplicationList(context.Background())
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmError{})
+		_, err := s.GetApplicationList(context.Background())
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_GetSchedulerUptime(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, &storageMockOk{}, nil)
+		_, err := s.GetSchedulerUptime(context.Background(), nil)
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, &storageMockError{}, nil)
+		_, err := s.GetSchedulerUptime(context.Background(), nil)
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_GetTransactionById(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, &storageMockOk{}, nil)
+		_, err := s.GetTransactionById(context.Background(), "")
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, &storageMockError{}, nil)
+		_, err := s.GetTransactionById(context.Background(), "nil")
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_GetTransactionGroups(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, &storageMockOk{}, nil)
+		_, err := s.GetTransactionGroups(context.Background(), nil)
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, &storageMockError{}, nil)
+		_, err := s.GetTransactionGroups(context.Background(), nil)
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_GetTransactionsList(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, &storageMockOk{}, nil)
+		_, err := s.GetTransactionsList(context.Background(), nil)
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, &storageMockError{}, nil)
+		_, err := s.GetTransactionsList(context.Background(), nil)
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_RegisterApplication(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmOk{})
+		_, err := s.RegisterApplication(context.Background(), nil)
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmError{})
+		_, err := s.RegisterApplication(context.Background(), nil)
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_SaveTransaction(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmOk{})
+		_, err := s.SaveTransaction(context.Background(), nil)
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmError{})
+		_, err := s.SaveTransaction(context.Background(), nil)
 		assert.NotNil(t, err)
 	})
 }

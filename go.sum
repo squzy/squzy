@@ -191,6 +191,16 @@ github.com/squzy/squzy_generated v1.7.2-0.20200603213541-003075991835 h1:5NvyeDq
 github.com/squzy/squzy_generated v1.7.2-0.20200603213541-003075991835/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/squzy/squzy_generated v1.7.2-0.20200604161343-cbfa4f2771da h1:UVwXfYhVv/zqa3mhQ6+g4M8SaTbPhJzUQvaloKP20cY=
 github.com/squzy/squzy_generated v1.7.2-0.20200604161343-cbfa4f2771da/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.7.2-0.20200606100715-e58f09efefb1 h1:OQf5gHlngaQ4T0SZmzzYDEzotTgKbCXftlff64HRIKo=
+github.com/squzy/squzy_generated v1.7.2-0.20200606100715-e58f09efefb1/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.7.2-0.20200606101444-14a3efe8cf01 h1:zJo2eMQgJ5HTIZ0S96n45GC2fPVFxMfyoB262CVbSvI=
+github.com/squzy/squzy_generated v1.7.2-0.20200606101444-14a3efe8cf01/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.7.2-0.20200606105945-d39a57e68fec h1:52+b4AY8slMG6+bKdDedwPy5EbuLKXmcIdu1Kf8bUz8=
+github.com/squzy/squzy_generated v1.7.2-0.20200606105945-d39a57e68fec/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.7.2-0.20200606112221-cfa4127fe5ec h1:6S7DJrkPhuorEWaOju3RywM2F7EjDVNWfwhvnVI9NkY=
+github.com/squzy/squzy_generated v1.7.2-0.20200606112221-cfa4127fe5ec/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.7.2-0.20200606114228-eb6839da8203 h1:JSuYPJwBwHFZsydLgWtycQIVb5+lswwF0LJsJqc35Mg=
+github.com/squzy/squzy_generated v1.7.2-0.20200606114228-eb6839da8203/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

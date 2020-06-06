@@ -5,6 +5,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"squzy/internal/helpers"
+	"time"
 )
 
 type Handlers interface {
@@ -20,7 +21,17 @@ type Handlers interface {
 	AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) (*apiPb.AddResponse, error)
 	RegisterApplication(ctx context.Context, rq *apiPb.ApplicationInfo) (*apiPb.InitializeApplicationResponse, error)
 	SaveTransaction(ctx context.Context, rq *apiPb.TransactionInfo) (*empty.Empty, error)
+	GetSchedulerUptime(ctx context.Context, rq *apiPb.GetSchedulerUptimeRequest)  (*apiPb.GetSchedulerUptimeResponse, error)
+	GetTransactionGroups(ctx context.Context, req *apiPb.GetTransactionGroupRequest) (*apiPb.GetTransactionGroupResponse, error)
+	GetTransactionsList(ctx context.Context, req *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error)
+	GetApplicationById(ctx context.Context, id string) (*apiPb.Application, error)
+	GetApplicationList(ctx context.Context) ([]*apiPb.Application, error)
+	GetTransactionById(ctx context.Context, id string) (*apiPb.GetTransactionByIdResponse, error)
 }
+
+const (
+	defaultRequestTimeout = time.Second * 30
+)
 
 type handlers struct {
 	agentClient                 apiPb.AgentServerClient
@@ -30,7 +41,7 @@ type handlers struct {
 }
 
 func (h *handlers) SaveTransaction(ctx context.Context, rq *apiPb.TransactionInfo) (*empty.Empty, error) {
-	c, cancel := helpers.TimeoutContext(ctx, 0)
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
 	r, err := h.applicationMonitoringClient.SaveTransaction(c, rq)
 	if err != nil {
@@ -40,7 +51,7 @@ func (h *handlers) SaveTransaction(ctx context.Context, rq *apiPb.TransactionInf
 }
 
 func (h *handlers) GetSchedulerHistoryByID(ctx context.Context, rq *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
-	c, cancel := helpers.TimeoutContext(ctx, 0)
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
 	r, err := h.storageClient.GetSchedulerInformation(c, rq)
 	if err != nil {
@@ -50,7 +61,7 @@ func (h *handlers) GetSchedulerHistoryByID(ctx context.Context, rq *apiPb.GetSch
 }
 
 func (h *handlers) GetAgentHistoryByID(ctx context.Context, rq *apiPb.GetAgentInformationRequest) (*apiPb.GetAgentInformationResponse, error) {
-	c, cancel := helpers.TimeoutContext(ctx, 0)
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
 	r, err := h.storageClient.GetAgentInformation(c, rq)
 	if err != nil {
@@ -60,7 +71,7 @@ func (h *handlers) GetAgentHistoryByID(ctx context.Context, rq *apiPb.GetAgentIn
 }
 
 func (h *handlers) RunScheduler(ctx context.Context, id string) error {
-	c, cancel := helpers.TimeoutContext(ctx, 0)
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
 	_, err := h.monitoringClient.Run(c, &apiPb.RunRequest{
 		Id: id,
@@ -69,7 +80,7 @@ func (h *handlers) RunScheduler(ctx context.Context, id string) error {
 }
 
 func (h *handlers) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) (*apiPb.AddResponse, error) {
-	c, cancel := helpers.TimeoutContext(ctx, 0)
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
 	res, err := h.monitoringClient.Add(c, scheduler)
 	if err != nil {
@@ -79,7 +90,7 @@ func (h *handlers) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest
 }
 
 func (h *handlers) StopScheduler(ctx context.Context, id string) error {
-	c, cancel := helpers.TimeoutContext(ctx, 0)
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
 	_, err := h.monitoringClient.Stop(c, &apiPb.StopRequest{
 		Id: id,
@@ -88,7 +99,7 @@ func (h *handlers) StopScheduler(ctx context.Context, id string) error {
 }
 
 func (h *handlers) RemoveScheduler(ctx context.Context, id string) error {
-	c, cancel := helpers.TimeoutContext(ctx, 0)
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
 	_, err := h.monitoringClient.Remove(c, &apiPb.RemoveRequest{
 		Id: id,
@@ -97,7 +108,7 @@ func (h *handlers) RemoveScheduler(ctx context.Context, id string) error {
 }
 
 func (h *handlers) GetSchedulerList(ctx context.Context) ([]*apiPb.Scheduler, error) {
-	c, cancel := helpers.TimeoutContext(ctx, 0)
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
 	list, err := h.monitoringClient.GetSchedulerList(c, &empty.Empty{})
 	if err != nil {
@@ -107,7 +118,7 @@ func (h *handlers) GetSchedulerList(ctx context.Context) ([]*apiPb.Scheduler, er
 }
 
 func (h *handlers) GetSchedulerByID(ctx context.Context, id string) (*apiPb.Scheduler, error) {
-	c, cancel := helpers.TimeoutContext(ctx, 0)
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
 	scheduler, err := h.monitoringClient.GetSchedulerById(c, &apiPb.GetSchedulerByIdRequest{
 		Id: id,
@@ -119,7 +130,7 @@ func (h *handlers) GetSchedulerByID(ctx context.Context, id string) (*apiPb.Sche
 }
 
 func (h *handlers) GetAgentList(ctx context.Context) ([]*apiPb.AgentItem, error) {
-	c, cancel := helpers.TimeoutContext(ctx, 0)
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
 	list, err := h.agentClient.GetAgentList(c, &empty.Empty{})
 	if err != nil {
@@ -129,7 +140,7 @@ func (h *handlers) GetAgentList(ctx context.Context) ([]*apiPb.AgentItem, error)
 }
 
 func (h *handlers) GetAgentByID(ctx context.Context, id string) (*apiPb.AgentItem, error) {
-	c, cancel := helpers.TimeoutContext(ctx, 0)
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
 	agent, err := h.agentClient.GetAgentById(c, &apiPb.GetAgentByIdRequest{
 		AgentId: id,
@@ -141,13 +152,77 @@ func (h *handlers) GetAgentByID(ctx context.Context, id string) (*apiPb.AgentIte
 }
 
 func (h *handlers) RegisterApplication(ctx context.Context, rq *apiPb.ApplicationInfo) (*apiPb.InitializeApplicationResponse, error) {
-	c, cancel := helpers.TimeoutContext(ctx, 0)
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
 	app, err := h.applicationMonitoringClient.InitializeApplication(c, rq)
 	if err != nil {
 		return nil, err
 	}
 	return app, err
+}
+
+func (h *handlers) GetSchedulerUptime(ctx context.Context, rq *apiPb.GetSchedulerUptimeRequest)  (*apiPb.GetSchedulerUptimeResponse, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	res, err := h.storageClient.GetSchedulerUptime(c, rq)
+	if err != nil {
+		return nil, err
+	}
+	return res, err
+}
+
+func (h *handlers) GetTransactionGroups(ctx context.Context, req *apiPb.GetTransactionGroupRequest) (*apiPb.GetTransactionGroupResponse, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	res, err := h.storageClient.GetTransactionsGroup(c, req)
+	if err != nil {
+		return nil, err
+	}
+	return res, err
+}
+
+func (h *handlers) GetTransactionsList(ctx context.Context, req *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	res, err := h.storageClient.GetTransactions(c, req)
+	if err != nil {
+		return nil, err
+	}
+	return res, err
+}
+
+func (h *handlers) GetTransactionById(ctx context.Context, id string) (*apiPb.GetTransactionByIdResponse, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	res, err := h.storageClient.GetTransactionById(c, &apiPb.GetTransactionByIdRequest{
+		TransactionId: id,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return res, err
+}
+
+func (h *handlers) GetApplicationById(ctx context.Context, id string) (*apiPb.Application, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	res, err := h.applicationMonitoringClient.GetApplicationById(c, &apiPb.GetApplicationByIdRequest{
+		ApplicationId: id,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return res, err
+}
+
+func (h *handlers) GetApplicationList(ctx context.Context) ([]*apiPb.Application, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	res, err := h.applicationMonitoringClient.GetApplicationList(c, &empty.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	return res.Applications, err
 }
 
 func New(

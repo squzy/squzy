@@ -29,6 +29,14 @@ func TestCfg_GetMonitoringServerAddress(t *testing.T) {
 	})
 }
 
+func TestCfg_GetApplicationMonitoringAddress(t *testing.T) {
+	t.Run("Should: return from env", func(t *testing.T) {
+		os.Setenv(ENV_APPLICATION_MONITORING_SERVER, "11124")
+		s := New()
+		assert.Equal(t, s.GetApplicationMonitoringAddress(), "11124")
+	})
+}
+
 func TestCfg_GetPort(t *testing.T) {
 	t.Run("Should: return from env", func(t *testing.T) {
 		os.Setenv(ENV_PORT, "11124")

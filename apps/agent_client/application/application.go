@@ -48,6 +48,7 @@ func (a *application) register(hostStat *host.InfoStat) string {
 		defer cancel()
 		res, err := a.client.Register(ctx, &apiPb.RegisterRequest{
 			AgentName: a.config.GetAgentName(),
+			Interval:  int64(a.config.GetInterval()) / 1e9,
 			HostInfo: &apiPb.HostInfo{
 				HostName: hostStat.Hostname,
 				Os:       hostStat.OS,

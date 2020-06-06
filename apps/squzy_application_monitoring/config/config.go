@@ -18,8 +18,8 @@ const (
 
 	defaultTracingHeader        = "Squzy_transaction"
 	defaultPort           int32 = 9095
-	defaultMongoDb              = "squzy_agent"
-	defaultCollection           = "agents"
+	defaultMongoDb              = "applications_monitoring"
+	defaultCollection           = "application"
 	defaultStorageTimeout       = time.Second * 5
 )
 

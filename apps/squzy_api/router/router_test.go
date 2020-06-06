@@ -18,12 +18,36 @@ import (
 type mockOk struct {
 }
 
+func (m mockOk) GetSchedulerUptime(ctx context.Context, rq *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
+	return &apiPb.GetSchedulerUptimeResponse{}, nil
+}
+
+func (m mockOk) GetTransactionGroups(ctx context.Context, req *apiPb.GetTransactionGroupRequest) (*apiPb.GetTransactionGroupResponse, error) {
+	return &apiPb.GetTransactionGroupResponse{}, nil
+}
+
+func (m mockOk) GetTransactionsList(ctx context.Context, req *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error) {
+	return &apiPb.GetTransactionsResponse{}, nil
+}
+
+func (m mockOk) GetApplicationById(ctx context.Context, id string) (*apiPb.Application, error) {
+	return &apiPb.Application{}, nil
+}
+
+func (m mockOk) GetApplicationList(ctx context.Context) ([]*apiPb.Application, error) {
+	return []*apiPb.Application{}, nil
+}
+
+func (m mockOk) GetTransactionById(ctx context.Context, id string) (*apiPb.GetTransactionByIdResponse, error) {
+	return &apiPb.GetTransactionByIdResponse{}, nil
+}
+
 func (m mockOk) RegisterApplication(ctx context.Context, rq *apiPb.ApplicationInfo) (*apiPb.InitializeApplicationResponse, error) {
-	panic("implement me")
+	return &apiPb.InitializeApplicationResponse{}, nil
 }
 
 func (m mockOk) SaveTransaction(ctx context.Context, rq *apiPb.TransactionInfo) (*empty.Empty, error) {
-	panic("implement me")
+	return &empty.Empty{}, nil
 }
 
 func (m mockOk) GetSchedulerHistoryByID(ctx context.Context, rq *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
@@ -69,12 +93,36 @@ func (m mockOk) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) (
 type mockError struct {
 }
 
+func (m mockError) GetSchedulerUptime(ctx context.Context, rq *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) GetTransactionGroups(ctx context.Context, req *apiPb.GetTransactionGroupRequest) (*apiPb.GetTransactionGroupResponse, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) GetTransactionsList(ctx context.Context, req *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) GetApplicationById(ctx context.Context, id string) (*apiPb.Application, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) GetApplicationList(ctx context.Context) ([]*apiPb.Application, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) GetTransactionById(ctx context.Context, id string) (*apiPb.GetTransactionByIdResponse, error) {
+	return nil, errors.New("")
+}
+
 func (m mockError) RegisterApplication(ctx context.Context, rq *apiPb.ApplicationInfo) (*apiPb.InitializeApplicationResponse, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (m mockError) SaveTransaction(ctx context.Context, rq *apiPb.TransactionInfo) (*empty.Empty, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (m mockError) GetSchedulerHistoryByID(ctx context.Context, rq *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
@@ -377,13 +425,154 @@ func TestRouter_GetEngine(t *testing.T) {
 				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
+			{
+				Path:         "/v1/schedulers/scheduler/uptime",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/schedulers/scheduler/uptime?dateFrom=0000-01-01T00:00:00.899Z&dateTo=0000-01-01T00:00:00.899Z",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusUnprocessableEntity,
+			},
+			{
+				Path:         "/v1/schedulers/scheduler/uptime?dateFrom=12321323&dateTo=12321323",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusUnprocessableEntity,
+			},
+			{
+				Path: "/v1/applications",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path: "/v1/applications",
+				Method: http.MethodPost,
+				ExpectedCode: http.StatusInternalServerError,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"name": "sf"
+						}
+					`,
+				)),
+			},
+			{
+				Path: "/v1/applications",
+				Method: http.MethodPost,
+				ExpectedCode: http.StatusUnprocessableEntity,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"name": ""
+						}
+					`,
+				)),
+			},
+			{
+				Path: "/v1/applications/app",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path: "/v1/applications/app/transactions/list?dateFrom=12321323&dateTo=12321323",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusBadRequest,
+			},
+			{
+				Path: "/v1/applications/app/transactions/list?dateFrom=0000-01-01T00:00:00.899Z&dateTo=0000-01-01T00:00:00.899Z",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusUnprocessableEntity,
+			},
+			{
+				Path: "/v1/applications/app/transactions/list?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path: "/v1/applications/app/transactions/group?dateFrom=12321323&dateTo=12321323",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusBadRequest,
+			},
+			{
+				Path: "/v1/applications/app/transactions/group?dateFrom=0000-01-01T00:00:00.899Z&dateTo=0000-01-01T00:00:00.899Z",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusUnprocessableEntity,
+			},
+			{
+				Path: "/v1/applications/app/transactions/group?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path: "/v1/applications/app/transactions/single/trra",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path: "/v1/applications/app/transactions",
+				Method: http.MethodPost,
+				ExpectedCode: http.StatusAccepted,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"name": ""
+						}
+					`,
+				)),
+			},
+			{
+				Path: "/v1/applications/app/transactions",
+				Method: http.MethodPost,
+				ExpectedCode: http.StatusAccepted,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"name": "safasf",
+							"id": "asfasfasf",
+							"dateFrom": "0000-01-01T00:00:00.899Z",
+							"dateTo": "0000-01-01T00:00:00.899Z"
+						}
+					`,
+				)),
+			},
+			{
+				Path: "/v1/applications/app/transactions",
+				Method: http.MethodPost,
+				ExpectedCode: http.StatusAccepted,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"name": "safasf",
+							"id": "asfasfasf",
+							"dateFrom": "2020-05-07T19:17:05.899Z",
+							"dateTo": "0000-01-01T00:00:00.899Z"
+						}
+					`,
+				)),
+			},
+			{
+				Path: "/v1/applications/app/transactions",
+				Method: http.MethodPost,
+				ExpectedCode: http.StatusAccepted,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"name": "safasf",
+							"id": "asfasfasf",
+							"dateFrom": "2020-05-07T19:17:05.899Z",
+							"dateTo": "2020-05-07T19:17:05.899Z"
+						}
+					`,
+				)),
+			},
 		}
 
 		for _, test := range tt {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(test.Method, test.Path, test.Body)
 			r.ServeHTTP(w, req)
-			assert.Equal(t, test.ExpectedCode, w.Code)
+			assert.Equal(t, test.ExpectedCode, w.Code, test.Path)
 		}
 	})
 	t.Run("Should: return success with mockOk", func(t *testing.T) {
@@ -524,51 +713,159 @@ func TestRouter_GetEngine(t *testing.T) {
 				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},
+			{
+				Path: "/v1/applications/app/transactions/list?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path: "/v1/applications/app/transactions/group?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/schedulers/scheduler/uptime",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path: "/v1/applications/app/transactions",
+				Method: http.MethodPost,
+				ExpectedCode: http.StatusAccepted,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"name": "safasf",
+							"id": "asfasfasf",
+							"dateFrom": "2020-05-07T19:17:05.899Z",
+							"dateTo": "2020-05-07T19:17:05.899Z"
+						}
+					`,
+				)),
+			},
+			{
+				Path: "/v1/applications/app",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path: "/v1/applications",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path: "/v1/applications",
+				Method: http.MethodPost,
+				ExpectedCode: http.StatusOK,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"name": "sf"
+						}
+					`,
+				)),
+			},
+			{
+				Path: "/v1/applications/app/transactions",
+				Method: http.MethodPost,
+				ExpectedCode: http.StatusAccepted,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"name": "safasf",
+							"id": "asfasfasf",
+							"dateFrom": "2020-05-07T19:17:05.899Z",
+							"dateTo": "2020-05-07T19:17:05.899Z",
+							"error": {
+								"message": "asffsaf"
+							},
+							"meta": {
+								"host": "asfsf"
+							}
+						}
+					`,
+				)),
+			},
+			{
+				Path: "/v1/applications/app/transactions/single/trra",
+				Method: http.MethodGet,
+				ExpectedCode: http.StatusOK,
+			},
 		}
 
 		for _, test := range tt {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(test.Method, test.Path, test.Body)
 			r.ServeHTTP(w, req)
-			assert.Equal(t, test.ExpectedCode, w.Code)
+			assert.Equal(t, test.ExpectedCode, w.Code, test.Path)
 		}
+	})
+}
+
+func TestGetStringValueFromString(t *testing.T) {
+	t.Run("Should: return nil", func(t *testing.T) {
+		assert.Nil(t, GetStringValueFromString(""))
+	})
+	t.Run("Should: not return nil", func(t *testing.T) {
+		assert.NotNil(t, GetStringValueFromString("1"))
+	})
+}
+
+func TestGetSchedulerListSorting(t *testing.T) {
+	t.Run("Should: return nil", func(t *testing.T) {
+		assert.Nil(t, GetSchedulerListSorting(0, 0))
+	})
+	t.Run("Should: not return nil", func(t *testing.T) {
+		assert.NotNil(t, GetSchedulerListSorting(0, 1))
+	})
+}
+
+func TestGetTransactionListSorting(t *testing.T) {
+	t.Run("Should: return nil", func(t *testing.T) {
+		assert.Nil(t, GetTransactionListSorting(0, 0))
+	})
+	t.Run("Should: not return nil", func(t *testing.T) {
+		assert.NotNil(t, GetTransactionListSorting(0, 1))
 	})
 }
 
 func TestGetFilters(t *testing.T) {
 	t.Run("Should: return all nils", func(t *testing.T) {
-		p, f, err := GetFilters(&HistoryFilterRequest{})
+		p, f, err := GetFilters(nil, nil)
 		assert.Nil(t, p)
 		assert.Nil(t, f)
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error because dateFrom", func(t *testing.T) {
 		r := time.Unix(-62135596801, 0)
-		_, _, err := GetFilters(&HistoryFilterRequest{
-			DateFrom: &r,
-			DateTo:   nil,
+		_, _, err := GetFilters(&PaginationRequest{
 			Page:     0,
 			Limit:    0,
+		}, &TimeFilterRequest{
+			DateFrom: &r,
+			DateTo:   nil,
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because dateTo", func(t *testing.T) {
 		r := time.Unix(-62135596801, 0)
-		_, _, err := GetFilters(&HistoryFilterRequest{
-			DateFrom: nil,
-			DateTo:   &r,
+		_, _, err := GetFilters(&PaginationRequest{
 			Page:     0,
 			Limit:    0,
+		}, &TimeFilterRequest{
+			DateFrom: nil,
+			DateTo:   &r,
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: parse time correct", func(t *testing.T) {
 		tim := time.Now()
-		pag, tF, err := GetFilters(&HistoryFilterRequest{
-			DateFrom: &tim,
-			DateTo:   &tim,
+		pag, tF, err := GetFilters(&PaginationRequest{
 			Page:     2,
 			Limit:    24,
+		},&TimeFilterRequest{
+			DateFrom: &tim,
+			DateTo:   &tim,
 		})
 		assert.Nil(t, err)
 		res, _ := ptypes.TimestampProto(tim)
@@ -578,12 +875,10 @@ func TestGetFilters(t *testing.T) {
 		assert.Equal(t, res, tF.From)
 	})
 	t.Run("Should: parse time correct", func(t *testing.T) {
-		r, tf, err := GetFilters(&HistoryFilterRequest{
-			DateFrom: nil,
-			DateTo:   nil,
+		r, tf, err := GetFilters(&PaginationRequest{
 			Page:     2,
 			Limit:    24,
-		})
+		}, nil)
 		assert.Nil(t, err)
 		assert.Equal(t, int32(24), r.Limit)
 		assert.Equal(t, int32(2), r.Page)
