@@ -135,7 +135,46 @@ func (s *Suite) Test_GetSnapshots() {
 		WithArgs(sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	_, _, err := postgr.GetSnapshots(id, nil, nil)
+	_, _, err := postgr.GetSnapshots(&apiPb.GetSchedulerInformationRequest{
+		SchedulerId: id,
+		Sort: &apiPb.SortingSchedulerList{
+			SortBy:               -1,
+			Direction:            -1,
+		},
+	})
+	require.NoError(s.T(), err)
+}
+
+func (s *Suite) Test_GetSnapshots_WithStatus() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbSnapshotCollection)
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "meta_data"`)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, _, err := postgr.GetSnapshots(&apiPb.GetSchedulerInformationRequest{
+		SchedulerId: id,
+		Sort: &apiPb.SortingSchedulerList{
+			SortBy:               apiPb.SortSchedulerList_BY_LATENCY,
+			Direction:            apiPb.SortDirection_ASC,
+		},
+		Status:      apiPb.SchedulerCode_OK,
+	})
 	require.NoError(s.T(), err)
 }
 
@@ -151,10 +190,14 @@ func (s *Suite) Test_GetSnapshots_Select_Error() {
 		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	_, _, err := postgr.GetSnapshots(id, &apiPb.Pagination{
-		Page:  -1, //random value
-		Limit: 2,  //random value
-	}, nil)
+	_, _, err := postgr.GetSnapshots(
+		&apiPb.GetSchedulerInformationRequest{
+			SchedulerId: id,
+			Pagination: &apiPb.Pagination{
+				Page:  -1, //random value
+				Limit: 2,  //random value
+			},
+		})
 	require.Error(s.T(), err)
 }
 
@@ -162,14 +205,19 @@ func TestPostgres_GetSnapshots(t *testing.T) {
 	//Time for invalid timestamp
 	maxValidSeconds := 253402300800
 	t.Run("Should: return error", func(t *testing.T) {
-		_, _, err := postgrWrong.GetSnapshots("", nil, &apiPb.TimeFilter{
-			From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
-			To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
-		})
+		_, _, err := postgrWrong.GetSnapshots(
+			&apiPb.GetSchedulerInformationRequest{
+				SchedulerId: "",
+				Pagination:  nil,
+				TimeRange: &apiPb.TimeFilter{
+					From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+					To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+				},
+			})
 		assert.Error(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		_, _, err := postgrWrong.GetSnapshots("", nil, nil)
+		_, _, err := postgrWrong.GetSnapshots(&apiPb.GetSchedulerInformationRequest{})
 		assert.Error(t, err)
 	})
 }

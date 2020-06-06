@@ -28,7 +28,7 @@ type MetaData struct {
 	SnapshotID uint      `gorm:"column:snapshotId"`
 	StartTime  time.Time `gorm:"column:startTime"`
 	EndTime    time.Time `gorm:"column:endTime"`
-	Value      []byte    `gorm:"column:value"` //TODO: google
+	Value      []byte    `gorm:"column:value"`
 }
 
 //Agent gorm description
@@ -147,40 +147,94 @@ func (p *postgres) InsertSnapshot(data *apiPb.SchedulerResponse) error {
 	return nil
 }
 
-func (p *postgres) GetSnapshots(schedulerID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.SchedulerSnapshot, int32, error) {
-	timeFrom, timeTo, err := getTime(filter)
+func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) ([]*apiPb.SchedulerSnapshot, int32, error) {
+	timeFrom, timeTo, err := getTime(request.GetTimeRange())
 	if err != nil {
 		return nil, -1, err
 	}
 
 	var count int
-	err = p.db.Table(dbSnapshotCollection).
-		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), schedulerID).
-		Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
-		Count(&count).Error
+	if request.GetStatus() == apiPb.SchedulerCode_SCHEDULER_CODE_UNSPECIFIED {
+		err = p.db.Table(dbSnapshotCollection).
+			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
+			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+			Count(&count).Error
+	} else {
+		err = p.db.Table(dbSnapshotCollection).
+			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
+			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus().String()).
+			Count(&count).Error
+	}
+
 	if err != nil {
 		return nil, -1, err
 	}
 
-	offset, limit := getOffsetAndLimit(count, pagination)
+	offset, limit := getOffsetAndLimit(count, request.GetPagination())
 
 	//TODO: test if it works
 	var dbSnapshots []*Snapshot
-	err = p.db.
-		Table(dbSnapshotCollection).
-		Set("gorm:auto_preload", true).
-		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), schedulerID).
-		Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
-		Order("created_at").
-		Offset(offset).
-		Limit(limit).
-		Find(&dbSnapshots).Error
+	if request.GetStatus() == apiPb.SchedulerCode_SCHEDULER_CODE_UNSPECIFIED {
+		err = p.db.
+			Table(dbSnapshotCollection).
+			Set("gorm:auto_preload", true).
+			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
+			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+			Order(getOrder(request.GetSort()) + " " + getDirection(request.GetSort())).
+			Offset(offset).
+			Limit(limit).
+			Find(&dbSnapshots).Error
+	} else {
+		err = p.db.
+			Table(dbSnapshotCollection).
+			Set("gorm:auto_preload", true).
+			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
+			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus().String()).
+			Order(getOrder(request.GetSort()) + " " + getDirection(request.GetSort())).
+			Offset(offset).
+			Limit(limit).
+			Find(&dbSnapshots).Error
+
+	}
 
 	if err != nil {
 		return nil, -1, errorDataBase
 	}
 
 	return ConvertFromPostgresSnapshots(dbSnapshots), int32(count), nil
+}
+
+func getOrder(request *apiPb.SortingSchedulerList) string {
+	if request == nil {
+		return `"meta"."startTime"`
+	}
+	orderMap := map[apiPb.SortSchedulerList]string{
+		apiPb.SortSchedulerList_SORT_SCHEDULER_LIST_UNSPECIFIED: `"meta"."startTime"`,
+		apiPb.SortSchedulerList_BY_START_TIME:                   `"meta"."startTime"`,
+		apiPb.SortSchedulerList_BY_END_TIME:                     `"meta"."endTime"`,
+		apiPb.SortSchedulerList_BY_LATENCY:                      `"meta"."endTime"-"meta"."startTime"`,
+	}
+	if res, ok := orderMap[request.GetSortBy()]; ok {
+		return res
+	}
+	return `"meta"."startTime"`
+}
+
+func getDirection(request *apiPb.SortingSchedulerList) string {
+	if request == nil {
+		return ``
+	}
+	directionMap := map[apiPb.SortDirection]string{
+		apiPb.SortDirection_SORT_DIRECTION_UNSPECIFIED: ``,
+		apiPb.SortDirection_ASC:                        `asc`,
+		apiPb.SortDirection_DESC:                       `desc`,
+	}
+	if res, ok := directionMap[request.GetDirection()]; ok {
+		return res
+	}
+	return ``
 }
 
 func (p *postgres) InsertStatRequest(data *apiPb.Metric) error {

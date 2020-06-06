@@ -7,7 +7,7 @@ import (
 
 type Database interface {
 	InsertSnapshot(data *apiPb.SchedulerResponse) error                                                                        //TODO: fix
-	GetSnapshots(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.SchedulerSnapshot, int32, error) //TODO: fix
+	GetSnapshots(request *apiPb.GetSchedulerInformationRequest) ([]*apiPb.SchedulerSnapshot, int32, error) //TODO: fix
 	InsertStatRequest(data *apiPb.Metric) error
 	GetStatRequest(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error)
 	GetCPUInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error)
