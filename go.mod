@@ -23,4 +23,6 @@ require (
 	golang.org/x/sys v0.0.0-20200511232937-7e40ca221e25 // indirect
 	google.golang.org/genproto v0.0.0-20200511104702-f5ebc3bea380 // indirect
 	google.golang.org/grpc v1.29.1
+	gorm.io/driver/postgres v0.0.0-20200602015520-15fcc29eb286
+	gorm.io/gorm v0.2.3
 )

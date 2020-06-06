@@ -138,8 +138,8 @@ func (s *Suite) Test_GetSnapshots() {
 	_, _, err := postgr.GetSnapshots(&apiPb.GetSchedulerInformationRequest{
 		SchedulerId: id,
 		Sort: &apiPb.SortingSchedulerList{
-			SortBy:               -1,
-			Direction:            -1,
+			SortBy:    -1,
+			Direction: -1,
 		},
 	})
 	require.NoError(s.T(), err)
@@ -170,10 +170,10 @@ func (s *Suite) Test_GetSnapshots_WithStatus() {
 	_, _, err := postgr.GetSnapshots(&apiPb.GetSchedulerInformationRequest{
 		SchedulerId: id,
 		Sort: &apiPb.SortingSchedulerList{
-			SortBy:               apiPb.SortSchedulerList_BY_LATENCY,
-			Direction:            apiPb.SortDirection_ASC,
+			SortBy:    apiPb.SortSchedulerList_BY_LATENCY,
+			Direction: apiPb.SortDirection_ASC,
 		},
-		Status:      apiPb.SchedulerCode_OK,
+		Status: apiPb.SchedulerCode_OK,
 	})
 	require.NoError(s.T(), err)
 }
@@ -220,6 +220,94 @@ func TestPostgres_GetSnapshots(t *testing.T) {
 		_, _, err := postgrWrong.GetSnapshots(&apiPb.GetSchedulerInformationRequest{})
 		assert.Error(t, err)
 	})
+}
+
+func (s *Suite) Test_GetSnapshotsUptime() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows = sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT "snapshots".* FROM "%s"`, dbSnapshotCollection)
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "meta_data"`)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, _, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
+		SchedulerId: id,
+	})
+	require.NoError(s.T(), err)
+}
+
+//Based on fact, that if request is not mocked, it will return error
+func (s *Suite) Test_GetSnapshotsUptime_FirstCountError() {
+	var (
+		id = "1"
+	)
+
+	_, _, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
+		SchedulerId: id,
+	})
+	require.Error(s.T(), err)
+}
+
+//Based on fact, that if request is not mocked, it will return error
+func (s *Suite) Test_GetSnapshotsUptime_SecondCountError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, _, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
+		SchedulerId: id,
+	})
+	require.Error(s.T(), err)
+}
+
+//Based on fact, that if request is not mocked, it will return error
+func (s *Suite) Test_GetSnapshotsUptime_SelectError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows = sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, _, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
+		SchedulerId: id,
+	})
+	require.Error(s.T(), err)
 }
 
 func TestPostgres_InsertStatRequest(t *testing.T) {

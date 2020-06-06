@@ -154,18 +154,18 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 		return nil, -1, err
 	}
 
-	var count int
+	var count int64
 	if request.GetStatus() == apiPb.SchedulerCode_SCHEDULER_CODE_UNSPECIFIED {
 		err = p.db.Table(dbSnapshotCollection).
-			Joins(fmt.Sprintf(`"JOIN "%s" ON "%s"."snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
+			Joins(fmt.Sprintf(`"JOIN "%s" ON "%s.snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+			Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
 			Count(&count).Error
 	} else {
 		err = p.db.Table(dbSnapshotCollection).
-			Joins(fmt.Sprintf(`"JOIN "%s" ON "%s"."snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
+			Joins(fmt.Sprintf(`"JOIN "%s" ON "%s.snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+			Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
 			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus().String()).
 			Count(&count).Error
 	}
@@ -181,9 +181,9 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 		err = p.db.
 			Table(dbSnapshotCollection).
 			Set("gorm:auto_preload", true).
-			Joins(fmt.Sprintf(`"JOIN "%s" ON "%s"."snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
+			Joins(fmt.Sprintf(`"JOIN "%s" ON "%s.snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+			Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
 			Order(getOrder(request.GetSort()) + " " + getDirection(request.GetSort())).
 			Offset(offset).
 			Limit(limit).
@@ -192,9 +192,9 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 		err = p.db.
 			Table(dbSnapshotCollection).
 			Set("gorm:auto_preload", true).
-			Joins(fmt.Sprintf(`"JOIN "%s" ON "%s"."snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
+			Joins(fmt.Sprintf(`"JOIN "%s" ON "%s.snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-			Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+			Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
 			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus().String()).
 			Order(getOrder(request.GetSort()) + " " + getDirection(request.GetSort())).
 			Offset(offset).
@@ -216,29 +216,50 @@ func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) 
 		return -1, -1, err
 	}
 
-	var countOk int
+	var countOk int64
 	err = p.db.Table(dbSnapshotCollection).
+		Joins(fmt.Sprintf(`"JOIN "%s" ON "%s.snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-		Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+		Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
 		Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), apiPb.SchedulerCode_OK.String()).
 		Count(&countOk).Error
-
-	var countAll int
-	err = p.db.Table(dbSnapshotCollection).
-		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-		Where(fmt.Sprintf(`"%s"."created_at" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
-		Count(&countOk).Error
-
-	//TODO: count latency
-
 	if err != nil {
 		return -1, -1, err
 	}
 
+	var countAll int
+	err = p.db.Table(dbSnapshotCollection).
+		Joins(fmt.Sprintf(`"JOIN "%s" ON "%s.snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
+		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
+		Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
+		Count(&countOk).Error
+	if err != nil {
+		return -1, -1, err
+	}
 
-	return float64(countOk)/float64(countAll), -1, nil
+	var dbSnapshots []*Snapshot
+	err = p.db.
+		Table(dbSnapshotCollection).
+		Set("gorm:auto_preload", true).
+		Joins(fmt.Sprintf(`"JOIN "%s" ON "%s.snapshotId" = "%s""."ID"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
+		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
+		Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
+		Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), apiPb.SchedulerCode_OK.String()).
+		Find(&dbSnapshots).Error
+	if err != nil {
+		return -1, -1, errorDataBase
+	}
+
+	latency := int64(0)
+	for _, snapshot := range dbSnapshots {
+		//Recieveing time difference in mellisecinds
+		if snapshot.Meta != nil {
+			latency += (snapshot.Meta.EndTime.UnixNano() - snapshot.Meta.StartTime.UnixNano()) / int64(time.Millisecond)
+		}
+	}
+
+	return float64(countOk) / float64(countAll), float64(latency) / float64(countOk), nil
 }
-
 
 func getOrder(request *apiPb.SortingSchedulerList) string {
 	if request == nil {
@@ -289,7 +310,7 @@ func (p *postgres) GetStatRequest(agentID string, pagination *apiPb.Pagination, 
 		return nil, -1, err
 	}
 
-	var count int
+	var count int64
 	err = p.db.Table(dbStatRequestCollection).
 		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
 		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
@@ -329,7 +350,7 @@ func (p *postgres) GetMemoryInfo(agentID string, pagination *apiPb.Pagination, f
 		return nil, -1, err
 	}
 
-	var count int
+	var count int64
 	err = p.db.Table(dbStatRequestCollection).
 		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
 		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
@@ -375,7 +396,7 @@ func (p *postgres) getSpecialRecords(agentID string, pagination *apiPb.Paginatio
 		return nil, -1, err
 	}
 
-	var count int
+	var count int64
 	err = p.db.Table(dbStatRequestCollection).
 		Where(fmt.Sprintf(`"%s"."agentID" = ?`, dbStatRequestCollection), agentID).
 		Where(fmt.Sprintf(`"%s"."time" BETWEEN ? and ?`, dbStatRequestCollection), timeFrom, timeTo).
@@ -421,12 +442,12 @@ func getTime(filter *apiPb.TimeFilter) (time.Time, time.Time, error) {
 }
 
 //Return offset and limit
-func getOffsetAndLimit(count int, pagination *apiPb.Pagination) (int32, int32) {
+func getOffsetAndLimit(count int64, pagination *apiPb.Pagination) (int, int) {
 	if pagination != nil {
 		if pagination.Page == -1 {
-			return int32(count) - pagination.Limit, pagination.Limit
+			return int(count) - int(pagination.Limit), int(pagination.Limit)
 		}
-		return pagination.GetLimit() * pagination.GetPage(), pagination.GetLimit()
+		return int(pagination.GetLimit() * pagination.GetPage()), int(pagination.GetLimit())
 	}
-	return int32(0), int32(count)
+	return 0, int(count)
 }
