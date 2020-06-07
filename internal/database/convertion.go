@@ -317,3 +317,89 @@ func convertFromNetInfo(data []*NetInfo) *apiPb.NetInfo {
 	}
 	return &apiPb.NetInfo{Interfaces: interfaces}
 }
+
+func convertToTransactionInfo(data *apiPb.TransactionInfo) (*TransactionInfo, error) {
+	startTime, err := ptypes.Timestamp(data.GetStartTime())
+	if err != nil {
+		return nil, err
+	}
+	endTime, err := ptypes.Timestamp(data.GetEndTime())
+	if err != nil {
+		return nil, err
+	}
+	if data.GetMeta() == nil {
+		data.Meta = &apiPb.TransactionInfo_Meta{
+			Host:   "",
+			Path:   "",
+			Method: "",
+		}
+	}
+	if data.Error == nil {
+		data.Error = &apiPb.TransactionInfo_Error{
+			Message: "",
+		}
+	}
+	return &TransactionInfo{
+		TransactionId:     data.GetId(),
+		ApplicationId:     data.GetApplicationId(),
+		ParentId:          data.GetParentId(),
+		MetaHost:          data.GetMeta().GetHost(),
+		MetaPath:          data.GetMeta().GetPath(),
+		MetaMethod:        data.GetMeta().GetMethod(),
+		Name:              data.GetName(),
+		StartTime:         startTime,
+		EndTime:           endTime,
+		TransactionStatus: data.GetStatus().String(),
+		TransactionType:   data.GetType().String(),
+		Error:             data.GetError().GetMessage(),
+	}, nil
+}
+
+func convertFromTransaction(data *TransactionInfo) (*apiPb.TransactionInfo, error) {
+	startTime, err := ptypes.TimestampProto(data.StartTime)
+	if err != nil {
+		return nil, err
+	}
+	endTime, err := ptypes.TimestampProto(data.EndTime)
+	if err != nil {
+		return nil, err
+	}
+	transactionMeta := &apiPb.TransactionInfo_Meta{
+		Host:                 data.MetaHost,
+		Path:                 data.MetaPath,
+		Method:               data.MetaMethod,
+	}
+	if data.MetaPath == "" && data.MetaHost == "" && data.MetaMethod == "" {
+		transactionMeta = nil
+	}
+	transactionError := &apiPb.TransactionInfo_Error{
+		Message:              data.Error,
+	}
+	if data.Error == "" {
+		transactionError = nil
+	}
+	return &apiPb.TransactionInfo{
+		Id:                   data.TransactionId,
+		ApplicationId:        data.ApplicationId,
+		ParentId:             data.ParentId,
+		Meta:                 transactionMeta,
+		Name:                 data.Name,
+		StartTime:            startTime,
+		EndTime:              endTime,
+		Status:               apiPb.TransactionStatus(apiPb.TransactionStatus_value[data.TransactionStatus]),
+		Type:                 apiPb.TransactionType(apiPb.TransactionType_value[data.TransactionType]),
+		Error:                transactionError,
+	}, nil
+}
+
+func convertFromTransactions(data []*TransactionInfo) []*apiPb.TransactionInfo {
+	var res []*apiPb.TransactionInfo
+	for _, request := range data {
+		stat, err := convertFromTransaction(request)
+		if err == nil {
+			res = append(res, stat)
+		}
+		//TODO: log if error
+	}
+	return res
+}

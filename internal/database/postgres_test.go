@@ -694,6 +694,43 @@ func (s *Suite) Test_GetNetInfo() {
 	require.NoError(s.T(), err)
 }
 
+
+func (s *Suite) Test_InsertTransactionInfo() {
+	s.mock.ExpectBegin()
+	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, dbTransactionInfoCollection)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+	s.mock.ExpectCommit()
+
+	correctTime, err := ptypes.TimestampProto(time.Now())
+	if err != nil {
+		require.NotNil(s.T(), nil)
+	}
+	err = postgr.InsertTransactionInfo(&apiPb.TransactionInfo{
+		StartTime: correctTime,
+		EndTime:   correctTime,
+	})
+	require.NoError(s.T(), err)
+}
+
+func TestPostgres_InsertTransactionInfo(t *testing.T) {
+	t.Run("Should: return conv error", func(t *testing.T) {
+		err := postgr.InsertTransactionInfo(&apiPb.TransactionInfo{})
+		assert.Error(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		correctTime, err := ptypes.TimestampProto(time.Now())
+		if err != nil {
+			assert.NotNil(t, nil)
+		}
+		err = postgrWrong.InsertTransactionInfo(&apiPb.TransactionInfo{
+			StartTime: correctTime,
+			EndTime:   correctTime,
+		})
+		assert.Error(t, err)
+	})
+}
+
 func (s *Suite) AfterTest(_, _ string) {
 	require.NoError(s.T(), s.mock.ExpectationsWereMet())
 }
