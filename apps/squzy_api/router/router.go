@@ -171,6 +171,37 @@ func (r *router) GetEngine() *gin.Engine {
 					}
 					successWrap(context, http.StatusOK, res)
 				})
+
+				application.PUT("enabled", func(context *gin.Context) {
+					applicationId := context.Param("applicationId")
+					res, err := r.handlers.EnabledApplicationById(context, applicationId)
+					if err != nil {
+						errWrap(context, http.StatusInternalServerError, err)
+						return
+					}
+					successWrap(context, http.StatusAccepted, res)
+				})
+
+				application.PUT("archived", func(context *gin.Context) {
+					applicationId := context.Param("applicationId")
+					res, err := r.handlers.ArchivedApplicationById(context, applicationId)
+					if err != nil {
+						errWrap(context, http.StatusInternalServerError, err)
+						return
+					}
+					successWrap(context, http.StatusAccepted, res)
+				})
+
+				application.PUT("disabled", func(context *gin.Context) {
+					applicationId := context.Param("applicationId")
+					res, err := r.handlers.DisabledApplicationById(context, applicationId)
+					if err != nil {
+						errWrap(context, http.StatusInternalServerError, err)
+						return
+					}
+					successWrap(context, http.StatusAccepted, res)
+				})
+
 				transactions := application.Group("transactions")
 				{
 					transactions.GET("list", func(context *gin.Context) {

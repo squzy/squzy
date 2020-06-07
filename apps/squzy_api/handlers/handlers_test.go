@@ -14,15 +14,15 @@ type mockAmOk struct {
 }
 
 func (m mockAmOk) ArchiveApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
-	panic("implement me")
+	return &apiPb.Application{}, nil
 }
 
 func (m mockAmOk) EnableApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
-	panic("implement me")
+	return &apiPb.Application{}, nil
 }
 
 func (m mockAmOk) DisableApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
-	panic("implement me")
+	return &apiPb.Application{}, nil
 }
 
 func (m mockAmOk) InitializeApplication(ctx context.Context, in *apiPb.ApplicationInfo, opts ...grpc.CallOption) (*apiPb.InitializeApplicationResponse, error) {
@@ -45,15 +45,15 @@ type mockAmError struct {
 }
 
 func (m mockAmError) ArchiveApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (m mockAmError) EnableApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (m mockAmError) DisableApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (m mockAmError) InitializeApplication(ctx context.Context, in *apiPb.ApplicationInfo, opts ...grpc.CallOption) (*apiPb.InitializeApplicationResponse, error) {
@@ -495,6 +495,45 @@ func TestHandlers_SaveTransaction(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := New(nil, nil, nil, &mockAmError{})
 		_, err := s.SaveTransaction(context.Background(), nil)
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_ArchivedApplicationById(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmOk{})
+		_, err := s.ArchivedApplicationById(context.Background(), "")
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmError{})
+		_, err := s.ArchivedApplicationById(context.Background(), "")
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_DisabledApplicationById(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmOk{})
+		_, err := s.DisabledApplicationById(context.Background(), "")
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmError{})
+		_, err := s.DisabledApplicationById(context.Background(), "")
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_EnabledApplicationById(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmOk{})
+		_, err := s.EnabledApplicationById(context.Background(), "")
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, &mockAmError{})
+		_, err := s.EnabledApplicationById(context.Background(), "")
 		assert.NotNil(t, err)
 	})
 }

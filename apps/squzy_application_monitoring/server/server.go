@@ -17,16 +17,44 @@ type server struct {
 	storage apiPb.StorageClient
 }
 
-func (s *server) ArchiveApplicationById(ctx context.Context, reuqest *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
-	panic("implement me")
+func (s *server) updateStatus(ctx context.Context, applicationId primitive.ObjectID, status apiPb.ApplicationStatus) (*apiPb.Application, error) {
+	err := s.db.SetStatus(ctx, applicationId, status)
+
+	if err != nil {
+		return nil, err
+	}
+
+	app, err := s.db.FindApplicationById(ctx, applicationId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return transformDbApplication(app), nil
 }
 
-func (s *server) EnableApplicationById(ctx context.Context, reuqest *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
-	panic("implement me")
+func (s *server) ArchiveApplicationById(ctx context.Context, request *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
+	applicationId, err := primitive.ObjectIDFromHex(request.ApplicationId)
+	if err != nil {
+		return nil, err
+	}
+	return s.updateStatus(ctx, applicationId, apiPb.ApplicationStatus_APPLICATION_STATUS_ARCHIVED)
 }
 
-func (s *server) DisableApplicationById(ctx context.Context, reuqest *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
-	panic("implement me")
+func (s *server) EnableApplicationById(ctx context.Context, request *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
+	applicationId, err := primitive.ObjectIDFromHex(request.ApplicationId)
+	if err != nil {
+		return nil, err
+	}
+	return s.updateStatus(ctx, applicationId, apiPb.ApplicationStatus_APPLICATION_STATUS_ENABLED)
+}
+
+func (s *server) DisableApplicationById(ctx context.Context, request *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
+	applicationId, err := primitive.ObjectIDFromHex(request.ApplicationId)
+	if err != nil {
+		return nil, err
+	}
+	return s.updateStatus(ctx, applicationId, apiPb.ApplicationStatus_APPLICATION_STATUS_DISABLED)
 }
 
 func transformDbApplication(dbApp *database.Application) *apiPb.Application {
@@ -34,6 +62,7 @@ func transformDbApplication(dbApp *database.Application) *apiPb.Application {
 		Id:       dbApp.Id.Hex(),
 		Name:     dbApp.Name,
 		HostName: dbApp.Host,
+		Status:   dbApp.Status,
 	}
 }
 
@@ -93,9 +122,13 @@ func (s *server) SaveTransaction(ctx context.Context, req *apiPb.TransactionInfo
 		return nil, err
 	}
 
-	_, err = s.db.FindApplicationById(ctx, applicationId)
+	app, err := s.db.FindApplicationById(ctx, applicationId)
 	if err != nil {
 		return nil, err
+	}
+
+	if app.Status != apiPb.ApplicationStatus_APPLICATION_STATUS_ENABLED {
+		return &empty.Empty{}, nil
 	}
 
 	go func() {

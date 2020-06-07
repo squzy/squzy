@@ -18,6 +18,18 @@ import (
 type mockOk struct {
 }
 
+func (m mockOk) ArchivedApplicationById(ctx context.Context, id string) (*apiPb.Application, error) {
+	return &apiPb.Application{}, nil
+}
+
+func (m mockOk) EnabledApplicationById(ctx context.Context, id string) (*apiPb.Application, error) {
+	return &apiPb.Application{}, nil
+}
+
+func (m mockOk) DisabledApplicationById(ctx context.Context, id string) (*apiPb.Application, error) {
+	return &apiPb.Application{}, nil
+}
+
 func (m mockOk) GetSchedulerUptime(ctx context.Context, rq *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
 	return &apiPb.GetSchedulerUptimeResponse{}, nil
 }
@@ -91,6 +103,18 @@ func (m mockOk) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) (
 }
 
 type mockError struct {
+}
+
+func (m mockError) ArchivedApplicationById(ctx context.Context, id string) (*apiPb.Application, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) EnabledApplicationById(ctx context.Context, id string) (*apiPb.Application, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) DisabledApplicationById(ctx context.Context, id string) (*apiPb.Application, error) {
+	return nil, errors.New("")
 }
 
 func (m mockError) GetSchedulerUptime(ctx context.Context, rq *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
@@ -566,6 +590,21 @@ func TestRouter_GetEngine(t *testing.T) {
 					`,
 				)),
 			},
+			{
+				Path:         "/v1/applications/app/enabled",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/applications/app/disabled",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/applications/app/archived",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusInternalServerError,
+			},
 		}
 
 		for _, test := range tt {
@@ -790,6 +829,21 @@ func TestRouter_GetEngine(t *testing.T) {
 				Path:         "/v1/applications/app/transactions/single/trra",
 				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/applications/app/enabled",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusAccepted,
+			},
+			{
+				Path:         "/v1/applications/app/disabled",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusAccepted,
+			},
+			{
+				Path:         "/v1/applications/app/archived",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusAccepted,
 			},
 		}
 

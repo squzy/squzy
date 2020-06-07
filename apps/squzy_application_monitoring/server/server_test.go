@@ -16,6 +16,54 @@ import (
 type mockStorage struct {
 }
 
+type dbMockFindError struct {
+}
+
+type dbMockOkEnabled struct {
+}
+
+func (d dbMockOkEnabled) FindOrCreate(ctx context.Context, name string, host string) (*database.Application, error) {
+	panic("implement me")
+}
+
+func (d dbMockOkEnabled) FindApplicationByName(ctx context.Context, name string) (*database.Application, error) {
+	panic("implement me")
+}
+
+func (d dbMockOkEnabled) FindApplicationById(ctx context.Context, id primitive.ObjectID) (*database.Application, error) {
+	return &database.Application{
+		Status: apiPb.ApplicationStatus_APPLICATION_STATUS_ENABLED,
+	}, nil
+}
+
+func (d dbMockOkEnabled) FindAllApplication(ctx context.Context) ([]*database.Application, error) {
+	panic("implement me")
+}
+
+func (d dbMockOkEnabled) SetStatus(ctx context.Context, id primitive.ObjectID, status apiPb.ApplicationStatus) error {
+	panic("implement me")
+}
+
+func (d dbMockFindError) FindOrCreate(ctx context.Context, name string, host string) (*database.Application, error) {
+	panic("implement me")
+}
+
+func (d dbMockFindError) FindApplicationByName(ctx context.Context, name string) (*database.Application, error) {
+	panic("implement me")
+}
+
+func (d dbMockFindError) FindApplicationById(ctx context.Context, id primitive.ObjectID) (*database.Application, error) {
+	return nil, errors.New("")
+}
+
+func (d dbMockFindError) FindAllApplication(ctx context.Context) ([]*database.Application, error) {
+	panic("implement me")
+}
+
+func (d dbMockFindError) SetStatus(ctx context.Context, id primitive.ObjectID, status apiPb.ApplicationStatus) error {
+	return nil
+}
+
 func (m mockStorage) SaveResponseFromScheduler(ctx context.Context, in *apiPb.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
 	panic("implement me")
 }
@@ -86,6 +134,10 @@ func (m mockCfg) GetStorageHost() string {
 type dbMockError struct {
 }
 
+func (d dbMockError) SetStatus(ctx context.Context, id primitive.ObjectID, status apiPb.ApplicationStatus) error {
+	return errors.New("")
+}
+
 func (d dbMockError) FindOrCreate(ctx context.Context, name string, host string) (*database.Application, error) {
 	return nil, errors.New("as")
 }
@@ -103,6 +155,10 @@ func (d dbMockError) FindAllApplication(ctx context.Context) ([]*database.Applic
 }
 
 type dbMockOk struct {
+}
+
+func (d dbMockOk) SetStatus(ctx context.Context, id primitive.ObjectID, status apiPb.ApplicationStatus) error {
+	return nil
 }
 
 func (d dbMockOk) FindOrCreate(ctx context.Context, name string, host string) (*database.Application, error) {
@@ -228,7 +284,7 @@ func TestServer_SaveTransaction(t *testing.T) {
 		})
 		assert.NotNil(t, err)
 	})
-	t.Run("Should: save without error", func(t *testing.T) {
+	t.Run("Should: save without error and not send to storage", func(t *testing.T) {
 		s := New(&dbMockOk{}, &mockCfg{}, &mockStorage{})
 		_, err := s.SaveTransaction(context.Background(), &apiPb.TransactionInfo{
 			Id:            primitive.NewObjectID().Hex(),
@@ -243,5 +299,101 @@ func TestServer_SaveTransaction(t *testing.T) {
 			Error:         nil,
 		})
 		assert.Nil(t, err)
+	})
+
+	t.Run("Should: save without error and send to storage", func(t *testing.T) {
+		s := New(&dbMockOkEnabled{}, &mockCfg{}, &mockStorage{})
+		_, err := s.SaveTransaction(context.Background(), &apiPb.TransactionInfo{
+			Id:            primitive.NewObjectID().Hex(),
+			ApplicationId: primitive.NewObjectID().Hex(),
+			ParentId:      "",
+			Meta:          nil,
+			Name:          "",
+			StartTime:     nil,
+			EndTime:       nil,
+			Status:        0,
+			Type:          0,
+			Error:         nil,
+		})
+		assert.Nil(t, err)
+	})
+}
+
+func TestServer_ArchiveApplicationById(t *testing.T) {
+	t.Run("Should: return application without error", func(t *testing.T) {
+		s := New(&dbMockOk{}, nil, nil)
+		_, err := s.ArchiveApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
+			ApplicationId: primitive.NewObjectID().Hex(),
+		})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error because objectId", func(t *testing.T) {
+		s := New(&dbMockOk{}, nil, nil)
+		_, err := s.ArchiveApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
+			ApplicationId: "primitive.NewObjectID().Hex()",
+		})
+		assert.NotNil(t, err)
+	})
+	t.Run("Should: return error database", func(t *testing.T) {
+		s := New(&dbMockError{}, nil, nil)
+		_, err := s.ArchiveApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
+			ApplicationId: primitive.NewObjectID().Hex(),
+		})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestServer_EnableApplicationById(t *testing.T) {
+	t.Run("Should: return application without error", func(t *testing.T) {
+		s := New(&dbMockOk{}, nil, nil)
+		_, err := s.EnableApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
+			ApplicationId: primitive.NewObjectID().Hex(),
+		})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error because objectId", func(t *testing.T) {
+		s := New(&dbMockOk{}, nil, nil)
+		_, err := s.EnableApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
+			ApplicationId: "primitive.NewObjectID().Hex()",
+		})
+		assert.NotNil(t, err)
+	})
+	t.Run("Should: return error database", func(t *testing.T) {
+		s := New(&dbMockError{}, nil, nil)
+		_, err := s.EnableApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
+			ApplicationId: primitive.NewObjectID().Hex(),
+		})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestServer_DisableApplicationById(t *testing.T) {
+	t.Run("Should: return application without error", func(t *testing.T) {
+		s := New(&dbMockOk{}, nil, nil)
+		_, err := s.DisableApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
+			ApplicationId: primitive.NewObjectID().Hex(),
+		})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error because objectId", func(t *testing.T) {
+		s := New(&dbMockOk{}, nil, nil)
+		_, err := s.DisableApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
+			ApplicationId: "primitive.NewObjectID().Hex()",
+		})
+		assert.NotNil(t, err)
+	})
+	t.Run("Should: return error database", func(t *testing.T) {
+		s := New(&dbMockError{}, nil, nil)
+		_, err := s.DisableApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
+			ApplicationId: primitive.NewObjectID().Hex(),
+		})
+		assert.NotNil(t, err)
+	})
+	t.Run("Should: return error database", func(t *testing.T) {
+		s := New(&dbMockFindError{}, nil, nil)
+		_, err := s.DisableApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
+			ApplicationId: primitive.NewObjectID().Hex(),
+		})
+		assert.NotNil(t, err)
 	})
 }
