@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/squzy/mongo_helper"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -11,10 +12,9 @@ import (
 	"squzy/apps/squzy_application_monitoring/config"
 	"squzy/apps/squzy_application_monitoring/database"
 	"squzy/apps/squzy_application_monitoring/server"
+	_ "squzy/apps/squzy_application_monitoring/version"
 	"squzy/internal/grpctools"
 	"squzy/internal/helpers"
-	"context"
-	_ "squzy/apps/squzy_application_monitoring/version"
 )
 
 func main() {

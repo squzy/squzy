@@ -21,7 +21,7 @@ type Handlers interface {
 	AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) (*apiPb.AddResponse, error)
 	RegisterApplication(ctx context.Context, rq *apiPb.ApplicationInfo) (*apiPb.InitializeApplicationResponse, error)
 	SaveTransaction(ctx context.Context, rq *apiPb.TransactionInfo) (*empty.Empty, error)
-	GetSchedulerUptime(ctx context.Context, rq *apiPb.GetSchedulerUptimeRequest)  (*apiPb.GetSchedulerUptimeResponse, error)
+	GetSchedulerUptime(ctx context.Context, rq *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error)
 	GetTransactionGroups(ctx context.Context, req *apiPb.GetTransactionGroupRequest) (*apiPb.GetTransactionGroupResponse, error)
 	GetTransactionsList(ctx context.Context, req *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error)
 	GetApplicationById(ctx context.Context, id string) (*apiPb.Application, error)
@@ -161,7 +161,7 @@ func (h *handlers) RegisterApplication(ctx context.Context, rq *apiPb.Applicatio
 	return app, err
 }
 
-func (h *handlers) GetSchedulerUptime(ctx context.Context, rq *apiPb.GetSchedulerUptimeRequest)  (*apiPb.GetSchedulerUptimeResponse, error) {
+func (h *handlers) GetSchedulerUptime(ctx context.Context, rq *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
 	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
 	res, err := h.storageClient.GetSchedulerUptime(c, rq)

@@ -441,13 +441,13 @@ func TestRouter_GetEngine(t *testing.T) {
 				ExpectedCode: http.StatusUnprocessableEntity,
 			},
 			{
-				Path: "/v1/applications",
-				Method: http.MethodGet,
+				Path:         "/v1/applications",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/applications",
-				Method: http.MethodPost,
+				Path:         "/v1/applications",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusInternalServerError,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -458,8 +458,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/applications",
-				Method: http.MethodPost,
+				Path:         "/v1/applications",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusUnprocessableEntity,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -470,48 +470,48 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/applications/app",
-				Method: http.MethodGet,
+				Path:         "/v1/applications/app",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/applications/app/transactions/list?dateFrom=12321323&dateTo=12321323",
-				Method: http.MethodGet,
+				Path:         "/v1/applications/app/transactions/list?dateFrom=12321323&dateTo=12321323",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusBadRequest,
 			},
 			{
-				Path: "/v1/applications/app/transactions/list?dateFrom=0000-01-01T00:00:00.899Z&dateTo=0000-01-01T00:00:00.899Z",
-				Method: http.MethodGet,
+				Path:         "/v1/applications/app/transactions/list?dateFrom=0000-01-01T00:00:00.899Z&dateTo=0000-01-01T00:00:00.899Z",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusUnprocessableEntity,
 			},
 			{
-				Path: "/v1/applications/app/transactions/list?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
-				Method: http.MethodGet,
+				Path:         "/v1/applications/app/transactions/list?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/applications/app/transactions/group?dateFrom=12321323&dateTo=12321323",
-				Method: http.MethodGet,
+				Path:         "/v1/applications/app/transactions/group?dateFrom=12321323&dateTo=12321323",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusBadRequest,
 			},
 			{
-				Path: "/v1/applications/app/transactions/group?dateFrom=0000-01-01T00:00:00.899Z&dateTo=0000-01-01T00:00:00.899Z",
-				Method: http.MethodGet,
+				Path:         "/v1/applications/app/transactions/group?dateFrom=0000-01-01T00:00:00.899Z&dateTo=0000-01-01T00:00:00.899Z",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusUnprocessableEntity,
 			},
 			{
-				Path: "/v1/applications/app/transactions/group?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
-				Method: http.MethodGet,
+				Path:         "/v1/applications/app/transactions/group?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/applications/app/transactions/single/trra",
-				Method: http.MethodGet,
+				Path:         "/v1/applications/app/transactions/single/trra",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/applications/app/transactions",
-				Method: http.MethodPost,
+				Path:         "/v1/applications/app/transactions",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusAccepted,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -522,8 +522,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/applications/app/transactions",
-				Method: http.MethodPost,
+				Path:         "/v1/applications/app/transactions",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusAccepted,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -537,8 +537,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/applications/app/transactions",
-				Method: http.MethodPost,
+				Path:         "/v1/applications/app/transactions",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusAccepted,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -552,8 +552,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/applications/app/transactions",
-				Method: http.MethodPost,
+				Path:         "/v1/applications/app/transactions",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusAccepted,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -714,13 +714,13 @@ func TestRouter_GetEngine(t *testing.T) {
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/applications/app/transactions/list?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
-				Method: http.MethodGet,
+				Path:         "/v1/applications/app/transactions/list?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/applications/app/transactions/group?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
-				Method: http.MethodGet,
+				Path:         "/v1/applications/app/transactions/group?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},
 			{
@@ -729,8 +729,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/applications/app/transactions",
-				Method: http.MethodPost,
+				Path:         "/v1/applications/app/transactions",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusAccepted,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -744,18 +744,18 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/applications/app",
-				Method: http.MethodGet,
+				Path:         "/v1/applications/app",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/applications",
-				Method: http.MethodGet,
+				Path:         "/v1/applications",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/applications",
-				Method: http.MethodPost,
+				Path:         "/v1/applications",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusOK,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -766,8 +766,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/applications/app/transactions",
-				Method: http.MethodPost,
+				Path:         "/v1/applications/app/transactions",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusAccepted,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -787,8 +787,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/applications/app/transactions/single/trra",
-				Method: http.MethodGet,
+				Path:         "/v1/applications/app/transactions/single/trra",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},
 		}
@@ -839,8 +839,8 @@ func TestGetFilters(t *testing.T) {
 	t.Run("Should: return error because dateFrom", func(t *testing.T) {
 		r := time.Unix(-62135596801, 0)
 		_, _, err := GetFilters(&PaginationRequest{
-			Page:     0,
-			Limit:    0,
+			Page:  0,
+			Limit: 0,
 		}, &TimeFilterRequest{
 			DateFrom: &r,
 			DateTo:   nil,
@@ -850,8 +850,8 @@ func TestGetFilters(t *testing.T) {
 	t.Run("Should: return error because dateTo", func(t *testing.T) {
 		r := time.Unix(-62135596801, 0)
 		_, _, err := GetFilters(&PaginationRequest{
-			Page:     0,
-			Limit:    0,
+			Page:  0,
+			Limit: 0,
 		}, &TimeFilterRequest{
 			DateFrom: nil,
 			DateTo:   &r,
@@ -861,9 +861,9 @@ func TestGetFilters(t *testing.T) {
 	t.Run("Should: parse time correct", func(t *testing.T) {
 		tim := time.Now()
 		pag, tF, err := GetFilters(&PaginationRequest{
-			Page:     2,
-			Limit:    24,
-		},&TimeFilterRequest{
+			Page:  2,
+			Limit: 24,
+		}, &TimeFilterRequest{
 			DateFrom: &tim,
 			DateTo:   &tim,
 		})
@@ -876,8 +876,8 @@ func TestGetFilters(t *testing.T) {
 	})
 	t.Run("Should: parse time correct", func(t *testing.T) {
 		r, tf, err := GetFilters(&PaginationRequest{
-			Page:     2,
-			Limit:    24,
+			Page:  2,
+			Limit: 24,
 		}, nil)
 		assert.Nil(t, err)
 		assert.Equal(t, int32(24), r.Limit)

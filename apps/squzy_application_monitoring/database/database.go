@@ -48,7 +48,7 @@ func (d *db) findApplication(ctx context.Context, filter bson.M) (*Application, 
 	return app, nil
 }
 
-func (d *db)  findListApplication(ctx context.Context, filter bson.M) ([]*Application, error) {
+func (d *db) findListApplication(ctx context.Context, filter bson.M) ([]*Application, error) {
 	list := []*Application{}
 	err := d.connector.FindAll(ctx, filter, &list)
 	if err != nil {

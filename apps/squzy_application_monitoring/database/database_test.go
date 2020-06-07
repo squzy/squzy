@@ -12,19 +12,15 @@ import (
 )
 
 type mockOk struct {
-
 }
 
 type mockError struct {
-
 }
 
 type mockNotFoundOk struct {
-
 }
 
 type mockNotFoundError struct {
-
 }
 
 func (m mockNotFoundError) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {

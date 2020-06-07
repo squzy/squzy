@@ -11,7 +11,6 @@ import (
 )
 
 type mock struct {
-
 }
 
 func (m mock) ArchiveApplicationById(ctx context.Context, reuqest *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {

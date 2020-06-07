@@ -12,8 +12,8 @@ import (
 )
 
 type server struct {
-	db database.Database
-	config config.Config
+	db      database.Database
+	config  config.Config
 	storage apiPb.StorageClient
 }
 
@@ -29,11 +29,11 @@ func (s *server) DisableApplicationById(ctx context.Context, reuqest *apiPb.Appl
 	panic("implement me")
 }
 
-func transformDbApplication(dbApp *database.Application) (*apiPb.Application) {
+func transformDbApplication(dbApp *database.Application) *apiPb.Application {
 	return &apiPb.Application{
-		Id:                   dbApp.Id.Hex(),
-		Name:                 dbApp.Name,
-		HostName:             dbApp.Host,
+		Id:       dbApp.Id.Hex(),
+		Name:     dbApp.Name,
+		HostName: dbApp.Host,
 	}
 }
 
@@ -99,7 +99,7 @@ func (s *server) SaveTransaction(ctx context.Context, req *apiPb.TransactionInfo
 	}
 
 	go func() {
-		reqCtx , cancel := helpers.TimeoutContext(context.Background(), s.config.GetStorageTimeout())
+		reqCtx, cancel := helpers.TimeoutContext(context.Background(), s.config.GetStorageTimeout())
 		defer cancel()
 		_, _ = s.storage.SaveTransaction(reqCtx, req)
 	}()
@@ -107,10 +107,10 @@ func (s *server) SaveTransaction(ctx context.Context, req *apiPb.TransactionInfo
 	return &empty.Empty{}, nil
 }
 
-func New(db database.Database, config config.Config, 	storage apiPb.StorageClient) apiPb.ApplicationMonitoringServer {
+func New(db database.Database, config config.Config, storage apiPb.StorageClient) apiPb.ApplicationMonitoringServer {
 	return &server{
-		db: db,
-		config: config,
+		db:      db,
+		config:  config,
 		storage: storage,
 	}
 }

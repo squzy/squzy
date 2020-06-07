@@ -45,8 +45,8 @@ type SchedulerHistory struct {
 }
 
 type AgentHistory struct {
-	Pagination  *PaginationRequest  `json:"omitempty"`
-	TimeFilters *TimeFilterRequest  `json:"omitempty"`
+	Pagination  *PaginationRequest
+	TimeFilters *TimeFilterRequest
 	Type        apiPb.TypeAgentStat `form:"type"`
 }
 
@@ -578,7 +578,7 @@ func GetStringValueFromString(str string) *wrappers.StringValue {
 	}
 }
 
-func GetFilters(paginationFilter *PaginationRequest, timeFilter *TimeFilterRequest, ) (*apiPb.Pagination, *apiPb.TimeFilter, error) {
+func GetFilters(paginationFilter *PaginationRequest, timeFilter *TimeFilterRequest) (*apiPb.Pagination, *apiPb.TimeFilter, error) {
 	var pagination *apiPb.Pagination
 	if paginationFilter == nil {
 		pagination = nil
