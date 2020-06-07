@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
@@ -106,10 +107,27 @@ type NetInfo struct {
 	DropOut       uint64 `gorm:"column:dropOut"`
 }
 
+type TransactionInfo struct {
+	gorm.Model
+	TransactionId     string    `gorm:"column:transactionId"`
+	ApplicationId     string    `gorm:"column:applicationId"`
+	ParentId          string    `gorm:"column:parentId"`
+	MetaHost          string    `gorm:"column:metaHost"`
+	MetaPath          string    `gorm:"column:metaPath"`
+	MetaMethod        string    `gorm:"column:metaMethod"`
+	Name              string    `gorm:"column:name"`
+	StartTime         time.Time `gorm:"column:startTime"`
+	EndTime           time.Time `gorm:"column:endTime"`
+	TransactionStatus string    `gorm:"column:transactionStatus"`
+	TransactionType   string    `gorm:"column:transactionType"`
+	Error             string    `gorm:"column:error"`
+}
+
 const (
-	dmMetaDataCollection    = "meta_data"
-	dbSnapshotCollection    = "snapshots"     //TODO: check
-	dbStatRequestCollection = "stat_requests" //TODO: check
+	dmMetaDataCollection        = "meta_data"
+	dbSnapshotCollection        = "snapshots"
+	dbTransactionInfoCollection = "transaction_infos" //TODO: check
+	dbStatRequestCollection     = "stat_requests"
 )
 
 var (
@@ -127,6 +145,7 @@ func (p *postgres) Migrate() error {
 		&MemorySwap{},
 		&DiskInfo{},
 		&NetInfo{},
+		&TransactionInfo{},
 	}
 
 	var err error
@@ -429,6 +448,85 @@ func (p *postgres) getSpecialRecords(agentID string, pagination *apiPb.Paginatio
 	}
 
 	return ConvertFromPostgressStatRequests(statRequests), int32(count), nil
+}
+
+func (p *postgres) InsertTransactionInfo(data *apiPb.TransactionInfo) error {
+	info, err := convertToTransactionInfo(data)
+	if err != nil {
+		return err
+	}
+	if err := p.db.Table(dbTransactionInfoCollection).Create(info).Error; err != nil {
+		return errorDataBase
+	}
+	return nil
+}
+
+func (p *postgres) GetTransactionInfo(request *apiPb.GetTransactionsRequest) ([]*apiPb.TransactionInfo, int64, error) {
+	timeFrom, timeTo, err := getTime(request.TimeRange)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	var count int64
+	err = p.db.Table(dbTransactionInfoCollection).
+		Where(fmt.Sprintf(`"%s"."applicationId" = ?`, dbTransactionInfoCollection), request.GetApplicationId()).
+		Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dbTransactionInfoCollection), timeFrom, timeTo).
+		Where(getTransactionsByString("metaHost", request.GetHost())).
+		Where(getTransactionsByString("name", request.GetName())).
+		Where(getTransactionsByString("metaPath", request.GetPath())).
+		Where(getTransactionsByString("metaMethod", request.GetMethod())).
+		Where(getTransactionTypeWhere(request.GetType())).
+		Where(getTransactionStatusWhere(request.GetStatus())).
+		Count(&count).Error
+	if err != nil {
+		return nil, -1, err
+	}
+
+	offset, limit := getOffsetAndLimit(count, request.GetPagination())
+
+	//TODO: order
+	var statRequests []*TransactionInfo
+	err = p.db.Table(dbTransactionInfoCollection).
+		Where(fmt.Sprintf(`"%s"."applicationId" = ?`, dbTransactionInfoCollection), request.GetApplicationId()).
+		Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dbTransactionInfoCollection), timeFrom, timeTo).
+		Where(getTransactionsByString("metaHost", request.GetHost())).
+		Where(getTransactionsByString("name", request.GetName())).
+		Where(getTransactionsByString("metaPath", request.GetPath())).
+		Where(getTransactionsByString("metaMethod", request.GetMethod())).
+		Where(getTransactionTypeWhere(request.GetType())).
+		Where(getTransactionStatusWhere(request.GetStatus())).
+		Order("startTime"). //TODO
+		Offset(offset).
+		Limit(limit).
+		Find(&statRequests).
+		Error
+
+	if err != nil {
+		return nil, -1, errorDataBase
+	}
+
+	return convertFromTransactions(statRequests), count, nil
+}
+
+func getTransactionsByString(key string, value *wrappers.StringValue) string {
+	if value == nil {
+		return ""
+	}
+	return fmt.Sprintf(`"%s"."%s" = %s`, dbTransactionInfoCollection, key, value.GetValue())
+}
+
+func getTransactionTypeWhere(transType apiPb.TransactionType) string {
+	if transType == apiPb.TransactionType_TRANSACTION_TYPE_UNSPECIFIED {
+		return ""
+	}
+	return fmt.Sprintf(`"%s"."transactionType" = %s`, dbTransactionInfoCollection, transType.String())
+}
+
+func getTransactionStatusWhere(transType apiPb.TransactionStatus) string {
+	if transType == apiPb.TransactionStatus_TRANSACTION_CODE_UNSPECIFIED {
+		return ""
+	}
+	return fmt.Sprintf(`"%s"."transactionType" = %s`, dbTransactionInfoCollection, transType.String())
 }
 
 func getTime(filter *apiPb.TimeFilter) (time.Time, time.Time, error) {
