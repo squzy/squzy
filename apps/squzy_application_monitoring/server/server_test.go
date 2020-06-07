@@ -148,21 +148,21 @@ func TestNew(t *testing.T) {
 func TestServer_GetApplicationById(t *testing.T) {
 	t.Run("Should: return application without error", func(t *testing.T) {
 		s := New(&dbMockOk{}, nil, nil)
-		_, err := s.GetApplicationById(context.Background(), &apiPb.GetApplicationByIdRequest{
+		_, err := s.GetApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
 			ApplicationId: primitive.NewObjectID().Hex(),
 		})
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error because objectId", func(t *testing.T) {
 		s := New(&dbMockOk{}, nil, nil)
-		_, err := s.GetApplicationById(context.Background(), &apiPb.GetApplicationByIdRequest{
+		_, err := s.GetApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
 			ApplicationId: "primitive.NewObjectID().Hex()",
 		})
 		assert.NotNil(t, err)
 	})
 	t.Run("Should: return error database", func(t *testing.T) {
 		s := New(&dbMockError{}, nil, nil)
-		_, err := s.GetApplicationById(context.Background(), &apiPb.GetApplicationByIdRequest{
+		_, err := s.GetApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
 			ApplicationId:  primitive.NewObjectID().Hex(),
 		})
 		assert.NotNil(t, err)

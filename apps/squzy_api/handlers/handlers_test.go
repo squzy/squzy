@@ -14,6 +14,18 @@ type mockAmOk struct {
 
 }
 
+func (m mockAmOk) ArchiveApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
+	panic("implement me")
+}
+
+func (m mockAmOk) EnableApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
+	panic("implement me")
+}
+
+func (m mockAmOk) DisableApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
+	panic("implement me")
+}
+
 func (m mockAmOk) InitializeApplication(ctx context.Context, in *apiPb.ApplicationInfo, opts ...grpc.CallOption) (*apiPb.InitializeApplicationResponse, error) {
 	return &apiPb.InitializeApplicationResponse{}, nil
 }
@@ -22,7 +34,7 @@ func (m mockAmOk) SaveTransaction(ctx context.Context, in *apiPb.TransactionInfo
 	return &empty.Empty{}, nil
 }
 
-func (m mockAmOk) GetApplicationById(ctx context.Context, in *apiPb.GetApplicationByIdRequest, opts ...grpc.CallOption) (*apiPb.Application, error) {
+func (m mockAmOk) GetApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
 	return &apiPb.Application{}, nil
 }
 
@@ -34,6 +46,18 @@ type mockAmError struct {
 
 }
 
+func (m mockAmError) ArchiveApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
+	panic("implement me")
+}
+
+func (m mockAmError) EnableApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
+	panic("implement me")
+}
+
+func (m mockAmError) DisableApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
+	panic("implement me")
+}
+
 func (m mockAmError) InitializeApplication(ctx context.Context, in *apiPb.ApplicationInfo, opts ...grpc.CallOption) (*apiPb.InitializeApplicationResponse, error) {
 	return nil, errors.New("")
 }
@@ -42,7 +66,7 @@ func (m mockAmError) SaveTransaction(ctx context.Context, in *apiPb.TransactionI
 	return nil, errors.New("")
 }
 
-func (m mockAmError) GetApplicationById(ctx context.Context, in *apiPb.GetApplicationByIdRequest, opts ...grpc.CallOption) (*apiPb.Application, error) {
+func (m mockAmError) GetApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
 	return nil, errors.New("")
 }
 

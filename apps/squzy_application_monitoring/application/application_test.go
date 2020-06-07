@@ -14,6 +14,18 @@ type mock struct {
 
 }
 
+func (m mock) ArchiveApplicationById(ctx context.Context, reuqest *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
+	panic("implement me")
+}
+
+func (m mock) EnableApplicationById(ctx context.Context, reuqest *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
+	panic("implement me")
+}
+
+func (m mock) DisableApplicationById(ctx context.Context, reuqest *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
+	panic("implement me")
+}
+
 func (m mock) InitializeApplication(ctx context.Context, info *apiPb.ApplicationInfo) (*apiPb.InitializeApplicationResponse, error) {
 	panic("implement me")
 }
@@ -22,7 +34,7 @@ func (m mock) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) 
 	panic("implement me")
 }
 
-func (m mock) GetApplicationById(ctx context.Context, request *apiPb.GetApplicationByIdRequest) (*apiPb.Application, error) {
+func (m mock) GetApplicationById(ctx context.Context, request *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
 	panic("implement me")
 }
 

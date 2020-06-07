@@ -64,7 +64,6 @@ type GetTransactionListRequest struct {
 }
 
 type GetTransactionGroupRequest struct {
-	Pagination        *PaginationRequest
 	TimeFilters       *TimeFilterRequest
 	GroupType         apiPb.GroupTransaction  `form:"group_by"`
 	TransactionType   apiPb.TransactionType   `form:"transaction_type"`
@@ -212,7 +211,7 @@ func (r *router) GetEngine() *gin.Engine {
 							errWrap(context, http.StatusBadRequest, err)
 							return
 						}
-						pagination, timeRange, err := GetFilters(rq.Pagination, rq.TimeFilters)
+						_, timeRange, err := GetFilters(nil, rq.TimeFilters)
 						if err != nil {
 							errWrap(context, http.StatusUnprocessableEntity, err)
 							return
@@ -220,7 +219,6 @@ func (r *router) GetEngine() *gin.Engine {
 
 						res, err := r.handlers.GetTransactionGroups(context, &apiPb.GetTransactionGroupRequest{
 							ApplicationId: applicationId,
-							Pagination:    pagination,
 							TimeRange:     timeRange,
 							GroupType:     rq.GroupType,
 							Type:          rq.TransactionType,

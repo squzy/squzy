@@ -206,7 +206,7 @@ func (h *handlers) GetTransactionById(ctx context.Context, id string) (*apiPb.Ge
 func (h *handlers) GetApplicationById(ctx context.Context, id string) (*apiPb.Application, error) {
 	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
 	defer cancel()
-	res, err := h.applicationMonitoringClient.GetApplicationById(c, &apiPb.GetApplicationByIdRequest{
+	res, err := h.applicationMonitoringClient.GetApplicationById(c, &apiPb.ApplicationByIdReuqest{
 		ApplicationId: id,
 	})
 	if err != nil {

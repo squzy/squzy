@@ -17,6 +17,18 @@ type server struct {
 	storage apiPb.StorageClient
 }
 
+func (s *server) ArchiveApplicationById(ctx context.Context, reuqest *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
+	panic("implement me")
+}
+
+func (s *server) EnableApplicationById(ctx context.Context, reuqest *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
+	panic("implement me")
+}
+
+func (s *server) DisableApplicationById(ctx context.Context, reuqest *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
+	panic("implement me")
+}
+
 func transformDbApplication(dbApp *database.Application) (*apiPb.Application) {
 	return &apiPb.Application{
 		Id:                   dbApp.Id.Hex(),
@@ -25,7 +37,7 @@ func transformDbApplication(dbApp *database.Application) (*apiPb.Application) {
 	}
 }
 
-func (s *server) GetApplicationById(ctx context.Context, request *apiPb.GetApplicationByIdRequest) (*apiPb.Application, error) {
+func (s *server) GetApplicationById(ctx context.Context, request *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
 	applicationId, err := primitive.ObjectIDFromHex(request.ApplicationId)
 	if err != nil {
 		return nil, err
