@@ -111,6 +111,6 @@ func New() Config {
 		mongoDb:         mongoDb,
 		mongoCollection: collection,
 		timeout:         timeoutStorage,
-		storageAddress: os.Getenv(ENV_STORAGE_HOST),
+		storageAddress:  os.Getenv(ENV_STORAGE_HOST),
 	}
 }

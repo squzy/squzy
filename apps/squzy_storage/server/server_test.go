@@ -131,4 +131,3 @@ func TestServer_Run(t *testing.T) {
 		assert.Equal(t, nil, err)
 	})
 }
-

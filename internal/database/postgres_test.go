@@ -337,10 +337,10 @@ func Test_getUptimeAndLatency(t *testing.T) {
 	t.Run("Should: return not 0 and no error", func(t *testing.T) {
 		snapshots := []*Snapshot{
 			{
-				Code:        "OK",
-				Meta:        &MetaData{
-					StartTime:  time.Now(),
-					EndTime:    time.Now(),
+				Code: "OK",
+				Meta: &MetaData{
+					StartTime: time.Now(),
+					EndTime:   time.Now(),
 				},
 			},
 		}

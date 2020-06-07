@@ -23,10 +23,9 @@ func (*dbErrorMock) GetSnapshots(*apiPb.GetSchedulerInformationRequest) ([]*apiP
 	return nil, -1, errors.New("error")
 }
 
-func (*dbErrorMock)  GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) (float64, float64, error) {
+func (*dbErrorMock) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) (float64, float64, error) {
 	return -1, -1, errors.New("error")
 }
-
 
 func (*dbErrorMock) InsertStatRequest(data *apiPb.Metric) error {
 	return errors.New("error")
@@ -67,7 +66,7 @@ func (*dbMock) GetSnapshots(*apiPb.GetSchedulerInformationRequest) ([]*apiPb.Sch
 	return nil, -1, nil
 }
 
-func (*dbMock)  GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) (float64, float64, error) {
+func (*dbMock) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) (float64, float64, error) {
 	return -1, -1, errors.New("error")
 }
 

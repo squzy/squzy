@@ -45,8 +45,8 @@ type SchedulerHistory struct {
 }
 
 type AgentHistory struct {
-	Pagination  *PaginationRequest  `json:"omitempty"`
-	TimeFilters *TimeFilterRequest  `json:"omitempty"`
+	Pagination  *PaginationRequest
+	TimeFilters *TimeFilterRequest
 	Type        apiPb.TypeAgentStat `form:"type"`
 }
 
@@ -64,7 +64,6 @@ type GetTransactionListRequest struct {
 }
 
 type GetTransactionGroupRequest struct {
-	Pagination        *PaginationRequest
 	TimeFilters       *TimeFilterRequest
 	GroupType         apiPb.GroupTransaction  `form:"group_by"`
 	TransactionType   apiPb.TransactionType   `form:"transaction_type"`
@@ -172,6 +171,37 @@ func (r *router) GetEngine() *gin.Engine {
 					}
 					successWrap(context, http.StatusOK, res)
 				})
+
+				application.PUT("enabled", func(context *gin.Context) {
+					applicationId := context.Param("applicationId")
+					res, err := r.handlers.EnabledApplicationById(context, applicationId)
+					if err != nil {
+						errWrap(context, http.StatusInternalServerError, err)
+						return
+					}
+					successWrap(context, http.StatusAccepted, res)
+				})
+
+				application.PUT("archived", func(context *gin.Context) {
+					applicationId := context.Param("applicationId")
+					res, err := r.handlers.ArchivedApplicationById(context, applicationId)
+					if err != nil {
+						errWrap(context, http.StatusInternalServerError, err)
+						return
+					}
+					successWrap(context, http.StatusAccepted, res)
+				})
+
+				application.PUT("disabled", func(context *gin.Context) {
+					applicationId := context.Param("applicationId")
+					res, err := r.handlers.DisabledApplicationById(context, applicationId)
+					if err != nil {
+						errWrap(context, http.StatusInternalServerError, err)
+						return
+					}
+					successWrap(context, http.StatusAccepted, res)
+				})
+
 				transactions := application.Group("transactions")
 				{
 					transactions.GET("list", func(context *gin.Context) {
@@ -212,7 +242,7 @@ func (r *router) GetEngine() *gin.Engine {
 							errWrap(context, http.StatusBadRequest, err)
 							return
 						}
-						pagination, timeRange, err := GetFilters(rq.Pagination, rq.TimeFilters)
+						_, timeRange, err := GetFilters(nil, rq.TimeFilters)
 						if err != nil {
 							errWrap(context, http.StatusUnprocessableEntity, err)
 							return
@@ -220,7 +250,6 @@ func (r *router) GetEngine() *gin.Engine {
 
 						res, err := r.handlers.GetTransactionGroups(context, &apiPb.GetTransactionGroupRequest{
 							ApplicationId: applicationId,
-							Pagination:    pagination,
 							TimeRange:     timeRange,
 							GroupType:     rq.GroupType,
 							Type:          rq.TransactionType,
@@ -580,7 +609,7 @@ func GetStringValueFromString(str string) *wrappers.StringValue {
 	}
 }
 
-func GetFilters(paginationFilter *PaginationRequest, timeFilter *TimeFilterRequest, ) (*apiPb.Pagination, *apiPb.TimeFilter, error) {
+func GetFilters(paginationFilter *PaginationRequest, timeFilter *TimeFilterRequest) (*apiPb.Pagination, *apiPb.TimeFilter, error) {
 	var pagination *apiPb.Pagination
 	if paginationFilter == nil {
 		pagination = nil

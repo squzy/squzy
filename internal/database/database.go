@@ -6,7 +6,7 @@ import (
 )
 
 type Database interface {
-	InsertSnapshot(data *apiPb.SchedulerResponse) error                                                                        //TODO: fix
+	InsertSnapshot(data *apiPb.SchedulerResponse) error                                                    //TODO: fix
 	GetSnapshots(request *apiPb.GetSchedulerInformationRequest) ([]*apiPb.SchedulerSnapshot, int32, error) //TODO: fix
 	GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) (float64, float64, error)
 	InsertStatRequest(data *apiPb.Metric) error
