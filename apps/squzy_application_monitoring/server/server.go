@@ -127,6 +127,7 @@ func (s *server) SaveTransaction(ctx context.Context, req *apiPb.TransactionInfo
 		return nil, err
 	}
 
+	// We not collect stats if not enabled
 	if app.Status != apiPb.ApplicationStatus_APPLICATION_STATUS_ENABLED {
 		return &empty.Empty{}, nil
 	}
