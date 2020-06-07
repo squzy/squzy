@@ -230,13 +230,13 @@ func (s *Suite) Test_GetSnapshotsUptime() {
 	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	query = fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
 	rows = sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	query = fmt.Sprintf(`SELECT "snapshots".* FROM "%s"`, dbSnapshotCollection)
@@ -277,7 +277,7 @@ func (s *Suite) Test_GetSnapshotsUptime_SecondCountError() {
 	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	_, _, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
@@ -295,19 +295,60 @@ func (s *Suite) Test_GetSnapshotsUptime_SelectError() {
 	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	query = fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
 	rows = sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	_, _, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
 		SchedulerId: id,
 	})
 	require.Error(s.T(), err)
+}
+
+func TestPostgres_GetSnapshotsUptime(t *testing.T) {
+	//Time for invalid timestamp
+	maxValidSeconds := 253402300800
+	t.Run("Should: return error", func(t *testing.T) {
+		_, _, err := postgrWrong.GetSnapshotsUptime(
+			&apiPb.GetSchedulerUptimeRequest{
+				SchedulerId: "",
+				TimeRange: &apiPb.TimeFilter{
+					From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+					To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+				},
+			})
+		assert.Error(t, err)
+	})
+}
+
+func Test_getUptimeAndLatency(t *testing.T) {
+	t.Run("Should: return 0 and no error", func(t *testing.T) {
+		var snapshots []*Snapshot
+		uptime, latency, err := getUptimeAndLatency(snapshots, 0, 0)
+		assert.Equal(t, float64(0), uptime)
+		assert.Equal(t, float64(0), latency)
+		assert.NoError(t, err)
+	})
+	t.Run("Should: return not 0 and no error", func(t *testing.T) {
+		snapshots := []*Snapshot{
+			{
+				Code:        "OK",
+				Meta:        &MetaData{
+					StartTime:  time.Now(),
+					EndTime:    time.Now(),
+				},
+			},
+		}
+		uptime, latency, err := getUptimeAndLatency(snapshots, 1, 1)
+		assert.Equal(t, float64(1), uptime)
+		assert.Equal(t, float64(0), latency)
+		assert.NoError(t, err)
+	})
 }
 
 func TestPostgres_InsertStatRequest(t *testing.T) {

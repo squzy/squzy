@@ -215,7 +215,7 @@ func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) 
 		return -1, -1, err
 	}
 
-	var countAll int
+	var countAll int64
 	err = p.db.Table(dbSnapshotCollection).
 		Joins(fmt.Sprintf(`JOIN "%s" ON "%s"."snapshotId" = "%s"."id"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
@@ -223,10 +223,6 @@ func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) 
 		Count(&countAll).Error
 	if err != nil {
 		return -1, -1, err
-	}
-	
-	if countAll == 0 {
-		return 0, 0, nil
 	}
 
 	var countOk int64
@@ -238,10 +234,6 @@ func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) 
 		Count(&countOk).Error
 	if err != nil {
 		return -1, -1, err
-	}
-	
-	if countAll == 0 {
-		return 0, 0, nil
 	}
 
 	var dbSnapshots []*Snapshot
@@ -257,15 +249,7 @@ func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) 
 		return -1, -1, errorDataBase
 	}
 
-	latency := int64(0)
-	for _, snapshot := range dbSnapshots {
-		//Recieveing time difference in mellisecinds
-		if snapshot.Meta != nil {
-			latency += (snapshot.Meta.EndTime.UnixNano() - snapshot.Meta.StartTime.UnixNano()) / int64(time.Millisecond)
-		}
-	}
-	
-	return float64(countOk) / float64(countAll), float64(latency) / float64(countOk), nil
+	return getUptimeAndLatency(dbSnapshots, countAll, countOk)
 }
 
 func getOrder(request *apiPb.SortingSchedulerList) string {
@@ -297,6 +281,20 @@ func getDirection(request *apiPb.SortingSchedulerList) string {
 		return res
 	}
 	return ``
+}
+
+func getUptimeAndLatency(dbSnapshots []*Snapshot, countAll, countOk int64) (float64, float64, error) {
+	if countAll == 0 || countOk == 0 {
+		return 0, 0, nil
+	}
+	latency := int64(0)
+	for _, snapshot := range dbSnapshots {
+		//Recieveing time difference in mellisecinds
+		if snapshot.Meta != nil {
+			latency += (snapshot.Meta.EndTime.UnixNano() - snapshot.Meta.StartTime.UnixNano()) / int64(time.Millisecond)
+		}
+	}
+	return float64(countOk) / float64(countAll), float64(latency) / float64(countOk), nil
 }
 
 func (p *postgres) InsertStatRequest(data *apiPb.Metric) error {
