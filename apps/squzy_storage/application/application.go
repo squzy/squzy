@@ -14,22 +14,6 @@ type service struct {
 	database database.Database
 }
 
-func (s *service) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {
-	panic("implement me")
-}
-
-func (s *service) GetTransactionsGroup(ctx context.Context, request *apiPb.GetTransactionGroupRequest) (*apiPb.GetTransactionGroupResponse, error) {
-	panic("implement me")
-}
-
-func (s *service) GetTransactions(ctx context.Context, request *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error) {
-	panic("implement me")
-}
-
-func (s *service) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.GetTransactionByIdResponse, error) {
-	panic("implement me")
-}
-
 func NewService(db database.Database) apiPb.StorageServer {
 	return &service{
 		database: db,
@@ -92,9 +76,37 @@ func (s *service) GetAgentInformation(ctx context.Context, request *apiPb.GetAge
 	}, wrapError(err)
 }
 
+func (s *service) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {
+	return &empty.Empty{}, wrapError(s.database.InsertTransactionInfo(info))
+}
+
+func (s *service) GetTransactions(ctx context.Context, request *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error) {
+	transactions, count, err := s.database.GetTransactionInfo(request)
+	return &apiPb.GetTransactionsResponse{
+		Count:        count,
+		Transactions: transactions,
+	}, wrapError(err)
+}
+
+func (s *service) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.GetTransactionByIdResponse, error) {
+	transaction, children, err := s.database.GetTransactionByID(request)
+	return &apiPb.GetTransactionByIdResponse{
+		Transaction: transaction,
+		Children:    children,
+	}, wrapError(err)
+}
+
+func (s *service) GetTransactionsGroup(ctx context.Context, request *apiPb.GetTransactionGroupRequest) (*apiPb.GetTransactionGroupResponse, error) {
+	res, err := s.database.GetTransactionGroup(request)
+	return &apiPb.GetTransactionGroupResponse{
+		Transactions:         res,
+	}, wrapError(err)
+}
+
 func wrapError(err error) error {
 	if err != nil {
 		return grpcStatus.Errorf(codes.Internal, err.Error())
 	}
 	return nil
 }
+

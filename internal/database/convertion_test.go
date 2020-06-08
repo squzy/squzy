@@ -205,3 +205,48 @@ func TestConvertFromPostgressStatRequest(t *testing.T) {
 		assert.NoError(t, err)
 	})
 }
+
+func TestConvertToTransactionInfo(t *testing.T) {
+	t.Run("Test: error", func(t *testing.T) {
+		_, err := convertToTransactionInfo(&apiPb.TransactionInfo{
+			StartTime: nil,
+		})
+		assert.Error(t, err)
+	})
+	t.Run("Test: error", func(t *testing.T) {
+		_, err := convertToTransactionInfo(&apiPb.TransactionInfo{
+			StartTime: ptypes.TimestampNow(),
+			EndTime:   nil,
+		})
+		assert.Error(t, err)
+	})
+}
+
+func TestConvertFromTransactionInfo(t *testing.T) {
+	t.Run("Test: error", func(t *testing.T) {
+		res := convertFromTransaction(&TransactionInfo{
+			StartTime: time.Unix(-62135596888, -100000000), //Protobuf validate this seconds aas error
+		})
+		assert.Nil(t, res)
+	})
+	t.Run("Test: error", func(t *testing.T) {
+		res := convertFromTransaction(&TransactionInfo{
+			StartTime: time.Now(),
+			EndTime:   time.Unix(-62135596888, -100000000), //Protobuf validate this seconds aas error
+		})
+		assert.Nil(t, res)
+	})
+}
+
+func TestConvertFromGroupResult(t *testing.T) {
+	t.Run("Test: error", func(t *testing.T) {
+		res := convertFromGroupResult([]*GroupResult{
+			{
+				GroupName:    "Name",
+				GroupCount:   0,
+				GroupLatency: time.Now(),
+			},
+		})
+		assert.NotNil(t, res)
+	})
+}
