@@ -19,10 +19,18 @@ type mockStorage struct {
 type dbMockFindError struct {
 }
 
+func (d dbMockFindError) FindApplicationByAgentId(ctx context.Context, agentId primitive.ObjectID) ([]*database.Application, error) {
+	return nil, errors.New("")
+}
+
 type dbMockOkEnabled struct {
 }
 
-func (d dbMockOkEnabled) FindOrCreate(ctx context.Context, name string, host string) (*database.Application, error) {
+func (d dbMockOkEnabled) FindApplicationByAgentId(ctx context.Context, agentId primitive.ObjectID) ([]*database.Application, error) {
+	panic("implement me")
+}
+
+func (d dbMockOkEnabled) FindOrCreate(ctx context.Context, name string, host string, agentId string) (*database.Application, error) {
 	panic("implement me")
 }
 
@@ -44,7 +52,7 @@ func (d dbMockOkEnabled) SetStatus(ctx context.Context, id primitive.ObjectID, s
 	panic("implement me")
 }
 
-func (d dbMockFindError) FindOrCreate(ctx context.Context, name string, host string) (*database.Application, error) {
+func (d dbMockFindError) FindOrCreate(ctx context.Context, name string, host string, agentId string) (*database.Application, error) {
 	panic("implement me")
 }
 
@@ -134,11 +142,15 @@ func (m mockCfg) GetStorageHost() string {
 type dbMockError struct {
 }
 
+func (d dbMockError) FindApplicationByAgentId(ctx context.Context, agentId primitive.ObjectID) ([]*database.Application, error) {
+	return nil, errors.New("")
+}
+
 func (d dbMockError) SetStatus(ctx context.Context, id primitive.ObjectID, status apiPb.ApplicationStatus) error {
 	return errors.New("")
 }
 
-func (d dbMockError) FindOrCreate(ctx context.Context, name string, host string) (*database.Application, error) {
+func (d dbMockError) FindOrCreate(ctx context.Context, name string, host string, agentId string) (*database.Application, error) {
 	return nil, errors.New("as")
 }
 
@@ -157,11 +169,19 @@ func (d dbMockError) FindAllApplication(ctx context.Context) ([]*database.Applic
 type dbMockOk struct {
 }
 
+func (d dbMockOk) FindApplicationByAgentId(ctx context.Context, agentId primitive.ObjectID) ([]*database.Application, error) {
+	return []*database.Application{
+		{
+
+		},
+	}, nil
+}
+
 func (d dbMockOk) SetStatus(ctx context.Context, id primitive.ObjectID, status apiPb.ApplicationStatus) error {
 	return nil
 }
 
-func (d dbMockOk) FindOrCreate(ctx context.Context, name string, host string) (*database.Application, error) {
+func (d dbMockOk) FindOrCreate(ctx context.Context, name string, host string, agentId string) (*database.Application, error) {
 	return &database.Application{}, nil
 }
 
@@ -393,6 +413,30 @@ func TestServer_DisableApplicationById(t *testing.T) {
 		s := New(&dbMockFindError{}, nil, nil)
 		_, err := s.DisableApplicationById(context.Background(), &apiPb.ApplicationByIdReuqest{
 			ApplicationId: primitive.NewObjectID().Hex(),
+		})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestServer_GetApplicationListByAgentId(t *testing.T) {
+	t.Run("Should: return application without error", func(t *testing.T) {
+		s := New(&dbMockOk{}, nil, nil)
+		_, err := s.GetApplicationListByAgentId(context.Background(), &apiPb.AgentIdRequest{
+			AgentId: primitive.NewObjectID().Hex(),
+		})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error because objectId", func(t *testing.T) {
+		s := New(&dbMockOk{}, nil, nil)
+		_, err := s.GetApplicationListByAgentId(context.Background(), &apiPb.AgentIdRequest{
+			AgentId: "primitive.NewObjectID().Hex()",
+		})
+		assert.NotNil(t, err)
+	})
+	t.Run("Should: return error database", func(t *testing.T) {
+		s := New(&dbMockError{}, nil, nil)
+		_, err := s.GetApplicationListByAgentId(context.Background(), &apiPb.AgentIdRequest{
+			AgentId: primitive.NewObjectID().Hex(),
 		})
 		assert.NotNil(t, err)
 	})

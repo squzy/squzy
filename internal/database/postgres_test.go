@@ -694,7 +694,6 @@ func (s *Suite) Test_GetNetInfo() {
 	require.NoError(s.T(), err)
 }
 
-
 func (s *Suite) Test_InsertTransactionInfo() {
 	s.mock.ExpectBegin()
 	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, dbTransactionInfoCollection)).

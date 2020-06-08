@@ -365,30 +365,30 @@ func convertFromTransaction(data *TransactionInfo) (*apiPb.TransactionInfo, erro
 		return nil, err
 	}
 	transactionMeta := &apiPb.TransactionInfo_Meta{
-		Host:                 data.MetaHost,
-		Path:                 data.MetaPath,
-		Method:               data.MetaMethod,
+		Host:   data.MetaHost,
+		Path:   data.MetaPath,
+		Method: data.MetaMethod,
 	}
 	if data.MetaPath == "" && data.MetaHost == "" && data.MetaMethod == "" {
 		transactionMeta = nil
 	}
 	transactionError := &apiPb.TransactionInfo_Error{
-		Message:              data.Error,
+		Message: data.Error,
 	}
 	if data.Error == "" {
 		transactionError = nil
 	}
 	return &apiPb.TransactionInfo{
-		Id:                   data.TransactionId,
-		ApplicationId:        data.ApplicationId,
-		ParentId:             data.ParentId,
-		Meta:                 transactionMeta,
-		Name:                 data.Name,
-		StartTime:            startTime,
-		EndTime:              endTime,
-		Status:               apiPb.TransactionStatus(apiPb.TransactionStatus_value[data.TransactionStatus]),
-		Type:                 apiPb.TransactionType(apiPb.TransactionType_value[data.TransactionType]),
-		Error:                transactionError,
+		Id:            data.TransactionId,
+		ApplicationId: data.ApplicationId,
+		ParentId:      data.ParentId,
+		Meta:          transactionMeta,
+		Name:          data.Name,
+		StartTime:     startTime,
+		EndTime:       endTime,
+		Status:        apiPb.TransactionStatus(apiPb.TransactionStatus_value[data.TransactionStatus]),
+		Type:          apiPb.TransactionType(apiPb.TransactionType_value[data.TransactionType]),
+		Error:         transactionError,
 	}, nil
 }
 

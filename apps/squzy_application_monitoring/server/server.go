@@ -17,6 +17,28 @@ type server struct {
 	storage apiPb.StorageClient
 }
 
+func (s *server) GetApplicationListByAgentId(ctx context.Context, request *apiPb.AgentIdRequest) (*apiPb.GetApplicationListResponse, error) {
+	agentId, err := primitive.ObjectIDFromHex(request.AgentId)
+	if err != nil {
+		return nil, err
+	}
+
+	list, err := s.db.FindApplicationByAgentId(ctx, agentId)
+	if err != nil {
+		return nil, err
+	}
+
+	appList := []*apiPb.Application{}
+
+	for _, v := range list {
+		appList = append(appList, transformDbApplication(v))
+	}
+
+	return &apiPb.GetApplicationListResponse{
+		Applications: appList,
+	}, nil
+}
+
 func (s *server) updateStatus(ctx context.Context, applicationId primitive.ObjectID, status apiPb.ApplicationStatus) (*apiPb.Application, error) {
 	err := s.db.SetStatus(ctx, applicationId, status)
 
@@ -106,7 +128,7 @@ func (s *server) InitializeApplication(ctx context.Context, req *apiPb.Applicati
 		return nil, errMissingName
 	}
 
-	application, err := s.db.FindOrCreate(ctx, req.Name, req.HostName)
+	application, err := s.db.FindOrCreate(ctx, req.Name, req.HostName, req.AgentId)
 	if err != nil {
 		return nil, err
 	}
@@ -132,11 +154,9 @@ func (s *server) SaveTransaction(ctx context.Context, req *apiPb.TransactionInfo
 		return &empty.Empty{}, nil
 	}
 
-	go func() {
-		reqCtx, cancel := helpers.TimeoutContext(context.Background(), s.config.GetStorageTimeout())
-		defer cancel()
-		_, _ = s.storage.SaveTransaction(reqCtx, req)
-	}()
+	reqCtx, cancel := helpers.TimeoutContext(context.Background(), s.config.GetStorageTimeout())
+	defer cancel()
+	_, _ = s.storage.SaveTransaction(reqCtx, req)
 
 	return &empty.Empty{}, nil
 }

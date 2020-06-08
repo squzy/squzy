@@ -81,7 +81,8 @@ func TestExecGrpc(t *testing.T) {
 			grpcServer := grpc.NewServer()
 			health_check.RegisterHealthServer(grpcServer, &server{})
 			go func() {
-				_ = grpcServer.Serve(lis)
+				err := grpcServer.Serve(lis)
+				assert.Nil(t, err)
 			}()
 			job := ExecGrpc("data", 1, &scheduler_config_storage.GrpcConfig{
 				Service: "",

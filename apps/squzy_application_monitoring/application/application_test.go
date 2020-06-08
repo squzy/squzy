@@ -13,6 +13,10 @@ import (
 type mock struct {
 }
 
+func (m mock) GetApplicationListByAgentId(ctx context.Context, request *apiPb.AgentIdRequest) (*apiPb.GetApplicationListResponse, error) {
+	panic("implement me")
+}
+
 func (m mock) ArchiveApplicationById(ctx context.Context, reuqest *apiPb.ApplicationByIdReuqest) (*apiPb.Application, error) {
 	panic("implement me")
 }
