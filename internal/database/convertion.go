@@ -381,16 +381,16 @@ func convertFromTransaction(data *TransactionInfo) *apiPb.TransactionInfo {
 	}
 	return &apiPb.TransactionInfo{
 
-		Id:                   data.TransactionId,
-		ApplicationId:        data.ApplicationId,
-		ParentId:             data.ParentId,
-		Meta:                 transactionMeta,
-		Name:                 data.Name,
-		StartTime:            startTime,
-		EndTime:              endTime,
-		Status:               apiPb.TransactionStatus(apiPb.TransactionStatus_value[data.TransactionStatus]),
-		Type:                 apiPb.TransactionType(apiPb.TransactionType_value[data.TransactionType]),
-		Error:                transactionError,
+		Id:            data.TransactionId,
+		ApplicationId: data.ApplicationId,
+		ParentId:      data.ParentId,
+		Meta:          transactionMeta,
+		Name:          data.Name,
+		StartTime:     startTime,
+		EndTime:       endTime,
+		Status:        apiPb.TransactionStatus(apiPb.TransactionStatus_value[data.TransactionStatus]),
+		Type:          apiPb.TransactionType(apiPb.TransactionType_value[data.TransactionType]),
+		Error:         transactionError,
 	}
 }
 
@@ -407,10 +407,10 @@ func convertFromTransactions(data []*TransactionInfo) []*apiPb.TransactionInfo {
 
 func convertFromGroupResult(group []*GroupResult) map[string]*apiPb.TransactionGroup {
 	res := map[string]*apiPb.TransactionGroup{}
-	for _, v := range group{
+	for _, v := range group {
 		res[v.GroupName] = &apiPb.TransactionGroup{
-			Count:                v.GroupCount,
-			AverageTime:          float64(v.GroupLatency.UnixNano() / int64(time.Millisecond)),
+			Count:       v.GroupCount,
+			AverageTime: float64(v.GroupLatency.UnixNano() / int64(time.Millisecond)),
 		}
 	}
 	return res

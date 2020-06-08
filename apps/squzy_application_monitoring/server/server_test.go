@@ -171,9 +171,7 @@ type dbMockOk struct {
 
 func (d dbMockOk) FindApplicationByAgentId(ctx context.Context, agentId primitive.ObjectID) ([]*database.Application, error) {
 	return []*database.Application{
-		{
-
-		},
+		{},
 	}, nil
 }
 

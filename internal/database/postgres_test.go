@@ -751,7 +751,7 @@ func (s *Suite) Test_GetTransactionInfo() {
 	_, _, err := postgr.GetTransactionInfo(
 		&apiPb.GetTransactionsRequest{
 			ApplicationId: id,
-			Host:          &wrappers.StringValue{Value: "q",},
+			Host:          &wrappers.StringValue{Value: "q"},
 			Sort: &apiPb.SortingTransactionList{
 				SortBy:    0,
 				Direction: 0,
@@ -771,7 +771,7 @@ func (s *Suite) Test_GetTransactionInfo_CountError() {
 			ApplicationId: id,
 			Type:          1,
 			Status:        1,
-			Host:          &wrappers.StringValue{Value: "q",},
+			Host:          &wrappers.StringValue{Value: "q"},
 		})
 	require.Error(s.T(), err)
 }
@@ -793,7 +793,7 @@ func (s *Suite) Test_GetTransactionInfo_SelectError() {
 			ApplicationId: id,
 			Type:          1,
 			Status:        1,
-			Host:          &wrappers.StringValue{Value: "q",},
+			Host:          &wrappers.StringValue{Value: "q"},
 		})
 	require.Error(s.T(), err)
 }
@@ -934,8 +934,8 @@ func (s *Suite) Test_GetTransactionGroup() {
 		WillReturnRows(rows)
 
 	_, err := postgr.GetTransactionGroup(&apiPb.GetTransactionGroupRequest{
-		ApplicationId:        "1",
-		GroupType:            2,
+		ApplicationId: "1",
+		GroupType:     2,
 	})
 	require.NoError(s.T(), err)
 }
@@ -943,12 +943,11 @@ func (s *Suite) Test_GetTransactionGroup() {
 //Based on fact, that if request is not mocked, it will return error
 func (s *Suite) Test_GetTransactionGroup_Error() {
 	_, err := postgr.GetTransactionGroup(&apiPb.GetTransactionGroupRequest{
-		ApplicationId:        "1",
-		GroupType:            -2,
+		ApplicationId: "1",
+		GroupType:     -2,
 	})
 	require.Error(s.T(), err)
 }
-
 
 func TestPostgres_GetTransactionGroup(t *testing.T) {
 	//Time for invalid timestamp
