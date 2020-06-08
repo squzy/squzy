@@ -53,7 +53,7 @@ func (d *db) SetStatus(ctx context.Context, id primitive.ObjectID, status apiPb.
 	}
 
 	_, err = d.connector.UpdateOne(ctx, bson.M{
-		"$eq":    id,
+		"_id": id,
 		"status": app.Status,
 	}, bson.M{
 		"$set": bson.M{
