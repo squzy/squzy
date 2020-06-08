@@ -7,6 +7,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	_struct "github.com/golang/protobuf/ptypes/struct"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"time"
 )
 
 func ConvertToPostgresSnapshot(request *apiPb.SchedulerResponse) (*Snapshot, error) {
@@ -355,14 +356,14 @@ func convertToTransactionInfo(data *apiPb.TransactionInfo) (*TransactionInfo, er
 	}, nil
 }
 
-func convertFromTransaction(data *TransactionInfo) (*apiPb.TransactionInfo, error) {
+func convertFromTransaction(data *TransactionInfo) *apiPb.TransactionInfo {
 	startTime, err := ptypes.TimestampProto(data.StartTime)
 	if err != nil {
-		return nil, err
+		return nil //TODO: log
 	}
 	endTime, err := ptypes.TimestampProto(data.EndTime)
 	if err != nil {
-		return nil, err
+		return nil //TODO: log
 	}
 	transactionMeta := &apiPb.TransactionInfo_Meta{
 		Host:   data.MetaHost,
@@ -379,27 +380,38 @@ func convertFromTransaction(data *TransactionInfo) (*apiPb.TransactionInfo, erro
 		transactionError = nil
 	}
 	return &apiPb.TransactionInfo{
-		Id:            data.TransactionId,
-		ApplicationId: data.ApplicationId,
-		ParentId:      data.ParentId,
-		Meta:          transactionMeta,
-		Name:          data.Name,
-		StartTime:     startTime,
-		EndTime:       endTime,
-		Status:        apiPb.TransactionStatus(apiPb.TransactionStatus_value[data.TransactionStatus]),
-		Type:          apiPb.TransactionType(apiPb.TransactionType_value[data.TransactionType]),
-		Error:         transactionError,
-	}, nil
+
+		Id:                   data.TransactionId,
+		ApplicationId:        data.ApplicationId,
+		ParentId:             data.ParentId,
+		Meta:                 transactionMeta,
+		Name:                 data.Name,
+		StartTime:            startTime,
+		EndTime:              endTime,
+		Status:               apiPb.TransactionStatus(apiPb.TransactionStatus_value[data.TransactionStatus]),
+		Type:                 apiPb.TransactionType(apiPb.TransactionType_value[data.TransactionType]),
+		Error:                transactionError,
+	}
 }
 
 func convertFromTransactions(data []*TransactionInfo) []*apiPb.TransactionInfo {
 	var res []*apiPb.TransactionInfo
 	for _, request := range data {
-		stat, err := convertFromTransaction(request)
-		if err == nil {
+		stat := convertFromTransaction(request)
+		if stat != nil {
 			res = append(res, stat)
 		}
-		//TODO: log if error
+	}
+	return res
+}
+
+func convertFromGroupResult(group []*GroupResult) map[string]*apiPb.TransactionGroup {
+	res := map[string]*apiPb.TransactionGroup{}
+	for _, v := range group{
+		res[v.GroupName] = &apiPb.TransactionGroup{
+			Count:                v.GroupCount,
+			AverageTime:          float64(v.GroupLatency.UnixNano() / int64(time.Millisecond)),
+		}
 	}
 	return res
 }

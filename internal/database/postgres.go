@@ -8,6 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"strings"
 	"time"
 )
 
@@ -203,7 +204,7 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 			Joins(fmt.Sprintf(`JOIN "%s" ON "%s"."snapshotId" = "%s"."id"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
 			Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
-			Order(getOrder(request.GetSort()) + " " + getDirection(request.GetSort())).
+			Order(getSnapshotOrder(request.GetSort()) + " " + getSnapshotDirection(request.GetSort())).
 			Offset(offset).
 			Limit(limit).
 			Find(&dbSnapshots).Error
@@ -215,7 +216,7 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
 			Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
 			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus().String()).
-			Order(getOrder(request.GetSort()) + " " + getDirection(request.GetSort())).
+			Order(getSnapshotOrder(request.GetSort()) + getSnapshotDirection(request.GetSort())).
 			Offset(offset).
 			Limit(limit).
 			Find(&dbSnapshots).Error
@@ -271,7 +272,7 @@ func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) 
 	return getUptimeAndLatency(dbSnapshots, countAll, countOk)
 }
 
-func getOrder(request *apiPb.SortingSchedulerList) string {
+func getSnapshotOrder(request *apiPb.SortingSchedulerList) string {
 	if request == nil {
 		return fmt.Sprintf(`"%s"."startTime"`, dmMetaDataCollection)
 	}
@@ -287,14 +288,14 @@ func getOrder(request *apiPb.SortingSchedulerList) string {
 	return fmt.Sprintf(`"%s"."startTime"`, dmMetaDataCollection)
 }
 
-func getDirection(request *apiPb.SortingSchedulerList) string {
+func getSnapshotDirection(request *apiPb.SortingSchedulerList) string {
 	if request == nil {
 		return ``
 	}
 	directionMap := map[apiPb.SortDirection]string{
 		apiPb.SortDirection_SORT_DIRECTION_UNSPECIFIED: ``,
-		apiPb.SortDirection_ASC:                        `asc`,
-		apiPb.SortDirection_DESC:                       `desc`,
+		apiPb.SortDirection_ASC:                        ` asc`,
+		apiPb.SortDirection_DESC:                       ` desc`,
 	}
 	if res, ok := directionMap[request.GetDirection()]; ok {
 		return res
@@ -495,7 +496,7 @@ func (p *postgres) GetTransactionInfo(request *apiPb.GetTransactionsRequest) ([]
 		Where(getTransactionsByString("metaMethod", request.GetMethod())).
 		Where(getTransactionTypeWhere(request.GetType())).
 		Where(getTransactionStatusWhere(request.GetStatus())).
-		Order("startTime"). //TODO
+		Order(getTransactionOrder(request.GetSort()) + getTransactionDirection(request.GetSort())). //TODO
 		Offset(offset).
 		Limit(limit).
 		Find(&statRequests).
@@ -506,6 +507,123 @@ func (p *postgres) GetTransactionInfo(request *apiPb.GetTransactionsRequest) ([]
 	}
 
 	return convertFromTransactions(statRequests), count, nil
+}
+
+func (p *postgres) GetTransactionByID(request *apiPb.GetTransactionByIdRequest) (*apiPb.TransactionInfo, []*apiPb.TransactionInfo, error) {
+	var transaction TransactionInfo
+	err := p.db.Table(dbTransactionInfoCollection).
+		Where(fmt.Sprintf(`"%s"."transactionId" = ?`, dbTransactionInfoCollection), request.GetTransactionId()).
+		First(&transaction).
+		Error
+	if err != nil || &transaction == nil {
+		return nil, nil, errorDataBase
+	}
+
+	children, err := p.GetTransactionChildren(transaction.TransactionId, "")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return convertFromTransaction(&transaction), convertFromTransactions(children), nil
+}
+
+//passedString is used in order to prevent cycles
+func (p *postgres) GetTransactionChildren(transactionId, passedString string) ([]*TransactionInfo, error) {
+	if strings.Contains(passedString, transactionId) {
+		return nil, nil
+	}
+
+	var childrenTransactions []*TransactionInfo
+	err := p.db.Table(dbTransactionInfoCollection).
+		Where(fmt.Sprintf(`"%s"."parentId" = ?`, dbTransactionInfoCollection), transactionId).
+		Find(&childrenTransactions).
+		Error
+	if err != nil {
+		return nil, errorDataBase
+	}
+	for _, v := range childrenTransactions {
+		fmt.Println(v)
+	}
+
+	res := childrenTransactions
+	for _, v := range childrenTransactions {
+		subchildren, err := p.GetTransactionChildren(v.TransactionId, passedString+" "+v.ParentId)
+		if err != nil {
+			return nil, errorDataBase
+		}
+		for _, v := range subchildren {
+			res = append(res, v)
+		}
+	}
+
+	return res, nil
+}
+
+type GroupResult struct {
+	GroupName    string    `gorm:"column:groupName"`
+	GroupCount   int64     `gorm:"column:count"`
+	GroupLatency time.Time `gorm:"column:latency"`
+}
+
+func (p *postgres) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest) (map[string]*apiPb.TransactionGroup, error) {
+	timeFrom, timeTo, err := getTime(request.TimeRange)
+	if err != nil {
+		return nil, err
+	}
+
+	selectString := fmt.Sprintf(
+		`%s as "groupName", COUNT(%s) as "count", AVG("%s"."endTime"-"%s"."startTime") as "latency"`,
+		getTransactionsGroupBy(request.GetGroupType()),
+		getTransactionsGroupBy(request.GetGroupType()),
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+	)
+
+	//TODO: order
+	var groupResult []*GroupResult
+	err = p.db.Table(dbTransactionInfoCollection).
+		Select(selectString).
+		Where(fmt.Sprintf(`"%s"."applicationId" = ?`, dbTransactionInfoCollection), request.GetApplicationId()).
+		Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dbTransactionInfoCollection), timeFrom, timeTo).
+		Where(getTransactionTypeWhere(request.GetType())).
+		Where(getTransactionStatusWhere(request.GetStatus())).
+		Group(getTransactionsGroupBy(request.GetGroupType())).
+		Find(&groupResult).
+		Error
+	if err != nil {
+		return nil, errorDataBase
+	}
+
+	return convertFromGroupResult(groupResult), nil
+}
+
+func getTransactionOrder(request *apiPb.SortingTransactionList) string {
+	if request == nil {
+		return fmt.Sprintf(`"%s"."startTime"`, dbTransactionInfoCollection)
+	}
+	orderMap := map[apiPb.SortTransactionList]string{
+		apiPb.SortTransactionList_SORT_TRANSACTION_LIST_UNSPECIFIED: fmt.Sprintf(`"%s"."startTime"`, dbTransactionInfoCollection),
+		apiPb.SortTransactionList_DURATION:                          fmt.Sprintf(`"%s"."endTime" - "%s"."startTime"`, dbTransactionInfoCollection, dmMetaDataCollection),
+	}
+	if res, ok := orderMap[request.GetSortBy()]; ok {
+		return res
+	}
+	return fmt.Sprintf(`"%s"."startTime"`, dbTransactionInfoCollection)
+}
+
+func getTransactionDirection(request *apiPb.SortingTransactionList) string {
+	if request == nil {
+		return ``
+	}
+	directionMap := map[apiPb.SortDirection]string{
+		apiPb.SortDirection_SORT_DIRECTION_UNSPECIFIED: ``,
+		apiPb.SortDirection_ASC:                        ` asc`,
+		apiPb.SortDirection_DESC:                       ` desc`,
+	}
+	if res, ok := directionMap[request.GetDirection()]; ok {
+		return res
+	}
+	return ``
 }
 
 func getTransactionsByString(key string, value *wrappers.StringValue) string {
@@ -527,6 +645,24 @@ func getTransactionStatusWhere(transType apiPb.TransactionStatus) string {
 		return ""
 	}
 	return fmt.Sprintf(`"%s"."transactionType" = %s`, dbTransactionInfoCollection, transType.String())
+}
+
+var (
+	groupMap = map[apiPb.GroupTransaction]string{
+		apiPb.GroupTransaction_GROUP_TRANSACTION_UNSPECIFIED: "transactionType",
+		apiPb.GroupTransaction_BY_TYPE:                       "transactionType",
+		apiPb.GroupTransaction_BY_NAME:                       "name",
+		apiPb.GroupTransaction_BY_METHOD:                     "metaMethod",
+		apiPb.GroupTransaction_BY_HOST:                       "metaHost",
+		apiPb.GroupTransaction_BY_PATH:                       "metaPath",
+	}
+)
+
+func getTransactionsGroupBy(group apiPb.GroupTransaction) string {
+	if val, ok := groupMap[group]; ok {
+		return fmt.Sprintf(`"%s"."%s"`, dbTransactionInfoCollection, val)
+	}
+	return fmt.Sprintf(`"%s"."transactionType"`, dbTransactionInfoCollection)
 }
 
 func getTime(filter *apiPb.TimeFilter) (time.Time, time.Time, error) {
