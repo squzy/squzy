@@ -27,7 +27,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	db := database.New(postgresDb.LogMode(true))
+	db := database.New(postgresDb.LogMode(false))
 
 	err = db.Migrate()
 	if err != nil {
