@@ -149,6 +149,19 @@ func TestDb_FindAllApplication(t *testing.T) {
 	})
 }
 
+func TestDb_FindByAgentId(t *testing.T) {
+	t.Run("Should: return all application", func(t *testing.T) {
+		s := New(&mockOk{})
+		_, err := s.FindApplicationByAgentId(context.Background(), primitive.NewObjectID())
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(&mockError{})
+		_, err := s.FindApplicationByAgentId(context.Background(), primitive.NewObjectID())
+		assert.NotNil(t, err)
+	})
+}
+
 func TestDb_FindApplicationById(t *testing.T) {
 	t.Run("Should: return application", func(t *testing.T) {
 		s := New(&mockOk{})
@@ -178,22 +191,22 @@ func TestDb_FindApplicationByName(t *testing.T) {
 func TestDb_FindOrCreate(t *testing.T) {
 	t.Run("Should: return application immediately", func(t *testing.T) {
 		s := New(&mockOk{})
-		_, err := s.FindOrCreate(context.Background(), "", "")
+		_, err := s.FindOrCreate(context.Background(), "", "", "")
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error because internal error", func(t *testing.T) {
 		s := New(&mockError{})
-		_, err := s.FindOrCreate(context.Background(), "", "")
+		_, err := s.FindOrCreate(context.Background(), "", "", "")
 		assert.NotNil(t, err)
 	})
 	t.Run("Should: create new application", func(t *testing.T) {
 		s := New(&mockNotFoundOk{})
-		_, err := s.FindOrCreate(context.Background(), "", "")
+		_, err := s.FindOrCreate(context.Background(), "", "", "")
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error because internal error while creation", func(t *testing.T) {
 		s := New(&mockNotFoundError{})
-		_, err := s.FindOrCreate(context.Background(), "", "")
+		_, err := s.FindOrCreate(context.Background(), "", "", "")
 		assert.NotNil(t, err)
 	})
 }

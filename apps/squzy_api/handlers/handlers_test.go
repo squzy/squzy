@@ -13,6 +13,10 @@ import (
 type mockAmOk struct {
 }
 
+func (m mockAmOk) GetApplicationListByAgentId(ctx context.Context, in *apiPb.AgentIdRequest, opts ...grpc.CallOption) (*apiPb.GetApplicationListResponse, error) {
+	panic("implement me")
+}
+
 func (m mockAmOk) ArchiveApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {
 	return &apiPb.Application{}, nil
 }
@@ -42,6 +46,10 @@ func (m mockAmOk) GetApplicationList(ctx context.Context, in *empty.Empty, opts 
 }
 
 type mockAmError struct {
+}
+
+func (m mockAmError) GetApplicationListByAgentId(ctx context.Context, in *apiPb.AgentIdRequest, opts ...grpc.CallOption) (*apiPb.GetApplicationListResponse, error) {
+	panic("implement me")
 }
 
 func (m mockAmError) ArchiveApplicationById(ctx context.Context, in *apiPb.ApplicationByIdReuqest, opts ...grpc.CallOption) (*apiPb.Application, error) {

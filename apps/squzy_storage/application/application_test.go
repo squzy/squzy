@@ -63,7 +63,7 @@ func (*dbErrorMock) GetTransactionByID(request *apiPb.GetTransactionByIdRequest)
 	return nil, nil, errors.New("error")
 }
 
-func (*dbErrorMock)  GetTransactionGroup(request *apiPb.GetTransactionGroupRequest) (map[string]*apiPb.TransactionGroup, error) {
+func (*dbErrorMock) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest) (map[string]*apiPb.TransactionGroup, error) {
 	return nil, errors.New("error")
 }
 
@@ -122,7 +122,7 @@ func (*dbMock) GetTransactionByID(request *apiPb.GetTransactionByIdRequest) (*ap
 	return nil, nil, nil
 }
 
-func (*dbMock)  GetTransactionGroup(request *apiPb.GetTransactionGroupRequest) (map[string]*apiPb.TransactionGroup, error) {
+func (*dbMock) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest) (map[string]*apiPb.TransactionGroup, error) {
 	return nil, nil
 }
 

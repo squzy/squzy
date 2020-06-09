@@ -93,8 +93,9 @@ type Scheduler struct {
 }
 
 type Application struct {
-	Host string `json:"host"`
-	Name string `json:"name" binding:"required"`
+	Host    string `json:"host"`
+	Name    string `json:"name" binding:"required"`
+	AgentId string `json:"agentId"`
 }
 
 type Transaction struct {

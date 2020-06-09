@@ -99,7 +99,7 @@ func (s *service) GetTransactionById(ctx context.Context, request *apiPb.GetTran
 func (s *service) GetTransactionsGroup(ctx context.Context, request *apiPb.GetTransactionGroupRequest) (*apiPb.GetTransactionGroupResponse, error) {
 	res, err := s.database.GetTransactionGroup(request)
 	return &apiPb.GetTransactionGroupResponse{
-		Transactions:         res,
+		Transactions: res,
 	}, wrapError(err)
 }
 
@@ -109,4 +109,3 @@ func wrapError(err error) error {
 	}
 	return nil
 }
-
