@@ -31,22 +31,27 @@ func (c *cfg) GetPort() int32 {
 }
 
 func (c *cfg) GetDbHost() string {
+	return "localhost"
 	return c.dbHost
 }
 
 func (c *cfg) GetDbPort() string {
+	return "5432"
 	return c.dbPort
 }
 
 func (c *cfg) GetDbName() string {
+	return "database"
 	return c.dbName
 }
 
 func (c *cfg) GetDbUser() string {
+	return "user"
 	return c.dbUser
 }
 
 func (c *cfg) GetDbPassword() string {
+	return "password"
 	return c.dbPassword
 }
 

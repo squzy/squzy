@@ -222,29 +222,13 @@ func TestConvertToTransactionInfo(t *testing.T) {
 	})
 }
 
-func TestConvertFromTransactionInfo(t *testing.T) {
-	t.Run("Test: error", func(t *testing.T) {
-		res := convertFromTransaction(&TransactionInfo{
-			StartTime: time.Unix(-62135596888, -100000000), //Protobuf validate this seconds aas error
-		})
-		assert.Nil(t, res)
-	})
-	t.Run("Test: error", func(t *testing.T) {
-		res := convertFromTransaction(&TransactionInfo{
-			StartTime: time.Now(),
-			EndTime:   time.Unix(-62135596888, -100000000), //Protobuf validate this seconds aas error
-		})
-		assert.Nil(t, res)
-	})
-}
-
 func TestConvertFromGroupResult(t *testing.T) {
 	t.Run("Test: error", func(t *testing.T) {
 		res := convertFromGroupResult([]*GroupResult{
 			{
 				GroupName:    "Name",
 				GroupCount:   0,
-				GroupLatency: time.Now(),
+				GroupLatency: string(time.Now().UnixNano()),
 			},
 		})
 		assert.NotNil(t, res)

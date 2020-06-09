@@ -110,18 +110,18 @@ type NetInfo struct {
 
 type TransactionInfo struct {
 	gorm.Model
-	TransactionId     string    `gorm:"column:transactionId"`
-	ApplicationId     string    `gorm:"column:applicationId"`
-	ParentId          string    `gorm:"column:parentId"`
-	MetaHost          string    `gorm:"column:metaHost"`
-	MetaPath          string    `gorm:"column:metaPath"`
-	MetaMethod        string    `gorm:"column:metaMethod"`
-	Name              string    `gorm:"column:name"`
-	StartTime         time.Time `gorm:"column:startTime"`
-	EndTime           time.Time `gorm:"column:endTime"`
-	TransactionStatus string    `gorm:"column:transactionStatus"`
-	TransactionType   string    `gorm:"column:transactionType"`
-	Error             string    `gorm:"column:error"`
+	TransactionId     string `gorm:"column:transactionId"`
+	ApplicationId     string `gorm:"column:applicationId"`
+	ParentId          string `gorm:"column:parentId"`
+	MetaHost          string `gorm:"column:metaHost"`
+	MetaPath          string `gorm:"column:metaPath"`
+	MetaMethod        string `gorm:"column:metaMethod"`
+	Name              string `gorm:"column:name"`
+	StartTime         int64  `gorm:"column:startTime"`
+	EndTime           int64  `gorm:"column:endTime"`
+	TransactionStatus string `gorm:"column:transactionStatus"`
+	TransactionType   string `gorm:"column:transactionType"`
+	Error             string `gorm:"column:error"`
 }
 
 const (
@@ -463,7 +463,7 @@ func (p *postgres) InsertTransactionInfo(data *apiPb.TransactionInfo) error {
 }
 
 func (p *postgres) GetTransactionInfo(request *apiPb.GetTransactionsRequest) ([]*apiPb.TransactionInfo, int64, error) {
-	timeFrom, timeTo, err := getTime(request.TimeRange)
+	timeFrom, timeTo, err := getTimeInt64(request.TimeRange)
 	if err != nil {
 		return nil, -1, err
 	}
@@ -541,9 +541,6 @@ func (p *postgres) GetTransactionChildren(transactionId, passedString string) ([
 	if err != nil {
 		return nil, errorDataBase
 	}
-	for _, v := range childrenTransactions {
-		fmt.Println(v)
-	}
 
 	res := childrenTransactions
 	for _, v := range childrenTransactions {
@@ -560,19 +557,20 @@ func (p *postgres) GetTransactionChildren(transactionId, passedString string) ([
 }
 
 type GroupResult struct {
-	GroupName    string    `gorm:"column:groupName"`
-	GroupCount   int64     `gorm:"column:count"`
-	GroupLatency time.Time `gorm:"column:latency"`
+	GroupName    string `gorm:"column:groupName"`
+	GroupCount   int64  `gorm:"column:count"`
+	GroupLatency string  `gorm:"column:latency"`
 }
 
 func (p *postgres) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest) (map[string]*apiPb.TransactionGroup, error) {
-	timeFrom, timeTo, err := getTime(request.TimeRange)
+	timeFrom, timeTo, err := getTimeInt64(request.TimeRange)
 	if err != nil {
 		return nil, err
 	}
 
 	selectString := fmt.Sprintf(
 		`%s as "groupName", COUNT(%s) as "count", AVG("%s"."endTime"-"%s"."startTime") as "latency"`,
+		//`%s as "groupName", COUNT(%s) as "count", AVG("%s"."startTime") as "latency"`,
 		getTransactionsGroupBy(request.GetGroupType()),
 		getTransactionsGroupBy(request.GetGroupType()),
 		dbTransactionInfoCollection,
@@ -630,21 +628,21 @@ func getTransactionsByString(key string, value *wrappers.StringValue) string {
 	if value == nil {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."%s" = %s`, dbTransactionInfoCollection, key, value.GetValue())
+	return fmt.Sprintf(`"%s"."%s" = '%s'`, dbTransactionInfoCollection, key, value.GetValue())
 }
 
 func getTransactionTypeWhere(transType apiPb.TransactionType) string {
 	if transType == apiPb.TransactionType_TRANSACTION_TYPE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."transactionType" = %s`, dbTransactionInfoCollection, transType.String())
+	return fmt.Sprintf(`"%s"."transactionType" = '%s'`, dbTransactionInfoCollection, transType.String())
 }
 
 func getTransactionStatusWhere(transType apiPb.TransactionStatus) string {
 	if transType == apiPb.TransactionStatus_TRANSACTION_CODE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."transactionType" = %s`, dbTransactionInfoCollection, transType.String())
+	return fmt.Sprintf(`"%s"."transactionStatus" = '%s'`, dbTransactionInfoCollection, transType.String())
 }
 
 var (
@@ -678,6 +676,25 @@ func getTime(filter *apiPb.TimeFilter) (time.Time, time.Time, error) {
 		}
 	}
 	return timeFrom, timeTo, err
+}
+
+//Return time unixNanos
+func getTimeInt64(filter *apiPb.TimeFilter) (int64, int64, error) {
+	timeFrom := time.Unix(0, 0)
+	timeTo := time.Now()
+	var err error
+	if filter != nil {
+		if filter.GetFrom() != nil {
+			timeFrom, err = ptypes.Timestamp(filter.From)
+		}
+		if filter.GetTo() != nil {
+			timeTo, err = ptypes.Timestamp(filter.To)
+		}
+	}
+	if err != nil {
+		return 0, 0, err
+	}
+	return timeFrom.UnixNano(), timeTo.UnixNano(), nil
 }
 
 //Return offset and limit

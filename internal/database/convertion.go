@@ -7,6 +7,8 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	_struct "github.com/golang/protobuf/ptypes/struct"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -348,8 +350,8 @@ func convertToTransactionInfo(data *apiPb.TransactionInfo) (*TransactionInfo, er
 		MetaPath:          data.GetMeta().GetPath(),
 		MetaMethod:        data.GetMeta().GetMethod(),
 		Name:              data.GetName(),
-		StartTime:         startTime,
-		EndTime:           endTime,
+		StartTime:         startTime.UnixNano(),
+		EndTime:           endTime.UnixNano(),
 		TransactionStatus: data.GetStatus().String(),
 		TransactionType:   data.GetType().String(),
 		Error:             data.GetError().GetMessage(),
@@ -357,14 +359,10 @@ func convertToTransactionInfo(data *apiPb.TransactionInfo) (*TransactionInfo, er
 }
 
 func convertFromTransaction(data *TransactionInfo) *apiPb.TransactionInfo {
-	startTime, err := ptypes.TimestampProto(data.StartTime)
-	if err != nil {
-		return nil //TODO: log
-	}
-	endTime, err := ptypes.TimestampProto(data.EndTime)
-	if err != nil {
-		return nil //TODO: log
-	}
+	//Skip error, because this convertion is always correct (data.StartTime < maximum possible value)
+	startTime, _ := ptypes.TimestampProto(time.Unix(0, data.StartTime))
+	endTime, _ := ptypes.TimestampProto(time.Unix(0, data.EndTime))
+
 	transactionMeta := &apiPb.TransactionInfo_Meta{
 		Host:                 data.MetaHost,
 		Path:                 data.MetaPath,
@@ -407,9 +405,13 @@ func convertFromTransactions(data []*TransactionInfo) []*apiPb.TransactionInfo {
 func convertFromGroupResult(group []*GroupResult) map[string]*apiPb.TransactionGroup {
 	res := map[string]*apiPb.TransactionGroup{}
 	for _, v := range group{
+		latency, err := strconv.ParseFloat(strings.Split(v.GroupLatency, ".")[0], 64)
+		if err != nil {
+			//TODO: log?
+		}
 		res[v.GroupName] = &apiPb.TransactionGroup{
 			Count:                v.GroupCount,
-			AverageTime:          float64(v.GroupLatency.UnixNano() / int64(time.Millisecond)),
+			AverageTime:          latency/1000000, //div 1000 in order to get milliseconds
 		}
 	}
 	return res
