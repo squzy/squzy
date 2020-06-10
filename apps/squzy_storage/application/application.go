@@ -45,11 +45,8 @@ func (s *service) GetSchedulerInformation(ctx context.Context, request *apiPb.Ge
 }
 
 func (s *service) GetSchedulerUptime(ctx context.Context, request *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
-	uptime, latency, err := s.database.GetSnapshotsUptime(request)
-	return &apiPb.GetSchedulerUptimeResponse{
-		Uptime:  uptime,
-		Latency: latency,
-	}, wrapError(err)
+	response, err := s.database.GetSnapshotsUptime(request)
+	return response, wrapError(err)
 }
 
 func (s *service) GetAgentInformation(ctx context.Context, request *apiPb.GetAgentInformationRequest) (*apiPb.GetAgentInformationResponse, error) {

@@ -60,10 +60,7 @@ func TestPostgres_Migrate_error(t *testing.T) {
 func (s *Suite) Test_Snapshots() {
 	s.mock.ExpectBegin()
 	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, dbSnapshotCollection)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
-	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, "meta_data")).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.mock.ExpectCommit()
 
@@ -125,16 +122,12 @@ func (s *Suite) Test_GetSnapshots() {
 		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	query = fmt.Sprintf(`SELECT "snapshots".* FROM "%s"`, dbSnapshotCollection)
+	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbSnapshotCollection)
 	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
-	s.mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "meta_data"`)).
-		WithArgs(sqlmock.AnyArg()).
-		WillReturnRows(rows)
 
 	_, _, err := postgr.GetSnapshots(&apiPb.GetSchedulerInformationRequest{
 		SchedulerId: id,
@@ -157,16 +150,12 @@ func (s *Suite) Test_GetSnapshots_WithStatus() {
 		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	query = fmt.Sprintf(`SELECT "snapshots".* FROM "%s"`, dbSnapshotCollection)
+	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbSnapshotCollection)
 	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
-	s.mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "meta_data"`)).
-		WithArgs(sqlmock.AnyArg()).
-		WillReturnRows(rows)
 
 	_, _, err := postgr.GetSnapshots(&apiPb.GetSchedulerInformationRequest{
 		SchedulerId: id,
@@ -234,24 +223,14 @@ func (s *Suite) Test_GetSnapshotsUptime() {
 		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	query = fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
-	rows = sqlmock.NewRows([]string{"count"}).AddRow("1")
-	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnRows(rows)
-
-	query = fmt.Sprintf(`SELECT "snapshots".* FROM "%s"`, dbSnapshotCollection)
+	query = fmt.Sprintf(`COUNT(*) as "count", AVG("%s"."metaEndTime"-"%s"."metaStartTime") as "latency"`, dbSnapshotCollection, dbSnapshotCollection)
 	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
-	s.mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "meta_data"`)).
-		WithArgs(sqlmock.AnyArg()).
-		WillReturnRows(rows)
 
-	_, _, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
+	_, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
 		SchedulerId: id,
 	})
 	require.NoError(s.T(), err)
@@ -263,25 +242,7 @@ func (s *Suite) Test_GetSnapshotsUptime_FirstCountError() {
 		id = "1"
 	)
 
-	_, _, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
-		SchedulerId: id,
-	})
-	require.Error(s.T(), err)
-}
-
-//Based on fact, that if request is not mocked, it will return error
-func (s *Suite) Test_GetSnapshotsUptime_SecondCountError() {
-	var (
-		id = "1"
-	)
-
-	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
-	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
-	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnRows(rows)
-
-	_, _, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
+	_, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
 		SchedulerId: id,
 	})
 	require.Error(s.T(), err)
@@ -299,13 +260,7 @@ func (s *Suite) Test_GetSnapshotsUptime_SelectError() {
 		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	query = fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
-	rows = sqlmock.NewRows([]string{"count"}).AddRow("1")
-	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnRows(rows)
-
-	_, _, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
+	_, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
 		SchedulerId: id,
 	})
 	require.Error(s.T(), err)
@@ -315,7 +270,7 @@ func TestPostgres_GetSnapshotsUptime(t *testing.T) {
 	//Time for invalid timestamp
 	maxValidSeconds := 253402300800
 	t.Run("Should: return error", func(t *testing.T) {
-		_, _, err := postgrWrong.GetSnapshotsUptime(
+		_, err := postgrWrong.GetSnapshotsUptime(
 			&apiPb.GetSchedulerUptimeRequest{
 				SchedulerId: "",
 				TimeRange: &apiPb.TimeFilter{
@@ -339,10 +294,8 @@ func Test_getUptimeAndLatency(t *testing.T) {
 		snapshots := []*Snapshot{
 			{
 				Code: "OK",
-				Meta: &MetaData{
-					StartTime: time.Now(),
-					EndTime:   time.Now(),
-				},
+				MetaStartTime: time.Now().UnixNano(),
+				MetaEndTime: time.Now().UnixNano(),
 			},
 		}
 		uptime, latency, err := getUptimeAndLatency(snapshots, 1, 1)
@@ -923,7 +876,7 @@ func (s *Suite) Test_GetTransactionChildren_SubchildrenError() {
 
 func (s *Suite) Test_GetTransactionGroup() {
 	query := fmt.Sprintf(
-		`SELECT "%s"."name" as "groupName", COUNT("%s"."name") as "count", AVG("%s"."endTime"-"%s"."startTime") as "latency"`,
+		`SELECT "%s"."name" as "groupName", COUNT("%s"."name") as "count", COUNT(CASE WHEN "transaction_infos"."transactionStatus" = 'TRANSACTION_SUCCESSFUL' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."endTime"-"%s"."startTime") as "latency", min("transaction_infos"."endTime"-"transaction_infos"."startTime") as "minTime", max("transaction_infos"."endTime"-"transaction_infos"."startTime") as "maxTime"`,
 		dbTransactionInfoCollection,
 		dbTransactionInfoCollection,
 		dbTransactionInfoCollection,

@@ -18,19 +18,13 @@ type postgres struct {
 
 type Snapshot struct {
 	gorm.Model
-	SchedulerID string    `gorm:"column:schedulerId"`
-	Code        string    `gorm:"column:code"`
-	Type        string    `gorm:"column:type"`
-	Error       string    `gorm:"column:error"`
-	Meta        *MetaData `gorm:"column:meta"`
-}
-
-type MetaData struct {
-	gorm.Model
-	SnapshotID uint      `gorm:"column:snapshotId"`
-	StartTime  time.Time `gorm:"column:startTime"`
-	EndTime    time.Time `gorm:"column:endTime"`
-	Value      []byte    `gorm:"column:value"`
+	SchedulerID   string `gorm:"column:schedulerId"`
+	Code          string `gorm:"column:code"`
+	Type          string `gorm:"column:type"`
+	Error         string `gorm:"column:error"`
+	MetaStartTime int64  `gorm:"column:metaStartTime"`
+	MetaEndTime   int64  `gorm:"column:metaEndTime"`
+	MetaValue     []byte `gorm:"column:metaValue"`
 }
 
 //Agent gorm description
@@ -125,7 +119,6 @@ type TransactionInfo struct {
 }
 
 const (
-	dmMetaDataCollection        = "meta_data"
 	dbSnapshotCollection        = "snapshots"
 	dbTransactionInfoCollection = "transaction_infos" //TODO: check
 	dbStatRequestCollection     = "stat_requests"
@@ -138,7 +131,6 @@ var (
 func (p *postgres) Migrate() error {
 	models := []interface{}{
 		&Snapshot{},
-		&MetaData{},
 		&StatRequest{},
 		&CPUInfo{},
 		&MemoryInfo{},
@@ -177,15 +169,13 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 	var count int64
 	if request.GetStatus() == apiPb.SchedulerCode_SCHEDULER_CODE_UNSPECIFIED {
 		err = p.db.Table(dbSnapshotCollection).
-			Joins(fmt.Sprintf(`JOIN "%s" ON "%s"."snapshotId" = "%s"."id"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-			Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
+			Where(fmt.Sprintf(`"%s"."metaStartTime" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 			Count(&count).Error
 	} else {
 		err = p.db.Table(dbSnapshotCollection).
-			Joins(fmt.Sprintf(`JOIN "%s" ON "%s"."snapshotId" = "%s"."id"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-			Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
+			Where(fmt.Sprintf(`"%s"."metaStartTime" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus().String()).
 			Count(&count).Error
 	}
@@ -201,9 +191,8 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 		err = p.db.
 			Table(dbSnapshotCollection).
 			Set("gorm:auto_preload", true).
-			Joins(fmt.Sprintf(`JOIN "%s" ON "%s"."snapshotId" = "%s"."id"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-			Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
+			Where(fmt.Sprintf(`"%s"."metaStartTime" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 			Order(getSnapshotOrder(request.GetSort()) + " " + getSnapshotDirection(request.GetSort())).
 			Offset(offset).
 			Limit(limit).
@@ -212,9 +201,8 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 		err = p.db.
 			Table(dbSnapshotCollection).
 			Set("gorm:auto_preload", true).
-			Joins(fmt.Sprintf(`JOIN "%s" ON "%s"."snapshotId" = "%s"."id"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-			Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
+			Where(fmt.Sprintf(`"%s"."metaStartTime" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus().String()).
 			Order(getSnapshotOrder(request.GetSort()) + getSnapshotDirection(request.GetSort())).
 			Offset(offset).
@@ -229,63 +217,56 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 	return ConvertFromPostgresSnapshots(dbSnapshots), int32(count), nil
 }
 
-func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) (float64, float64, error) {
+type UptimeResult struct {
+	Count        int64  `gorm:"column:count"`
+	Latency      string `gorm:"column:latency"`
+}
+
+func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
 	timeFrom, timeTo, err := getTime(request.GetTimeRange())
 	if err != nil {
-		return -1, -1, err
+		return nil, err
 	}
-
 	var countAll int64
 	err = p.db.Table(dbSnapshotCollection).
-		Joins(fmt.Sprintf(`JOIN "%s" ON "%s"."snapshotId" = "%s"."id"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
 		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-		Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
+		Where(fmt.Sprintf(`"%s"."metaStartTime" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
 		Count(&countAll).Error
-	if err != nil {
-		return -1, -1, err
-	}
 
-	var countOk int64
+	selectString := fmt.Sprintf(
+		`COUNT(*) as "count", AVG("%s"."metaEndTime"-"%s"."metaStartTime") as "latency"`,
+		dbSnapshotCollection,
+		dbSnapshotCollection,
+	)
+
+	var uptimeResult UptimeResult
 	err = p.db.Table(dbSnapshotCollection).
-		Joins(fmt.Sprintf(`JOIN "%s" ON "%s"."snapshotId" = "%s"."id"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
+		Select(selectString).
 		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-		Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
-		Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), apiPb.SchedulerCode_OK.String()).
-		Count(&countOk).Error
+		Where(fmt.Sprintf(`"%s"."metaStartTime" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
+		Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), "OK").
+		Find(&uptimeResult).Error
 	if err != nil {
-		return -1, -1, err
+		return nil, err
 	}
 
-	var dbSnapshots []*Snapshot
-	err = p.db.
-		Table(dbSnapshotCollection).
-		Set("gorm:auto_preload", true).
-		Joins(fmt.Sprintf(`JOIN "%s" ON "%s"."snapshotId" = "%s"."id"`, dmMetaDataCollection, dmMetaDataCollection, dbSnapshotCollection)).
-		Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
-		Where(fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dmMetaDataCollection), timeFrom, timeTo).
-		Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), apiPb.SchedulerCode_OK.String()).
-		Find(&dbSnapshots).Error
-	if err != nil {
-		return -1, -1, errorDataBase
-	}
-
-	return getUptimeAndLatency(dbSnapshots, countAll, countOk)
+	return convertFromUptimeResult(&uptimeResult, countAll), nil
 }
 
 func getSnapshotOrder(request *apiPb.SortingSchedulerList) string {
 	if request == nil {
-		return fmt.Sprintf(`"%s"."startTime"`, dmMetaDataCollection)
+		return fmt.Sprintf(`"%s"."metaStartTime"`, dbSnapshotCollection)
 	}
 	orderMap := map[apiPb.SortSchedulerList]string{
-		apiPb.SortSchedulerList_SORT_SCHEDULER_LIST_UNSPECIFIED: fmt.Sprintf(`"%s"."startTime"`, dmMetaDataCollection),
-		apiPb.SortSchedulerList_BY_START_TIME:                   fmt.Sprintf(`"%s"."startTime"`, dmMetaDataCollection),
-		apiPb.SortSchedulerList_BY_END_TIME:                     fmt.Sprintf(`"%s"."endTime"`, dmMetaDataCollection),
-		apiPb.SortSchedulerList_BY_LATENCY:                      fmt.Sprintf(`"%s"."endTime" - "%s"."startTime"`, dmMetaDataCollection, dmMetaDataCollection),
+		apiPb.SortSchedulerList_SORT_SCHEDULER_LIST_UNSPECIFIED: fmt.Sprintf(`"%s"."metaStartTime"`, dbSnapshotCollection),
+		apiPb.SortSchedulerList_BY_START_TIME:                   fmt.Sprintf(`"%s"."metaStartTime"`, dbSnapshotCollection),
+		apiPb.SortSchedulerList_BY_END_TIME:                     fmt.Sprintf(`"%s"."metaEndTime"`, dbSnapshotCollection),
+		apiPb.SortSchedulerList_BY_LATENCY:                      fmt.Sprintf(`"%s"."metaEndTime" - "%s"."metaStartTime"`, dbSnapshotCollection, dbSnapshotCollection),
 	}
 	if res, ok := orderMap[request.GetSortBy()]; ok {
 		return res
 	}
-	return fmt.Sprintf(`"%s"."startTime"`, dmMetaDataCollection)
+	return fmt.Sprintf(`"%s"."metaStartTime"`, dbSnapshotCollection)
 }
 
 func getSnapshotDirection(request *apiPb.SortingSchedulerList) string {
@@ -303,17 +284,18 @@ func getSnapshotDirection(request *apiPb.SortingSchedulerList) string {
 	return ``
 }
 
+//TODO: remake
 func getUptimeAndLatency(dbSnapshots []*Snapshot, countAll, countOk int64) (float64, float64, error) {
 	if countAll == 0 || countOk == 0 {
 		return 0, 0, nil
 	}
 	latency := int64(0)
-	for _, snapshot := range dbSnapshots {
+	/*for _, snapshot := range dbSnapshots {
 		//Recieveing time difference in mellisecinds
 		if snapshot.Meta != nil {
 			latency += (snapshot.Meta.EndTime.UnixNano() - snapshot.Meta.StartTime.UnixNano()) / int64(time.Millisecond)
 		}
-	}
+	}*/
 	return float64(countOk) / float64(countAll), float64(latency) / float64(countOk), nil
 }
 
@@ -557,9 +539,12 @@ func (p *postgres) GetTransactionChildren(transactionId, passedString string) ([
 }
 
 type GroupResult struct {
-	GroupName    string `gorm:"column:groupName"`
-	GroupCount   int64  `gorm:"column:count"`
-	GroupLatency string  `gorm:"column:latency"`
+	Name         string `gorm:"column:groupName"`
+	Count        int64  `gorm:"column:count"`
+	SuccessCount int64  `gorm:"column:successCount"`
+	Latency      string `gorm:"column:latency"`
+	MinTime      string `gorm:"column:minTime"`
+	MaxTime      string `gorm:"column:maxTime"`
 }
 
 func (p *postgres) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest) (map[string]*apiPb.TransactionGroup, error) {
@@ -569,10 +554,14 @@ func (p *postgres) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest
 	}
 
 	selectString := fmt.Sprintf(
-		`%s as "groupName", COUNT(%s) as "count", AVG("%s"."endTime"-"%s"."startTime") as "latency"`,
-		//`%s as "groupName", COUNT(%s) as "count", AVG("%s"."startTime") as "latency"`,
+		`%s as "groupName", COUNT(%s) as "count", COUNT(CASE WHEN "%s"."transactionStatus" = 'TRANSACTION_SUCCESSFUL' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."endTime"-"%s"."startTime") as "latency", min("%s"."endTime"-"%s"."startTime") as "minTime", max("%s"."endTime"-"%s"."startTime") as "maxTime"`,
 		getTransactionsGroupBy(request.GetGroupType()),
 		getTransactionsGroupBy(request.GetGroupType()),
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
 		dbTransactionInfoCollection,
 		dbTransactionInfoCollection,
 	)
@@ -601,7 +590,7 @@ func getTransactionOrder(request *apiPb.SortingTransactionList) string {
 	}
 	orderMap := map[apiPb.SortTransactionList]string{
 		apiPb.SortTransactionList_SORT_TRANSACTION_LIST_UNSPECIFIED: fmt.Sprintf(`"%s"."startTime"`, dbTransactionInfoCollection),
-		apiPb.SortTransactionList_DURATION:                          fmt.Sprintf(`"%s"."endTime" - "%s"."startTime"`, dbTransactionInfoCollection, dmMetaDataCollection),
+		apiPb.SortTransactionList_DURATION:                          fmt.Sprintf(`"%s"."endTime" - "%s"."startTime"`, dbTransactionInfoCollection, dbTransactionInfoCollection),
 	}
 	if res, ok := orderMap[request.GetSortBy()]; ok {
 		return res

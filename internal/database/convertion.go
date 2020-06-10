@@ -74,95 +74,64 @@ func convertToSnapshot(request *apiPb.SchedulerSnapshot, schedulerID string) (*S
 	if request == nil {
 		return nil, errors.New("ERROR_SNAPSHOT_IS_EMPTY")
 	}
-	metaData, err := convertToMetaData(request.GetMeta())
+	if request.GetMeta() == nil {
+		return nil, errors.New("EMPTY_META_DATA")
+	}
+	startTime, err := ptypes.Timestamp(request.GetMeta().GetStartTime())
 	if err != nil {
 		return nil, err
 	}
+	endTime, err := ptypes.Timestamp(request.GetMeta().GetEndTime())
+	if err != nil {
+		return nil, err
+	}
+
 	res := &Snapshot{
-		SchedulerID: schedulerID,
-		Code:        request.GetCode().String(),
-		Type:        request.GetType().String(),
-		Meta:        metaData,
+		SchedulerID:   schedulerID,
+		Code:          request.GetCode().String(),
+		Type:          request.GetType().String(),
+		MetaStartTime: startTime.UnixNano(),
+		MetaEndTime:   endTime.UnixNano(),
 	}
 	if request.GetError() != nil {
 		res.Error = request.GetError().GetMessage()
 	}
+
+	var b bytes.Buffer
+	err = (&jsonpb.Marshaler{}).Marshal(&b, request.GetMeta().GetValue())
+	if err != nil {
+		return res, nil
+	}
+	res.MetaValue = b.Bytes()
 	return res, nil
 }
 
-func convertToMetaData(request *apiPb.SchedulerSnapshot_MetaData) (*MetaData, error) {
-	if request == nil {
-		return nil, errors.New("EMPTY_META_DATA")
-	}
-	startTime, err := ptypes.Timestamp(request.GetStartTime())
-	if err != nil {
-		return nil, err
-	}
-	endTime, err := ptypes.Timestamp(request.GetEndTime())
-	if err != nil {
-		return nil, err
-	}
-
-	var b bytes.Buffer
-
-	err = (&jsonpb.Marshaler{}).Marshal(&b, request.GetValue())
-
-	if err != nil {
-		return &MetaData{
-			StartTime: startTime,
-			EndTime:   endTime,
-		}, nil
-	}
-	return &MetaData{
-		StartTime: startTime,
-		EndTime:   endTime,
-		Value:     b.Bytes(),
-	}, nil
-}
-
 func convertFromSnapshot(snapshot *Snapshot) (*apiPb.SchedulerSnapshot, error) {
-	meta, err := convertFromMetaData(snapshot.Meta)
-	if err != nil {
-		return nil, err
-	}
+	//Skip error, because this convertion is always correct (snapshot.MetaStartTime < maximum possible value)
+	startTime, _ := ptypes.TimestampProto(time.Unix(0, snapshot.MetaStartTime))
+	endTime, _ := ptypes.TimestampProto(time.Unix(0, snapshot.MetaEndTime))
+
 	res := &apiPb.SchedulerSnapshot{
 		Code: apiPb.SchedulerCode(apiPb.SchedulerCode_value[snapshot.Code]),
 		Type: apiPb.SchedulerType(apiPb.SchedulerType_value[snapshot.Type]),
-		Meta: meta,
+		Meta: &apiPb.SchedulerSnapshot_MetaData{
+			StartTime:            startTime,
+			EndTime:              endTime,
+		},
 	}
 	if snapshot.Error != "" {
 		res.Error = &apiPb.SchedulerSnapshot_Error{
 			Message: snapshot.Error,
 		}
 	}
-	return res, nil
-}
 
-func convertFromMetaData(metaData *MetaData) (*apiPb.SchedulerSnapshot_MetaData, error) {
-	if metaData == nil {
-		return nil, errors.New("EMPTY_META_DATA")
-	}
-	startTime, err := ptypes.TimestampProto(metaData.StartTime)
-	if err != nil {
-		return nil, err
-	}
-	endTime, err := ptypes.TimestampProto(metaData.EndTime)
-	if err != nil {
-		return nil, err
-	}
 	str := &_struct.Value{}
-
-	if err := jsonpb.Unmarshal(bytes.NewReader(metaData.Value), str); err != nil {
-		return &apiPb.SchedulerSnapshot_MetaData{
-			StartTime: startTime,
-			EndTime:   endTime,
-		}, nil
+	if err := jsonpb.Unmarshal(bytes.NewReader(snapshot.MetaValue), str); err != nil {
+		return res, nil
 	}
-	return &apiPb.SchedulerSnapshot_MetaData{
-		StartTime: startTime,
-		EndTime:   endTime,
-		Value:     str,
-	}, nil
+
+	res.Meta.Value = str
+	return res, nil
 }
 
 func convertToCPUInfo(request *apiPb.CpuInfo) []*CPUInfo {
@@ -403,16 +372,43 @@ func convertFromTransactions(data []*TransactionInfo) []*apiPb.TransactionInfo {
 	return res
 }
 
+func convertFromUptimeResult(uptimeResult *UptimeResult, countAll int64) *apiPb.GetSchedulerUptimeResponse {
+	latency, err := strconv.ParseFloat(strings.Split(uptimeResult.Latency, ".")[0], 64)
+	if err != nil {
+		return nil
+		//TODO: log?
+	}
+	return &apiPb.GetSchedulerUptimeResponse{
+		Uptime:               float64(uptimeResult.Count) / float64(countAll),
+		Latency:              latency,
+	}
+}
+
 func convertFromGroupResult(group []*GroupResult) map[string]*apiPb.TransactionGroup {
 	res := map[string]*apiPb.TransactionGroup{}
-	for _, v := range group{
-		latency, err := strconv.ParseFloat(strings.Split(v.GroupLatency, ".")[0], 64)
+	for _, v := range group {
+		latency, err := strconv.ParseFloat(strings.Split(v.Latency, ".")[0], 64)
 		if err != nil {
+			continue
 			//TODO: log?
 		}
-		res[v.GroupName] = &apiPb.TransactionGroup{
-			Count:                v.GroupCount,
-			AverageTime:          latency/1000000, //div 1000 in order to get milliseconds
+		minTime, err := strconv.ParseFloat(strings.Split(v.MinTime, ".")[0], 64)
+		if err != nil {
+			continue
+			//TODO: log?
+		}
+		maxTime, err := strconv.ParseFloat(strings.Split(v.MaxTime, ".")[0], 64)
+		if err != nil {
+			continue
+			//TODO: log?
+		}
+		res[v.Name] = &apiPb.TransactionGroup{
+			Count:        v.Count,
+			SuccessRatio: float64(v.SuccessCount) / float64(v.Count),
+			AverageTime:  latency / 1000000, //div 1000 in order to get milliseconds
+			MinTime:      minTime / 1000000,
+			MaxTime:      maxTime / 1000000,
+			Throughput:   (latency / (60000000000)) / float64(v.Count), //Take minutes and div by count
 		}
 	}
 	return res
