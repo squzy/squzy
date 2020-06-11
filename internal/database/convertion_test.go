@@ -231,20 +231,20 @@ func TestConvertFromGroupResult(t *testing.T) {
 				Name:    "Name",
 				Count:   0,
 			},
-		})
+		}, time.Now().UnixNano())
 		assert.NotNil(t, res)
 	})
-	t.Run("Test: error", func(t *testing.T) {
+	t.Run("Test: no error", func(t *testing.T) {
 		res := convertFromGroupResult([]*GroupResult{
 			{
 				Name:    "Name",
 				Count:   0,
 				Latency: "10000.000",
 			},
-		})
+		}, time.Now().UnixNano())
 		assert.NotNil(t, res)
 	})
-	t.Run("Test: error", func(t *testing.T) {
+	t.Run("Test: no error", func(t *testing.T) {
 		res := convertFromGroupResult([]*GroupResult{
 			{
 				Name:    "Name",
@@ -252,10 +252,10 @@ func TestConvertFromGroupResult(t *testing.T) {
 				Latency: "10000.000",
 				MinTime: "10000.000",
 			},
-		})
+		}, time.Now().UnixNano())
 		assert.NotNil(t, res)
 	})
-	t.Run("Test: error", func(t *testing.T) {
+	t.Run("Test: no error", func(t *testing.T) {
 		res := convertFromGroupResult([]*GroupResult{
 			{
 				Name:    "Name",
@@ -264,7 +264,27 @@ func TestConvertFromGroupResult(t *testing.T) {
 				MinTime: "10000.000",
 				MaxTime: "10000.000",
 			},
-		})
+		}, time.Now().UnixNano())
+		assert.NotNil(t, res)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		res := convertFromGroupResult([]*GroupResult{
+			{
+				Name:    "Name",
+				Count:   0,
+				Latency: "10000.000",
+				MinTime: "10000.000",
+				MaxTime: "10000.000",
+				LowTime: "10000.000",
+			},
+		}, time.Now().UnixNano())
+		assert.NotNil(t, res)
+	})
+}
+
+func TestGetThroughput(t *testing.T) {
+	t.Run("Test: error", func(t *testing.T) {
+		res := getThroughput(0, 10, 10)
 		assert.NotNil(t, res)
 	})
 }

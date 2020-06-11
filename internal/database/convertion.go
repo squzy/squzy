@@ -384,7 +384,7 @@ func convertFromUptimeResult(uptimeResult *UptimeResult, countAll int64) *apiPb.
 	}
 }
 
-func convertFromGroupResult(group []*GroupResult) map[string]*apiPb.TransactionGroup {
+func convertFromGroupResult(group []*GroupResult, upTime int64) map[string]*apiPb.TransactionGroup {
 	res := map[string]*apiPb.TransactionGroup{}
 	for _, v := range group {
 		latency, err := strconv.ParseFloat(strings.Split(v.Latency, ".")[0], 64)
@@ -402,14 +402,27 @@ func convertFromGroupResult(group []*GroupResult) map[string]*apiPb.TransactionG
 			continue
 			//TODO: log?
 		}
+		lowTime, err := strconv.ParseFloat(strings.Split(v.LowTime, ".")[0], 64)
+		if err != nil {
+			continue
+			//TODO: log?
+		}
 		res[v.Name] = &apiPb.TransactionGroup{
 			Count:        v.Count,
 			SuccessRatio: float64(v.SuccessCount) / float64(v.Count),
 			AverageTime:  latency / 1000000, //div 1000 in order to get milliseconds
 			MinTime:      minTime / 1000000,
 			MaxTime:      maxTime / 1000000,
-			Throughput:   (latency / (60000000000)) / float64(v.Count), //Take minutes and div by count
+			Throughput:   getThroughput(v.Count, lowTime, upTime), //Take minutes and div by count
 		}
 	}
 	return res
+}
+
+func getThroughput(count int64, lowTime float64, upTime int64) float64 {
+	timeDiapasonMinutes := (float64(upTime)-lowTime) / 60000000000
+	if timeDiapasonMinutes == 0 {
+		return 0
+	}
+	return float64(count)/timeDiapasonMinutes
 }

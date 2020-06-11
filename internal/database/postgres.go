@@ -545,6 +545,7 @@ type GroupResult struct {
 	Latency      string `gorm:"column:latency"`
 	MinTime      string `gorm:"column:minTime"`
 	MaxTime      string `gorm:"column:maxTime"`
+	LowTime      string `gorm:"column:lowTime"`
 }
 
 func (p *postgres) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest) (map[string]*apiPb.TransactionGroup, error) {
@@ -554,9 +555,10 @@ func (p *postgres) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest
 	}
 
 	selectString := fmt.Sprintf(
-		`%s as "groupName", COUNT(%s) as "count", COUNT(CASE WHEN "%s"."transactionStatus" = 'TRANSACTION_SUCCESSFUL' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."endTime"-"%s"."startTime") as "latency", min("%s"."endTime"-"%s"."startTime") as "minTime", max("%s"."endTime"-"%s"."startTime") as "maxTime"`,
+		`%s as "groupName", COUNT(%s) as "count", COUNT(CASE WHEN "%s"."transactionStatus" = 'TRANSACTION_SUCCESSFUL' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."endTime"-"%s"."startTime") as "latency", min("%s"."endTime"-"%s"."startTime") as "minTime", max("%s"."endTime"-"%s"."startTime") as "maxTime", min("%s"."endTime") as "lowTime"`,
 		getTransactionsGroupBy(request.GetGroupType()),
 		getTransactionsGroupBy(request.GetGroupType()),
+		dbTransactionInfoCollection,
 		dbTransactionInfoCollection,
 		dbTransactionInfoCollection,
 		dbTransactionInfoCollection,
@@ -581,7 +583,7 @@ func (p *postgres) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest
 		return nil, errorDataBase
 	}
 
-	return convertFromGroupResult(groupResult), nil
+	return convertFromGroupResult(groupResult, timeTo), nil
 }
 
 func getTransactionOrder(request *apiPb.SortingTransactionList) string {
