@@ -218,8 +218,8 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 }
 
 type UptimeResult struct {
-	Count        int64  `gorm:"column:count"`
-	Latency      string `gorm:"column:latency"`
+	Count   int64  `gorm:"column:count"`
+	Latency string `gorm:"column:latency"`
 }
 
 func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {

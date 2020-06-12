@@ -102,8 +102,8 @@ type Transaction struct {
 	Id       string                  `json:"id" binding:"required"`
 	ParentID string                  `json:"parentId"`
 	Name     string                  `json:"name" binding:"required"`
-	DateFrom time.Time               `json:"dateFrom" time_format:"2006-01-02T15:04:05Z07:00" binding:"required"`
-	DateTo   time.Time               `json:"dateTo" time_format:"2006-01-02T15:04:05Z07:00" binding:"required"`
+	DateFrom time.Time               `json:"dateFrom" time_format:"unixNano" binding:"required"`
+	DateTo   time.Time               `json:"dateTo" time_format:"unixNano" binding:"required"`
 	Status   apiPb.TransactionStatus `json:"status"`
 	Type     apiPb.TransactionType   `json:"type"`
 	Meta     *struct {
@@ -158,7 +158,6 @@ func (r *router) GetEngine() *gin.Engine {
 					errWrap(context, http.StatusInternalServerError, err)
 					return
 				}
-
 				successWrap(context, http.StatusOK, app)
 			})
 			application := applications.Group(":applicationId")
@@ -166,6 +165,7 @@ func (r *router) GetEngine() *gin.Engine {
 				application.GET("", func(context *gin.Context) {
 					applicationId := context.Param("applicationId")
 					res, err := r.handlers.GetApplicationById(context, applicationId)
+
 					if err != nil {
 						errWrap(context, http.StatusInternalServerError, err)
 						return
