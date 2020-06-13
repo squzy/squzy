@@ -1,13 +1,16 @@
 package router
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"net/http"
 	"squzy/apps/squzy_api/handlers"
+	"strconv"
 	"time"
 )
 
@@ -98,12 +101,39 @@ type Application struct {
 	AgentId string `json:"agentId"`
 }
 
+type transactionTime timestamp.Timestamp
+
+var _ json.Unmarshaler = &transactionTime{}
+
+func (mt *transactionTime) UnmarshalJSON(bs []byte) error {
+	var stringTime string
+	err := json.Unmarshal(bs, &stringTime)
+	if err != nil {
+		return err
+	}
+
+	intTime, err := strconv.ParseInt(stringTime, 10, 64)
+	if err != nil {
+		return err
+	}
+	*mt = transactionTime{
+		Seconds: intTime / 1e9,
+		Nanos:   int32(intTime % 1e9),
+	}
+	return nil
+}
+
+func (mt *transactionTime) ToTimeStamp() *timestamp.Timestamp {
+	t := timestamp.Timestamp(*mt)
+	return &t
+}
+
 type Transaction struct {
 	Id       string                  `json:"id" binding:"required"`
 	ParentID string                  `json:"parentId"`
 	Name     string                  `json:"name" binding:"required"`
-	DateFrom time.Time               `json:"dateFrom" time_format:"unixNano" binding:"required"`
-	DateTo   time.Time               `json:"dateTo" time_format:"unixNano" binding:"required"`
+	DateFrom transactionTime         `json:"dateFrom" time_format:"unixNano" binding:"required"`
+	DateTo   transactionTime         `json:"dateTo" time_format:"unixNano" binding:"required"`
 	Status   apiPb.TransactionStatus `json:"status"`
 	Type     apiPb.TransactionType   `json:"type"`
 	Meta     *struct {
@@ -270,16 +300,6 @@ func (r *router) GetEngine() *gin.Engine {
 							successWrap(context, http.StatusAccepted, nil)
 							return
 						}
-						timeFrom, err := ptypes.TimestampProto(trx.DateFrom)
-						if err != nil {
-							successWrap(context, http.StatusAccepted, nil)
-							return
-						}
-						timeTo, err := ptypes.TimestampProto(trx.DateTo)
-						if err != nil {
-							successWrap(context, http.StatusAccepted, nil)
-							return
-						}
 						var meta *apiPb.TransactionInfo_Meta
 						if trx.Meta != nil {
 							meta = &apiPb.TransactionInfo_Meta{
@@ -300,8 +320,8 @@ func (r *router) GetEngine() *gin.Engine {
 							ParentId:      trx.ParentID,
 							Meta:          meta,
 							Name:          trx.Name,
-							StartTime:     timeFrom,
-							EndTime:       timeTo,
+							StartTime:     trx.DateFrom.ToTimeStamp(),
+							EndTime:       trx.DateTo.ToTimeStamp(),
 							Status:        trx.Status,
 							Type:          trx.Type,
 							Error:         trxError,
