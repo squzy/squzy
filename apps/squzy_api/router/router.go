@@ -253,6 +253,7 @@ func (r *router) GetEngine() *gin.Engine {
 							Pagination:    pagination,
 							TimeRange:     timeRange,
 							Type:          rq.TransactionType,
+							Status:        rq.TransactionStatus,
 							Host:          GetStringValueFromString(rq.HostFilter),
 							Name:          GetStringValueFromString(rq.NameFilter),
 							Path:          GetStringValueFromString(rq.PathFilter),
