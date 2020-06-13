@@ -593,6 +593,8 @@ func getTransactionOrder(request *apiPb.SortingTransactionList) string {
 	orderMap := map[apiPb.SortTransactionList]string{
 		apiPb.SortTransactionList_SORT_TRANSACTION_LIST_UNSPECIFIED: fmt.Sprintf(`"%s"."startTime"`, dbTransactionInfoCollection),
 		apiPb.SortTransactionList_DURATION:                          fmt.Sprintf(`"%s"."endTime" - "%s"."startTime"`, dbTransactionInfoCollection, dbTransactionInfoCollection),
+		apiPb.SortTransactionList_BY_TRANSACTION_START_TIME:         fmt.Sprintf(`"%s"."startTime"`, dbTransactionInfoCollection),
+		apiPb.SortTransactionList_BY_TRANSACTION_END_TIME:           fmt.Sprintf(`"%s"."endTime"`, dbTransactionInfoCollection),
 	}
 	if res, ok := orderMap[request.GetSortBy()]; ok {
 		return res
