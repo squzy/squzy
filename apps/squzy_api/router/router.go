@@ -163,6 +163,18 @@ func (r *router) GetEngine() *gin.Engine {
 	engine.Use(gin.Recovery())
 	v1 := engine.Group("v1")
 	{
+		transaction := v1.Group("transaction")
+		{
+			transaction.GET(":transaction_id", func(context *gin.Context) {
+				trxId := context.Param("transaction_id")
+				res, err := r.handlers.GetTransactionById(context, trxId)
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+				successWrap(context, http.StatusOK, res)
+			})
+		}
 		applications := v1.Group("applications")
 		{
 			applications.GET("", func(context *gin.Context) {
@@ -334,19 +346,6 @@ func (r *router) GetEngine() *gin.Engine {
 						}
 						successWrap(context, http.StatusAccepted, nil)
 					})
-					transaction := transactions.Group("single/:transaction_id")
-					{
-						transaction.GET("", func(context *gin.Context) {
-							trxId := context.Param("transaction_id")
-							res, err := r.handlers.GetTransactionById(context, trxId)
-							if err != nil {
-								// we will skip error here
-								errWrap(context, http.StatusInternalServerError, err)
-								return
-							}
-							successWrap(context, http.StatusOK, res)
-						})
-					}
 				}
 			}
 		}

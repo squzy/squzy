@@ -529,7 +529,7 @@ func TestRouter_GetEngine(t *testing.T) {
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path:         "/v1/applications/app/transactions/single/trra",
+				Path:         "/v1/transaction/trra",
 				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
@@ -841,7 +841,7 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path:         "/v1/applications/app/transactions/single/trra",
+				Path:         "/v1/transaction/trra",
 				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},
