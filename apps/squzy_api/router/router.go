@@ -1,13 +1,16 @@
 package router
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"net/http"
 	"squzy/apps/squzy_api/handlers"
+	"strconv"
 	"time"
 )
 
@@ -98,12 +101,39 @@ type Application struct {
 	AgentId string `json:"agentId"`
 }
 
+type transactionTime timestamp.Timestamp
+
+var _ json.Unmarshaler = &transactionTime{}
+
+func (mt *transactionTime) UnmarshalJSON(bs []byte) error {
+	var stringTime string
+	err := json.Unmarshal(bs, &stringTime)
+	if err != nil {
+		return err
+	}
+
+	intTime, err := strconv.ParseInt(stringTime, 10, 64)
+	if err != nil {
+		return err
+	}
+	*mt = transactionTime{
+		Seconds: intTime / 1e9,
+		Nanos:   int32(intTime % 1e9),
+	}
+	return nil
+}
+
+func (mt *transactionTime) ToTimeStamp() *timestamp.Timestamp {
+	t := timestamp.Timestamp(*mt)
+	return &t
+}
+
 type Transaction struct {
 	Id       string                  `json:"id" binding:"required"`
 	ParentID string                  `json:"parentId"`
 	Name     string                  `json:"name" binding:"required"`
-	DateFrom time.Time               `json:"dateFrom" time_format:"2006-01-02T15:04:05Z07:00" binding:"required"`
-	DateTo   time.Time               `json:"dateTo" time_format:"2006-01-02T15:04:05Z07:00" binding:"required"`
+	DateFrom transactionTime         `json:"dateFrom" time_format:"unixNano" binding:"required"`
+	DateTo   transactionTime         `json:"dateTo" time_format:"unixNano" binding:"required"`
 	Status   apiPb.TransactionStatus `json:"status"`
 	Type     apiPb.TransactionType   `json:"type"`
 	Meta     *struct {
@@ -133,6 +163,18 @@ func (r *router) GetEngine() *gin.Engine {
 	engine.Use(gin.Recovery())
 	v1 := engine.Group("v1")
 	{
+		transaction := v1.Group("transaction")
+		{
+			transaction.GET(":transaction_id", func(context *gin.Context) {
+				trxId := context.Param("transaction_id")
+				res, err := r.handlers.GetTransactionById(context, trxId)
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+				successWrap(context, http.StatusOK, res)
+			})
+		}
 		applications := v1.Group("applications")
 		{
 			applications.GET("", func(context *gin.Context) {
@@ -158,7 +200,6 @@ func (r *router) GetEngine() *gin.Engine {
 					errWrap(context, http.StatusInternalServerError, err)
 					return
 				}
-
 				successWrap(context, http.StatusOK, app)
 			})
 			application := applications.Group(":applicationId")
@@ -166,6 +207,7 @@ func (r *router) GetEngine() *gin.Engine {
 				application.GET("", func(context *gin.Context) {
 					applicationId := context.Param("applicationId")
 					res, err := r.handlers.GetApplicationById(context, applicationId)
+
 					if err != nil {
 						errWrap(context, http.StatusInternalServerError, err)
 						return
@@ -223,6 +265,7 @@ func (r *router) GetEngine() *gin.Engine {
 							Pagination:    pagination,
 							TimeRange:     timeRange,
 							Type:          rq.TransactionType,
+							Status:        rq.TransactionStatus,
 							Host:          GetStringValueFromString(rq.HostFilter),
 							Name:          GetStringValueFromString(rq.NameFilter),
 							Path:          GetStringValueFromString(rq.PathFilter),
@@ -270,16 +313,6 @@ func (r *router) GetEngine() *gin.Engine {
 							successWrap(context, http.StatusAccepted, nil)
 							return
 						}
-						timeFrom, err := ptypes.TimestampProto(trx.DateFrom)
-						if err != nil {
-							successWrap(context, http.StatusAccepted, nil)
-							return
-						}
-						timeTo, err := ptypes.TimestampProto(trx.DateTo)
-						if err != nil {
-							successWrap(context, http.StatusAccepted, nil)
-							return
-						}
 						var meta *apiPb.TransactionInfo_Meta
 						if trx.Meta != nil {
 							meta = &apiPb.TransactionInfo_Meta{
@@ -300,8 +333,8 @@ func (r *router) GetEngine() *gin.Engine {
 							ParentId:      trx.ParentID,
 							Meta:          meta,
 							Name:          trx.Name,
-							StartTime:     timeFrom,
-							EndTime:       timeTo,
+							StartTime:     trx.DateFrom.ToTimeStamp(),
+							EndTime:       trx.DateTo.ToTimeStamp(),
 							Status:        trx.Status,
 							Type:          trx.Type,
 							Error:         trxError,
@@ -313,19 +346,6 @@ func (r *router) GetEngine() *gin.Engine {
 						}
 						successWrap(context, http.StatusAccepted, nil)
 					})
-					transaction := transactions.Group("single/:transaction_id")
-					{
-						transaction.GET("", func(context *gin.Context) {
-							trxId := context.Param("transaction_id")
-							res, err := r.handlers.GetTransactionById(context, trxId)
-							if err != nil {
-								// we will skip error here
-								errWrap(context, http.StatusInternalServerError, err)
-								return
-							}
-							successWrap(context, http.StatusOK, res)
-						})
-					}
 				}
 			}
 		}

@@ -13,6 +13,7 @@ go_library(
          "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
          "@com_github_golang_protobuf//ptypes/empty:go_default_library",
          "@com_github_golang_protobuf//ptypes/wrappers:go_default_library",
+         "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
      ]
 )
 

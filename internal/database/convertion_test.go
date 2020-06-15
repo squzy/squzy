@@ -228,8 +228,8 @@ func TestConvertFromGroupResult(t *testing.T) {
 	t.Run("Test: error", func(t *testing.T) {
 		res := convertFromGroupResult([]*GroupResult{
 			{
-				Name:    "Name",
-				Count:   0,
+				Name:  "Name",
+				Count: 0,
 			},
 		}, time.Now().UnixNano())
 		assert.NotNil(t, res)

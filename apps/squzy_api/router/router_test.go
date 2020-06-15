@@ -529,7 +529,7 @@ func TestRouter_GetEngine(t *testing.T) {
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path:         "/v1/applications/app/transactions/single/trra",
+				Path:         "/v1/transaction/trra",
 				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
@@ -569,7 +569,7 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"name": "safasf",
 							"id": "asfasfasf",
-							"dateFrom": "2020-05-07T19:17:05.899Z",
+							"dateFrom": 5,
 							"dateTo": "0000-01-01T00:00:00.899Z"
 						}
 					`,
@@ -584,8 +584,23 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"name": "safasf",
 							"id": "asfasfasf",
-							"dateFrom": "2020-05-07T19:17:05.899Z",
-							"dateTo": "2020-05-07T19:17:05.899Z"
+							"dateFrom": "1592007035247519000",
+							"dateTo": "1"
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/applications/app/transactions",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusAccepted,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"name": "safasf",
+							"id": "asfasfasf",
+							"dateFrom": "1592007035247519000",
+							"dateTo": "1592007035247519000"
 						}
 					`,
 				)),
@@ -776,8 +791,8 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"name": "safasf",
 							"id": "asfasfasf",
-							"dateFrom": "2020-05-07T19:17:05.899Z",
-							"dateTo": "2020-05-07T19:17:05.899Z"
+							"dateFrom": "1592007035247519000",
+							"dateTo": "1592007035247519000"
 						}
 					`,
 				)),
@@ -813,8 +828,8 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"name": "safasf",
 							"id": "asfasfasf",
-							"dateFrom": "2020-05-07T19:17:05.899Z",
-							"dateTo": "2020-05-07T19:17:05.899Z",
+							"dateFrom": "1592007035247519000",
+							"dateTo": "1592007035247519000",
 							"error": {
 								"message": "asffsaf"
 							},
@@ -826,7 +841,7 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path:         "/v1/applications/app/transactions/single/trra",
+				Path:         "/v1/transaction/trra",
 				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},

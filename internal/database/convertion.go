@@ -115,8 +115,8 @@ func convertFromSnapshot(snapshot *Snapshot) (*apiPb.SchedulerSnapshot, error) {
 		Code: apiPb.SchedulerCode(apiPb.SchedulerCode_value[snapshot.Code]),
 		Type: apiPb.SchedulerType(apiPb.SchedulerType_value[snapshot.Type]),
 		Meta: &apiPb.SchedulerSnapshot_MetaData{
-			StartTime:            startTime,
-			EndTime:              endTime,
+			StartTime: startTime,
+			EndTime:   endTime,
 		},
 	}
 	if snapshot.Error != "" {
@@ -379,8 +379,8 @@ func convertFromUptimeResult(uptimeResult *UptimeResult, countAll int64) *apiPb.
 		//TODO: log?
 	}
 	return &apiPb.GetSchedulerUptimeResponse{
-		Uptime:               float64(uptimeResult.Count) / float64(countAll),
-		Latency:              latency,
+		Uptime:  float64(uptimeResult.Count) / float64(countAll),
+		Latency: latency,
 	}
 }
 
@@ -420,9 +420,9 @@ func convertFromGroupResult(group []*GroupResult, upTime int64) map[string]*apiP
 }
 
 func getThroughput(count int64, lowTime float64, upTime int64) float64 {
-	timeDiapasonMinutes := (float64(upTime)-lowTime) / 60000000000
+	timeDiapasonMinutes := (float64(upTime) - lowTime) / 60000000000
 	if timeDiapasonMinutes == 0 {
 		return 0
 	}
-	return float64(count)/timeDiapasonMinutes
+	return float64(count) / timeDiapasonMinutes
 }

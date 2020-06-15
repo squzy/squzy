@@ -128,7 +128,6 @@ func (s *Suite) Test_GetSnapshots() {
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-
 	_, _, err := postgr.GetSnapshots(&apiPb.GetSchedulerInformationRequest{
 		SchedulerId: id,
 		Sort: &apiPb.SortingSchedulerList{
@@ -155,7 +154,6 @@ func (s *Suite) Test_GetSnapshots_WithStatus() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
-
 
 	_, _, err := postgr.GetSnapshots(&apiPb.GetSchedulerInformationRequest{
 		SchedulerId: id,
@@ -229,7 +227,6 @@ func (s *Suite) Test_GetSnapshotsUptime() {
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-
 	_, err := postgr.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
 		SchedulerId: id,
 	})
@@ -293,9 +290,9 @@ func Test_getUptimeAndLatency(t *testing.T) {
 	t.Run("Should: return not 0 and no error", func(t *testing.T) {
 		snapshots := []*Snapshot{
 			{
-				Code: "OK",
+				Code:          "OK",
 				MetaStartTime: time.Now().UnixNano(),
-				MetaEndTime: time.Now().UnixNano(),
+				MetaEndTime:   time.Now().UnixNano(),
 			},
 		}
 		uptime, latency, err := getUptimeAndLatency(snapshots, 1, 1)
