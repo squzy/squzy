@@ -161,7 +161,7 @@ func (p *postgres) InsertSnapshot(data *apiPb.SchedulerResponse) error {
 }
 
 func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) ([]*apiPb.SchedulerSnapshot, int32, error) {
-	timeFrom, timeTo, err := getTime(request.GetTimeRange())
+	timeFrom, timeTo, err := getTimeInt64(request.GetTimeRange())
 	if err != nil {
 		return nil, -1, err
 	}
@@ -223,7 +223,7 @@ type UptimeResult struct {
 }
 
 func (p *postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
-	timeFrom, timeTo, err := getTime(request.GetTimeRange())
+	timeFrom, timeTo, err := getTimeInt64(request.GetTimeRange())
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +281,7 @@ func getSnapshotDirection(request *apiPb.SortingSchedulerList) string {
 	if res, ok := directionMap[request.GetDirection()]; ok {
 		return res
 	}
-	return ``
+	return ` desc`
 }
 
 //TODO: remake
@@ -612,7 +612,7 @@ func getTransactionDirection(request *apiPb.SortingTransactionList) string {
 	if res, ok := directionMap[request.GetDirection()]; ok {
 		return res
 	}
-	return ``
+	return ` desc`
 }
 
 func getTransactionsByString(key string, value *wrappers.StringValue) string {
