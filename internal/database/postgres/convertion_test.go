@@ -1,4 +1,4 @@
-package database
+package postgres
 
 import (
 	"github.com/golang/protobuf/ptypes"

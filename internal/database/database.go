@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/jinzhu/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"squzy/internal/database/postgres"
 )
 
 type Database interface {
@@ -23,7 +24,7 @@ type Database interface {
 }
 
 func New(pgDb *gorm.DB) Database {
-	return &postgres{
-		db: pgDb,
+	return &postgres.Postgres{
+		Db: pgDb,
 	}
 }

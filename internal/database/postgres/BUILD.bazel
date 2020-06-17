@@ -3,12 +3,15 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
      name = "go_default_library",
      srcs = [
-         "database.go",
+         "convertion.go",
+         "postgres.go",
+         "snapshot.go",
+         "stat_request.go",
+         "transaction_info.go",
      ],
-     importpath = "squzy/internal/database",
+     importpath = "squzy/internal/database/postgres",
      visibility = ["//visibility:public"],
      deps = [
-        "//internal/database/postgres:go_default_library",
         "@com_github_jinzhu_gorm//:go_default_library",
         "@com_github_jinzhu_gorm//dialects/postgres:go_default_library",
         "@com_github_golang_protobuf//jsonpb:go_default_library",
@@ -23,11 +26,14 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
-        "database_test.go",
+        "convertion_test.go",
+        "postgres_test.go",
+         "snapshot_test.go",
+         "stat_request_test.go",
+         "transaction_info_test.go",
     ],
     embed = [":go_default_library"],
     deps = [
-        "//internal/database/postgres:go_default_library",
         "@com_github_stretchr_testify//assert:go_default_library",
         "@com_github_stretchr_testify//require:go_default_library",
         "@com_github_stretchr_testify//suite:go_default_library",
