@@ -19,8 +19,8 @@ type postgres struct {
 type Snapshot struct {
 	gorm.Model
 	SchedulerID   string `gorm:"column:schedulerId"`
-	Code          string `gorm:"column:code"`
-	Type          string `gorm:"column:type"`
+	Code          int32  `gorm:"column:code"`
+	Type          int32  `gorm:"column:type"`
 	Error         string `gorm:"column:error"`
 	MetaStartTime int64  `gorm:"column:metaStartTime"`
 	MetaEndTime   int64  `gorm:"column:metaEndTime"`
@@ -113,8 +113,8 @@ type TransactionInfo struct {
 	Name              string `gorm:"column:name"`
 	StartTime         int64  `gorm:"column:startTime"`
 	EndTime           int64  `gorm:"column:endTime"`
-	TransactionStatus string `gorm:"column:transactionStatus"`
-	TransactionType   string `gorm:"column:transactionType"`
+	TransactionStatus int32  `gorm:"column:transactionStatus"`
+	TransactionType   int32  `gorm:"column:transactionType"`
 	Error             string `gorm:"column:error"`
 }
 
@@ -176,7 +176,7 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 		err = p.db.Table(dbSnapshotCollection).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
 			Where(fmt.Sprintf(`"%s"."metaStartTime" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
-			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus().String()).
+			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus()).
 			Count(&count).Error
 	}
 
@@ -203,7 +203,7 @@ func (p *postgres) GetSnapshots(request *apiPb.GetSchedulerInformationRequest) (
 			Set("gorm:auto_preload", true).
 			Where(fmt.Sprintf(`"%s"."schedulerId" = ?`, dbSnapshotCollection), request.GetSchedulerId()).
 			Where(fmt.Sprintf(`"%s"."metaStartTime" BETWEEN ? and ?`, dbSnapshotCollection), timeFrom, timeTo).
-			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus().String()).
+			Where(fmt.Sprintf(`"%s"."code" = ?`, dbSnapshotCollection), request.GetStatus()).
 			Order(getSnapshotOrder(request.GetSort()) + getSnapshotDirection(request.GetSort())).
 			Offset(offset).
 			Limit(limit).
@@ -284,21 +284,6 @@ func getSnapshotDirection(request *apiPb.SortingSchedulerList) string {
 	return ` desc`
 }
 
-//TODO: remake
-func getUptimeAndLatency(dbSnapshots []*Snapshot, countAll, countOk int64) (float64, float64, error) {
-	if countAll == 0 || countOk == 0 {
-		return 0, 0, nil
-	}
-	latency := int64(0)
-	/*for _, snapshot := range dbSnapshots {
-		//Recieveing time difference in mellisecinds
-		if snapshot.Meta != nil {
-			latency += (snapshot.Meta.EndTime.UnixNano() - snapshot.Meta.StartTime.UnixNano()) / int64(time.Millisecond)
-		}
-	}*/
-	return float64(countOk) / float64(countAll), float64(latency) / float64(countOk), nil
-}
-
 func (p *postgres) InsertStatRequest(data *apiPb.Metric) error {
 	pgData, err := ConvertToPostgressStatRequest(data)
 	if err != nil {
@@ -328,7 +313,6 @@ func (p *postgres) GetStatRequest(agentID string, pagination *apiPb.Pagination, 
 
 	offset, limit := getOffsetAndLimit(count, pagination)
 
-	//TODO: test if it works
 	var statRequests []*StatRequest
 	err = p.db.
 		Set("gorm:auto_preload", true).
@@ -368,7 +352,6 @@ func (p *postgres) GetMemoryInfo(agentID string, pagination *apiPb.Pagination, f
 
 	offset, limit := getOffsetAndLimit(count, pagination)
 
-	//TODO: test if it works
 	var statRequests []*StatRequest
 	err = p.db.
 		Preload("MemoryInfo").
@@ -414,7 +397,6 @@ func (p *postgres) getSpecialRecords(agentID string, pagination *apiPb.Paginatio
 
 	offset, limit := getOffsetAndLimit(count, pagination)
 
-	//TODO: test if it works
 	var statRequests []*StatRequest
 	err = p.db.
 		Preload(key).
@@ -628,14 +610,14 @@ func getTransactionTypeWhere(transType apiPb.TransactionType) string {
 	if transType == apiPb.TransactionType_TRANSACTION_TYPE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."transactionType" = '%s'`, dbTransactionInfoCollection, transType.String())
+	return fmt.Sprintf(`"%s"."transactionType" = '%s'`, dbTransactionInfoCollection, transType)
 }
 
 func getTransactionStatusWhere(transType apiPb.TransactionStatus) string {
 	if transType == apiPb.TransactionStatus_TRANSACTION_CODE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."transactionStatus" = '%s'`, dbTransactionInfoCollection, transType.String())
+	return fmt.Sprintf(`"%s"."transactionStatus" = '%s'`, dbTransactionInfoCollection, transType)
 }
 
 var (

@@ -279,29 +279,6 @@ func TestPostgres_GetSnapshotsUptime(t *testing.T) {
 	})
 }
 
-func Test_getUptimeAndLatency(t *testing.T) {
-	t.Run("Should: return 0 and no error", func(t *testing.T) {
-		var snapshots []*Snapshot
-		uptime, latency, err := getUptimeAndLatency(snapshots, 0, 0)
-		assert.Equal(t, float64(0), uptime)
-		assert.Equal(t, float64(0), latency)
-		assert.NoError(t, err)
-	})
-	t.Run("Should: return not 0 and no error", func(t *testing.T) {
-		snapshots := []*Snapshot{
-			{
-				Code:          "OK",
-				MetaStartTime: time.Now().UnixNano(),
-				MetaEndTime:   time.Now().UnixNano(),
-			},
-		}
-		uptime, latency, err := getUptimeAndLatency(snapshots, 1, 1)
-		assert.Equal(t, float64(1), uptime)
-		assert.Equal(t, float64(0), latency)
-		assert.NoError(t, err)
-	})
-}
-
 func TestPostgres_InsertStatRequest(t *testing.T) {
 	t.Run("Should: return conv error", func(t *testing.T) {
 		err := postgr.InsertStatRequest(&apiPb.Metric{})
@@ -922,7 +899,7 @@ func Test_getTransactionDirection(t *testing.T) {
 			SortBy:    -1,
 			Direction: -1,
 		})
-		assert.Equal(t, "", res)
+		assert.Equal(t, " desc", res)
 	})
 }
 

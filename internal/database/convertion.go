@@ -88,8 +88,8 @@ func convertToSnapshot(request *apiPb.SchedulerSnapshot, schedulerID string) (*S
 
 	res := &Snapshot{
 		SchedulerID:   schedulerID,
-		Code:          request.GetCode().String(),
-		Type:          request.GetType().String(),
+		Code:          int32(request.GetCode()),
+		Type:          int32(request.GetType()),
 		MetaStartTime: startTime.UnixNano(),
 		MetaEndTime:   endTime.UnixNano(),
 	}
@@ -112,8 +112,8 @@ func convertFromSnapshot(snapshot *Snapshot) (*apiPb.SchedulerSnapshot, error) {
 	endTime, _ := ptypes.TimestampProto(time.Unix(0, snapshot.MetaEndTime))
 
 	res := &apiPb.SchedulerSnapshot{
-		Code: apiPb.SchedulerCode(apiPb.SchedulerCode_value[snapshot.Code]),
-		Type: apiPb.SchedulerType(apiPb.SchedulerType_value[snapshot.Type]),
+		Code: apiPb.SchedulerCode(snapshot.Code),
+		Type: apiPb.SchedulerType(snapshot.Type),
 		Meta: &apiPb.SchedulerSnapshot_MetaData{
 			StartTime: startTime,
 			EndTime:   endTime,
@@ -321,8 +321,8 @@ func convertToTransactionInfo(data *apiPb.TransactionInfo) (*TransactionInfo, er
 		Name:              data.GetName(),
 		StartTime:         startTime.UnixNano(),
 		EndTime:           endTime.UnixNano(),
-		TransactionStatus: data.GetStatus().String(),
-		TransactionType:   data.GetType().String(),
+		TransactionStatus: int32(data.GetStatus()),
+		TransactionType:   int32(data.GetType()),
 		Error:             data.GetError().GetMessage(),
 	}, nil
 }
@@ -355,8 +355,8 @@ func convertFromTransaction(data *TransactionInfo) *apiPb.TransactionInfo {
 		Name:          data.Name,
 		StartTime:     startTime,
 		EndTime:       endTime,
-		Status:        apiPb.TransactionStatus(apiPb.TransactionStatus_value[data.TransactionStatus]),
-		Type:          apiPb.TransactionType(apiPb.TransactionType_value[data.TransactionType]),
+		Status:        apiPb.TransactionStatus(data.TransactionStatus),
+		Type:          apiPb.TransactionType(data.TransactionType),
 		Error:         transactionError,
 	}
 }
