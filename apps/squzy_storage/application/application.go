@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/codes"
 	grpcStatus "google.golang.org/grpc/status"
 	"squzy/internal/database"
+	"fmt"
 )
 
 type service struct {
@@ -53,6 +54,7 @@ func (s *service) GetAgentInformation(ctx context.Context, request *apiPb.GetAge
 	var res []*apiPb.GetAgentInformationResponse_Statistic
 	var count int32
 	var err error
+	fmt.Println("HERE: " + request.GetAgentId())
 	switch request.GetType() {
 	case apiPb.TypeAgentStat_ALL:
 		res, count, err = s.database.GetStatRequest(request.GetAgentId(), request.GetPagination(), request.GetTimeRange())

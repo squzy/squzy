@@ -94,3 +94,7 @@ func getOffsetAndLimit(count int64, pagination *apiPb.Pagination) (int, int) {
 	}
 	return 0, int(count)
 }
+
+func checkError() {
+
+}

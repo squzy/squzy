@@ -79,6 +79,8 @@ func (p *Postgres) GetTransactionInfo(request *apiPb.GetTransactionsRequest) ([]
 		return nil, -1, err
 	}
 
+	fmt.Println(getTransactionTypeWhere(request.GetType()))
+	fmt.Println(getTransactionStatusWhere(request.GetStatus()))
 	var count int64
 	err = p.Db.Table(dbTransactionInfoCollection).
 		Where(applicationIdFilterString, request.GetApplicationId()).
@@ -127,7 +129,7 @@ func (p *Postgres) GetTransactionByID(request *apiPb.GetTransactionByIdRequest) 
 		First(&transaction).
 		Error
 	if err != nil || &transaction == nil {
-		return nil, nil, errorDataBase
+		return nil, nil, err
 	}
 
 	children, err := p.GetTransactionChildren(transaction.TransactionId, "")
@@ -174,7 +176,7 @@ func (p *Postgres) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest
 	}
 
 	selectString := fmt.Sprintf(
-		`%s as "groupName", COUNT(%s) as "count", COUNT(CASE WHEN "%s"."transactionStatus" = 'TRANSACTION_SUCCESSFUL' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."endTime"-"%s"."startTime") as "latency", min("%s"."endTime"-"%s"."startTime") as "minTime", max("%s"."endTime"-"%s"."startTime") as "maxTime", min("%s"."endTime") as "lowTime"`,
+		`%s as "groupName", COUNT(%s) as "count", COUNT(CASE WHEN "%s"."transactionStatus" = '1' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."endTime"-"%s"."startTime") as "latency", min("%s"."endTime"-"%s"."startTime") as "minTime", max("%s"."endTime"-"%s"."startTime") as "maxTime", min("%s"."endTime") as "lowTime"`,
 		getTransactionsGroupBy(request.GetGroupType()),
 		getTransactionsGroupBy(request.GetGroupType()),
 		dbTransactionInfoCollection,
@@ -236,14 +238,14 @@ func getTransactionTypeWhere(transType apiPb.TransactionType) string {
 	if transType == apiPb.TransactionType_TRANSACTION_TYPE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."%s" = '%s'`, dbTransactionInfoCollection, transTransactionTypeStr, transType)
+	return fmt.Sprintf(`"%s"."%s" = '%d'`, dbTransactionInfoCollection, transTransactionTypeStr, transType)
 }
 
 func getTransactionStatusWhere(transType apiPb.TransactionStatus) string {
 	if transType == apiPb.TransactionStatus_TRANSACTION_CODE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."transactionStatus" = '%s'`, dbTransactionInfoCollection, transType)
+	return fmt.Sprintf(`"%s"."transactionStatus" = '%d'`, dbTransactionInfoCollection, transType)
 }
 
 func getTransactionsGroupBy(group apiPb.GroupTransaction) string {
@@ -252,3 +254,4 @@ func getTransactionsGroupBy(group apiPb.GroupTransaction) string {
 	}
 	return fmt.Sprintf(`"%s"."%s"`, dbTransactionInfoCollection, transTransactionTypeStr)
 }
+
