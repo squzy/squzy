@@ -277,7 +277,7 @@ func (s *SuiteTransInfo) Test_GetTransactionChildren_SubchildrenError() {
 
 func (s *SuiteTransInfo) Test_GetTransactionGroup() {
 	query := fmt.Sprintf(
-		`SELECT "%s"."name" as "groupName", COUNT("%s"."name") as "count", COUNT(CASE WHEN "transaction_infos"."transactionStatus" = 'TRANSACTION_SUCCESSFUL' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."endTime"-"%s"."startTime") as "latency", min("transaction_infos"."endTime"-"transaction_infos"."startTime") as "minTime", max("transaction_infos"."endTime"-"transaction_infos"."startTime") as "maxTime", min("%s"."endTime") as "lowTime"`,
+		`SELECT "%s"."name" as "groupName", COUNT("%s"."name") as "count", COUNT(CASE WHEN "transaction_infos"."transactionStatus" = '1' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."endTime"-"%s"."startTime") as "latency", min("transaction_infos"."endTime"-"transaction_infos"."startTime") as "minTime", max("transaction_infos"."endTime"-"transaction_infos"."startTime") as "maxTime", min("%s"."endTime") as "lowTime"`,
 		dbTransactionInfoCollection,
 		dbTransactionInfoCollection,
 		dbTransactionInfoCollection,
