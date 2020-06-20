@@ -219,7 +219,7 @@ func getTransactionOrder(request *apiPb.SortingTransactionList) string {
 
 func getTransactionDirection(request *apiPb.SortingTransactionList) string {
 	if request == nil {
-		return ``
+		return ` desc`
 	}
 	if res, ok := directionMap[request.GetDirection()]; ok {
 		return res
