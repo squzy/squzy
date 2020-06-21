@@ -9,7 +9,7 @@ import (
 
 //docker run -d --rm --name postgres -e POSTGRES_USER="user" -e POSTGRES_PASSWORD="password" -e POSTGRES_DB="database" -p 5432:5432 postgres
 var (
-	db, _  = gorm.Open(
+	db, _ = gorm.Open(
 		"postgres",
 		fmt.Sprintf("host=lkl port=00 user=us dbname=dbn password=ps connect_timeout=10 sslmode=disable"))
 	postgrWrong = &Postgres{

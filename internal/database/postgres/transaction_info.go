@@ -254,4 +254,3 @@ func getTransactionsGroupBy(group apiPb.GroupTransaction) string {
 	}
 	return fmt.Sprintf(`"%s"."%s"`, dbTransactionInfoCollection, transTransactionTypeStr)
 }
-
