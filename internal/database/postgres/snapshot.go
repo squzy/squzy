@@ -116,7 +116,7 @@ func getCodeString(code apiPb.SchedulerCode) string {
 	if code == apiPb.SchedulerCode_SCHEDULER_CODE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."code" = "%d"`, dbSnapshotCollection, code)
+	return fmt.Sprintf(`"%s"."code" = '%d'`, dbSnapshotCollection, code)
 }
 
 func getSnapshotOrder(request *apiPb.SortingSchedulerList) string {
