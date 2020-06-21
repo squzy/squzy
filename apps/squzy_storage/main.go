@@ -34,7 +34,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	apiService := application.NewService(db)
-	storageServ := server.NewServer(cnfg, apiService)
+	apiService := server.NewServer(db)
+	storageServ := application.NewApplication(cnfg, apiService)
 	log.Fatal(storageServ.Run())
 }
