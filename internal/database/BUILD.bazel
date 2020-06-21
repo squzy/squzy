@@ -3,17 +3,17 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
      name = "go_default_library",
      srcs = [
-         "convertion.go",
          "database.go",
-         "postgres.go",
      ],
      importpath = "squzy/internal/database",
      visibility = ["//visibility:public"],
      deps = [
+        "//internal/database/postgres:go_default_library",
         "@com_github_jinzhu_gorm//:go_default_library",
         "@com_github_jinzhu_gorm//dialects/postgres:go_default_library",
         "@com_github_golang_protobuf//jsonpb:go_default_library",
         "@com_github_golang_protobuf//ptypes:go_default_library",
+        "@com_github_golang_protobuf//ptypes/wrappers:go_default_library",
         "@com_github_golang_protobuf//ptypes/struct:go_default_library",
         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
      ],
@@ -23,12 +23,11 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
-        "convertion_test.go",
         "database_test.go",
-        "postgres_test.go",
     ],
     embed = [":go_default_library"],
     deps = [
+        "//internal/database/postgres:go_default_library",
         "@com_github_stretchr_testify//assert:go_default_library",
         "@com_github_stretchr_testify//require:go_default_library",
         "@com_github_stretchr_testify//suite:go_default_library",

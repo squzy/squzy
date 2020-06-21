@@ -14,6 +14,8 @@ build_bin_squzy: .build_bin_squzy
 
 build_bin_storage: .build_bin_storage
 
+build_application_monitoring: .build_application_monitoring
+
 run_agent: .run_agent
 
 run_squzy: .run_squzy
@@ -54,6 +56,9 @@ default: build
 
 .build_agent_server:
 	./build.bash squzy_agent_server squzy_agent_server_$(version) $(version)
+
+.build_application_monitoring:
+	./build.bash squzy_application_monitoring squzy_application_monitoring_$(version) $(version)
 
 .test_debug:
 	bazel test --define version="local" //...:all --sandbox_debug

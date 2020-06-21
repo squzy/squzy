@@ -28,6 +28,7 @@ type AgentDao struct {
 	Status    apiPb.AgentStatus  `bson:"status"`
 	HostInfo  *HostInfo          `bson:"hostInfo,omitempty"`
 	History   []*HistoryItem     `bson:"history"`
+	Interval  int64              `bson:"interval"`
 }
 
 type HostInfo struct {
@@ -52,6 +53,7 @@ func dbToPb(agent *AgentDao) *apiPb.AgentItem {
 		Id:        agent.ID.Hex(),
 		AgentName: agent.AgentName,
 		Status:    agent.Status,
+		Interval:  agent.Interval,
 	}
 	if agent.HostInfo != nil {
 		a.HostInfo = &apiPb.HostInfo{
@@ -81,6 +83,7 @@ func (d *db) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, err
 		ID:        id,
 		AgentName: agent.AgentName,
 		Status:    apiPb.AgentStatus_REGISTRED,
+		Interval:  agent.Interval,
 		History: []*HistoryItem{
 			{
 				Status:    apiPb.AgentStatus_REGISTRED,

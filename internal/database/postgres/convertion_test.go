@@ -1,4 +1,4 @@
-package database
+package postgres
 
 import (
 	"github.com/golang/protobuf/ptypes"
@@ -75,38 +75,20 @@ func TestConvertFromPostgresSnapshots(t *testing.T) {
 	wrongTime := time.Unix(-62135596888, -100000000) //Protobuf validate this seconds aas error
 	t.Run("Test: error in convertation", func(t *testing.T) {
 		res := ConvertFromPostgresSnapshots([]*Snapshot{{}})
-		assert.Nil(t, res)
+		assert.NotNil(t, res)
 	})
 	t.Run("Test: error in convertation", func(t *testing.T) {
 		res := ConvertFromPostgresSnapshots([]*Snapshot{
 			{
-				Meta: &MetaData{
-					StartTime: wrongTime,
-					EndTime:   time.Time{},
-				},
+				MetaStartTime: wrongTime.UnixNano(),
 			},
 		})
-		assert.Nil(t, res)
+		assert.NotNil(t, res)
 	})
 	t.Run("Test: error", func(t *testing.T) {
 		res := ConvertFromPostgresSnapshots([]*Snapshot{
 			{
-				Meta: &MetaData{
-					StartTime: time.Time{},
-					EndTime:   wrongTime,
-				},
-			},
-		})
-		assert.Nil(t, res)
-	})
-	t.Run("Test: no error", func(t *testing.T) {
-		res := ConvertFromPostgresSnapshots([]*Snapshot{
-			{
-				Meta: &MetaData{
-					StartTime: time.Time{},
-					EndTime:   time.Time{},
-					Value:     nil,
-				},
+				Error: "error",
 			},
 		})
 		assert.NotNil(t, res)
@@ -114,12 +96,15 @@ func TestConvertFromPostgresSnapshots(t *testing.T) {
 	t.Run("Test: no error", func(t *testing.T) {
 		res := ConvertFromPostgresSnapshots([]*Snapshot{
 			{
-				Error: "error",
-				Meta: &MetaData{
-					StartTime: time.Time{},
-					EndTime:   time.Time{},
-					Value:     []byte(`{"stringValue":"HUY"}`),
-				},
+				MetaValue: nil,
+			},
+		})
+		assert.NotNil(t, res)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		res := ConvertFromPostgresSnapshots([]*Snapshot{
+			{
+				MetaValue: []byte(`{"stringValue":"HUY"}`),
 			},
 		})
 		assert.NotNil(t, res)
@@ -203,5 +188,103 @@ func TestConvertFromPostgressStatRequest(t *testing.T) {
 			Time:     time.Time{},
 		})
 		assert.NoError(t, err)
+	})
+}
+
+func TestConvertToTransactionInfo(t *testing.T) {
+	t.Run("Test: error", func(t *testing.T) {
+		_, err := convertToTransactionInfo(&apiPb.TransactionInfo{
+			StartTime: nil,
+		})
+		assert.Error(t, err)
+	})
+	t.Run("Test: error", func(t *testing.T) {
+		_, err := convertToTransactionInfo(&apiPb.TransactionInfo{
+			StartTime: ptypes.TimestampNow(),
+			EndTime:   nil,
+		})
+		assert.Error(t, err)
+	})
+}
+
+func TestConvertFromUptimeResult(t *testing.T) {
+	t.Run("Test: error", func(t *testing.T) {
+		res := convertFromUptimeResult(&UptimeResult{
+			Count:   10,
+			Latency: "qwe",
+		}, 10)
+		assert.Nil(t, res)
+	})
+	t.Run("Test: error", func(t *testing.T) {
+		res := convertFromUptimeResult(&UptimeResult{
+			Count:   10,
+			Latency: "10000",
+		}, 10)
+		assert.NotNil(t, res)
+	})
+}
+
+func TestConvertFromGroupResult(t *testing.T) {
+	t.Run("Test: error", func(t *testing.T) {
+		res := convertFromGroupResult([]*GroupResult{
+			{
+				Name:  "Name",
+				Count: 0,
+			},
+		}, time.Now().UnixNano())
+		assert.NotNil(t, res)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		res := convertFromGroupResult([]*GroupResult{
+			{
+				Name:    "Name",
+				Count:   0,
+				Latency: "10000.000",
+			},
+		}, time.Now().UnixNano())
+		assert.NotNil(t, res)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		res := convertFromGroupResult([]*GroupResult{
+			{
+				Name:    "Name",
+				Count:   0,
+				Latency: "10000.000",
+				MinTime: "10000.000",
+			},
+		}, time.Now().UnixNano())
+		assert.NotNil(t, res)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		res := convertFromGroupResult([]*GroupResult{
+			{
+				Name:    "Name",
+				Count:   0,
+				Latency: "10000.000",
+				MinTime: "10000.000",
+				MaxTime: "10000.000",
+			},
+		}, time.Now().UnixNano())
+		assert.NotNil(t, res)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		res := convertFromGroupResult([]*GroupResult{
+			{
+				Name:    "Name",
+				Count:   0,
+				Latency: "10000.000",
+				MinTime: "10000.000",
+				MaxTime: "10000.000",
+				LowTime: "10000.000",
+			},
+		}, time.Now().UnixNano())
+		assert.NotNil(t, res)
+	})
+}
+
+func TestGetThroughput(t *testing.T) {
+	t.Run("Test: error", func(t *testing.T) {
+		res := getThroughput(0, 10, 10)
+		assert.NotNil(t, res)
 	})
 }

@@ -288,8 +288,8 @@ go_repository(
 go_repository(
     name = "com_github_squzy_squzy_generated",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:1JTyWXHUiASd+ifXn/1zlUDbP+5bA+t1063ezT7pffA=",
-    version = "v1.7.0",
+    sum = "h1:m6t2PW4An/KJ+US5vJOmNWhlWEi7vuuPOz7CHiJ9JyI=",
+    version = "v1.7.2-0.20200613110416-af0cc49be69d",
 )
 
 go_repository(

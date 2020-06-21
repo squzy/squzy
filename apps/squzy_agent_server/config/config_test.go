@@ -19,10 +19,6 @@ func TestNew(t *testing.T) {
 	})
 }
 
-func TestCfg_GetClientAddress(t *testing.T) {
-
-}
-
 func TestCfg_GetPort(t *testing.T) {
 	t.Run("Should: return from env", func(t *testing.T) {
 		os.Setenv(ENV_PORT, "11124")

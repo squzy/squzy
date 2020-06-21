@@ -5,14 +5,16 @@ go_library(
      srcs = [
          "server.go",
      ],
-     importpath = "squzy/apps/squzy_storage/server",
+     importpath = "squzy/apps/squzy_storage/application",
      visibility = ["//visibility:public"],
      deps = [
-        "//apps/squzy_storage/config:go_default_library",
+        "//internal/database:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes:go_default_library",
+        "@org_golang_google_grpc//status:go_default_library",
+        "@com_github_golang_protobuf//ptypes:go_default_library",
+        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-        "@com_github_grpc_ecosystem_go_grpc_middleware//:go_default_library",
-        "@com_github_grpc_ecosystem_go_grpc_middleware//recovery:go_default_library",
      ],
 
 )
@@ -20,11 +22,10 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
-        "server_test.go"
+         "server_test.go",
     ],
     embed = [":go_default_library"],
     deps = [
-        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
         "@com_github_stretchr_testify//assert:go_default_library",
     ]
 )

@@ -2,188 +2,132 @@ package application
 
 import (
 	"context"
-	"errors"
+	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
+	"net"
 	"testing"
+	"time"
 )
 
-type dbErrorMock struct {
+type configErrorMock struct {
 }
 
-func (*dbErrorMock) Migrate() error {
-	return nil
+func (*configErrorMock) GetPort() int32 {
+	return 1000000
 }
 
-func (*dbErrorMock) InsertSnapshot(data *apiPb.SchedulerResponse) error {
-	return errors.New("error")
+func (*configErrorMock) GetDbHost() string {
+	panic("implement me!")
 }
 
-func (*dbErrorMock) GetSnapshots(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.SchedulerSnapshot, int32, error) {
-	return nil, -1, errors.New("error")
+func (*configErrorMock) GetDbPort() string {
+	panic("implement me!")
 }
 
-func (*dbErrorMock) InsertStatRequest(data *apiPb.Metric) error {
-	return errors.New("error")
+func (*configErrorMock) GetDbName() string {
+	panic("implement me!")
 }
 
-func (*dbErrorMock) GetStatRequest(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, -1, errors.New("error")
+func (*configErrorMock) GetDbUser() string {
+	panic("implement me!")
 }
 
-func (*dbErrorMock) GetCPUInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, -1, errors.New("error")
+func (*configErrorMock) GetDbPassword() string {
+	panic("implement me!")
 }
 
-func (*dbErrorMock) GetMemoryInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, -1, errors.New("error")
+type configMock struct {
 }
 
-func (*dbErrorMock) GetDiskInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, -1, errors.New("error")
+func (*configMock) GetPort() int32 {
+	return 23233
 }
 
-func (*dbErrorMock) GetNetInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, -1, errors.New("error")
+func (*configMock) GetDbHost() string {
+	panic("implement me!")
 }
 
-type dbMock struct {
+func (*configMock) GetDbPort() string {
+	panic("implement me!")
 }
 
-func (*dbMock) Migrate() error {
-	return nil
+func (*configMock) GetDbName() string {
+	panic("implement me!")
 }
 
-func (*dbMock) InsertSnapshot(data *apiPb.SchedulerResponse) error {
-	return nil
+func (*configMock) GetDbUser() string {
+	panic("implement me!")
 }
 
-func (*dbMock) GetSnapshots(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.SchedulerSnapshot, int32, error) {
-	return nil, -1, nil
+func (*configMock) GetDbPassword() string {
+	panic("implement me!")
 }
 
-func (*dbMock) InsertStatRequest(data *apiPb.Metric) error {
-	return nil
+type mockApiStorage struct {
 }
 
-func (*dbMock) GetStatRequest(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, -1, nil
+func (s mockApiStorage) GetSchedulerUptime(ctx context.Context, in *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
+	panic("implement me")
 }
 
-func (*dbMock) GetCPUInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, -1, nil
+func (m mockApiStorage) SaveResponseFromScheduler(ctx context.Context, response *apiPb.SchedulerResponse) (*empty.Empty, error) {
+	panic("implement me")
 }
 
-func (*dbMock) GetMemoryInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, -1, nil
+func (m mockApiStorage) SaveResponseFromAgent(ctx context.Context, metric *apiPb.Metric) (*empty.Empty, error) {
+	panic("implement me")
 }
 
-func (*dbMock) GetDiskInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, -1, nil
+func (m mockApiStorage) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {
+	panic("implement me")
 }
 
-func (*dbMock) GetNetInfo(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
-	return nil, -1, nil
+func (m mockApiStorage) GetSchedulerInformation(ctx context.Context, request *apiPb.GetSchedulerInformationRequest) (*apiPb.GetSchedulerInformationResponse, error) {
+	panic("implement me")
 }
 
-func TestNewService(t *testing.T) {
-	t.Run("Should: return no nil", func(t *testing.T) {
-		assert.NotNil(t, NewService(nil))
+func (m mockApiStorage) GetAgentInformation(ctx context.Context, request *apiPb.GetAgentInformationRequest) (*apiPb.GetAgentInformationResponse, error) {
+	panic("implement me")
+}
+
+func (m mockApiStorage) GetTransactionsGroup(ctx context.Context, request *apiPb.GetTransactionGroupRequest) (*apiPb.GetTransactionGroupResponse, error) {
+	panic("implement me")
+}
+
+func (m mockApiStorage) GetTransactions(ctx context.Context, request *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error) {
+	panic("implement me")
+}
+
+func (m mockApiStorage) GetTransactionById(ctx context.Context, request *apiPb.GetTransactionByIdRequest) (*apiPb.GetTransactionByIdResponse, error) {
+	panic("implement me")
+}
+
+func TestNewServer(t *testing.T) {
+	t.Run("Should: work", func(t *testing.T) {
+		s := NewApplication(nil, nil)
+		assert.NotNil(t, s)
 	})
 }
 
-func TestService_SendResponseFromScheduler(t *testing.T) {
+func TestServer_Run(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		s := service{
-			database: &dbErrorMock{},
+		s := &application{
+			config:  &configErrorMock{},
+			apiServ: nil,
 		}
-		_, err := s.SendResponseFromScheduler(context.Background(), nil)
-		assert.Error(t, err)
+		assert.Error(t, s.Run())
 	})
-	t.Run("Should: return no error", func(t *testing.T) {
-		s := service{
-			database: &dbMock{},
-		}
-		_, err := s.SendResponseFromScheduler(context.Background(), nil)
-		assert.NoError(t, err)
-	})
-}
-
-func TestService_SendResponseFromAgent(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		s := service{
-			database: &dbErrorMock{},
+		s := &application{
+			config:  &configMock{},
+			apiServ: &mockApiStorage{},
 		}
-		_, err := s.SendResponseFromAgent(context.Background(), nil)
-		assert.Error(t, err)
-	})
-	t.Run("Should: return no error", func(t *testing.T) {
-		s := service{
-			database: &dbMock{},
-		}
-		_, err := s.SendResponseFromAgent(context.Background(), nil)
-		assert.NoError(t, err)
-	})
-}
-
-func TestService_GetSchedulerInformation(t *testing.T) {
-	t.Run("Should: return error", func(t *testing.T) {
-		s := service{
-			database: &dbErrorMock{},
-		}
-		_, err := s.GetSchedulerInformation(context.Background(), &apiPb.GetSchedulerInformationRequest{})
-		assert.Error(t, err)
-	})
-	t.Run("Should: return no error", func(t *testing.T) {
-		s := service{
-			database: &dbMock{},
-		}
-		_, err := s.GetSchedulerInformation(context.Background(), &apiPb.GetSchedulerInformationRequest{})
-		assert.NoError(t, err)
-	})
-}
-
-func TestService_GetAgentInformation(t *testing.T) {
-	t.Run("Should: return error", func(t *testing.T) {
-		s := service{
-			database: &dbErrorMock{},
-		}
-		_, err := s.GetAgentInformation(context.Background(), &apiPb.GetAgentInformationRequest{Type: -1})
-		assert.Error(t, err)
-	})
-	t.Run("Should: return no error", func(t *testing.T) {
-		s := service{
-			database: &dbMock{},
-		}
-		_, err := s.GetAgentInformation(context.Background(), &apiPb.GetAgentInformationRequest{Type: apiPb.TypeAgentStat_ALL})
-		assert.NoError(t, err)
-	})
-	t.Run("Should: return no error", func(t *testing.T) {
-		s := service{
-			database: &dbMock{},
-		}
-		_, err := s.GetAgentInformation(context.Background(), &apiPb.GetAgentInformationRequest{Type: apiPb.TypeAgentStat_CPU})
-		assert.NoError(t, err)
-	})
-	t.Run("Should: return no error", func(t *testing.T) {
-		s := service{
-			database: &dbMock{},
-		}
-		_, err := s.GetAgentInformation(context.Background(), &apiPb.GetAgentInformationRequest{Type: apiPb.TypeAgentStat_MEMORY})
-		assert.NoError(t, err)
-	})
-	t.Run("Should: return no error", func(t *testing.T) {
-		s := service{
-			database: &dbMock{},
-		}
-		_, err := s.GetAgentInformation(context.Background(), &apiPb.GetAgentInformationRequest{Type: apiPb.TypeAgentStat_DISK})
-		assert.NoError(t, err)
-	})
-	t.Run("Should: return no error", func(t *testing.T) {
-		s := service{
-			database: &dbMock{},
-		}
-		_, err := s.GetAgentInformation(context.Background(), &apiPb.GetAgentInformationRequest{Type: apiPb.TypeAgentStat_NET})
-		assert.NoError(t, err)
+		go func() {
+			_ = s.Run()
+		}()
+		time.Sleep(time.Second)
+		_, err := net.Dial("tcp", "localhost:23233")
+		assert.Equal(t, nil, err)
 	})
 }

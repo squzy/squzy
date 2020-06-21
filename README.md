@@ -46,7 +46,7 @@ Squzy Web GUI - helps interact with squzy.
 
 ### [Squzy API](https://github.com/squzy/squzy/tree/develop/apps/squzy_api)
 
-Squzy Web GUI - helps interact with squzy.
+Squzy API server for works GUI + applications
 
 # Authors
 - [Iurii Panarin](https://github.com/PxyUp)
