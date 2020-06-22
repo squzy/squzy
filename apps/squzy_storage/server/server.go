@@ -15,6 +15,26 @@ type server struct {
 	database database.Database
 }
 
+func (s *server) SaveIncident(context.Context, *apiPb.Incident) (*empty.Empty, error) {
+	panic("implement me")
+}
+
+func (s *server) UpdateIncidentStatus(context.Context, *apiPb.UpdateIncidentStatusRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s *server) GetIncidentById(context.Context, *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s *server) GetIncidentByRuleId(context.Context, *apiPb.RuleIdRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s *server) GetIncidentsList(context.Context, *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
+	panic("implement me")
+}
+
 func NewServer(db database.Database) apiPb.StorageServer {
 	return &server{
 		database: db,
