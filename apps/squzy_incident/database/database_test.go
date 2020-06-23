@@ -2,16 +2,15 @@ package database
 
 import (
 	"context"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"testing"
 )
 
 type mockMongo struct {
-
 }
 
 func (m mockMongo) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
@@ -42,26 +41,20 @@ func TestNew(t *testing.T) {
 
 func TestDatabase_SaveRule(t *testing.T) {
 	t.Run("Should: return nil", func(t *testing.T) {
-		assert.Nil(t, db.SaveRule(context.Background(), &apiPb.Rule{}))
+		assert.Nil(t, db.SaveRule(context.Background(), &Rule{}))
 	})
 }
 
 func TestDatabase_FindRuleById(t *testing.T) {
 	t.Run("Should: return nil", func(t *testing.T) {
-		_, err := db.FindRuleById(context.Background(), "")
+		_, err := db.FindRuleById(context.Background(), primitive.NewObjectID())
 		assert.Nil(t, err)
 	})
 }
 
 func TestDatabase_FindRulesByOwnerId(t *testing.T) {
 	t.Run("Should: return nil", func(t *testing.T) {
-		_, err := db.FindRulesByOwnerId(context.Background(), "")
+		_, err := db.FindRulesByOwnerId(context.Background(), 0, primitive.NewObjectID())
 		assert.Nil(t, err)
-	})
-}
-
-func TestDatabase_RemoveRule(t *testing.T) {
-	t.Run("Should: return nil", func(t *testing.T) {
-		assert.Nil(t, db.RemoveRule(context.Background(), ""))
 	})
 }

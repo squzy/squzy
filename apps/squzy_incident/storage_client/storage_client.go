@@ -17,20 +17,20 @@ type storage struct {
 
 func New(client apiPb.StorageClient) Storage {
 	return &storage{
-		client:client,
+		client: client,
 	}
 }
 
 func (s *storage) SetStatus(ctx context.Context, id string, status apiPb.IncidentStatus) (*apiPb.Incident, error) {
 	return s.client.UpdateIncidentStatus(ctx, &apiPb.UpdateIncidentStatusRequest{
-		IncidentId:           id,
-		Status:               status,
+		IncidentId: id,
+		Status:     status,
 	})
 }
 
 func (s *storage) GetIncident(ctx context.Context, ruleID string) (*apiPb.Incident, error) {
 	return s.client.GetIncidentByRuleId(ctx, &apiPb.RuleIdRequest{
-		RuleId:               ruleID,
+		RuleId: ruleID,
 	})
 }
 

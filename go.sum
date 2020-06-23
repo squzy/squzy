@@ -181,6 +181,8 @@ github.com/squzy/squzy_generated v1.8.1-0.20200623053716-78b52eb18c80 h1:Mwo6BYn
 github.com/squzy/squzy_generated v1.8.1-0.20200623053716-78b52eb18c80/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/squzy/squzy_generated v1.8.1-0.20200623053834-1ffdf427fd6f h1:od90qFld/gne3Qq2vnm//FxxlsfPbnlGCggcsb8VOqI=
 github.com/squzy/squzy_generated v1.8.1-0.20200623053834-1ffdf427fd6f/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.8.1-0.20200623221151-f44fdefd1841 h1:RZlCk3GChAcnh9i+wJwvukOTWP13fAScLhNcnC4IXQ4=
+github.com/squzy/squzy_generated v1.8.1-0.20200623221151-f44fdefd1841/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

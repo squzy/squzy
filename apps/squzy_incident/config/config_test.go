@@ -35,4 +35,3 @@ func TestCfg_GetStorageHost(t *testing.T) {
 		assert.Equal(t, s.GetStorageHost(), "localhost:9090")
 	})
 }
-

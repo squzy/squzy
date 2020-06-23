@@ -5,18 +5,39 @@ import (
 	"github.com/squzy/mongo_helper"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Database interface {
-	SaveRule(context.Context, *apiPb.Rule) error
-	FindRuleById(context.Context, string) (*apiPb.Rule, error)
-	FindRulesByOwnerId(ctx context.Context, ownerType int32, ownerId string) ([]*apiPb.Rule, error)
-	RemoveRule(context.Context, string) error
+	SaveRule(context.Context, *Rule) error
+	FindRuleById(context.Context, primitive.ObjectID) (*Rule, error)
+	FindRulesByOwnerId(ctx context.Context, ownerType apiPb.RuleOwnerType, ownerId primitive.ObjectID) ([]*Rule, error)
+	RemoveRule(ctx context.Context, ruleId primitive.ObjectID) (*Rule, error)
+	ActivateRule(ctx context.Context, ruleId primitive.ObjectID) (*Rule, error)
+	DeactivateRule(ctx context.Context, ruleId primitive.ObjectID) (*Rule, error)
+}
+
+type Rule struct {
+	Id        primitive.ObjectID  `bson:"_id"`
+	Rule      string              `bson:"rule,omitempty"`
+	Name      string              `bson:"name,omitempty"`
+	AutoClose bool                `bson:"autoClose"`
+	OwnerType apiPb.RuleOwnerType `bson:"ownerType"`
+	OwnerId   primitive.ObjectID  `bson:"ownerId"`
+	Status    apiPb.RuleStatus    `bson:"status"`
 }
 
 type database struct {
 	mongo mongo_helper.Connector
 }
+
+var (
+	activeStatus = []apiPb.RuleStatus{
+		apiPb.RuleStatus_RULE_STATUS_ACTIVE, apiPb.RuleStatus_RULE_STATUS_INACTIVE,
+	}
+)
+
+
 
 func New(mongo mongo_helper.Connector) Database {
 	return &database{
@@ -24,13 +45,41 @@ func New(mongo mongo_helper.Connector) Database {
 	}
 }
 
-func (db *database) SaveRule(ctx context.Context, rule *apiPb.Rule) error {
+func (db *database) DeactivateRule(ctx context.Context, ruleId primitive.ObjectID) (*Rule, error) {
+	return db.setStatus(ctx, ruleId, apiPb.RuleStatus_RULE_STATUS_INACTIVE)
+}
+
+func (db *database) setStatus(ctx context.Context, ruleId primitive.ObjectID, status apiPb.RuleStatus) (*Rule, error) {
+	filter := bson.M{
+		"id": ruleId,
+	}
+	if status != apiPb.RuleStatus_RULE_STATUS_REMOVED {
+		filter["status"] = bson.M{
+			"$in": activeStatus,
+		}
+	}
+	_, err := db.mongo.UpdateOne(ctx, filter, bson.M{
+		"$set": bson.M{
+			"status": status,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return db.FindRuleById(ctx, ruleId)
+}
+
+func (db *database) ActivateRule(ctx context.Context, ruleId primitive.ObjectID) (*Rule, error) {
+	return db.setStatus(ctx, ruleId, apiPb.RuleStatus_RULE_STATUS_ACTIVE)
+}
+
+func (db *database) SaveRule(ctx context.Context, rule *Rule) error {
 	_, err := db.mongo.InsertOne(ctx, rule)
 	return err
 }
 
-func (db *database) FindRuleById(ctx context.Context, id string) (*apiPb.Rule, error) {
-	rule := &apiPb.Rule{}
+func (db *database) FindRuleById(ctx context.Context, id primitive.ObjectID) (*Rule, error) {
+	rule := &Rule{}
 	filter := bson.M{
 		"id": id,
 	}
@@ -38,17 +87,16 @@ func (db *database) FindRuleById(ctx context.Context, id string) (*apiPb.Rule, e
 	return rule, err
 }
 
-func (db *database) FindRulesByOwnerId(ctx context.Context, ownerType int32, ownerId string) ([]*apiPb.Rule, error) {
-	var rule []*apiPb.Rule
+func (db *database) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.RuleOwnerType, ownerId primitive.ObjectID) ([]*Rule, error) {
+	var rule []*Rule
 	filter := bson.M{
 		"owner_type": ownerType,
-		"owner_id": ownerId,
+		"owner_id":   ownerId,
 	}
 	err := db.mongo.FindAll(ctx, filter, rule)
 	return rule, err
 }
 
-func (db *database) RemoveRule(context.Context, string) error {
-	//TODO: implement removal in mongo
-	return nil
+func (db *database) RemoveRule(ctx context.Context, ruleId primitive.ObjectID) (*Rule, error) {
+	return db.setStatus(ctx, ruleId, apiPb.RuleStatus_RULE_STATUS_REMOVED)
 }

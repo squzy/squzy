@@ -11,7 +11,7 @@ import (
 )
 
 type server struct {
-	db database.Database
+	db      database.Database
 	storage storage_client.Storage
 }
 
@@ -19,32 +19,106 @@ func NewIncidentServer() apiPb.IncidentServerServer {
 	return &server{}
 }
 
+func dbRuleToProto(rule *database.Rule) *apiPb.Rule {
+	return &apiPb.Rule{
+		Id:        rule.Id.Hex(),
+		Rule:      rule.Rule,
+		Name:      rule.Name,
+		AutoClose: rule.AutoClose,
+		OwnerType: rule.OwnerType,
+		OwnerId:   rule.OwnerId.Hex(),
+		Status:    rule.Status,
+	}
+}
+
+func (s *server) ActivateRule(ctx context.Context, request *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	ruleId, err := primitive.ObjectIDFromHex(request.RuleId)
+	if err != nil {
+		return nil, err
+	}
+
+	rule, err := s.db.ActivateRule(ctx, ruleId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return dbRuleToProto(rule), nil
+}
+
+func (s *server) DeactivateRule(ctx context.Context, request *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	ruleId, err := primitive.ObjectIDFromHex(request.RuleId)
+	if err != nil {
+		return nil, err
+	}
+
+	rule, err := s.db.DeactivateRule(ctx, ruleId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return dbRuleToProto(rule), nil
+}
+
 func (s *server) CreateRule(ctx context.Context, request *apiPb.CreateRuleRequest) (*apiPb.Rule, error) {
-	rule := &apiPb.Rule{
-		Id:        primitive.NewObjectID().String(),
+	ownerId, err := primitive.ObjectIDFromHex(request.OwnerId)
+	if err != nil {
+		return nil, err
+	}
+	rule := &database.Rule{
+		Id:        primitive.NewObjectID(),
 		Rule:      request.GetRule(),
 		Name:      request.GetName(),
 		AutoClose: request.GetAutoClose(),
 		OwnerType: request.GetOwnerType(),
-		OwnerId:   request.GetOwnerId(),
+		OwnerId:   ownerId,
+		Status:    apiPb.RuleStatus_RULE_STATUS_ACTIVE,
 	}
-	err := s.db.SaveRule(ctx, rule)
-	return rule, err
+	err = s.db.SaveRule(ctx, rule)
+	if err != nil {
+		return nil, err
+	}
+	return dbRuleToProto(rule), err
 }
 
 func (s *server) GetRuleById(ctx context.Context, request *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
-	return s.db.FindRuleById(ctx, request.GetRuleId())
+	ruleId, err := primitive.ObjectIDFromHex(request.RuleId)
+	if err != nil {
+		return nil, err
+	}
+	rule, err := s.db.FindRuleById(ctx, ruleId)
+	if err != nil {
+		return nil, err
+	}
+	return dbRuleToProto(rule), nil
 }
 
 func (s *server) GetRulesByOwnerId(ctx context.Context, request *apiPb.GetRulesByOwnerIdRequest) (*apiPb.Rules, error) {
-	rules, err := s.db.FindRulesByOwnerId(ctx, int32(request.GetOwnerType()), request.GetOwnerId())
+	ownerId, err := primitive.ObjectIDFromHex(request.OwnerId)
+	if err != nil {
+		return nil, err
+	}
+	dbRules, err := s.db.FindRulesByOwnerId(ctx, request.GetOwnerType(), ownerId)
+	rules := []*apiPb.Rule{}
+	for _, rule := range dbRules {
+		rules = append(rules, dbRuleToProto(rule))
+	}
 	return &apiPb.Rules{
-		Rules:                rules,
+		Rules: rules,
 	}, err
 }
 
 func (s *server) RemoveRule(ctx context.Context, request *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
-	return nil, s.db.RemoveRule(ctx, request.RuleId)
+	ruleId, err := primitive.ObjectIDFromHex(request.RuleId)
+	if err != nil {
+		return nil, err
+	}
+	rule, err := s.db.RemoveRule(ctx, ruleId)
+	if err != nil {
+		return nil, err
+	}
+	return dbRuleToProto(rule), nil
 }
 
 func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.StorageRecord) (*empty.Empty, error) {
@@ -60,15 +134,15 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 
 	wasError := false
 	for _, rule := range rules {
-		wasIncident := checkRule(rule.GetRule())
-		incident, err := s.storage.GetIncident(ctx, rule.GetId())
+		wasIncident := checkRule(rule.Rule)
+		incident, err := s.storage.GetIncident(ctx, rule.Id.Hex())
 		if err != nil {
 			wasError = true
 			continue
 		}
 
 		if isIncidentExist(incident) && isIncidentOpened(incident) && !wasIncident {
-			if err := s.tryCloseIncident(ctx, rule, incident); err != nil {
+			if err := s.tryCloseIncident(ctx, rule.AutoClose, incident); err != nil {
 				wasError = true
 			}
 			continue
@@ -96,17 +170,29 @@ func (s *server) StudyIncident(context.Context, *apiPb.IncidentIdRequest) (*apiP
 	panic("implement me")
 }
 
-func getOwnerTypeAndId(request *apiPb.StorageRecord) (int32, string, error) {
+func getOwnerTypeAndId(request *apiPb.StorageRecord) (apiPb.RuleOwnerType, primitive.ObjectID, error) {
 	if request.GetScheduler() != nil {
-		return int32(apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT), request.GetScheduler().GetId(), nil
+		ownerId, err := primitive.ObjectIDFromHex(request.GetScheduler().Id)
+		if err != nil {
+			return 0, primitive.ObjectID{}, errors.New("ERROR_NO_RECORD")
+		}
+		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT, ownerId, nil
 	}
 	if request.GetAgent() != nil {
-		return int32(apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT), request.GetAgent().GetAgentId(), nil
+		ownerId, err := primitive.ObjectIDFromHex(request.GetAgent().AgentId)
+		if err != nil {
+			return 0, primitive.ObjectID{}, errors.New("ERROR_NO_RECORD")
+		}
+		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT, ownerId, nil
 	}
 	if request.GetTransaction() != nil {
-		return int32(apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION), request.GetTransaction().GetId(), nil
+		ownerId, err := primitive.ObjectIDFromHex(request.GetTransaction().Id)
+		if err != nil {
+			return 0, primitive.ObjectID{}, errors.New("ERROR_NO_RECORD")
+		}
+		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION, ownerId, nil
 	}
-	return 0, "", errors.New("ERROR_NO_RECORD")
+	return 0, primitive.ObjectID{}, errors.New("ERROR_NO_RECORD")
 }
 
 func checkRule(rule string) bool {
@@ -125,8 +211,8 @@ func isIncidentOpened(incident *apiPb.Incident) bool {
 	return incident.GetStatus() == apiPb.IncidentStatus_INCIDENT_STATUS_OPENED
 }
 
-func (s *server) tryCloseIncident(ctx context.Context, rule *apiPb.Rule, incident *apiPb.Incident) error {
-	if rule.AutoClose {
+func (s *server) tryCloseIncident(ctx context.Context, autoClose bool, incident *apiPb.Incident) error {
+	if autoClose {
 		_, err := s.storage.SetStatus(ctx, incident.GetId(), apiPb.IncidentStatus_INCIDENT_STATUS_CLOSED)
 		return err
 	}
