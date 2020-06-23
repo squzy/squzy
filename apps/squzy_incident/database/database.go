@@ -1,16 +1,16 @@
 package database
 
 import (
+	"context"
 	"github.com/squzy/mongo_helper"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"context"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 type Database interface {
 	SaveRule(context.Context, *apiPb.Rule) error
 	FindRuleById(context.Context, string) (*apiPb.Rule, error)
-	FindRulesByOwnerId(context.Context, string) ([]*apiPb.Rule, error)
+	FindRulesByOwnerId(ctx context.Context, ownerType int32, ownerId string) ([]*apiPb.Rule, error)
 	RemoveRule(context.Context, string) error
 }
 
@@ -32,16 +32,17 @@ func (db *database) SaveRule(ctx context.Context, rule *apiPb.Rule) error {
 func (db *database) FindRuleById(ctx context.Context, id string) (*apiPb.Rule, error) {
 	rule := &apiPb.Rule{}
 	filter := bson.M{
-		"_id":    id,
+		"id": id,
 	}
 	err := db.mongo.FindOne(ctx, filter, rule)
 	return rule, err
 }
 
-func (db *database) FindRulesByOwnerId(ctx context.Context, id string) ([]*apiPb.Rule, error) {
+func (db *database) FindRulesByOwnerId(ctx context.Context, ownerType int32, ownerId string) ([]*apiPb.Rule, error) {
 	var rule []*apiPb.Rule
 	filter := bson.M{
-		"parent":    id,
+		"owner_type": ownerType,
+		"owner_id": ownerId,
 	}
 	err := db.mongo.FindAll(ctx, filter, rule)
 	return rule, err

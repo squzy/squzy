@@ -28,6 +28,7 @@ func (s *server) GetIncidentById(context.Context, *apiPb.IncidentIdRequest) (*ap
 }
 
 func (s *server) GetIncidentByRuleId(context.Context, *apiPb.RuleIdRequest) (*apiPb.Incident, error) {
+	//TODO: return nil, nil if no incident
 	panic("implement me")
 }
 
