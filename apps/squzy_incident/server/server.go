@@ -38,7 +38,6 @@ func (s *server) ActivateRule(ctx context.Context, request *apiPb.RuleIdRequest)
 	}
 
 	rule, err := s.db.ActivateRule(ctx, ruleId)
-
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +52,6 @@ func (s *server) DeactivateRule(ctx context.Context, request *apiPb.RuleIdReques
 	}
 
 	rule, err := s.db.DeactivateRule(ctx, ruleId)
-
 	if err != nil {
 		return nil, err
 	}
@@ -87,6 +85,7 @@ func (s *server) GetRuleById(ctx context.Context, request *apiPb.RuleIdRequest) 
 	if err != nil {
 		return nil, err
 	}
+
 	rule, err := s.db.FindRuleById(ctx, ruleId)
 	if err != nil {
 		return nil, err
@@ -99,6 +98,7 @@ func (s *server) GetRulesByOwnerId(ctx context.Context, request *apiPb.GetRulesB
 	if err != nil {
 		return nil, err
 	}
+
 	dbRules, err := s.db.FindRulesByOwnerId(ctx, request.GetOwnerType(), ownerId)
 	rules := []*apiPb.Rule{}
 	for _, rule := range dbRules {
@@ -114,6 +114,7 @@ func (s *server) RemoveRule(ctx context.Context, request *apiPb.RuleIdRequest) (
 	if err != nil {
 		return nil, err
 	}
+
 	rule, err := s.db.RemoveRule(ctx, ruleId)
 	if err != nil {
 		return nil, err
@@ -174,21 +175,21 @@ func getOwnerTypeAndId(request *apiPb.StorageRecord) (apiPb.RuleOwnerType, primi
 	if request.GetScheduler() != nil {
 		ownerId, err := primitive.ObjectIDFromHex(request.GetScheduler().Id)
 		if err != nil {
-			return 0, primitive.ObjectID{}, errors.New("ERROR_NO_RECORD")
+			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}
 		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT, ownerId, nil
 	}
 	if request.GetAgent() != nil {
 		ownerId, err := primitive.ObjectIDFromHex(request.GetAgent().AgentId)
 		if err != nil {
-			return 0, primitive.ObjectID{}, errors.New("ERROR_NO_RECORD")
+			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}
 		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT, ownerId, nil
 	}
 	if request.GetTransaction() != nil {
 		ownerId, err := primitive.ObjectIDFromHex(request.GetTransaction().Id)
 		if err != nil {
-			return 0, primitive.ObjectID{}, errors.New("ERROR_NO_RECORD")
+			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}
 		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION, ownerId, nil
 	}
