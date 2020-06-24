@@ -11,7 +11,9 @@ import (
 	"strconv"
 )
 
-type FilterFn func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest
+type FilterTransaction func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest
+
+type FilterSnapshot func(req *apiPb.GetSchedulerInformationRequest) *apiPb.GetSchedulerInformationRequest
 
 type Expression interface {
 	IsValidTransaction(applicationId string, rule string) bool
@@ -29,27 +31,27 @@ func NewExpr(storage apiPb.StorageClient) Expression {
 
 func (e *expressionStruct) IsValidTransaction(applicationId string, rule string) bool {
 	env := map[string]interface{}{
-		"last": func(count int32, filters ...FilterFn) []*apiPb.TransactionInfo {
+		"last": func(count int32, filters ...FilterTransaction) []*apiPb.TransactionInfo {
 			return e.GetTransactions(
 				applicationId,
 				apiPb.SortDirection_DESC,
 				&apiPb.Pagination{
-					Page:                 -1,
+					Page:                 0,
 					Limit:                count,
 				},
 				filters...)
 		},
-		"first": func(count int32, filters ...FilterFn) []*apiPb.TransactionInfo {
+		"first": func(count int32, filters ...FilterTransaction) []*apiPb.TransactionInfo {
 			return e.GetTransactions(
 				applicationId,
 				apiPb.SortDirection_ASC,
 				&apiPb.Pagination{
-					Page:                 -1,
+					Page:                 0,
 					Limit:                count,
 				},
 				filters...)
 		},
-		"index": func(index int32, filters ...FilterFn) []*apiPb.TransactionInfo {
+		"index": func(index int32, filters ...FilterTransaction) []*apiPb.TransactionInfo {
 			return e.GetTransactions(
 				applicationId,
 				apiPb.SortDirection_ASC,
@@ -59,19 +61,19 @@ func (e *expressionStruct) IsValidTransaction(applicationId string, rule string)
 				},
 				filters...)
 		},
-		"UseType": func(trType apiPb.TransactionType) FilterFn {
+		"UseType": func(trType apiPb.TransactionType) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				req.Type = trType
 				return req
 			}
 		},
-		"UseStatus": func(trStatus apiPb.TransactionStatus) FilterFn {
+		"UseStatus": func(trStatus apiPb.TransactionStatus) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				req.Status = trStatus
 				return req
 			}
 		},
-		"SetTimeFrom": func(timeStr string) FilterFn {
+		"SetTimeFrom": func(timeStr string) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				if req.TimeRange == nil {
 					req.TimeRange = &apiPb.TimeFilter{}
@@ -80,7 +82,7 @@ func (e *expressionStruct) IsValidTransaction(applicationId string, rule string)
 				return req
 			}
 		},
-		"SetTimeTo": func(timeStr string) FilterFn {
+		"SetTimeTo": func(timeStr string) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				if req.TimeRange == nil {
 					req.TimeRange = &apiPb.TimeFilter{}
@@ -119,8 +121,85 @@ func (e *expressionStruct) IsValidTransaction(applicationId string, rule string)
 	return false
 }
 
+func (e *expressionStruct) IsValidSnapshot(schedulerId string, rule string) bool {
+	env := map[string]interface{}{
+		"last": func(count int32, filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
+			return e.GetSnapshots(
+				schedulerId,
+				apiPb.SortDirection_DESC,
+				&apiPb.Pagination{
+					Page:                 0,
+					Limit:                count,
+				},
+				filters...)
+		},
+		"first": func(count int32, filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
+			return e.GetSnapshots(
+				schedulerId,
+				apiPb.SortDirection_ASC,
+				&apiPb.Pagination{
+					Page:                 0,
+					Limit:                count,
+				},
+				filters...)
+		},
+		"index": func(index int32, filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
+			return e.GetSnapshots(
+				schedulerId,
+				apiPb.SortDirection_ASC,
+				&apiPb.Pagination{
+					Page:                 index,
+					Limit:                1,
+				},
+				filters...)
+		},
+		"UseCode": func(status apiPb.SchedulerCode) FilterSnapshot {
+			return func(req *apiPb.GetSchedulerInformationRequest) *apiPb.GetSchedulerInformationRequest {
+				req.Status = status
+				return req
+			}
+		},
+		"SetTimeFrom": func(timeStr string) FilterSnapshot {
+			return func(req *apiPb.GetSchedulerInformationRequest) *apiPb.GetSchedulerInformationRequest {
+				if req.TimeRange == nil {
+					req.TimeRange = &apiPb.TimeFilter{}
+				}
+				req.TimeRange.From = convertToTimestamp(timeStr)
+				return req
+			}
+		},
+		"SetTimeTo": func(timeStr string) FilterSnapshot {
+			return func(req *apiPb.GetSchedulerInformationRequest) *apiPb.GetSchedulerInformationRequest {
+				if req.TimeRange == nil {
+					req.TimeRange = &apiPb.TimeFilter{}
+				}
+				req.TimeRange.To = convertToTimestamp(timeStr)
+				return req
+			}
+		},
+		//Transaction status keys
+		"Ok": apiPb.SchedulerCode_OK,
+		"Error":  apiPb.SchedulerCode_ERROR,
+	}
+
+	program, err := expr.Compile(rule, expr.Env(env))
+	if err != nil {
+		panic(err)
+	}
+
+	output, err := expr.Run(program, env)
+	if err != nil {
+		panic(err)
+	}
+	value, err := strconv.ParseBool(fmt.Sprintf("%v", output))
+	if err == nil {
+		return value
+	}
+	return false
+}
+
 func convertToTimestamp(strTime string) *timestamp.Timestamp {
-	t, err := dateparse.ParseAny("3/1/2014")
+	t, err := dateparse.ParseAny(strTime)
 	if err != nil {
 		panic(err)
 	}
@@ -135,7 +214,7 @@ func (e *expressionStruct) GetTransactions(
 	applicationId string,
 	direction apiPb.SortDirection,
 	pagination *apiPb.Pagination,
-	filters ...FilterFn) []*apiPb.TransactionInfo {
+	filters ...FilterTransaction) []*apiPb.TransactionInfo {
 
 	req := &apiPb.GetTransactionsRequest{
 		ApplicationId: applicationId,
@@ -154,4 +233,29 @@ func (e *expressionStruct) GetTransactions(
 		panic(err)
 	}
 	return list.GetTransactions()
+}
+
+func (e *expressionStruct) GetSnapshots(
+	schedulerId string,
+	direction apiPb.SortDirection,
+	pagination *apiPb.Pagination,
+	filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
+
+	req := &apiPb.GetSchedulerInformationRequest{
+		SchedulerId: schedulerId,
+		Pagination: pagination,
+		Sort: &apiPb.SortingSchedulerList{
+			Direction: direction,
+		},
+	}
+	if filters != nil {
+		for _, filter := range filters {
+			req = filter(req)
+		}
+	}
+	list, err := e.storageClient.GetSchedulerInformation(context.Background(), req)
+	if err != nil {
+		panic(err)
+	}
+	return list.GetSnapshots()
 }
