@@ -15,6 +15,10 @@ type server struct {
 	storage storage_client.Storage
 }
 
+func (s *server) ValidateRule(ctx context.Context, request *apiPb.ValidateRuleRequest) (*apiPb.ValidateRuleResponse, error) {
+	panic("implement me")
+}
+
 func NewIncidentServer() apiPb.IncidentServerServer {
 	return &server{}
 }
