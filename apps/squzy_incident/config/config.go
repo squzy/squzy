@@ -8,13 +8,21 @@ import (
 const (
 	ENV_PORT          = "PORT"
 	ENV_STRORAGE_HOST = "ENV_STRORAGE_HOST"
+	ENV_MONGO_DB         = "MONGO_DB"
+	ENV_MONGO_URI        = "MONGO_URI"
+	ENV_MONGO_COLLECTION = "MONGO_COLLECTION"
 
 	defaultPort int32 = 9090
+	defaultMongoDb              = "applications_monitoring"
+	defaultCollection           = "application"
 )
 
 type cfg struct {
 	port        int32
 	storageHost string
+	mongoURI        string
+	mongoDb         string
+	mongoCollection string
 }
 
 func (c *cfg) GetPort() int32 {
@@ -25,9 +33,24 @@ func (c *cfg) GetStorageHost() string {
 	return c.storageHost
 }
 
+func (c *cfg) GetMongoURI() string {
+	return c.mongoURI
+}
+
+func (c *cfg) GetMongoDb() string {
+	return c.mongoDb
+}
+
+func (c *cfg) GetMongoCollection() string {
+	return c.mongoCollection
+}
+
 type Config interface {
 	GetPort() int32
 	GetStorageHost() string
+	GetMongoURI() string
+	GetMongoDb() string
+	GetMongoCollection() string
 }
 
 func New() Config {
@@ -40,8 +63,21 @@ func New() Config {
 			port = int32(i)
 		}
 	}
+
+	mongoDb := os.Getenv(ENV_MONGO_DB)
+	if mongoDb == "" {
+		mongoDb = defaultMongoDb
+	}
+	collection := os.Getenv(ENV_MONGO_COLLECTION)
+	if collection == "" {
+		collection = defaultCollection
+	}
+
 	return &cfg{
 		port:        port,
 		storageHost: os.Getenv(ENV_STRORAGE_HOST),
+		mongoURI:        os.Getenv(ENV_MONGO_URI),
+		mongoDb:         mongoDb,
+		mongoCollection: collection,
 	}
 }
