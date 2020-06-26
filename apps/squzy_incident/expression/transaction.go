@@ -2,16 +2,39 @@ package expression
 
 import (
 	"context"
-	"fmt"
-	"github.com/antonmedv/expr"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"strconv"
 )
 
 type FilterTransaction func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest
 
-func (e *expressionStruct) IsValidTransaction(applicationId string, rule string) bool {
-	env := map[string]interface{}{
+func (e *expressionStruct) GetTransactions(
+	applicationId string,
+	direction apiPb.SortDirection,
+	pagination *apiPb.Pagination,
+	filters ...FilterTransaction) []*apiPb.TransactionInfo {
+
+	req := &apiPb.GetTransactionsRequest{
+		ApplicationId: applicationId,
+		Pagination:    pagination,
+		Sort: &apiPb.SortingTransactionList{
+			Direction: direction,
+		},
+	}
+	if filters != nil {
+		for _, filter := range filters {
+			req = filter(req)
+		}
+	}
+	list, err := e.storageClient.GetTransactions(context.Background(), req)
+	if err != nil {
+		panic(err)
+	}
+	return list.GetTransactions()
+}
+
+func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]interface{} {
+	return map[string]interface{}{
 		"last": func(count int32, filters ...FilterTransaction) []*apiPb.TransactionInfo {
 			return e.GetTransactions(
 				applicationId,
@@ -72,6 +95,38 @@ func (e *expressionStruct) IsValidTransaction(applicationId string, rule string)
 				return req
 			}
 		},
+		"SetHost":func(host string) FilterTransaction {
+			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
+				req.Host = &wrappers.StringValue{
+					Value: host,
+				}
+				return req
+			}
+		},
+		"SetName":func(name string) FilterTransaction {
+			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
+				req.Name = &wrappers.StringValue{
+					Value: name,
+				}
+				return req
+			}
+		},
+		"SetPath":func(path string) FilterTransaction {
+			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
+				req.Path = &wrappers.StringValue{
+					Value: path,
+				}
+				return req
+			}
+		},
+		"SetMethod":func(method string) FilterTransaction {
+			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
+				req.Method = &wrappers.StringValue{
+					Value: method,
+				}
+				return req
+			}
+		},
 		//Transaction status keys
 		"Success": apiPb.TransactionStatus_TRANSACTION_SUCCESSFUL,
 		"Failed":  apiPb.TransactionStatus_TRANSACTION_FAILED,
@@ -85,44 +140,4 @@ func (e *expressionStruct) IsValidTransaction(applicationId string, rule string)
 		"Internal":  apiPb.TransactionType_TRANSACTION_TYPE_INTERNAL,
 		"Router":    apiPb.TransactionType_TRANSACTION_TYPE_ROUTER,
 	}
-
-	program, err := expr.Compile(rule, expr.Env(env))
-	if err != nil {
-		panic(err)
-	}
-
-	output, err := expr.Run(program, env)
-	if err != nil {
-		panic(err)
-	}
-	value, err := strconv.ParseBool(fmt.Sprintf("%v", output))
-	if err == nil {
-		return value
-	}
-	return false
-}
-
-func (e *expressionStruct) GetTransactions(
-	applicationId string,
-	direction apiPb.SortDirection,
-	pagination *apiPb.Pagination,
-	filters ...FilterTransaction) []*apiPb.TransactionInfo {
-
-	req := &apiPb.GetTransactionsRequest{
-		ApplicationId: applicationId,
-		Pagination:    pagination,
-		Sort: &apiPb.SortingTransactionList{
-			Direction: direction,
-		},
-	}
-	if filters != nil {
-		for _, filter := range filters {
-			req = filter(req)
-		}
-	}
-	list, err := e.storageClient.GetTransactions(context.Background(), req)
-	if err != nil {
-		panic(err)
-	}
-	return list.GetTransactions()
 }

@@ -7,20 +7,21 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"squzy/apps/squzy_incident/database"
-	"squzy/apps/squzy_incident/storage_client"
+	"squzy/apps/squzy_incident/expression"
 )
 
 type server struct {
 	db      database.Database
-	storage storage_client.Storage
+	storage apiPb.StorageClient
+	expr    expression.Expression
 }
 
-func (s *server) ValidateRule(ctx context.Context, request *apiPb.ValidateRuleRequest) (*apiPb.ValidateRuleResponse, error) {
-	panic("implement me")
-}
-
-func NewIncidentServer() apiPb.IncidentServerServer {
-	return &server{}
+func NewIncidentServer(storage apiPb.StorageClient, db database.Database) apiPb.IncidentServerServer {
+	return &server{
+		db:      db,
+		storage: storage,
+		expr:       expression.NewExpression(storage),
+	}
 }
 
 func dbRuleToProto(rule *database.Rule) *apiPb.Rule {
@@ -126,6 +127,21 @@ func (s *server) RemoveRule(ctx context.Context, request *apiPb.RuleIdRequest) (
 	return dbRuleToProto(rule), nil
 }
 
+func (s *server) ValidateRule(ctx context.Context, request *apiPb.ValidateRuleRequest) (*apiPb.ValidateRuleResponse, error) {
+	err := s.expr.IsValid(request.OwnerType, request.Rule)
+	if err != nil {
+		return &apiPb.ValidateRuleResponse{
+			IsValid:              false,
+			Error:                &apiPb.ValidateRuleResponse_Error{
+				Message:              err.Error(),
+			},
+		}, nil
+	}
+	return &apiPb.ValidateRuleResponse{
+		IsValid:              true,
+	}, nil
+}
+
 func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.StorageRecord) (*empty.Empty, error) {
 	ownerType, ownerId, err := getOwnerTypeAndId(request)
 	if err != nil {
@@ -139,8 +155,10 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 
 	wasError := false
 	for _, rule := range rules {
-		wasIncident := checkRule(rule.Rule)
-		incident, err := s.storage.GetIncident(ctx, rule.Id.Hex())
+		wasIncident := s.expr.ProcessRule(ownerType, ownerId.Hex(), rule.Rule)
+		incident, err := s.storage.GetIncidentByRuleId(ctx, &apiPb.RuleIdRequest{
+			RuleId: rule.Id.Hex(),
+		})
 		if err != nil {
 			wasError = true
 			continue
@@ -154,7 +172,7 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 		}
 
 		if !isIncidentExist(incident) && wasIncident {
-			if err := s.storage.SaveIncident(ctx, incident); err != nil {
+			if _, err := s.storage.SaveIncident(ctx, incident); err != nil {
 				wasError = true
 			}
 			continue
@@ -168,7 +186,7 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 }
 
 func (s *server) CloseIncident(ctx context.Context, request *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
-	return s.storage.SetStatus(ctx, request.GetIncidentId(), apiPb.IncidentStatus_INCIDENT_STATUS_CLOSED)
+	return s.setStatus(ctx, request.GetIncidentId(), apiPb.IncidentStatus_INCIDENT_STATUS_CLOSED)
 }
 
 func (s *server) StudyIncident(context.Context, *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
@@ -200,11 +218,6 @@ func getOwnerTypeAndId(request *apiPb.StorageRecord) (apiPb.RuleOwnerType, primi
 	return 0, primitive.ObjectID{}, errors.New("ERROR_NO_RECORD")
 }
 
-func checkRule(rule string) bool {
-	//TODO
-	return false
-}
-
 func isIncidentExist(incident *apiPb.Incident) bool {
 	return incident != nil
 }
@@ -218,9 +231,16 @@ func isIncidentOpened(incident *apiPb.Incident) bool {
 
 func (s *server) tryCloseIncident(ctx context.Context, autoClose bool, incident *apiPb.Incident) error {
 	if autoClose {
-		_, err := s.storage.SetStatus(ctx, incident.GetId(), apiPb.IncidentStatus_INCIDENT_STATUS_CLOSED)
+		_, err := s.setStatus(ctx, incident.GetId(), apiPb.IncidentStatus_INCIDENT_STATUS_CLOSED)
 		return err
 	}
-	_, err := s.storage.SetStatus(ctx, incident.GetId(), apiPb.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED)
+	_, err := s.setStatus(ctx, incident.GetId(), apiPb.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED)
 	return err
+}
+
+func (s *server) setStatus(ctx context.Context, id string, status apiPb.IncidentStatus) (*apiPb.Incident, error) {
+	return s.storage.UpdateIncidentStatus(ctx, &apiPb.UpdateIncidentStatusRequest{
+		IncidentId: id,
+		Status:     status,
+	})
 }

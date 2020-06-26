@@ -2,16 +2,38 @@ package expression
 
 import (
 	"context"
-	"fmt"
-	"github.com/antonmedv/expr"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"strconv"
 )
 
 type FilterSnapshot func(req *apiPb.GetSchedulerInformationRequest) *apiPb.GetSchedulerInformationRequest
 
-func (e *expressionStruct) IsValidSnapshot(schedulerId string, rule string) bool {
-	env := map[string]interface{}{
+func (e *expressionStruct) GetSnapshots(
+	schedulerId string,
+	direction apiPb.SortDirection,
+	pagination *apiPb.Pagination,
+	filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
+
+	req := &apiPb.GetSchedulerInformationRequest{
+		SchedulerId: schedulerId,
+		Pagination:  pagination,
+		Sort: &apiPb.SortingSchedulerList{
+			Direction: direction,
+		},
+	}
+	if filters != nil {
+		for _, filter := range filters {
+			req = filter(req)
+		}
+	}
+	list, err := e.storageClient.GetSchedulerInformation(context.Background(), req)
+	if err != nil {
+		panic(err)
+	}
+	return list.GetSnapshots()
+}
+
+func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interface{} {
+	return map[string]interface{}{
 		"last": func(count int32, filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
 			return e.GetSnapshots(
 				schedulerId,
@@ -70,44 +92,4 @@ func (e *expressionStruct) IsValidSnapshot(schedulerId string, rule string) bool
 		"Ok":    apiPb.SchedulerCode_OK,
 		"Error": apiPb.SchedulerCode_ERROR,
 	}
-
-	program, err := expr.Compile(rule, expr.Env(env))
-	if err != nil {
-		panic(err)
-	}
-
-	output, err := expr.Run(program, env)
-	if err != nil {
-		panic(err)
-	}
-	value, err := strconv.ParseBool(fmt.Sprintf("%v", output))
-	if err == nil {
-		return value
-	}
-	return false
-}
-
-func (e *expressionStruct) GetSnapshots(
-	schedulerId string,
-	direction apiPb.SortDirection,
-	pagination *apiPb.Pagination,
-	filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
-
-	req := &apiPb.GetSchedulerInformationRequest{
-		SchedulerId: schedulerId,
-		Pagination:  pagination,
-		Sort: &apiPb.SortingSchedulerList{
-			Direction: direction,
-		},
-	}
-	if filters != nil {
-		for _, filter := range filters {
-			req = filter(req)
-		}
-	}
-	list, err := e.storageClient.GetSchedulerInformation(context.Background(), req)
-	if err != nil {
-		panic(err)
-	}
-	return list.GetSnapshots()
 }
