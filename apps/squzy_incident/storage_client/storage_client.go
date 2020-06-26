@@ -55,12 +55,12 @@ type FilterTransaction struct {
 func (s *storage) GetLastTransactions(ctx context.Context, count int, filter *FilterTransaction) []*apiPb.TransactionInfo {
 	transactions, err := s.client.GetTransactions(ctx, &apiPb.GetTransactionsRequest{
 		ApplicationId: "", //TODO:
-		TimeRange:     &apiPb.TimeFilter{
-			From:                 getTimestamp(filter.TimeFrom),
-			To:                   getTimestamp(filter.TimeTo),
+		TimeRange: &apiPb.TimeFilter{
+			From: getTimestamp(filter.TimeFrom),
+			To:   getTimestamp(filter.TimeTo),
 		},
-		Type:          filter.Type,
-		Status:        filter.Status,
+		Type:   filter.Type,
+		Status: filter.Status,
 	})
 	if err != nil {
 		panic(err)
@@ -72,12 +72,12 @@ func (s *storage) GetLastTransactions(ctx context.Context, count int, filter *Fi
 func (s *storage) GetFirstTransactions(ctx context.Context, count int, filter *FilterTransaction) []*apiPb.TransactionInfo {
 	transactions, err := s.client.GetTransactions(ctx, &apiPb.GetTransactionsRequest{
 		ApplicationId: "", //TODO:
-		TimeRange:     &apiPb.TimeFilter{
-			From:                 getTimestamp(filter.TimeFrom),
-			To:                   getTimestamp(filter.TimeTo),
+		TimeRange: &apiPb.TimeFilter{
+			From: getTimestamp(filter.TimeFrom),
+			To:   getTimestamp(filter.TimeTo),
 		},
-		Type:          filter.Type,
-		Status:        filter.Status,
+		Type:   filter.Type,
+		Status: filter.Status,
 		Sort: &apiPb.SortingTransactionList{
 			Direction: apiPb.SortDirection_ASC,
 		},

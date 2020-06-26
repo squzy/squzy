@@ -17,8 +17,8 @@ func (e *expressionStruct) IsValidSnapshot(schedulerId string, rule string) bool
 				schedulerId,
 				apiPb.SortDirection_DESC,
 				&apiPb.Pagination{
-					Page:                 0,
-					Limit:                count,
+					Page:  0,
+					Limit: count,
 				},
 				filters...)
 		},
@@ -27,8 +27,8 @@ func (e *expressionStruct) IsValidSnapshot(schedulerId string, rule string) bool
 				schedulerId,
 				apiPb.SortDirection_ASC,
 				&apiPb.Pagination{
-					Page:                 0,
-					Limit:                count,
+					Page:  0,
+					Limit: count,
 				},
 				filters...)
 		},
@@ -37,8 +37,8 @@ func (e *expressionStruct) IsValidSnapshot(schedulerId string, rule string) bool
 				schedulerId,
 				apiPb.SortDirection_ASC,
 				&apiPb.Pagination{
-					Page:                 index,
-					Limit:                1,
+					Page:  index,
+					Limit: 1,
 				},
 				filters...)
 		},
@@ -67,8 +67,8 @@ func (e *expressionStruct) IsValidSnapshot(schedulerId string, rule string) bool
 			}
 		},
 		//Transaction status keys
-		"Ok": apiPb.SchedulerCode_OK,
-		"Error":  apiPb.SchedulerCode_ERROR,
+		"Ok":    apiPb.SchedulerCode_OK,
+		"Error": apiPb.SchedulerCode_ERROR,
 	}
 
 	program, err := expr.Compile(rule, expr.Env(env))
@@ -95,7 +95,7 @@ func (e *expressionStruct) GetSnapshots(
 
 	req := &apiPb.GetSchedulerInformationRequest{
 		SchedulerId: schedulerId,
-		Pagination: pagination,
+		Pagination:  pagination,
 		Sort: &apiPb.SortingSchedulerList{
 			Direction: direction,
 		},

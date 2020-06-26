@@ -37,8 +37,6 @@ var (
 	}
 )
 
-
-
 func New(mongo mongo_helper.Connector) Database {
 	return &database{
 		mongo: mongo,

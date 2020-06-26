@@ -110,7 +110,7 @@ func (e *expressionStruct) GetTransactions(
 
 	req := &apiPb.GetTransactionsRequest{
 		ApplicationId: applicationId,
-		Pagination: pagination,
+		Pagination:    pagination,
 		Sort: &apiPb.SortingTransactionList{
 			Direction: direction,
 		},

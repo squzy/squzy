@@ -16,8 +16,8 @@ func (e *expressionStruct) IsValidAgent(agentId string, rule string) bool {
 			return e.GetAgents(
 				agentId,
 				&apiPb.Pagination{
-					Page:                 0,
-					Limit:                count,
+					Page:  0,
+					Limit: count,
 				},
 				filters...)
 		},
@@ -63,7 +63,7 @@ func (e *expressionStruct) GetAgents(
 	filters ...FilterAgent) []*apiPb.GetAgentInformationResponse_Statistic {
 
 	req := &apiPb.GetAgentInformationRequest{
-		AgentId: agentId,
+		AgentId:    agentId,
 		Pagination: pagination,
 	}
 	if filters != nil {
