@@ -77,7 +77,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				return req
 			}
 		},
-		"SetTimeFrom": func(timeStr string) FilterTransaction {
+		"UseTimeFrom": func(timeStr string) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				if req.TimeRange == nil {
 					req.TimeRange = &apiPb.TimeFilter{}
@@ -86,7 +86,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				return req
 			}
 		},
-		"SetTimeTo": func(timeStr string) FilterTransaction {
+		"UseTimeTo": func(timeStr string) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				if req.TimeRange == nil {
 					req.TimeRange = &apiPb.TimeFilter{}
@@ -95,7 +95,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				return req
 			}
 		},
-		"SetHost":func(host string) FilterTransaction {
+		"UseHost":func(host string) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				req.Host = &wrappers.StringValue{
 					Value: host,
@@ -103,7 +103,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				return req
 			}
 		},
-		"SetName":func(name string) FilterTransaction {
+		"UseName":func(name string) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				req.Name = &wrappers.StringValue{
 					Value: name,
@@ -111,7 +111,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				return req
 			}
 		},
-		"SetPath":func(path string) FilterTransaction {
+		"UsePath":func(path string) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				req.Path = &wrappers.StringValue{
 					Value: path,
@@ -119,7 +119,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				return req
 			}
 		},
-		"SetMethod":func(method string) FilterTransaction {
+		"UseMethod":func(method string) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				req.Method = &wrappers.StringValue{
 					Value: method,

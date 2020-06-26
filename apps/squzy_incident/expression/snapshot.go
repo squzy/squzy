@@ -70,7 +70,7 @@ func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interfa
 				return req
 			}
 		},
-		"SetTimeFrom": func(timeStr string) FilterSnapshot {
+		"UseTimeFrom": func(timeStr string) FilterSnapshot {
 			return func(req *apiPb.GetSchedulerInformationRequest) *apiPb.GetSchedulerInformationRequest {
 				if req.TimeRange == nil {
 					req.TimeRange = &apiPb.TimeFilter{}
@@ -79,7 +79,7 @@ func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interfa
 				return req
 			}
 		},
-		"SetTimeTo": func(timeStr string) FilterSnapshot {
+		"UseTimeTo": func(timeStr string) FilterSnapshot {
 			return func(req *apiPb.GetSchedulerInformationRequest) *apiPb.GetSchedulerInformationRequest {
 				if req.TimeRange == nil {
 					req.TimeRange = &apiPb.TimeFilter{}

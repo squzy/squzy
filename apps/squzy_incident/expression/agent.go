@@ -39,7 +39,7 @@ func (e *expressionStruct) getAgentEnv(agentId string) map[string]interface{} {
 				},
 				filters...)
 		},
-		"SetTimeFrom": func(timeStr string) FilterAgent {
+		"UseTimeFrom": func(timeStr string) FilterAgent {
 			return func(req *apiPb.GetAgentInformationRequest) *apiPb.GetAgentInformationRequest {
 				if req.TimeRange == nil {
 					req.TimeRange = &apiPb.TimeFilter{}
@@ -48,12 +48,18 @@ func (e *expressionStruct) getAgentEnv(agentId string) map[string]interface{} {
 				return req
 			}
 		},
-		"SetTimeTo": func(timeStr string) FilterAgent {
+		"UseTimeTo": func(timeStr string) FilterAgent {
 			return func(req *apiPb.GetAgentInformationRequest) *apiPb.GetAgentInformationRequest {
 				if req.TimeRange == nil {
 					req.TimeRange = &apiPb.TimeFilter{}
 				}
 				req.TimeRange.To = convertToTimestamp(timeStr)
+				return req
+			}
+		},
+		"UseType": func(reqType apiPb.TypeAgentStat) FilterAgent {
+			return func(req *apiPb.GetAgentInformationRequest) *apiPb.GetAgentInformationRequest {
+				req.Type = reqType
 				return req
 			}
 		},
