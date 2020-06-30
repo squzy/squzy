@@ -16,6 +16,10 @@ type server struct {
 	expr    expression.Expression
 }
 
+var (
+	errNotValidRule = errors.New("rule is not valid")
+)
+
 func NewIncidentServer(storage apiPb.StorageClient, db database.Database) apiPb.IncidentServerServer {
 	return &server{
 		db:      db,
@@ -68,6 +72,16 @@ func (s *server) CreateRule(ctx context.Context, request *apiPb.CreateRuleReques
 	ownerId, err := primitive.ObjectIDFromHex(request.OwnerId)
 	if err != nil {
 		return nil, err
+	}
+	res, err := s.ValidateRule(ctx, &apiPb.ValidateRuleRequest{
+		OwnerType: request.GetOwnerType(),
+		Rule:      request.GetRule(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	if !res.IsValid {
+		return nil, errNotValidRule
 	}
 	rule := &database.Rule{
 		Id:        primitive.NewObjectID(),
