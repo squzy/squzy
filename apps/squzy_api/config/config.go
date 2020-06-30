@@ -11,6 +11,7 @@ type Config interface {
 	GetPort() int32
 	GetStorageServerAddress() string
 	GetApplicationMonitoringAddress() string
+	GetIncidentServerAddress() string
 }
 
 type cfg struct {
@@ -19,6 +20,11 @@ type cfg struct {
 	monitoringServer            string
 	storageServer               string
 	applicationMonitoringServer string
+	incidentServer              string
+}
+
+func (c *cfg) GetIncidentServerAddress() string {
+	return c.incidentServer
 }
 
 func (c *cfg) GetApplicationMonitoringAddress() string {
@@ -47,6 +53,7 @@ const (
 	ENV_MONITORING_SERVER             = "MONITORING_SERVER_HOST"
 	ENV_STORAGE_SERVER                = "STORAGE_SERVER_HOST"
 	ENV_APPLICATION_MONITORING_SERVER = "APPLICATION_MONITORING_SERVER_HOST"
+	ENV_INCIDENT_SERVER               = "INCIDENT_SERVER_HOST"
 
 	defaultPort int32 = 8080
 )
@@ -66,5 +73,6 @@ func New() Config {
 		monitoringServer:            os.Getenv(ENV_MONITORING_SERVER),
 		storageServer:               os.Getenv(ENV_STORAGE_SERVER),
 		applicationMonitoringServer: os.Getenv(ENV_APPLICATION_MONITORING_SERVER),
+		incidentServer:              os.Getenv(ENV_INCIDENT_SERVER),
 	}
 }

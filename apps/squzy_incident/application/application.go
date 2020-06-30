@@ -44,4 +44,3 @@ func (s *application) Run() error {
 	apiPb.RegisterIncidentServerServer(grpcServer, s.apiServ)
 	return grpcServer.Serve(lis)
 }
-

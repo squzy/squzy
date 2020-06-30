@@ -95,7 +95,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				return req
 			}
 		},
-		"UseHost":func(host string) FilterTransaction {
+		"UseHost": func(host string) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				req.Host = &wrappers.StringValue{
 					Value: host,
@@ -103,7 +103,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				return req
 			}
 		},
-		"UseName":func(name string) FilterTransaction {
+		"UseName": func(name string) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				req.Name = &wrappers.StringValue{
 					Value: name,
@@ -111,7 +111,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				return req
 			}
 		},
-		"UsePath":func(path string) FilterTransaction {
+		"UsePath": func(path string) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				req.Path = &wrappers.StringValue{
 					Value: path,
@@ -119,7 +119,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				return req
 			}
 		},
-		"UseMethod":func(method string) FilterTransaction {
+		"UseMethod": func(method string) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {
 				req.Method = &wrappers.StringValue{
 					Value: method,

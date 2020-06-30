@@ -102,7 +102,7 @@ type RuleIdRequest struct {
 
 type ListRulesByOwnerIdRequest struct {
 	OwnerType apiPb.RuleOwnerType `form:"ownerType"`
-	OwnerId   string              `json:"ownerId"`
+	OwnerId   string              `form:"ownerId"`
 }
 
 type Scheduler struct {
@@ -221,8 +221,8 @@ func (r *router) GetEngine() *gin.Engine {
 				}
 
 				rules, err := r.handlers.GetRulesByOwnerId(context, &apiPb.GetRulesByOwnerIdRequest{
-					OwnerType:            rq.OwnerType,
-					OwnerId:              rq.OwnerId,
+					OwnerType: rq.OwnerType,
+					OwnerId:   rq.OwnerId,
 				})
 
 				if err != nil {
@@ -262,7 +262,7 @@ func (r *router) GetEngine() *gin.Engine {
 				singleRule.GET("", func(context *gin.Context) {
 					ruleId := context.Param("rule_id")
 					rule, err := r.handlers.GetRuleById(context, &apiPb.RuleIdRequest{
-						RuleId:               ruleId,
+						RuleId: ruleId,
 					})
 					if err != nil {
 						errWrap(context, http.StatusInternalServerError, err)
@@ -273,7 +273,7 @@ func (r *router) GetEngine() *gin.Engine {
 				singleRule.DELETE("", func(context *gin.Context) {
 					ruleId := context.Param("rule_id")
 					rule, err := r.handlers.RemoveRuleById(context, &apiPb.RuleIdRequest{
-						RuleId:               ruleId,
+						RuleId: ruleId,
 					})
 					if err != nil {
 						errWrap(context, http.StatusInternalServerError, err)
@@ -285,7 +285,7 @@ func (r *router) GetEngine() *gin.Engine {
 				singleRule.PUT("activate", func(context *gin.Context) {
 					ruleId := context.Param("rule_id")
 					rule, err := r.handlers.ActivateRuleById(context, &apiPb.RuleIdRequest{
-						RuleId:               ruleId,
+						RuleId: ruleId,
 					})
 					if err != nil {
 						errWrap(context, http.StatusInternalServerError, err)
@@ -296,7 +296,7 @@ func (r *router) GetEngine() *gin.Engine {
 				singleRule.PUT("deactivate", func(context *gin.Context) {
 					ruleId := context.Param("rule_id")
 					rule, err := r.handlers.DeactivateRuleById(context, &apiPb.RuleIdRequest{
-						RuleId:               ruleId,
+						RuleId: ruleId,
 					})
 					if err != nil {
 						errWrap(context, http.StatusInternalServerError, err)

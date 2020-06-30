@@ -33,10 +33,10 @@ type Handlers interface {
 	CreateRule(ctx context.Context, rule *apiPb.CreateRuleRequest) (*apiPb.Rule, error)
 	ValidateRule(ctx context.Context, rule *apiPb.ValidateRuleRequest) (*apiPb.ValidateRuleResponse, error)
 	GetRulesByOwnerId(ctx context.Context, req *apiPb.GetRulesByOwnerIdRequest) (*apiPb.Rules, error)
-	GetRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule,error)
-	ActivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule,error)
-	DeactivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule,error)
-	RemoveRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule,error)
+	GetRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error)
+	ActivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error)
+	DeactivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error)
+	RemoveRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error)
 }
 
 const (
@@ -259,11 +259,13 @@ func New(
 	monitoringClient apiPb.SchedulersExecutorClient,
 	storageClient apiPb.StorageClient,
 	applicationMonitoringClient apiPb.ApplicationMonitoringClient,
+	incidentClient apiPb.IncidentServerClient,
 ) Handlers {
 	return &handlers{
 		agentClient:                 agentClient,
 		monitoringClient:            monitoringClient,
 		storageClient:               storageClient,
 		applicationMonitoringClient: applicationMonitoringClient,
+		incidentClient:              incidentClient,
 	}
 }

@@ -49,7 +49,7 @@ func (db *database) DeactivateRule(ctx context.Context, ruleId primitive.ObjectI
 
 func (db *database) setStatus(ctx context.Context, ruleId primitive.ObjectID, status apiPb.RuleStatus) (*Rule, error) {
 	filter := bson.M{
-		"id": ruleId,
+		"_id": ruleId,
 	}
 	if status != apiPb.RuleStatus_RULE_STATUS_REMOVED {
 		filter["status"] = bson.M{
@@ -79,20 +79,20 @@ func (db *database) SaveRule(ctx context.Context, rule *Rule) error {
 func (db *database) FindRuleById(ctx context.Context, id primitive.ObjectID) (*Rule, error) {
 	rule := &Rule{}
 	filter := bson.M{
-		"id": id,
+		"_id": id,
 	}
 	err := db.mongo.FindOne(ctx, filter, rule)
 	return rule, err
 }
 
 func (db *database) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.RuleOwnerType, ownerId primitive.ObjectID) ([]*Rule, error) {
-	var rule []*Rule
+	var rules []*Rule
 	filter := bson.M{
-		"owner_type": ownerType,
-		"owner_id":   ownerId,
+		"ownerType": ownerType,
+		"ownerId":   ownerId,
 	}
-	err := db.mongo.FindAll(ctx, filter, rule)
-	return rule, err
+	err := db.mongo.FindAll(ctx, filter, &rules)
+	return rules, err
 }
 
 func (db *database) RemoveRule(ctx context.Context, ruleId primitive.ObjectID) (*Rule, error) {

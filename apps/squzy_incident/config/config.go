@@ -6,20 +6,20 @@ import (
 )
 
 const (
-	ENV_PORT          = "PORT"
-	ENV_STRORAGE_HOST = "ENV_STRORAGE_HOST"
+	ENV_PORT             = "PORT"
+	ENV_STRORAGE_HOST    = "ENV_STRORAGE_HOST"
 	ENV_MONGO_DB         = "MONGO_DB"
 	ENV_MONGO_URI        = "MONGO_URI"
 	ENV_MONGO_COLLECTION = "MONGO_COLLECTION"
 
-	defaultPort int32 = 9090
-	defaultMongoDb              = "applications_monitoring"
-	defaultCollection           = "application"
+	defaultPort       int32 = 9097
+	defaultMongoDb          = "incident_manager"
+	defaultCollection       = "rules"
 )
 
 type cfg struct {
-	port        int32
-	storageHost string
+	port            int32
+	storageHost     string
 	mongoURI        string
 	mongoDb         string
 	mongoCollection string
@@ -74,8 +74,8 @@ func New() Config {
 	}
 
 	return &cfg{
-		port:        port,
-		storageHost: os.Getenv(ENV_STRORAGE_HOST),
+		port:            port,
+		storageHost:     os.Getenv(ENV_STRORAGE_HOST),
 		mongoURI:        os.Getenv(ENV_MONGO_URI),
 		mongoDb:         mongoDb,
 		mongoCollection: collection,

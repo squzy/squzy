@@ -20,7 +20,7 @@ func NewIncidentServer(storage apiPb.StorageClient, db database.Database) apiPb.
 	return &server{
 		db:      db,
 		storage: storage,
-		expr:       expression.NewExpression(storage),
+		expr:    expression.NewExpression(storage),
 	}
 }
 
@@ -103,8 +103,7 @@ func (s *server) GetRulesByOwnerId(ctx context.Context, request *apiPb.GetRulesB
 	if err != nil {
 		return nil, err
 	}
-
-	dbRules, err := s.db.FindRulesByOwnerId(ctx, request.GetOwnerType(), ownerId)
+	dbRules, err := s.db.FindRulesByOwnerId(ctx, request.OwnerType, ownerId)
 	rules := []*apiPb.Rule{}
 	for _, rule := range dbRules {
 		rules = append(rules, dbRuleToProto(rule))
@@ -131,14 +130,14 @@ func (s *server) ValidateRule(ctx context.Context, request *apiPb.ValidateRuleRe
 	err := s.expr.IsValid(request.OwnerType, request.Rule)
 	if err != nil {
 		return &apiPb.ValidateRuleResponse{
-			IsValid:              false,
-			Error:                &apiPb.ValidateRuleResponse_Error{
-				Message:              err.Error(),
+			IsValid: false,
+			Error: &apiPb.ValidateRuleResponse_Error{
+				Message: err.Error(),
 			},
 		}, nil
 	}
 	return &apiPb.ValidateRuleResponse{
-		IsValid:              true,
+		IsValid: true,
 	}, nil
 }
 
