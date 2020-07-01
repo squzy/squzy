@@ -39,7 +39,7 @@ func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interfa
 				schedulerId,
 				apiPb.SortDirection_DESC,
 				&apiPb.Pagination{
-					Page:  0,
+					Page:  -1,
 					Limit: count,
 				},
 				filters...)

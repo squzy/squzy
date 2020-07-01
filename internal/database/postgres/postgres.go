@@ -40,6 +40,7 @@ func (p *Postgres) Migrate() error {
 		&DiskInfo{},
 		&NetInfo{},
 		&TransactionInfo{},
+		&Incident{},
 	}
 
 	var err error

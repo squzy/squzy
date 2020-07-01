@@ -15,27 +15,6 @@ type server struct {
 	database database.Database
 }
 
-func (s *server) SaveIncident(context.Context, *apiPb.Incident) (*empty.Empty, error) {
-	panic("implement me")
-}
-
-func (s *server) UpdateIncidentStatus(context.Context, *apiPb.UpdateIncidentStatusRequest) (*apiPb.Incident, error) {
-	panic("implement me")
-}
-
-func (s *server) GetIncidentById(context.Context, *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
-	panic("implement me")
-}
-
-func (s *server) GetIncidentByRuleId(context.Context, *apiPb.RuleIdRequest) (*apiPb.Incident, error) {
-	//TODO: return nil, nil if no incident
-	panic("implement me")
-}
-
-func (s *server) GetIncidentsList(context.Context, *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
-	panic("implement me")
-}
-
 func NewServer(db database.Database) apiPb.StorageServer {
 	return &server{
 		database: db,
@@ -128,4 +107,24 @@ func wrapError(err error) error {
 		return grpcStatus.Errorf(codes.Internal, err.Error())
 	}
 	return nil
+}
+
+func (s *server) SaveIncident(ctx context.Context, request *apiPb.Incident) (*empty.Empty, error) {
+	return &empty.Empty{}, s.database.InsertIncident(request)
+}
+
+func (s *server) UpdateIncidentStatus(ctx context.Context, request *apiPb.UpdateIncidentStatusRequest) (*apiPb.Incident, error) {
+	return s.database.UpdateIncidentStatus(request.GetIncidentId(), request.GetStatus())
+}
+
+func (s *server) GetIncidentById(ctx context.Context, request *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	return s.database.GetIncidentById(request.GetIncidentId())
+}
+
+func (s *server) GetIncidentByRuleId(ctx context.Context, request *apiPb.RuleIdRequest) (*apiPb.Incident, error) {
+	return s.database.GetActiveIncidentByRuleId(request.GetRuleId())
+}
+
+func (s *server) GetIncidentsList(context.Context, *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
+	panic("implement me")
 }

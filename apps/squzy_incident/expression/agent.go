@@ -34,7 +34,7 @@ func (e *expressionStruct) getAgentEnv(agentId string) map[string]interface{} {
 			return e.GetAgents(
 				agentId,
 				&apiPb.Pagination{
-					Page:  0,
+					Page:  -1,
 					Limit: count,
 				},
 				filters...)
