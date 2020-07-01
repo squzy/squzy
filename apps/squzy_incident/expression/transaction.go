@@ -40,7 +40,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				applicationId,
 				apiPb.SortDirection_DESC,
 				&apiPb.Pagination{
-					Page:  0,
+					Page:  -1,
 					Limit: count,
 				},
 				filters...)
