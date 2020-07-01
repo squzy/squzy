@@ -91,8 +91,8 @@ go_repository(
 go_repository(
     name = "com_github_stretchr_testify",
     importpath = "github.com/stretchr/testify",
-    sum = "h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=",
-    version = "v1.4.0",
+    sum = "h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H4=",
+    version = "v1.5.1",
 )
 
 go_repository(
@@ -288,8 +288,8 @@ go_repository(
 go_repository(
     name = "com_github_squzy_squzy_generated",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:nFuv3RoHBJ42dY5uuuqv1BuJ4Nf5lMaapp7ErdkdxDg=",
-    version = "v1.8.0",
+    sum = "h1:r9ul5JKqtQaxEgppE2Z2hBoEr1iMUaI3FTDSqfxNLO0=",
+    version = "v1.8.1-0.20200701222642-d6643d50bbbf",
 )
 
 go_repository(
@@ -920,4 +920,67 @@ go_repository(
     importpath = "google.golang.org/protobuf",
     sum = "h1:cJv5/xdbk1NnMPR1VP9+HU6gupuG9MLBoH1r6RHZ2MY=",
     version = "v1.22.0",
+)
+
+go_repository(
+    name = "com_github_antonmedv_expr",
+    importpath = "github.com/antonmedv/expr",
+    sum = "h1:uVwIkIBNO2yn4vY2u2DQUqXTmv9jEEMCEcHa19G5weY=",
+    version = "v1.8.8",
+)
+
+go_repository(
+    name = "com_github_araddon_dateparse",
+    importpath = "github.com/araddon/dateparse",
+    sum = "h1:TEBmxO80TM04L8IuMWk77SGL1HomBmKTdzdJLLWznxI=",
+    version = "v0.0.0-20200409225146-d820a6159ab1",
+)
+
+go_repository(
+    name = "com_github_gdamore_encoding",
+    importpath = "github.com/gdamore/encoding",
+    sum = "h1:+7OoQ1Bc6eTm5niUzBa0Ctsh6JbMW6Ra+YNuAtDBdko=",
+    version = "v1.0.0",
+)
+
+go_repository(
+    name = "com_github_gdamore_tcell",
+    importpath = "github.com/gdamore/tcell",
+    sum = "h1:r35w0JBADPZCVQijYebl6YMWWtHRqVEGt7kL2eBADRM=",
+    version = "v1.3.0",
+)
+
+go_repository(
+    name = "com_github_lucasb_eyer_go_colorful",
+    importpath = "github.com/lucasb-eyer/go-colorful",
+    sum = "h1:QIbQXiugsb+q10B+MI+7DI1oQLdmnep86tWFlaaUAac=",
+    version = "v1.0.3",
+)
+
+go_repository(
+    name = "com_github_mattn_go_runewidth",
+    importpath = "github.com/mattn/go-runewidth",
+    sum = "h1:3tS41NlGYSmhhe/8fhGRzc+z3AYCw1Fe1WAyLuujKs0=",
+    version = "v0.0.8",
+)
+
+go_repository(
+    name = "com_github_rivo_tview",
+    importpath = "github.com/rivo/tview",
+    sum = "h1:4CFNy7/q7P06AsIONZzuWy7jcdqEmYQvOZ9FAFZdbls=",
+    version = "v0.0.0-20200219210816-cd38d7432498",
+)
+
+go_repository(
+    name = "com_github_rivo_uniseg",
+    importpath = "github.com/rivo/uniseg",
+    sum = "h1:+2KBaVoUmb9XzDsrx/Ct0W/EYOSFf/nWTauy++DprtY=",
+    version = "v0.1.0",
+)
+
+go_repository(
+    name = "com_github_sanity_io_litter",
+    importpath = "github.com/sanity-io/litter",
+    sum = "h1:DGJO0bxH/+C2EukzOSBmAlxmkhVMGqzvcx/rvySYw9M=",
+    version = "v1.2.0",
 )
