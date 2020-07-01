@@ -37,6 +37,10 @@ type Handlers interface {
 	ActivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error)
 	DeactivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error)
 	RemoveRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error)
+	GetIncidentList(ctx context.Context, req *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error)
+	GetIncidentById(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error)
+	StudyIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error)
+	CloseIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error)
 }
 
 const (
@@ -49,6 +53,30 @@ type handlers struct {
 	storageClient               apiPb.StorageClient
 	applicationMonitoringClient apiPb.ApplicationMonitoringClient
 	incidentClient              apiPb.IncidentServerClient
+}
+
+func (h *handlers) StudyIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.incidentClient.StudyIncident(c, req)
+}
+
+func (h *handlers) CloseIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.incidentClient.CloseIncident(c, req)
+}
+
+func (h *handlers) GetIncidentById(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.storageClient.GetIncidentById(c, req)
+}
+
+func (h *handlers) GetIncidentList(ctx context.Context, req *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.storageClient.GetIncidentsList(c, req)
 }
 
 func (h *handlers) GetRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error) {

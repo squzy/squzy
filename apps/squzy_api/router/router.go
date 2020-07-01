@@ -53,6 +53,15 @@ type AgentHistory struct {
 	Type        apiPb.TypeAgentStat `form:"type"`
 }
 
+type GetIncidentListRequest struct {
+	Pagination    *PaginationRequest
+	TimeFilters   *TimeFilterRequest
+	Status        apiPb.IncidentStatus   `form:"status"`
+	RuleId        string                 `form:"ruleId"`
+	SortBy        apiPb.SortIncidentList `form:"sort_by"`
+	SortDirection apiPb.SortDirection    `form:"sort_direction"`
+}
+
 type GetTransactionListRequest struct {
 	Pagination        *PaginationRequest
 	TimeFilters       *TimeFilterRequest
@@ -207,6 +216,80 @@ func (r *router) GetEngine() *gin.Engine {
 				}
 
 				successWrap(context, http.StatusOK, rule)
+			})
+		}
+		incidents := v1.Group("incidents")
+		{
+			incidents.GET("", func(context *gin.Context) {
+				rq := &GetIncidentListRequest{}
+				err := context.ShouldBind(rq)
+
+				if err != nil {
+					errWrap(context, http.StatusUnprocessableEntity, err)
+					return
+				}
+
+				pagination, timeRange, err := GetFilters(rq.Pagination, rq.TimeFilters)
+				if err != nil {
+					errWrap(context, http.StatusUnprocessableEntity, err)
+					return
+				}
+
+				res, err := r.handlers.GetIncidentList(context, &apiPb.GetIncidentsListRequest{
+					Pagination: pagination,
+					TimeRange:  timeRange,
+					Status:     rq.Status,
+					RuleId:     GetStringValueFromString(rq.RuleId),
+					Sort:       GetIncidentListSorting(rq.SortDirection, rq.SortBy),
+				})
+
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+
+				successWrap(context, http.StatusOK, res)
+			})
+
+			incident := v1.Group(":incident_id")
+
+			incident.GET("", func(context *gin.Context) {
+				id := context.Param("incident_id")
+				inc, err := r.handlers.GetIncidentById(context, &apiPb.IncidentIdRequest{
+					IncidentId: id,
+				})
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+
+				successWrap(context, http.StatusOK, inc)
+			})
+
+			incident.PUT("close", func(context *gin.Context) {
+				id := context.Param("incident_id")
+				inc, err := r.handlers.CloseIncident(context, &apiPb.IncidentIdRequest{
+					IncidentId: id,
+				})
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+
+				successWrap(context, http.StatusOK, inc)
+			})
+
+			incident.PUT("study", func(context *gin.Context) {
+				id := context.Param("incident_id")
+				inc, err := r.handlers.StudyIncident(context, &apiPb.IncidentIdRequest{
+					IncidentId: id,
+				})
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+
+				successWrap(context, http.StatusOK, inc)
 			})
 		}
 		rules := v1.Group("rules")
@@ -761,6 +844,16 @@ func GetTransactionListSorting(direction apiPb.SortDirection, sortBy apiPb.SortT
 		return nil
 	}
 	return &apiPb.SortingTransactionList{
+		Direction: direction,
+		SortBy:    sortBy,
+	}
+}
+
+func GetIncidentListSorting(direction apiPb.SortDirection, sortBy apiPb.SortIncidentList) *apiPb.SortingIncidentList {
+	if sortBy == apiPb.SortIncidentList_SORT_INCIDENT_LIST_UNSPECIFIED {
+		return nil
+	}
+	return &apiPb.SortingIncidentList{
 		Direction: direction,
 		SortBy:    sortBy,
 	}
