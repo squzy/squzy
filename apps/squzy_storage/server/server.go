@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc/codes"
@@ -54,7 +53,6 @@ func (s *server) GetAgentInformation(ctx context.Context, request *apiPb.GetAgen
 	var res []*apiPb.GetAgentInformationResponse_Statistic
 	var count int32
 	var err error
-	fmt.Println("HERE: " + request.GetAgentId())
 	switch request.GetType() {
 	case apiPb.TypeAgentStat_ALL:
 		res, count, err = s.database.GetStatRequest(request.GetAgentId(), request.GetPagination(), request.GetTimeRange())

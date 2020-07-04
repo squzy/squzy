@@ -467,8 +467,10 @@ func convertFromIncidentHistory(data *IncidentHistory) *apiPb.Incident_HistoryIt
 func convertFromUptimeResult(uptimeResult *UptimeResult, countAll int64) *apiPb.GetSchedulerUptimeResponse {
 	latency, err := strconv.ParseFloat(strings.Split(uptimeResult.Latency, ".")[0], 64)
 	if err != nil {
-		return nil
-		//TODO: log?
+		return &apiPb.GetSchedulerUptimeResponse{
+			Uptime: 0,
+			Latency: 0,
+		}
 	}
 	return &apiPb.GetSchedulerUptimeResponse{
 		Uptime:  float64(uptimeResult.Count) / float64(countAll),

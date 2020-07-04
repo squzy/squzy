@@ -7,7 +7,7 @@ import (
 
 const (
 	ENV_PORT             = "PORT"
-	ENV_STRORAGE_HOST    = "ENV_STRORAGE_HOST"
+	ENV_STORAGE_HOST    = "STORAGE_HOST"
 	ENV_MONGO_DB         = "MONGO_DB"
 	ENV_MONGO_URI        = "MONGO_URI"
 	ENV_MONGO_COLLECTION = "MONGO_COLLECTION"
@@ -75,7 +75,7 @@ func New() Config {
 
 	return &cfg{
 		port:            port,
-		storageHost:     os.Getenv(ENV_STRORAGE_HOST),
+		storageHost:     os.Getenv(ENV_STORAGE_HOST),
 		mongoURI:        os.Getenv(ENV_MONGO_URI),
 		mongoDb:         mongoDb,
 		mongoCollection: collection,
