@@ -35,7 +35,7 @@ func (e *expressionStruct) GetTransactions(
 
 func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]interface{} {
 	return map[string]interface{}{
-		"last": func(count int32, filters ...FilterTransaction) []*apiPb.TransactionInfo {
+		"Last": func(count int32, filters ...FilterTransaction) []*apiPb.TransactionInfo {
 			return e.GetTransactions(
 				applicationId,
 				apiPb.SortDirection_DESC,
@@ -45,7 +45,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				},
 				filters...)
 		},
-		"first": func(count int32, filters ...FilterTransaction) []*apiPb.TransactionInfo {
+		"First": func(count int32, filters ...FilterTransaction) []*apiPb.TransactionInfo {
 			return e.GetTransactions(
 				applicationId,
 				apiPb.SortDirection_ASC,
@@ -55,7 +55,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				},
 				filters...)
 		},
-		"index": func(index int32, filters ...FilterTransaction) []*apiPb.TransactionInfo {
+		"Index": func(index int32, filters ...FilterTransaction) []*apiPb.TransactionInfo {
 			return e.GetTransactions(
 				applicationId,
 				apiPb.SortDirection_ASC,

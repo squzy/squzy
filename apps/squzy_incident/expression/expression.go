@@ -25,8 +25,8 @@ func NewExpression(storage apiPb.StorageClient) Expression {
 	}
 }
 
-func (e *expressionStruct) ProcessRule(ruleType apiPb.RuleOwnerType, applicationId string, rule string) bool {
-	env := e.getTransactionEnv(applicationId)
+func (e *expressionStruct) ProcessRule(ruleType apiPb.RuleOwnerType, id string, rule string) bool {
+	env := e.getEnv(ruleType, id)
 
 	program, err := expr.Compile(rule, expr.Env(env))
 	if err != nil {
@@ -38,14 +38,14 @@ func (e *expressionStruct) ProcessRule(ruleType apiPb.RuleOwnerType, application
 		panic(err)
 	}
 	value, err := strconv.ParseBool(fmt.Sprintf("%v", output))
-	if err == nil {
-		return value
+	if err != nil {
+		panic(err)
 	}
-	return false
+	return value
 }
 
 func (e *expressionStruct) IsValid(ruleType apiPb.RuleOwnerType, rule string) error {
-	env := e.getTransactionEnv("id")
+	env := e.getEnv(ruleType, "id")
 
 	_, err := expr.Compile(rule, expr.Env(env))
 	return err
@@ -60,7 +60,7 @@ func (e *expressionStruct) getEnv(owner apiPb.RuleOwnerType, id string) map[stri
 	case apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION:
 		return e.getTransactionEnv(id)
 	}
-	return nil
+	panic("RULE_TYPE_NOT_PROVIDED")
 }
 
 func convertToTimestamp(strTime string) *timestamp.Timestamp {

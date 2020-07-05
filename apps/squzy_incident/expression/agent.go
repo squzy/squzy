@@ -30,7 +30,7 @@ func (e *expressionStruct) GetAgents(
 
 func (e *expressionStruct) getAgentEnv(agentId string) map[string]interface{} {
 	return map[string]interface{}{
-		"last": func(count int32, filters ...FilterAgent) []*apiPb.GetAgentInformationResponse_Statistic {
+		"Last": func(count int32, filters ...FilterAgent) []*apiPb.GetAgentInformationResponse_Statistic {
 			return e.GetAgents(
 				agentId,
 				&apiPb.Pagination{
@@ -63,5 +63,10 @@ func (e *expressionStruct) getAgentEnv(agentId string) map[string]interface{} {
 				return req
 			}
 		},
+		"All":    apiPb.TypeAgentStat_ALL,
+		"CPU":    apiPb.TypeAgentStat_CPU,
+		"Disk":   apiPb.TypeAgentStat_DISK,
+		"Memory": apiPb.TypeAgentStat_MEMORY,
+		"Net":    apiPb.TypeAgentStat_NET,
 	}
 }

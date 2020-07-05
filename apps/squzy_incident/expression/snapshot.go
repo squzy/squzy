@@ -34,7 +34,7 @@ func (e *expressionStruct) GetSnapshots(
 
 func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interface{} {
 	return map[string]interface{}{
-		"last": func(count int32, filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
+		"Last": func(count int32, filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
 			return e.GetSnapshots(
 				schedulerId,
 				apiPb.SortDirection_DESC,
@@ -44,7 +44,7 @@ func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interfa
 				},
 				filters...)
 		},
-		"first": func(count int32, filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
+		"First": func(count int32, filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
 			return e.GetSnapshots(
 				schedulerId,
 				apiPb.SortDirection_ASC,
@@ -54,7 +54,7 @@ func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interfa
 				},
 				filters...)
 		},
-		"index": func(index int32, filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
+		"Index": func(index int32, filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
 			return e.GetSnapshots(
 				schedulerId,
 				apiPb.SortDirection_ASC,
@@ -91,5 +91,10 @@ func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interfa
 		//Transaction status keys
 		"Ok":    apiPb.SchedulerCode_OK,
 		"Error": apiPb.SchedulerCode_ERROR,
+		"TCP":                        apiPb.SchedulerType_TCP,
+		"GRPC":                       apiPb.SchedulerType_GRPC,
+		"HTTP":                       apiPb.SchedulerType_HTTP,
+		"SiteMap":                   apiPb.SchedulerType_SITE_MAP,
+		"HTTPJSONValue":            apiPb.SchedulerType_HTTP_JSON_VALUE,
 	}
 }
