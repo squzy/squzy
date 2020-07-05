@@ -64,7 +64,6 @@ func TestNewServer(t *testing.T) {
 }
 
 type mockApiIncident struct {
-
 }
 
 func (m mockApiIncident) CreateRule(context.Context, *apiPb.CreateRuleRequest) (*apiPb.Rule, error) {
@@ -128,4 +127,3 @@ func TestServer_Run(t *testing.T) {
 		assert.Equal(t, nil, err)
 	})
 }
-

@@ -3,7 +3,9 @@ package server
 import (
 	"context"
 	"errors"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/google/uuid"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"squzy/apps/squzy_incident/database"
@@ -190,9 +192,16 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 		}
 
 		if !isIncidentExist(incident) && wasIncident {
-			incident =  &apiPb.Incident{
-				Status:               apiPb.IncidentStatus_INCIDENT_STATUS_OPENED,
-				RuleId:               rule.Id.Hex(),
+			incident = &apiPb.Incident{
+				Status: apiPb.IncidentStatus_INCIDENT_STATUS_OPENED,
+				RuleId: rule.Id.Hex(),
+				Id:     uuid.New().String(),
+				Histories: []*apiPb.Incident_HistoryItem{
+					{
+						Status:    apiPb.IncidentStatus_INCIDENT_STATUS_OPENED,
+						Timestamp: ptypes.TimestampNow(),
+					},
+				},
 			}
 			if _, err := s.storage.SaveIncident(ctx, incident); err != nil {
 				wasError = true

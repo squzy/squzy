@@ -10,6 +10,92 @@ import (
 	"testing"
 )
 
+type mockIncidentOk struct {
+}
+
+func (m mockIncidentOk) CreateRule(ctx context.Context, in *apiPb.CreateRuleRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	return &apiPb.Rule{}, nil
+}
+
+func (m mockIncidentOk) GetRuleById(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	return &apiPb.Rule{}, nil
+}
+
+func (m mockIncidentOk) GetRulesByOwnerId(ctx context.Context, in *apiPb.GetRulesByOwnerIdRequest, opts ...grpc.CallOption) (*apiPb.Rules, error) {
+	return &apiPb.Rules{}, nil
+}
+
+func (m mockIncidentOk) RemoveRule(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	return &apiPb.Rule{}, nil
+}
+
+func (m mockIncidentOk) ValidateRule(ctx context.Context, in *apiPb.ValidateRuleRequest, opts ...grpc.CallOption) (*apiPb.ValidateRuleResponse, error) {
+	return &apiPb.ValidateRuleResponse{}, nil
+}
+
+func (m mockIncidentOk) ProcessRecordFromStorage(ctx context.Context, in *apiPb.StorageRecord, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return &empty.Empty{}, nil
+}
+
+func (m mockIncidentOk) CloseIncident(ctx context.Context, in *apiPb.IncidentIdRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
+	return &apiPb.Incident{}, nil
+}
+
+func (m mockIncidentOk) ActivateRule(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	return &apiPb.Rule{}, nil
+}
+
+func (m mockIncidentOk) DeactivateRule(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	return &apiPb.Rule{}, nil
+}
+
+func (m mockIncidentOk) StudyIncident(ctx context.Context, in *apiPb.IncidentIdRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
+	return &apiPb.Incident{}, nil
+}
+
+type mockIncidentError struct {
+}
+
+func (m mockIncidentError) CreateRule(ctx context.Context, in *apiPb.CreateRuleRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	return nil, errors.New("")
+}
+
+func (m mockIncidentError) GetRuleById(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	return nil, errors.New("")
+}
+
+func (m mockIncidentError) GetRulesByOwnerId(ctx context.Context, in *apiPb.GetRulesByOwnerIdRequest, opts ...grpc.CallOption) (*apiPb.Rules, error) {
+	return nil, errors.New("")
+}
+
+func (m mockIncidentError) RemoveRule(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	return nil, errors.New("")
+}
+
+func (m mockIncidentError) ValidateRule(ctx context.Context, in *apiPb.ValidateRuleRequest, opts ...grpc.CallOption) (*apiPb.ValidateRuleResponse, error) {
+	return nil, errors.New("")
+}
+
+func (m mockIncidentError) ProcessRecordFromStorage(ctx context.Context, in *apiPb.StorageRecord, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, errors.New("")
+}
+
+func (m mockIncidentError) CloseIncident(ctx context.Context, in *apiPb.IncidentIdRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
+	return nil, errors.New("")
+}
+
+func (m mockIncidentError) ActivateRule(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	return nil, errors.New("")
+}
+
+func (m mockIncidentError) DeactivateRule(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	return nil, errors.New("")
+}
+
+func (m mockIncidentError) StudyIncident(ctx context.Context, in *apiPb.IncidentIdRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
+	return nil, errors.New("")
+}
+
 type mockAmOk struct {
 }
 
@@ -92,7 +178,7 @@ func (s storageMockOk) UpdateIncidentStatus(ctx context.Context, in *apiPb.Updat
 }
 
 func (s storageMockOk) GetIncidentById(ctx context.Context, in *apiPb.IncidentIdRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
-	panic("implement me")
+	return &apiPb.Incident{}, nil
 }
 
 func (s storageMockOk) GetIncidentByRuleId(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
@@ -100,7 +186,7 @@ func (s storageMockOk) GetIncidentByRuleId(ctx context.Context, in *apiPb.RuleId
 }
 
 func (s storageMockOk) GetIncidentsList(ctx context.Context, in *apiPb.GetIncidentsListRequest, opts ...grpc.CallOption) (*apiPb.GetIncidentsListResponse, error) {
-	panic("implement me")
+	return &apiPb.GetIncidentsListResponse{}, nil
 }
 
 func (s storageMockOk) GetSchedulerUptime(ctx context.Context, in *apiPb.GetSchedulerUptimeRequest, opts ...grpc.CallOption) (*apiPb.GetSchedulerUptimeResponse, error) {
@@ -151,7 +237,7 @@ func (s storageMockError) UpdateIncidentStatus(ctx context.Context, in *apiPb.Up
 }
 
 func (s storageMockError) GetIncidentById(ctx context.Context, in *apiPb.IncidentIdRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (s storageMockError) GetIncidentByRuleId(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
@@ -159,7 +245,7 @@ func (s storageMockError) GetIncidentByRuleId(ctx context.Context, in *apiPb.Rul
 }
 
 func (s storageMockError) GetIncidentsList(ctx context.Context, in *apiPb.GetIncidentsListRequest, opts ...grpc.CallOption) (*apiPb.GetIncidentsListResponse, error) {
-	panic("implement me")
+	return nil, errors.New("")
 }
 
 func (s storageMockError) GetSchedulerUptime(ctx context.Context, in *apiPb.GetSchedulerUptimeRequest, opts ...grpc.CallOption) (*apiPb.GetSchedulerUptimeResponse, error) {
@@ -582,6 +668,149 @@ func TestHandlers_EnabledApplicationById(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := New(nil, nil, nil, &mockAmError{}, nil)
 		_, err := s.EnabledApplicationById(context.Background(), "")
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_CreateRule(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentOk{})
+		_, err := s.CreateRule(context.Background(), &apiPb.CreateRuleRequest{})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentError{})
+		_, err := s.CreateRule(context.Background(), &apiPb.CreateRuleRequest{})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_ActivateRuleById(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentOk{})
+		_, err := s.ActivateRuleById(context.Background(), &apiPb.RuleIdRequest{})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentError{})
+		_, err := s.ActivateRuleById(context.Background(), &apiPb.RuleIdRequest{})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_CloseIncident(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentOk{})
+		_, err := s.CloseIncident(context.Background(), &apiPb.IncidentIdRequest{})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentError{})
+		_, err := s.CloseIncident(context.Background(), &apiPb.IncidentIdRequest{})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_DeactivateRuleById(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentOk{})
+		_, err := s.DeactivateRuleById(context.Background(), &apiPb.RuleIdRequest{})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentError{})
+		_, err := s.DeactivateRuleById(context.Background(), &apiPb.RuleIdRequest{})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_GetIncidentById(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, &storageMockOk{}, nil, nil)
+		_, err := s.GetIncidentById(context.Background(), &apiPb.IncidentIdRequest{})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, &storageMockError{}, nil, nil)
+		_, err := s.GetIncidentById(context.Background(), &apiPb.IncidentIdRequest{})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_GetRuleById(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentOk{})
+		_, err := s.GetRuleById(context.Background(), &apiPb.RuleIdRequest{})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentError{})
+		_, err := s.GetRuleById(context.Background(), &apiPb.RuleIdRequest{})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_ValidateRule(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentOk{})
+		_, err := s.ValidateRule(context.Background(), &apiPb.ValidateRuleRequest{})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentError{})
+		_, err := s.ValidateRule(context.Background(), &apiPb.ValidateRuleRequest{})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_RemoveRuleById(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentOk{})
+		_, err := s.RemoveRuleById(context.Background(), &apiPb.RuleIdRequest{})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentError{})
+		_, err := s.RemoveRuleById(context.Background(), &apiPb.RuleIdRequest{})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_StudyIncident(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentOk{})
+		_, err := s.StudyIncident(context.Background(), &apiPb.IncidentIdRequest{})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentError{})
+		_, err := s.StudyIncident(context.Background(), &apiPb.IncidentIdRequest{})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_GetIncidentList(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, &storageMockOk{}, nil, nil)
+		_, err := s.GetIncidentList(context.Background(), &apiPb.GetIncidentsListRequest{})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, &storageMockError{}, nil, nil)
+		_, err := s.GetIncidentList(context.Background(), &apiPb.GetIncidentsListRequest{})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHandlers_GetRulesByOwnerId(t *testing.T) {
+	t.Run("Should: not return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentOk{})
+		_, err := s.GetRulesByOwnerId(context.Background(), &apiPb.GetRulesByOwnerIdRequest{})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(nil, nil, nil, nil, &mockIncidentError{})
+		_, err := s.GetRulesByOwnerId(context.Background(), &apiPb.GetRulesByOwnerIdRequest{})
 		assert.NotNil(t, err)
 	})
 }

@@ -57,6 +57,6 @@ func TestCfg_GetIncidentServerAddress(t *testing.T) {
 	t.Run("Should: return from env", func(t *testing.T) {
 		os.Setenv(ENV_INCIDENT_SERVER, "11124")
 		s := New()
-		assert.Equal(t, s.GetStorageServerAddress(), "11124")
+		assert.Equal(t, s.GetIncidentServerAddress(), "11124")
 	})
 }

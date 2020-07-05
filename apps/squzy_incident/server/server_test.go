@@ -298,7 +298,7 @@ func TestServer_DeactivateRule(t *testing.T) {
 func TestServer_CreateRule(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		_, err := sErr.CreateRule(ctx, &apiPb.CreateRuleRequest{
-			OwnerId:   "",
+			OwnerId: "",
 		})
 		assert.Error(t, err)
 	})

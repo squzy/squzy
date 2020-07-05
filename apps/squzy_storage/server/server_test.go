@@ -16,7 +16,7 @@ func (mock *dbErrorMock) InsertIncident(*apiPb.Incident) error {
 }
 
 func (mock *dbErrorMock) GetIncidentById(id string) (*apiPb.Incident, error) {
-	return nil,  errors.New("ERROR")
+	return nil, errors.New("ERROR")
 }
 
 func (mock *dbErrorMock) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, error) {
@@ -409,4 +409,3 @@ func TestServer_GetIncidentsList(t *testing.T) {
 		assert.NoError(t, err)
 	})
 }
-
