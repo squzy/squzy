@@ -7,27 +7,24 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
 	"net"
-	"squzy/apps/squzy_incident/config"
 )
 
 type Application interface {
-	Run() error
+	Run(port int32) error
 }
 
 type application struct {
-	config  config.Config
-	apiServ apiPb.IncidentServerServer
+	incidentServ apiPb.IncidentServerServer
 }
 
-func NewApplication(cnfg config.Config, apiServ apiPb.IncidentServerServer) Application {
+func NewApplication(incidentServ apiPb.IncidentServerServer) Application {
 	return &application{
-		config:  cnfg,
-		apiServ: apiServ,
+		incidentServ: incidentServ,
 	}
 }
 
-func (s *application) Run() error {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.config.GetPort()))
+func (s *application) Run(port int32) error {
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		return err
 	}
@@ -41,6 +38,6 @@ func (s *application) Run() error {
 		),
 		),
 	)
-	apiPb.RegisterIncidentServerServer(grpcServer, s.apiServ)
+	apiPb.RegisterIncidentServerServer(grpcServer, s.incidentServ)
 	return grpcServer.Serve(lis)
 }
