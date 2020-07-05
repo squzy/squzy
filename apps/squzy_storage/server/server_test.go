@@ -12,23 +12,23 @@ type dbErrorMock struct {
 }
 
 func (mock *dbErrorMock) InsertIncident(*apiPb.Incident) error {
-	panic("implement me")
+	return errors.New("ERROR")
 }
 
 func (mock *dbErrorMock) GetIncidentById(id string) (*apiPb.Incident, error) {
-	panic("implement me")
+	return nil,  errors.New("ERROR")
 }
 
 func (mock *dbErrorMock) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, error) {
-	panic("implement me")
+	return nil, errors.New("ERROR")
 }
 
 func (mock *dbErrorMock) UpdateIncidentStatus(id string, status apiPb.IncidentStatus) (*apiPb.Incident, error) {
-	panic("implement me")
+	return nil, errors.New("ERROR")
 }
 
 func (mock *dbErrorMock) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*apiPb.Incident, int64, error) {
-	panic("implement me")
+	return nil, 0, errors.New("ERROR")
 }
 
 func (*dbErrorMock) Migrate() error {
@@ -91,23 +91,23 @@ type dbMock struct {
 }
 
 func (mock *dbMock) InsertIncident(*apiPb.Incident) error {
-	panic("implement me")
+	return nil
 }
 
 func (mock *dbMock) GetIncidentById(id string) (*apiPb.Incident, error) {
-	panic("implement me")
+	return &apiPb.Incident{}, nil
 }
 
 func (mock *dbMock) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, error) {
-	panic("implement me")
+	return &apiPb.Incident{}, nil
 }
 
 func (mock *dbMock) UpdateIncidentStatus(id string, status apiPb.IncidentStatus) (*apiPb.Incident, error) {
-	panic("implement me")
+	return &apiPb.Incident{}, nil
 }
 
 func (mock *dbMock) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*apiPb.Incident, int64, error) {
-	panic("implement me")
+	return nil, 0, nil
 }
 
 func (*dbMock) Migrate() error {
@@ -352,3 +352,61 @@ func TestService_GetTransactionsGroup(t *testing.T) {
 		assert.NoError(t, err)
 	})
 }
+
+func TestServer_SaveIncident(t *testing.T) {
+	t.Run("Should: return error", func(t *testing.T) {
+		s := server{
+			database: &dbErrorMock{},
+		}
+		_, err := s.SaveIncident(context.Background(), nil)
+		assert.Error(t, err)
+	})
+}
+
+func TestServer_UpdateIncidentStatus(t *testing.T) {
+	t.Run("Should: return error", func(t *testing.T) {
+		s := server{
+			database: &dbErrorMock{},
+		}
+		_, err := s.UpdateIncidentStatus(context.Background(), nil)
+		assert.Error(t, err)
+	})
+}
+
+func TestServer_GetIncidentById(t *testing.T) {
+	t.Run("Should: return error", func(t *testing.T) {
+		s := server{
+			database: &dbErrorMock{},
+		}
+		_, err := s.GetIncidentById(context.Background(), nil)
+		assert.Error(t, err)
+	})
+}
+
+func TestServer_GetIncidentByRuleId(t *testing.T) {
+	t.Run("Should: return error", func(t *testing.T) {
+		s := server{
+			database: &dbErrorMock{},
+		}
+		_, err := s.GetIncidentByRuleId(context.Background(), nil)
+		assert.Error(t, err)
+	})
+}
+
+func TestServer_GetIncidentsList(t *testing.T) {
+	t.Run("Should: return error", func(t *testing.T) {
+		s := server{
+			database: &dbErrorMock{},
+		}
+		_, err := s.GetIncidentsList(context.Background(), nil)
+		assert.Error(t, err)
+	})
+	t.Run("Should: return no error", func(t *testing.T) {
+		s := server{
+			database: &dbMock{},
+		}
+		_, err := s.GetIncidentsList(context.Background(), nil)
+		assert.NoError(t, err)
+	})
+}
+
