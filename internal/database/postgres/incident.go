@@ -107,10 +107,10 @@ func (p *Postgres) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, er
 	return convertFromIncident(&incident), nil
 }
 
-func (p *Postgres) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*apiPb.Incident, error) {
+func (p *Postgres) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*apiPb.Incident, int64, error) {
 	timeFrom, timeTo, err := getTimeInt64(request.GetTimeRange())
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
 	var count int64
@@ -120,7 +120,7 @@ func (p *Postgres) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*apiP
 		Where(getIncidentRuleString(request.GetRuleId())).
 		Count(&count).Error
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
 	offset, limit := getOffsetAndLimit(count, request.GetPagination())
@@ -137,10 +137,10 @@ func (p *Postgres) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*apiP
 		Limit(limit).
 		Find(&incidents).Error
 	if err != nil {
-		return nil, errorDataBase
+		return nil, -1, errorDataBase
 	}
 
-	return convertFromIncidents(incidents), nil
+	return convertFromIncidents(incidents), count, nil
 }
 
 func getIncidentStatusString(code apiPb.IncidentStatus) string {
