@@ -123,6 +123,13 @@ func (s *server) GetIncidentByRuleId(ctx context.Context, request *apiPb.RuleIdR
 	return s.database.GetActiveIncidentByRuleId(request.GetRuleId())
 }
 
-func (s *server) GetIncidentsList(context.Context, *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
-	panic("implement me")
+func (s *server) GetIncidentsList(ctx context.Context, request *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
+	incidents, count, err := s.database.GetIncidents(request)
+	if err != nil {
+		return nil, err
+	}
+	return &apiPb.GetIncidentsListResponse{
+		Count:                count,
+		Incidents:            incidents,
+	}, nil
 }

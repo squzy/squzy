@@ -24,6 +24,7 @@ type Database interface {
 	GetIncidentById(id string) (*apiPb.Incident, error)
 	GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, error)
 	UpdateIncidentStatus(id string, status apiPb.IncidentStatus) (*apiPb.Incident, error)
+	GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*apiPb.Incident, int64, error)
 	Migrate() error
 }
 
