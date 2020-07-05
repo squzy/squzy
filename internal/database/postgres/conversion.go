@@ -374,6 +374,10 @@ func convertFromTransactions(data []*TransactionInfo) []*apiPb.TransactionInfo {
 
 func convertToIncident(data *apiPb.Incident) *Incident {
 	histories, startTime, endTime := convertToIncidentHistories(data.GetHistories())
+	if startTime == 0 || endTime == 0  {
+		startTime = time.Now().UnixNano()
+		endTime = time.Now().UnixNano()
+	}
 	return &Incident{
 		Status:    int32(data.GetStatus()),
 		RuleId:    data.GetRuleId(),
@@ -385,7 +389,7 @@ func convertToIncident(data *apiPb.Incident) *Incident {
 
 func convertToIncidentHistories(data []*apiPb.Incident_HistoryItem) ([]*IncidentHistory, int64, int64) {
 	if data == nil {
-		return nil, -1, -1
+		return nil, 0, 0
 	}
 	var histories []*IncidentHistory
 	minTime := int64(0)

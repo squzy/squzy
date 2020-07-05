@@ -5,6 +5,7 @@ import (
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/jinzhu/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"time"
 )
 
 type Incident struct {
@@ -24,12 +25,16 @@ type IncidentHistory struct {
 	Timestamp  int64 `gorm:"column:time"`
 }
 
-const dbIncidentCollection = "incidents"
+const (
+	dbIncidentCollection = "incidents"
+	dbIncidentHistoryCollection = "incident_histories"
+)
 
 var (
 	incidentIdFilterString        = fmt.Sprintf(`"%s"."id" = ?`, dbIncidentCollection)
 	incidentRuleIdFilterString    = fmt.Sprintf(`"%s"."id" = ?`, dbIncidentCollection)
 	incidentStatusString          = fmt.Sprintf(`"%s"."status"`, dbIncidentCollection)
+	incidentEndTimeString          = fmt.Sprintf(`"%s"."endTime"`, dbIncidentCollection)
 	incidentStartTimeFilterString = fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dbIncidentCollection)
 
 	incidentOrderMap = map[apiPb.SortIncidentList]string{
@@ -48,43 +53,57 @@ func (p *Postgres) InsertIncident(data *apiPb.Incident) error {
 }
 
 func (p *Postgres) UpdateIncidentStatus(id string, status apiPb.IncidentStatus) (*apiPb.Incident, error) {
-	//TODO: update history
+	var incident Incident
+	if err := p.Db.Table(dbIncidentCollection).Where(incidentIdFilterString, id).First(&incident).Error; err != nil {
+		return nil, errorDataBase
+	}
+
+	tNow := time.Now().UnixNano()
 
 	if err := p.Db.Table(dbIncidentCollection).Where(incidentIdFilterString, id).
-		Updates(map[string]interface{}{incidentStatusString: int32(status)}).Error; err != nil {
+		Updates(
+			map[string]interface{}{
+				incidentStatusString: int32(status),
+				incidentEndTimeString: tNow,
+			}).Error; err != nil {
 
 		return nil, errorDataBase
 	}
 
-	var incident *Incident
-	if err := p.Db.Table(dbIncidentCollection).Where(incidentIdFilterString, id).First(incident).Error; err != nil {
+	history := &IncidentHistory{
+		IncidentID: incident.ID,
+		Status:     int32(status),
+		Timestamp:  tNow,
+	}
+	if err := p.Db.Table(dbIncidentHistoryCollection).Create(history).Error; err != nil {
+
 		return nil, errorDataBase
 	}
-	return convertFromIncident(incident), nil
+
+	return convertFromIncident(&incident), nil
 }
 
 func (p *Postgres) GetIncidentById(id string) (*apiPb.Incident, error) {
-	var incident *Incident
+	var incident Incident
 	if err := p.Db.Table(dbIncidentCollection).
 		Set("gorm:auto_preload", true).
-		Where(incidentStatusString, id).First(incident).Error; err != nil {
+		Where(incidentStatusString, id).First(&incident).Error; err != nil {
 		return nil, errorDataBase
 	}
-	return convertFromIncident(incident), nil
+	return convertFromIncident(&incident), nil
 }
 
 func (p *Postgres) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, error) {
-	var incident *Incident
+	var incident Incident
 	if err := p.Db.Table(dbIncidentCollection).
 		Set("gorm:auto_preload", true).
 		Where(incidentRuleIdFilterString, ruleId).
-		Where(getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_OPENED), ruleId).First(incident).Error; err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			return nil, nil
-		}
-		return nil, errorDataBase
+		Where(getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_OPENED)).
+		First(&incident).Error; err != nil {
+
+		return nil, checkNoFoundError(err)
 	}
-	return convertFromIncident(incident), nil
+	return convertFromIncident(&incident), nil
 }
 
 func (p *Postgres) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*apiPb.Incident, error) {
@@ -155,4 +174,11 @@ func getIncidentDirection(request *apiPb.SortingIncidentList) string {
 		return res
 	}
 	return ` desc`
+}
+
+func checkNoFoundError(err error) error {
+	if gorm.IsRecordNotFoundError(err) {
+		return nil
+	}
+	return errorDataBase
 }

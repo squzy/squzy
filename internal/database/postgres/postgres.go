@@ -41,6 +41,7 @@ func (p *Postgres) Migrate() error {
 		&NetInfo{},
 		&TransactionInfo{},
 		&Incident{},
+		&IncidentHistory{},
 	}
 
 	var err error
