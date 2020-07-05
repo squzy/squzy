@@ -162,19 +162,17 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 	if err != nil {
 		return nil, err
 	}
-
 	rules, err := s.ruleDb.FindRulesByOwnerId(ctx, ownerType, ownerId)
 	if err != nil {
 		return nil, err
 	}
-
 	wasError := false
 	for _, rule := range rules {
-
 		if rule.Status != apiPb.RuleStatus_RULE_STATUS_ACTIVE {
 			continue
 		}
 		wasIncident := s.expr.ProcessRule(ownerType, ownerId.Hex(), rule.Rule)
+		// @TODO NIKITA HERE PROBLEM
 		incident, err := s.storage.GetIncidentByRuleId(ctx, &apiPb.RuleIdRequest{
 			RuleId: rule.Id.Hex(),
 		})
@@ -230,7 +228,7 @@ func getOwnerTypeAndId(request *apiPb.StorageRecord) (apiPb.RuleOwnerType, primi
 		if err != nil {
 			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}
-		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT, ownerId, nil
+		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER, ownerId, nil
 	}
 	if request.GetAgentMetric() != nil {
 		ownerId, err := primitive.ObjectIDFromHex(request.GetAgentMetric().AgentId)

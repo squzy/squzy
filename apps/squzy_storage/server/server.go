@@ -50,6 +50,16 @@ func (s *server) SaveResponseFromScheduler(ctx context.Context, request *apiPb.S
 
 func (s *server) SaveResponseFromAgent(ctx context.Context, request *apiPb.Metric) (*empty.Empty, error) {
 	err := s.database.InsertStatRequest(request)
+	defer func() {
+		if request == nil {
+			return
+		}
+		s.SendRecordToIncident(&apiPb.StorageRecord{
+			Record: &apiPb.StorageRecord_AgentMetric{
+				AgentMetric: request,
+			},
+		})
+	}()
 	if err != nil {
 		return nil, grpcStatus.Errorf(codes.Internal, err.Error())
 	}
@@ -93,8 +103,18 @@ func (s *server) GetAgentInformation(ctx context.Context, request *apiPb.GetAgen
 	}, wrapError(err)
 }
 
-func (s *server) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {
-	return &empty.Empty{}, wrapError(s.database.InsertTransactionInfo(info))
+func (s *server) SaveTransaction(ctx context.Context, req *apiPb.TransactionInfo) (*empty.Empty, error) {
+	defer func() {
+		if req == nil {
+			return
+		}
+		s.SendRecordToIncident(&apiPb.StorageRecord{
+			Record: &apiPb.StorageRecord_Transaction{
+				Transaction: req,
+			},
+		})
+	}()
+	return &empty.Empty{}, wrapError(s.database.InsertTransactionInfo(req))
 }
 
 func (s *server) GetTransactions(ctx context.Context, request *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error) {

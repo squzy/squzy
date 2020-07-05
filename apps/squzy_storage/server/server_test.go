@@ -322,6 +322,7 @@ func TestService_SaveResponseFromAgent(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := server{
 			database: &dbErrorMock{},
+			cfg: mockConfigDisable{},
 		}
 		_, err := s.SaveResponseFromAgent(context.Background(), nil)
 		assert.Error(t, err)
@@ -329,8 +330,17 @@ func TestService_SaveResponseFromAgent(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := server{
 			database: &dbMock{},
+			cfg: mockConfigDisable{},
 		}
 		_, err := s.SaveResponseFromAgent(context.Background(), nil)
+		assert.NoError(t, err)
+	})
+	t.Run("Should: return no error", func(t *testing.T) {
+		s := server{
+			database: &dbMock{},
+			cfg: mockConfigEnable{},
+		}
+		_, err := s.SaveResponseFromAgent(context.Background(), &apiPb.Metric{})
 		assert.NoError(t, err)
 	})
 }
@@ -418,6 +428,7 @@ func TestService_SaveTransaction(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := server{
 			database: &dbErrorMock{},
+			cfg: mockConfigDisable{},
 		}
 		_, err := s.SaveTransaction(context.Background(), &apiPb.TransactionInfo{})
 		assert.Error(t, err)
@@ -425,6 +436,15 @@ func TestService_SaveTransaction(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := server{
 			database: &dbMock{},
+			cfg: mockConfigDisable{},
+		}
+		_, err := s.SaveTransaction(context.Background(), &apiPb.TransactionInfo{})
+		assert.NoError(t, err)
+	})
+	t.Run("Should: return no error", func(t *testing.T) {
+		s := server{
+			database: &dbMock{},
+			cfg: mockConfigEnable{},
 		}
 		_, err := s.SaveTransaction(context.Background(), &apiPb.TransactionInfo{})
 		assert.NoError(t, err)
