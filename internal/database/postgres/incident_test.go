@@ -51,7 +51,7 @@ func (s *SuiteIncident) SetupSuite() {
 func (s *SuiteIncident) Test_InsertIncident() {
 	s.mock.ExpectBegin()
 	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, dbIncidentCollection)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
 	s.mock.ExpectQuery(fmt.Sprintf(`INSERT INTO "%s"`, dbIncidentHistoryCollection)).
@@ -105,6 +105,7 @@ func (s *SuiteIncident) Test_UpdateIncidentStatus() {
 	_, err := postgrIncident.UpdateIncidentStatus("", apiPb.IncidentStatus_INCIDENT_STATUS_OPENED)
 	require.NoError(s.T(), err)
 }
+
 
 //Based on fact, that if request is not mocked, it will return error
 func (s *SuiteIncident) Test_UpdateIncidentStatus_SelectError() {
@@ -306,3 +307,4 @@ func (s *SuiteIncident) AfterTest(_, _ string) {
 func TestInitIncident(t *testing.T) {
 	suite.Run(t, new(SuiteIncident))
 }
+

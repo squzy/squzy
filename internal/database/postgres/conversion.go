@@ -379,11 +379,12 @@ func convertToIncident(data *apiPb.Incident) *Incident {
 		endTime = time.Now().UnixNano()
 	}
 	return &Incident{
-		Status:    int32(data.GetStatus()),
-		RuleId:    data.GetRuleId(),
-		StartTime: startTime,
-		EndTime:   endTime,
-		Histories: histories,
+		IncidentId: data.GetId(),
+		Status:     int32(data.GetStatus()),
+		RuleId:     data.GetRuleId(),
+		StartTime:  startTime,
+		EndTime:    endTime,
+		Histories:  histories,
 	}
 }
 
@@ -435,7 +436,7 @@ func convertFromIncidents(data []*Incident) []*apiPb.Incident {
 
 func convertFromIncident(data *Incident) *apiPb.Incident {
 	return &apiPb.Incident{
-		Id:        string(data.ID),
+		Id:        data.IncidentId,
 		Status:    apiPb.IncidentStatus(data.Status),
 		RuleId:    data.RuleId,
 		Histories: convertFromIncidentHistories(data.Histories),

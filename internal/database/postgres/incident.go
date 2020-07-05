@@ -10,12 +10,12 @@ import (
 
 type Incident struct {
 	gorm.Model
-	//Id                   string
-	Status    int32              `gorm:"column:status"`
-	RuleId    string             `gorm:"column:ruleId"`
-	StartTime int64              `gorm:"column:startTime"`
-	EndTime   int64              `gorm:"column:endTime"`
-	Histories []*IncidentHistory `gorm:"column:history"`
+	IncidentId string             `gorm:"column:incidentId"`
+	Status     int32              `gorm:"column:status"`
+	RuleId     string             `gorm:"column:ruleId"`
+	StartTime  int64              `gorm:"column:startTime"`
+	EndTime    int64              `gorm:"column:endTime"`
+	Histories  []*IncidentHistory `gorm:"column:history"`
 }
 
 type IncidentHistory struct {
@@ -31,8 +31,8 @@ const (
 )
 
 var (
-	incidentIdFilterString        = fmt.Sprintf(`"%s"."id" = ?`, dbIncidentCollection)
-	incidentRuleIdFilterString    = fmt.Sprintf(`"%s"."id" = ?`, dbIncidentCollection)
+	incidentIdFilterString        = fmt.Sprintf(`"%s"."incidentId" = ?`, dbIncidentCollection)
+	incidentRuleIdFilterString    = fmt.Sprintf(`"%s"."ruleId" = ?`, dbIncidentCollection)
 	incidentStatusString          = fmt.Sprintf(`"%s"."status"`, dbIncidentCollection)
 	incidentEndTimeString         = fmt.Sprintf(`"%s"."endTime"`, dbIncidentCollection)
 	incidentStartTimeFilterString = fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dbIncidentCollection)
@@ -154,7 +154,7 @@ func getIncidentRuleString(ruleId *wrappers.StringValue) string {
 	if ruleId == nil {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."id" = %s`, dbIncidentCollection, ruleId.Value)
+	return fmt.Sprintf(`"%s"."ruleId" = %s`, dbIncidentCollection, ruleId.Value)
 }
 
 func getIncidentOrder(request *apiPb.SortingIncidentList) string {
