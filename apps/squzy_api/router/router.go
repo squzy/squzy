@@ -251,7 +251,7 @@ func (r *router) GetEngine() *gin.Engine {
 				successWrap(context, http.StatusOK, res)
 			})
 
-			incident := v1.Group(":incident_id")
+			incident := incidents.Group(":incident_id")
 
 			incident.GET("", func(context *gin.Context) {
 				id := context.Param("incident_id")
