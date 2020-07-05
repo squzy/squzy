@@ -68,10 +68,10 @@ func TestServer_Run(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := NewApplication(mockApiIncident{})
 		go func() {
-			_ = s.Run(23233)
+			_ = s.Run(23234)
 		}()
-		time.Sleep(time.Second)
-		_, err := net.Dial("tcp", "localhost:23233")
+		time.Sleep(time.Second * 2)
+		_, err := net.Dial("tcp", "localhost:23234")
 		assert.Equal(t, nil, err)
 	})
 }

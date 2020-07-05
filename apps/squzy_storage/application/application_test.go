@@ -37,6 +37,14 @@ func (*configErrorMock) GetDbPassword() string {
 	panic("implement me!")
 }
 
+func (*configErrorMock) GetIncidentServerAddress() string {
+	return ""
+}
+
+func (*configErrorMock) WithIncident() bool {
+	return false
+}
+
 type configMock struct {
 }
 
@@ -46,6 +54,14 @@ func (*configMock) GetPort() int32 {
 
 func (*configMock) GetDbHost() string {
 	panic("implement me!")
+}
+
+func (*configMock) GetIncidentServerAddress() string {
+	return ""
+}
+
+func (*configMock) WithIncident() bool {
+	return false
 }
 
 func (*configMock) GetDbPort() string {

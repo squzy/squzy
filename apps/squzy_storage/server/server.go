@@ -7,21 +7,41 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc/codes"
 	grpcStatus "google.golang.org/grpc/status"
+	"squzy/apps/squzy_storage/config"
 	"squzy/internal/database"
+	"squzy/internal/helpers"
+	"time"
 )
 
 type server struct {
-	database database.Database
+	database       database.Database
+	incidentClient apiPb.IncidentServerClient
+	cfg            config.Config
 }
 
-func NewServer(db database.Database) apiPb.StorageServer {
+func NewServer(db database.Database, incidentClient apiPb.IncidentServerClient, cfg config.Config) apiPb.StorageServer {
 	return &server{
-		database: db,
+		database:       db,
+		incidentClient: incidentClient,
+		cfg:            cfg,
 	}
 }
 
 func (s *server) SaveResponseFromScheduler(ctx context.Context, request *apiPb.SchedulerResponse) (*empty.Empty, error) {
 	err := s.database.InsertSnapshot(request)
+	defer func() {
+		if request == nil {
+			return
+		}
+		s.SendRecordToIncident(&apiPb.StorageRecord{
+			Record: &apiPb.StorageRecord_Snapshot{
+				Snapshot: &apiPb.SchedulerSnapshotWithId{
+					Snapshot: request.GetSnapshot(),
+					Id:       request.GetSchedulerId(),
+				},
+			},
+		})
+	}()
 	if err != nil {
 		return nil, grpcStatus.Errorf(codes.Internal, err.Error())
 	}
@@ -132,4 +152,18 @@ func (s *server) GetIncidentsList(ctx context.Context, request *apiPb.GetInciden
 		Count:     count,
 		Incidents: incidents,
 	}, nil
+}
+
+func (s *server) SendRecordToIncident(rq *apiPb.StorageRecord) {
+	if !s.cfg.WithIncident() {
+		return
+	}
+	if s.incidentClient == nil {
+		return
+	}
+	go func() {
+		ctx, cancel := helpers.TimeoutContext(context.Background(), time.Second*5)
+		defer cancel()
+		_, _ = s.incidentClient.ProcessRecordFromStorage(ctx, rq)
+	}()
 }

@@ -8,7 +8,9 @@ go_library(
      importpath = "squzy/apps/squzy_storage/application",
      visibility = ["//visibility:public"],
      deps = [
+     	"//apps/squzy_storage/config:go_default_library",
         "//internal/database:go_default_library",
+        "//internal/helpers:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//codes:go_default_library",
         "@org_golang_google_grpc//status:go_default_library",

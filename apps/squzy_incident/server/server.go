@@ -225,15 +225,15 @@ func (s *server) StudyIncident(ctx context.Context, request *apiPb.IncidentIdReq
 }
 
 func getOwnerTypeAndId(request *apiPb.StorageRecord) (apiPb.RuleOwnerType, primitive.ObjectID, error) {
-	if request.GetScheduler() != nil {
-		ownerId, err := primitive.ObjectIDFromHex(request.GetScheduler().Id)
+	if request.GetSnapshot() != nil {
+		ownerId, err := primitive.ObjectIDFromHex(request.GetSnapshot().Id)
 		if err != nil {
 			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}
 		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT, ownerId, nil
 	}
-	if request.GetAgent() != nil {
-		ownerId, err := primitive.ObjectIDFromHex(request.GetAgent().AgentId)
+	if request.GetAgentMetric() != nil {
+		ownerId, err := primitive.ObjectIDFromHex(request.GetAgentMetric().AgentId)
 		if err != nil {
 			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}
