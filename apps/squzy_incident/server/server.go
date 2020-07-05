@@ -3,7 +3,9 @@ package server
 import (
 	"context"
 	"errors"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/google/uuid"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"squzy/apps/squzy_incident/database"
@@ -160,19 +162,17 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 	if err != nil {
 		return nil, err
 	}
-
 	rules, err := s.ruleDb.FindRulesByOwnerId(ctx, ownerType, ownerId)
 	if err != nil {
 		return nil, err
 	}
-
 	wasError := false
 	for _, rule := range rules {
-
 		if rule.Status != apiPb.RuleStatus_RULE_STATUS_ACTIVE {
 			continue
 		}
 		wasIncident := s.expr.ProcessRule(ownerType, ownerId.Hex(), rule.Rule)
+		// @TODO NIKITA HERE PROBLEM
 		incident, err := s.storage.GetIncidentByRuleId(ctx, &apiPb.RuleIdRequest{
 			RuleId: rule.Id.Hex(),
 		})
@@ -190,9 +190,16 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 		}
 
 		if !isIncidentExist(incident) && wasIncident {
-			incident =  &apiPb.Incident{
-				Status:               apiPb.IncidentStatus_INCIDENT_STATUS_OPENED,
-				RuleId:               rule.Id.Hex(),
+			incident = &apiPb.Incident{
+				Status: apiPb.IncidentStatus_INCIDENT_STATUS_OPENED,
+				RuleId: rule.Id.Hex(),
+				Id:     uuid.New().String(),
+				Histories: []*apiPb.Incident_HistoryItem{
+					{
+						Status:    apiPb.IncidentStatus_INCIDENT_STATUS_OPENED,
+						Timestamp: ptypes.TimestampNow(),
+					},
+				},
 			}
 			if _, err := s.storage.SaveIncident(ctx, incident); err != nil {
 				wasError = true
@@ -216,15 +223,15 @@ func (s *server) StudyIncident(ctx context.Context, request *apiPb.IncidentIdReq
 }
 
 func getOwnerTypeAndId(request *apiPb.StorageRecord) (apiPb.RuleOwnerType, primitive.ObjectID, error) {
-	if request.GetScheduler() != nil {
-		ownerId, err := primitive.ObjectIDFromHex(request.GetScheduler().Id)
+	if request.GetSnapshot() != nil {
+		ownerId, err := primitive.ObjectIDFromHex(request.GetSnapshot().Id)
 		if err != nil {
 			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}
-		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT, ownerId, nil
+		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER, ownerId, nil
 	}
-	if request.GetAgent() != nil {
-		ownerId, err := primitive.ObjectIDFromHex(request.GetAgent().AgentId)
+	if request.GetAgentMetric() != nil {
+		ownerId, err := primitive.ObjectIDFromHex(request.GetAgentMetric().AgentId)
 		if err != nil {
 			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}

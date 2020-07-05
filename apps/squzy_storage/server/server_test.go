@@ -3,10 +3,127 @@ package server
 import (
 	"context"
 	"errors"
+	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc"
 	"testing"
 )
+
+type mockClient struct {
+
+}
+
+func (m mockClient) CreateRule(ctx context.Context, in *apiPb.CreateRuleRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	panic("implement me")
+}
+
+func (m mockClient) GetRuleById(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	panic("implement me")
+}
+
+func (m mockClient) GetRulesByOwnerId(ctx context.Context, in *apiPb.GetRulesByOwnerIdRequest, opts ...grpc.CallOption) (*apiPb.Rules, error) {
+	panic("implement me")
+}
+
+func (m mockClient) RemoveRule(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	panic("implement me")
+}
+
+func (m mockClient) ValidateRule(ctx context.Context, in *apiPb.ValidateRuleRequest, opts ...grpc.CallOption) (*apiPb.ValidateRuleResponse, error) {
+	panic("implement me")
+}
+
+func (m mockClient) ProcessRecordFromStorage(ctx context.Context, in *apiPb.StorageRecord, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return &empty.Empty{}, nil
+}
+
+func (m mockClient) CloseIncident(ctx context.Context, in *apiPb.IncidentIdRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (m mockClient) ActivateRule(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	panic("implement me")
+}
+
+func (m mockClient) DeactivateRule(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
+	panic("implement me")
+}
+
+func (m mockClient) StudyIncident(ctx context.Context, in *apiPb.IncidentIdRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+type mockConfigDisable struct {
+
+}
+func (m mockConfigDisable) GetPort() int32 {
+	panic("implement me")
+}
+
+func (m mockConfigDisable) GetDbHost() string {
+	panic("implement me")
+}
+
+func (m mockConfigDisable) GetDbPort() string {
+	panic("implement me")
+}
+
+func (m mockConfigDisable) GetDbName() string {
+	panic("implement me")
+}
+
+func (m mockConfigDisable) GetDbUser() string {
+	panic("implement me")
+}
+
+func (m mockConfigDisable) GetDbPassword() string {
+	panic("implement me")
+}
+
+func (m mockConfigDisable) GetIncidentServerAddress() string {
+	panic("implement me")
+}
+
+func (m mockConfigDisable) WithIncident() bool {
+	return false
+}
+
+type mockConfigEnable struct {
+
+}
+
+func (m mockConfigEnable) GetPort() int32 {
+	panic("implement me")
+}
+
+func (m mockConfigEnable) GetDbHost() string {
+	panic("implement me")
+}
+
+func (m mockConfigEnable) GetDbPort() string {
+	panic("implement me")
+}
+
+func (m mockConfigEnable) GetDbName() string {
+	panic("implement me")
+}
+
+func (m mockConfigEnable) GetDbUser() string {
+	panic("implement me")
+}
+
+func (m mockConfigEnable) GetDbPassword() string {
+	panic("implement me")
+}
+
+func (m mockConfigEnable) GetIncidentServerAddress() string {
+	panic("implement me")
+}
+
+func (m mockConfigEnable) WithIncident() bool {
+	return true
+}
 
 type dbErrorMock struct {
 }
@@ -16,7 +133,7 @@ func (mock *dbErrorMock) InsertIncident(*apiPb.Incident) error {
 }
 
 func (mock *dbErrorMock) GetIncidentById(id string) (*apiPb.Incident, error) {
-	return nil,  errors.New("ERROR")
+	return nil, errors.New("ERROR")
 }
 
 func (mock *dbErrorMock) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, error) {
@@ -168,7 +285,7 @@ func (*dbMock) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest) (m
 
 func TestNewService(t *testing.T) {
 	t.Run("Should: return no nil", func(t *testing.T) {
-		assert.NotNil(t, NewServer(nil))
+		assert.NotNil(t, NewServer(nil, nil, nil))
 	})
 }
 
@@ -176,6 +293,7 @@ func TestService_SaveResponseFromScheduler(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := server{
 			database: &dbErrorMock{},
+			cfg: mockConfigEnable{},
 		}
 		_, err := s.SaveResponseFromScheduler(context.Background(), nil)
 		assert.Error(t, err)
@@ -183,8 +301,19 @@ func TestService_SaveResponseFromScheduler(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := server{
 			database: &dbMock{},
+			cfg: mockConfigEnable{},
 		}
 		_, err := s.SaveResponseFromScheduler(context.Background(), nil)
+		assert.NoError(t, err)
+	})
+	t.Run("Should: return no error", func(t *testing.T) {
+		s := server{
+			database: &dbMock{},
+			cfg: mockConfigEnable{},
+		}
+		_, err := s.SaveResponseFromScheduler(context.Background(), &apiPb.SchedulerResponse{
+			Snapshot: &apiPb.SchedulerSnapshot{},
+		})
 		assert.NoError(t, err)
 	})
 }
@@ -193,6 +322,7 @@ func TestService_SaveResponseFromAgent(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := server{
 			database: &dbErrorMock{},
+			cfg: mockConfigDisable{},
 		}
 		_, err := s.SaveResponseFromAgent(context.Background(), nil)
 		assert.Error(t, err)
@@ -200,8 +330,17 @@ func TestService_SaveResponseFromAgent(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := server{
 			database: &dbMock{},
+			cfg: mockConfigDisable{},
 		}
 		_, err := s.SaveResponseFromAgent(context.Background(), nil)
+		assert.NoError(t, err)
+	})
+	t.Run("Should: return no error", func(t *testing.T) {
+		s := server{
+			database: &dbMock{},
+			cfg: mockConfigEnable{},
+		}
+		_, err := s.SaveResponseFromAgent(context.Background(), &apiPb.Metric{})
 		assert.NoError(t, err)
 	})
 }
@@ -289,6 +428,7 @@ func TestService_SaveTransaction(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := server{
 			database: &dbErrorMock{},
+			cfg: mockConfigDisable{},
 		}
 		_, err := s.SaveTransaction(context.Background(), &apiPb.TransactionInfo{})
 		assert.Error(t, err)
@@ -296,6 +436,15 @@ func TestService_SaveTransaction(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := server{
 			database: &dbMock{},
+			cfg: mockConfigEnable{},
+		}
+		_, err := s.SaveTransaction(context.Background(), nil)
+		assert.NoError(t, err)
+	})
+	t.Run("Should: return no error", func(t *testing.T) {
+		s := server{
+			database: &dbMock{},
+			cfg: mockConfigEnable{},
 		}
 		_, err := s.SaveTransaction(context.Background(), &apiPb.TransactionInfo{})
 		assert.NoError(t, err)
@@ -410,3 +559,37 @@ func TestServer_GetIncidentsList(t *testing.T) {
 	})
 }
 
+func TestServer_SendRecordToIncident(t *testing.T) {
+	t.Run("Should: not throw panic and send incidnet", func(t *testing.T) {
+		s := &server{
+			database: nil,
+			incidentClient: &mockClient{},
+			cfg: &mockConfigEnable{},
+		}
+		panicFn := func() {
+			s.SendRecordToIncident(nil)
+		}
+		assert.NotPanics(t, panicFn)
+	})
+	t.Run("Should: not send incident", func(t *testing.T) {
+		s := &server{
+			database: nil,
+			cfg: &mockConfigDisable{},
+		}
+		panicFn := func() {
+			s.SendRecordToIncident(nil)
+		}
+		assert.NotPanics(t, panicFn)
+	})
+	t.Run("Should: not send incident", func(t *testing.T) {
+		s := &server{
+			database: nil,
+			cfg: &mockConfigEnable{},
+		}
+		panicFn := func() {
+			s.SendRecordToIncident(nil)
+		}
+		assert.NotPanics(t, panicFn)
+	})
+
+}

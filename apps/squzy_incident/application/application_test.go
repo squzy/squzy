@@ -10,61 +10,14 @@ import (
 	"time"
 )
 
-type configErrorMock struct {
-}
-
-func (*configErrorMock) GetPort() int32 {
-	return 1000000
-}
-
-func (*configErrorMock) GetStorageHost() string {
-	panic("implement me!")
-}
-
-func (*configErrorMock) GetMongoURI() string {
-	panic("implement me!")
-}
-
-func (*configErrorMock) GetMongoDb() string {
-	panic("implement me!")
-}
-
-func (*configErrorMock) GetMongoCollection() string {
-	panic("implement me!")
-}
-
-type configMock struct {
-}
-
-func (*configMock) GetPort() int32 {
-	return 23233
-}
-
-func (*configMock) GetStorageHost() string {
-	panic("implement me!")
-}
-
-func (*configMock) GetMongoURI() string {
-	panic("implement me!")
-}
-
-func (*configMock) GetMongoDb() string {
-	panic("implement me!")
-}
-
-func (*configMock) GetMongoCollection() string {
-	panic("implement me!")
-}
-
 func TestNewServer(t *testing.T) {
 	t.Run("Should: work", func(t *testing.T) {
-		s := NewApplication(nil, nil)
+		s := NewApplication(nil)
 		assert.NotNil(t, s)
 	})
 }
 
 type mockApiIncident struct {
-
 }
 
 func (m mockApiIncident) CreateRule(context.Context, *apiPb.CreateRuleRequest) (*apiPb.Rule, error) {
@@ -109,23 +62,16 @@ func (m mockApiIncident) StudyIncident(context.Context, *apiPb.IncidentIdRequest
 
 func TestServer_Run(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
-		s := &application{
-			config:  &configErrorMock{},
-			apiServ: nil,
-		}
-		assert.Error(t, s.Run())
+		s := NewApplication(nil)
+		assert.Error(t, s.Run(124124))
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := &application{
-			config:  &configMock{},
-			apiServ: &mockApiIncident{},
-		}
+		s := NewApplication(mockApiIncident{})
 		go func() {
-			_ = s.Run()
+			_ = s.Run(23234)
 		}()
-		time.Sleep(time.Second)
-		_, err := net.Dial("tcp", "localhost:23233")
+		time.Sleep(time.Second * 2)
+		_, err := net.Dial("tcp", "localhost:23234")
 		assert.Equal(t, nil, err)
 	})
 }
-

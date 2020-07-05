@@ -45,6 +45,6 @@ func main() {
 	connector := mongo_helper.New(client.Database(cfg.GetMongoDb()).Collection(cfg.GetMongoCollection()))
 
 	apiService := server.NewIncidentServer(storageClient, database.New(connector))
-	storageServ := application.NewApplication(cfg, apiService)
-	log.Fatal(storageServ.Run())
+	storageServ := application.NewApplication(apiService)
+	log.Fatal(storageServ.Run(cfg.GetPort()))
 }

@@ -9,10 +9,6 @@ go_library(
     ],
     importpath = "squzy/apps/squzy_storage",
     deps = [
-        "//apps/squzy_api/config:go_default_library",
-        "//apps/squzy_api/version:go_default_library",
-        "//apps/squzy_api/router:go_default_library",
-        "//apps/squzy_api/handlers:go_default_library",
         "//apps/squzy_storage/application:go_default_library",
         "//apps/squzy_storage/config:go_default_library",
         "//apps/squzy_storage/server:go_default_library",

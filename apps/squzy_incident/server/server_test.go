@@ -298,7 +298,7 @@ func TestServer_DeactivateRule(t *testing.T) {
 func TestServer_CreateRule(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		_, err := sErr.CreateRule(ctx, &apiPb.CreateRuleRequest{
-			OwnerId:   "",
+			OwnerId: "",
 		})
 		assert.Error(t, err)
 	})
@@ -388,14 +388,14 @@ func TestServer_RemoveRule(t *testing.T) {
 func TestServer_ProcessRecordFromStorage(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		_, err := s.ProcessRecordFromStorage(ctx, &apiPb.StorageRecord{
-			Record: &apiPb.StorageRecord_Agent{},
+			Record: &apiPb.StorageRecord_AgentMetric{},
 		})
 		assert.Error(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
 		_, err := sErr.ProcessRecordFromStorage(ctx, &apiPb.StorageRecord{
-			Record: &apiPb.StorageRecord_Agent{
-				Agent: &apiPb.Metric{
+			Record: &apiPb.StorageRecord_AgentMetric{
+				AgentMetric: &apiPb.Metric{
 					AgentId: primitive.NewObjectID().Hex(),
 				},
 			},
@@ -409,8 +409,8 @@ func TestServer_ProcessRecordFromStorage(t *testing.T) {
 			expr:    expression.NewExpression(&mockStorage{}),
 		}
 		_, err := sWithErrorStorage.ProcessRecordFromStorage(ctx, &apiPb.StorageRecord{
-			Record: &apiPb.StorageRecord_Agent{
-				Agent: &apiPb.Metric{
+			Record: &apiPb.StorageRecord_AgentMetric{
+				AgentMetric: &apiPb.Metric{
 					AgentId: primitive.NewObjectID().Hex(),
 				},
 			},
@@ -420,8 +420,8 @@ func TestServer_ProcessRecordFromStorage(t *testing.T) {
 	// isIncidentExist(incident) && isIncidentOpened(incident) && !wasIncident
 	t.Run("Should: return error", func(t *testing.T) {
 		_, err := s.ProcessRecordFromStorage(ctx, &apiPb.StorageRecord{
-			Record: &apiPb.StorageRecord_Agent{
-				Agent: &apiPb.Metric{
+			Record: &apiPb.StorageRecord_AgentMetric{
+				AgentMetric: &apiPb.Metric{
 					AgentId: incidentExistIncidentOpenedIncident.Hex(),
 				},
 			},
@@ -431,8 +431,8 @@ func TestServer_ProcessRecordFromStorage(t *testing.T) {
 	// !isIncidentExist(incident) && wasIncident
 	t.Run("Should: return error", func(t *testing.T) {
 		_, err := s.ProcessRecordFromStorage(ctx, &apiPb.StorageRecord{
-			Record: &apiPb.StorageRecord_Agent{
-				Agent: &apiPb.Metric{
+			Record: &apiPb.StorageRecord_AgentMetric{
+				AgentMetric: &apiPb.Metric{
 					AgentId: isIncidentExistwasIncident.Hex(),
 				},
 			},
@@ -442,8 +442,8 @@ func TestServer_ProcessRecordFromStorage(t *testing.T) {
 
 	t.Run("Should: return no error", func(t *testing.T) {
 		_, err := s.ProcessRecordFromStorage(ctx, &apiPb.StorageRecord{
-			Record: &apiPb.StorageRecord_Agent{
-				Agent: &apiPb.Metric{
+			Record: &apiPb.StorageRecord_AgentMetric{
+				AgentMetric: &apiPb.Metric{
 					AgentId: ruleIsNotActive.Hex(),
 				},
 			},
@@ -469,16 +469,16 @@ func TestServer_StudyIncident(t *testing.T) {
 func Test_getOwnerTypeAndId(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		_, _, err := getOwnerTypeAndId(&apiPb.StorageRecord{
-			Record: &apiPb.StorageRecord_Scheduler{
-				Scheduler: &apiPb.Scheduler{},
+			Record: &apiPb.StorageRecord_Snapshot{
+				Snapshot: &apiPb.SchedulerSnapshotWithId{},
 			},
 		})
 		assert.Error(t, err)
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
 		_, _, err := getOwnerTypeAndId(&apiPb.StorageRecord{
-			Record: &apiPb.StorageRecord_Scheduler{
-				Scheduler: &apiPb.Scheduler{
+			Record: &apiPb.StorageRecord_Snapshot{
+				Snapshot: &apiPb.SchedulerSnapshotWithId{
 					Id: primitive.NewObjectID().Hex(),
 				},
 			},
@@ -487,8 +487,8 @@ func Test_getOwnerTypeAndId(t *testing.T) {
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
 		_, _, err := getOwnerTypeAndId(&apiPb.StorageRecord{
-			Record: &apiPb.StorageRecord_Agent{
-				Agent: &apiPb.Metric{},
+			Record: &apiPb.StorageRecord_AgentMetric{
+				AgentMetric: &apiPb.Metric{},
 			},
 		})
 		assert.Error(t, err)

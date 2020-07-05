@@ -15,6 +15,8 @@ func TestNew(t *testing.T) {
 		assert.Equal(t, s.GetDbName(), "")
 		assert.Equal(t, s.GetDbUser(), "")
 		assert.Equal(t, s.GetDbPassword(), "")
+		assert.Equal(t, s.GetIncidentServerAddress(), "")
+		assert.Equal(t, s.WithIncident(), false)
 	})
 }
 
@@ -85,5 +87,27 @@ func TestCfg_GetDbPassword(t *testing.T) {
 		}
 		s := New()
 		assert.Equal(t, s.GetDbPassword(), "dbpassword")
+	})
+}
+
+func TestCfg_GetIncidentServerAddress(t *testing.T) {
+	t.Run("Should: return from env", func(t *testing.T) {
+		err := os.Setenv(ENV_INCIDENT_SERVER_HOST, "dbpassword")
+		if err != nil {
+			assert.NotNil(t, nil)
+		}
+		s := New()
+		assert.Equal(t, s.GetIncidentServerAddress(), "dbpassword")
+	})
+}
+
+func TestCfg_WithIncident(t *testing.T) {
+	t.Run("Should: return from env", func(t *testing.T) {
+		err := os.Setenv(ENV_ENABLE_INCIDENT, "true")
+		if err != nil {
+			assert.NotNil(t, nil)
+		}
+		s := New()
+		assert.Equal(t, s.WithIncident(), true)
 	})
 }
