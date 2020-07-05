@@ -24,7 +24,6 @@ func TestExpressionStruct_GetTransactions(t *testing.T) {
 	})
 }
 
-
 func TestExpressionStruct_getTransactionEnv(t *testing.T) {
 	t.Run("Should: no panic", func(t *testing.T) {
 		res := exprCorr.ProcessRule(

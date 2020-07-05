@@ -24,7 +24,6 @@ func TestExpressionStruct_GetSnapshots(t *testing.T) {
 	})
 }
 
-
 func TestExpressionStruct_getSnapshotEnv(t *testing.T) {
 	t.Run("Should: no panic", func(t *testing.T) {
 		res := exprCorr.ProcessRule(

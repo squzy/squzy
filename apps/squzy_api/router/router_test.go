@@ -709,8 +709,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/rule/validate",
-				Method: http.MethodPost,
+				Path:         "/v1/rule/validate",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusUnprocessableEntity,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -721,8 +721,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/rule/validate",
-				Method: http.MethodPost,
+				Path:         "/v1/rule/validate",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusInternalServerError,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -733,48 +733,48 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/incidents?dateFrom=12321323&dateTo=12321323",
-				Method: http.MethodGet,
+				Path:         "/v1/incidents?dateFrom=12321323&dateTo=12321323",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusBadRequest,
 			},
 			{
-				Path: "/v1/incidents?dateFrom=0000-01-01T00:00:00.899Z&dateTo=0000-01-01T00:00:00.899Z",
-				Method: http.MethodGet,
+				Path:         "/v1/incidents?dateFrom=0000-01-01T00:00:00.899Z&dateTo=0000-01-01T00:00:00.899Z",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusUnprocessableEntity,
 			},
 			{
-				Path: "/v1/incidents?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
-				Method: http.MethodGet,
+				Path:         "/v1/incidents?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/incidents/incident",
-				Method: http.MethodGet,
+				Path:         "/v1/incidents/incident",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/incidents/incident/close",
-				Method: http.MethodPut,
+				Path:         "/v1/incidents/incident/close",
+				Method:       http.MethodPut,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/incidents/incident/study",
-				Method: http.MethodPut,
+				Path:         "/v1/incidents/incident/study",
+				Method:       http.MethodPut,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/rules?ownerType=2020-05-07T19:17:05.899Z",
-				Method: http.MethodGet,
+				Path:         "/v1/rules?ownerType=2020-05-07T19:17:05.899Z",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusBadRequest,
 			},
 			{
-				Path: "/v1/rules?ownerType=0&ownerId=243",
-				Method: http.MethodGet,
+				Path:         "/v1/rules?ownerType=0&ownerId=243",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/rules",
-				Method: http.MethodPost,
+				Path:         "/v1/rules",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusBadRequest,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -785,8 +785,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/rules",
-				Method: http.MethodPost,
+				Path:         "/v1/rules",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusInternalServerError,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -798,23 +798,23 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/rules/23",
-				Method: http.MethodGet,
+				Path:         "/v1/rules/23",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/rules/23",
-				Method: http.MethodDelete,
+				Path:         "/v1/rules/23",
+				Method:       http.MethodDelete,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/rules/23/activate",
-				Method: http.MethodPut,
+				Path:         "/v1/rules/23/activate",
+				Method:       http.MethodPut,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/rules/23/deactivate",
-				Method: http.MethodPut,
+				Path:         "/v1/rules/23/deactivate",
+				Method:       http.MethodPut,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 		}
@@ -1058,8 +1058,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				ExpectedCode: http.StatusAccepted,
 			},
 			{
-				Path: "/v1/rule/validate",
-				Method: http.MethodPost,
+				Path:         "/v1/rule/validate",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusOK,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -1070,33 +1070,33 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/incidents?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
-				Method: http.MethodGet,
+				Path:         "/v1/incidents?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/incidents/123",
-				Method: http.MethodGet,
+				Path:         "/v1/incidents/123",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/incidents/123/close",
-				Method: http.MethodPut,
+				Path:         "/v1/incidents/123/close",
+				Method:       http.MethodPut,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/incidents/123/study",
-				Method: http.MethodPut,
+				Path:         "/v1/incidents/123/study",
+				Method:       http.MethodPut,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/rules?ownerId=234234",
-				Method: http.MethodGet,
+				Path:         "/v1/rules?ownerId=234234",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/rules",
-				Method: http.MethodPost,
+				Path:         "/v1/rules",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusCreated,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -1108,23 +1108,23 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/rules/123",
-				Method: http.MethodGet,
+				Path:         "/v1/rules/123",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/rules/123",
-				Method: http.MethodDelete,
+				Path:         "/v1/rules/123",
+				Method:       http.MethodDelete,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/rules/123/activate",
-				Method: http.MethodPut,
+				Path:         "/v1/rules/123/activate",
+				Method:       http.MethodPut,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/rules/123/deactivate",
-				Method: http.MethodPut,
+				Path:         "/v1/rules/123/deactivate",
+				Method:       http.MethodPut,
 				ExpectedCode: http.StatusOK,
 			},
 		}

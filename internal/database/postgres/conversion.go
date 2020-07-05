@@ -374,7 +374,7 @@ func convertFromTransactions(data []*TransactionInfo) []*apiPb.TransactionInfo {
 
 func convertToIncident(data *apiPb.Incident) *Incident {
 	histories, startTime, endTime := convertToIncidentHistories(data.GetHistories())
-	if startTime == 0 || endTime == 0  {
+	if startTime == 0 || endTime == 0 {
 		startTime = time.Now().UnixNano()
 		endTime = time.Now().UnixNano()
 	}
@@ -472,7 +472,7 @@ func convertFromUptimeResult(uptimeResult *UptimeResult, countAll int64) *apiPb.
 	latency, err := strconv.ParseFloat(strings.Split(uptimeResult.Latency, ".")[0], 64)
 	if err != nil {
 		return &apiPb.GetSchedulerUptimeResponse{
-			Uptime: 0,
+			Uptime:  0,
 			Latency: 0,
 		}
 	}

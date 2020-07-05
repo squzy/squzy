@@ -129,7 +129,7 @@ func (s *server) GetIncidentsList(ctx context.Context, request *apiPb.GetInciden
 		return nil, err
 	}
 	return &apiPb.GetIncidentsListResponse{
-		Count:                count,
-		Incidents:            incidents,
+		Count:     count,
+		Incidents: incidents,
 	}, nil
 }

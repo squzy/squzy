@@ -31,7 +31,7 @@ func (m mockMongo) UpdateOne(ctx context.Context, filter interface{}, update int
 }
 
 var (
-	db = New(&mockMongo{})
+	db    = New(&mockMongo{})
 	dbErr = New(&mockErrorMongo{})
 )
 

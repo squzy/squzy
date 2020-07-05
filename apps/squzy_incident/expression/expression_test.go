@@ -3,6 +3,7 @@ package expression
 import (
 	"context"
 	"errors"
+	"github.com/araddon/dateparse"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
@@ -64,18 +65,18 @@ func (m mockStorage) GetTransactionsGroup(ctx context.Context, in *apiPb.GetTran
 
 func (m mockStorage) GetTransactions(ctx context.Context, in *apiPb.GetTransactionsRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionsResponse, error) {
 	return &apiPb.GetTransactionsResponse{
-		Transactions:         []*apiPb.TransactionInfo{
+		Transactions: []*apiPb.TransactionInfo{
 			{
-				Meta:                 &apiPb.TransactionInfo_Meta{
-					Host:                 "host",
-					Path:                 "path",
-					Method:               "method",
+				Meta: &apiPb.TransactionInfo_Meta{
+					Host:   "host",
+					Path:   "path",
+					Method: "method",
 				},
-				Name:                 "name",
-				StartTime:            ptypes.TimestampNow(),
-				EndTime:              ptypes.TimestampNow(),
-				Status:               apiPb.TransactionStatus_TRANSACTION_SUCCESSFUL,
-				Type:                 apiPb.TransactionType_TRANSACTION_TYPE_DB,
+				Name:      "name",
+				StartTime: ptypes.TimestampNow(),
+				EndTime:   ptypes.TimestampNow(),
+				Status:    apiPb.TransactionStatus_TRANSACTION_SUCCESSFUL,
+				Type:      apiPb.TransactionType_TRANSACTION_TYPE_DB,
 			},
 		},
 	}, nil
@@ -184,7 +185,7 @@ func TestExpressionStruct_ProcessRule(t *testing.T) {
 				"",
 				"")
 		}
-		assert.Panics(t, panicFunc, "The code did not panic")
+		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
 	})
 	t.Run("Should: panic", func(t *testing.T) {
 		panicFunc := func() {
@@ -193,7 +194,16 @@ func TestExpressionStruct_ProcessRule(t *testing.T) {
 				"12345",
 				"wrongString")
 		}
-		assert.Panics(t, panicFunc, "The code did not panic")
+		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
+	})
+	t.Run("Should: panic because storage error", func(t *testing.T) {
+		panicFunc := func() {
+			_ = exprErr.ProcessRule(
+				apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
+				"12345",
+				"one(Last(10), {one(.CpuInfo.Cpus, {.Load <= 10})})")
+		}
+		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
 	})
 	t.Run("Should: no panic", func(t *testing.T) {
 		res := exprCorr.ProcessRule(
@@ -201,6 +211,16 @@ func TestExpressionStruct_ProcessRule(t *testing.T) {
 			"12345",
 			"one(Last(10), {one(.CpuInfo.Cpus, {.Load <= 10})})")
 		assert.True(t, res)
+	})
+	t.Run("Should: panic because not bool", func(t *testing.T) {
+		panicFunc :=
+			func() {
+				_ = exprCorr.ProcessRule(
+					apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
+					"12345",
+					"filter(Last(10), {one(.CpuInfo.Cpus, {.Load <= 10})})")
+			}
+		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
 	})
 	t.Run("Should: no panic", func(t *testing.T) {
 		res := exprCorr.ProcessRule(
@@ -231,6 +251,24 @@ func Test_convertToTimestamp(t *testing.T) {
 		panicFunc := func() {
 			_ = convertToTimestamp("01-10-2020")
 		}
-		assert.Panics(t, panicFunc, "The code did not panic")
+		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
+	})
+	t.Run("Should: no panic", func(t *testing.T) {
+		str := "3/1/2014"
+		v, err := dateparse.ParseAny(str)
+		assert.Nil(t, err)
+		res := convertToTimestamp(str)
+		value, err := ptypes.TimestampProto(v)
+		assert.Nil(t, err)
+		res2, err := ptypes.Timestamp(value)
+		assert.Nil(t, err)
+		assert.EqualValues(t, res, value)
+		assert.EqualValues(t, v, res2)
+	})
+	t.Run("Should: panic", func(t *testing.T) {
+		panicFunc := func() {
+			_ = convertToTimestamp("0000-01-01T00:00:00.899Z")
+		}
+		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
 	})
 }

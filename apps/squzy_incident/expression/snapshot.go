@@ -89,12 +89,12 @@ func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interfa
 			}
 		},
 		//Transaction status keys
-		"Ok":    apiPb.SchedulerCode_OK,
-		"Error": apiPb.SchedulerCode_ERROR,
-		"TCP":                        apiPb.SchedulerType_TCP,
-		"GRPC":                       apiPb.SchedulerType_GRPC,
-		"HTTP":                       apiPb.SchedulerType_HTTP,
-		"SiteMap":                   apiPb.SchedulerType_SITE_MAP,
-		"HTTPJSONValue":            apiPb.SchedulerType_HTTP_JSON_VALUE,
+		"Ok":            apiPb.SchedulerCode_OK,
+		"Error":         apiPb.SchedulerCode_ERROR,
+		"TCP":           apiPb.SchedulerType_TCP,
+		"GRPC":          apiPb.SchedulerType_GRPC,
+		"HTTP":          apiPb.SchedulerType_HTTP,
+		"SiteMap":       apiPb.SchedulerType_SITE_MAP,
+		"HTTPJSONValue": apiPb.SchedulerType_HTTP_JSON_VALUE,
 	}
 }

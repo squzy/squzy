@@ -26,7 +26,7 @@ type IncidentHistory struct {
 }
 
 const (
-	dbIncidentCollection = "incidents"
+	dbIncidentCollection        = "incidents"
 	dbIncidentHistoryCollection = "incident_histories"
 )
 
@@ -34,7 +34,7 @@ var (
 	incidentIdFilterString        = fmt.Sprintf(`"%s"."id" = ?`, dbIncidentCollection)
 	incidentRuleIdFilterString    = fmt.Sprintf(`"%s"."id" = ?`, dbIncidentCollection)
 	incidentStatusString          = fmt.Sprintf(`"%s"."status"`, dbIncidentCollection)
-	incidentEndTimeString          = fmt.Sprintf(`"%s"."endTime"`, dbIncidentCollection)
+	incidentEndTimeString         = fmt.Sprintf(`"%s"."endTime"`, dbIncidentCollection)
 	incidentStartTimeFilterString = fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dbIncidentCollection)
 
 	incidentOrderMap = map[apiPb.SortIncidentList]string{
@@ -63,7 +63,7 @@ func (p *Postgres) UpdateIncidentStatus(id string, status apiPb.IncidentStatus) 
 	if err := p.Db.Table(dbIncidentCollection).Where(incidentIdFilterString, id).
 		Updates(
 			map[string]interface{}{
-				incidentStatusString: int32(status),
+				incidentStatusString:  int32(status),
 				incidentEndTimeString: tNow,
 			}).Error; err != nil {
 
@@ -88,7 +88,7 @@ func (p *Postgres) GetIncidentById(id string) (*apiPb.Incident, error) {
 	if err := p.Db.Table(dbIncidentCollection).
 		Set("gorm:auto_preload", true).
 		Where(incidentStatusString, id).First(&incident).Error; err != nil {
-			fmt.Println(err)
+		fmt.Println(err)
 		return nil, errorDataBase
 	}
 	return convertFromIncident(&incident), nil

@@ -257,7 +257,7 @@ func (s *SuiteIncident) Test_GetIncidents_selectIncidentHistoryError() {
 
 func Test_getIncidentRuleString(t *testing.T) {
 	t.Run("Should: return string", func(t *testing.T) {
-		res := getIncidentRuleString(&wrappers.StringValue{Value:"id"})
+		res := getIncidentRuleString(&wrappers.StringValue{Value: "id"})
 		assert.NotEqual(t, "", res)
 	})
 }
