@@ -4,6 +4,8 @@ build: .build
 
 build_agent_server: .build_agent_server
 
+build_incident: .build_incident
+
 build_agent: .build_agent
 
 build_bin_api: .build_bin_api
@@ -44,6 +46,10 @@ default: build
 
 .build_agent:
 	./build.bash agent_client squzy_agent_$(version) $(version)
+
+.build_incident:
+	./build.bash squzy_incident squzy_incident_$(version) $(version)
+
 
 .build_bin_squzy:
 	./build.bash squzy_monitoring squzy_monitoring_$(version) $(version)
