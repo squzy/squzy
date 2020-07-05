@@ -11,7 +11,7 @@ import (
 )
 
 type server struct {
-	db      database.Database
+	ruleDb  database.Database
 	storage apiPb.StorageClient
 	expr    expression.Expression
 }
@@ -22,7 +22,7 @@ var (
 
 func NewIncidentServer(storage apiPb.StorageClient, db database.Database) apiPb.IncidentServerServer {
 	return &server{
-		db:      db,
+		ruleDb:  db,
 		storage: storage,
 		expr:    expression.NewExpression(storage),
 	}
@@ -46,7 +46,7 @@ func (s *server) ActivateRule(ctx context.Context, request *apiPb.RuleIdRequest)
 		return nil, err
 	}
 
-	rule, err := s.db.ActivateRule(ctx, ruleId)
+	rule, err := s.ruleDb.ActivateRule(ctx, ruleId)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (s *server) DeactivateRule(ctx context.Context, request *apiPb.RuleIdReques
 		return nil, err
 	}
 
-	rule, err := s.db.DeactivateRule(ctx, ruleId)
+	rule, err := s.ruleDb.DeactivateRule(ctx, ruleId)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (s *server) CreateRule(ctx context.Context, request *apiPb.CreateRuleReques
 		OwnerId:   ownerId,
 		Status:    apiPb.RuleStatus_RULE_STATUS_ACTIVE,
 	}
-	err = s.db.SaveRule(ctx, rule)
+	err = s.ruleDb.SaveRule(ctx, rule)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (s *server) GetRuleById(ctx context.Context, request *apiPb.RuleIdRequest) 
 		return nil, err
 	}
 
-	rule, err := s.db.FindRuleById(ctx, ruleId)
+	rule, err := s.ruleDb.FindRuleById(ctx, ruleId)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (s *server) GetRulesByOwnerId(ctx context.Context, request *apiPb.GetRulesB
 	if err != nil {
 		return nil, err
 	}
-	dbRules, err := s.db.FindRulesByOwnerId(ctx, request.OwnerType, ownerId)
+	dbRules, err := s.ruleDb.FindRulesByOwnerId(ctx, request.OwnerType, ownerId)
 	rules := []*apiPb.Rule{}
 	for _, rule := range dbRules {
 		rules = append(rules, dbRuleToProto(rule))
@@ -133,7 +133,7 @@ func (s *server) RemoveRule(ctx context.Context, request *apiPb.RuleIdRequest) (
 		return nil, err
 	}
 
-	rule, err := s.db.RemoveRule(ctx, ruleId)
+	rule, err := s.ruleDb.RemoveRule(ctx, ruleId)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +161,7 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 		return nil, err
 	}
 
-	rules, err := s.db.FindRulesByOwnerId(ctx, ownerType, ownerId)
+	rules, err := s.ruleDb.FindRulesByOwnerId(ctx, ownerType, ownerId)
 	if err != nil {
 		return nil, err
 	}
