@@ -436,9 +436,9 @@ func TestService_SaveTransaction(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := server{
 			database: &dbMock{},
-			cfg: mockConfigDisable{},
+			cfg: mockConfigEnable{},
 		}
-		_, err := s.SaveTransaction(context.Background(), &apiPb.TransactionInfo{})
+		_, err := s.SaveTransaction(context.Background(), nil)
 		assert.NoError(t, err)
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
