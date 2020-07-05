@@ -207,13 +207,13 @@ func (s *SuiteIncident) Test_GetIncidents() {
 		WithArgs(sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	_, err := postgrIncident.GetIncidents(&apiPb.GetIncidentsListRequest{})
+	_, _, err := postgrIncident.GetIncidents(&apiPb.GetIncidentsListRequest{})
 	require.NoError(s.T(), err)
 }
 
 func (s *SuiteIncident) Test_GetIncidents_timeError() {
 	maxValidSeconds := 253402300800
-	_, err := postgrIncident.GetIncidents(&apiPb.GetIncidentsListRequest{
+	_, _, err := postgrIncident.GetIncidents(&apiPb.GetIncidentsListRequest{
 		TimeRange: &apiPb.TimeFilter{
 			From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
 			To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
@@ -223,7 +223,7 @@ func (s *SuiteIncident) Test_GetIncidents_timeError() {
 }
 
 func (s *SuiteIncident) Test_GetIncidents_countError() {
-	_, err := postgrIncident.GetIncidents(&apiPb.GetIncidentsListRequest{})
+	_, _, err := postgrIncident.GetIncidents(&apiPb.GetIncidentsListRequest{})
 	require.Error(s.T(), err)
 }
 
@@ -234,7 +234,7 @@ func (s *SuiteIncident) Test_GetIncidents_selectIncidentError() {
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	_, err := postgrIncident.GetIncidents(&apiPb.GetIncidentsListRequest{})
+	_, _, err := postgrIncident.GetIncidents(&apiPb.GetIncidentsListRequest{})
 	require.Error(s.T(), err)
 }
 
@@ -251,7 +251,7 @@ func (s *SuiteIncident) Test_GetIncidents_selectIncidentHistoryError() {
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	_, err := postgrIncident.GetIncidents(&apiPb.GetIncidentsListRequest{})
+	_, _, err := postgrIncident.GetIncidents(&apiPb.GetIncidentsListRequest{})
 	require.Error(s.T(), err)
 }
 

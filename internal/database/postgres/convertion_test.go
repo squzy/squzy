@@ -214,7 +214,7 @@ func TestConvertFromUptimeResult(t *testing.T) {
 			Count:   10,
 			Latency: "qwe",
 		}, 10)
-		assert.Nil(t, res)
+		assert.NotNil(t, res)
 	})
 	t.Run("Test: error", func(t *testing.T) {
 		res := convertFromUptimeResult(&UptimeResult{

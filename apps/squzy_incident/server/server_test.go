@@ -95,8 +95,8 @@ func (m mockDatabase) FindRuleById(context.Context, primitive.ObjectID) (*databa
 	return &database.Rule{}, nil
 }
 
-func (m mockDatabase) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.RuleOwnerType, ownerId string) ([]*database.Rule, error) {
-	if ownerId == "ruleIsNotActive" {
+func (m mockDatabase) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.RuleOwnerType, ownerId primitive.ObjectID) ([]*database.Rule, error) {
+	if ownerId == ruleIsNotActive {
 		return []*database.Rule{
 			{
 				Status: apiPb.RuleStatus_RULE_STATUS_UNSPECIFIED,
@@ -104,7 +104,7 @@ func (m mockDatabase) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.Ru
 			},
 		}, nil
 	}
-	if ownerId == incidentExistIncidentOpenedIncident.Hex() {
+	if ownerId == incidentExistIncidentOpenedIncident {
 		return []*database.Rule{
 			{
 				Id:     incidentExistIncidentOpenedIncident,
@@ -113,7 +113,7 @@ func (m mockDatabase) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.Ru
 			},
 		}, nil
 	}
-	if ownerId == isIncidentExistwasIncident.Hex() {
+	if ownerId == isIncidentExistwasIncident {
 		return []*database.Rule{
 			{
 				Id:     isIncidentExistwasIncident,
@@ -212,7 +212,7 @@ func (m mockErrorDatabase) FindRuleById(context.Context, primitive.ObjectID) (*d
 	return nil, errors.New("ERROR")
 }
 
-func (m mockErrorDatabase) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.RuleOwnerType, ownerId string) ([]*database.Rule, error) {
+func (m mockErrorDatabase) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.RuleOwnerType, ownerId primitive.ObjectID) ([]*database.Rule, error) {
 	return nil, errors.New("ERROR")
 }
 
@@ -244,6 +244,7 @@ var (
 
 	incidentExistIncidentOpenedIncident = primitive.NewObjectID()
 	isIncidentExistwasIncident          = primitive.NewObjectID()
+	ruleIsNotActive                     = primitive.NewObjectID()
 )
 
 func TestNewIncidentServer(t *testing.T) {
@@ -297,6 +298,12 @@ func TestServer_DeactivateRule(t *testing.T) {
 func TestServer_CreateRule(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		_, err := sErr.CreateRule(ctx, &apiPb.CreateRuleRequest{
+			OwnerId:   "",
+		})
+		assert.Error(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		_, err := sErr.CreateRule(ctx, &apiPb.CreateRuleRequest{
 			OwnerId:   primitive.NewObjectID().Hex(),
 			OwnerType: apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
 			Rule:      "len(Last(10)) > 0",
@@ -343,6 +350,12 @@ func TestServer_GetRuleById(t *testing.T) {
 }
 
 func TestServer_GetRulesByOwnerId(t *testing.T) {
+	t.Run("Should: return error", func(t *testing.T) {
+		_, err := s.GetRulesByOwnerId(ctx, &apiPb.GetRulesByOwnerIdRequest{
+			OwnerId: "",
+		})
+		assert.Error(t, err)
+	})
 	t.Run("Should: return error", func(t *testing.T) {
 		_, err := s.GetRulesByOwnerId(ctx, &apiPb.GetRulesByOwnerIdRequest{
 			OwnerId: primitive.NewObjectID().Hex(),
@@ -431,7 +444,7 @@ func TestServer_ProcessRecordFromStorage(t *testing.T) {
 		_, err := s.ProcessRecordFromStorage(ctx, &apiPb.StorageRecord{
 			Record: &apiPb.StorageRecord_Agent{
 				Agent: &apiPb.Metric{
-					AgentId: "ruleIsNotActive",
+					AgentId: ruleIsNotActive.Hex(),
 				},
 			},
 		})
@@ -460,12 +473,40 @@ func Test_getOwnerTypeAndId(t *testing.T) {
 				Scheduler: &apiPb.Scheduler{},
 			},
 		})
+		assert.Error(t, err)
+	})
+	t.Run("Should: return no error", func(t *testing.T) {
+		_, _, err := getOwnerTypeAndId(&apiPb.StorageRecord{
+			Record: &apiPb.StorageRecord_Scheduler{
+				Scheduler: &apiPb.Scheduler{
+					Id: primitive.NewObjectID().Hex(),
+				},
+			},
+		})
 		assert.NoError(t, err)
+	})
+	t.Run("Should: return no error", func(t *testing.T) {
+		_, _, err := getOwnerTypeAndId(&apiPb.StorageRecord{
+			Record: &apiPb.StorageRecord_Agent{
+				Agent: &apiPb.Metric{},
+			},
+		})
+		assert.Error(t, err)
 	})
 	t.Run("Should: return no error", func(t *testing.T) {
 		_, _, err := getOwnerTypeAndId(&apiPb.StorageRecord{
 			Record: &apiPb.StorageRecord_Transaction{
 				Transaction: &apiPb.TransactionInfo{},
+			},
+		})
+		assert.Error(t, err)
+	})
+	t.Run("Should: return no error", func(t *testing.T) {
+		_, _, err := getOwnerTypeAndId(&apiPb.StorageRecord{
+			Record: &apiPb.StorageRecord_Transaction{
+				Transaction: &apiPb.TransactionInfo{
+					ApplicationId: primitive.NewObjectID().Hex(),
+				},
 			},
 		})
 		assert.NoError(t, err)

@@ -18,6 +18,26 @@ import (
 type server struct {
 }
 
+func (s server) SaveIncident(context.Context, *apiPb.Incident) (*empty.Empty, error) {
+	panic("implement me")
+}
+
+func (s server) UpdateIncidentStatus(context.Context, *apiPb.UpdateIncidentStatusRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s server) GetIncidentById(context.Context, *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s server) GetIncidentByRuleId(context.Context, *apiPb.RuleIdRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s server) GetIncidentsList(context.Context, *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
+	panic("implement me")
+}
+
 func (s server) GetSchedulerUptime(ctx context.Context, request *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
 	panic("implement me")
 }
@@ -51,6 +71,26 @@ func (s server) SaveResponseFromAgent(context.Context, *apiPb.Metric) (*empty.Em
 }
 
 type serverErrorThrow struct {
+}
+
+func (s serverErrorThrow) SaveIncident(context.Context, *apiPb.Incident) (*empty.Empty, error) {
+	panic("implement me")
+}
+
+func (s serverErrorThrow) UpdateIncidentStatus(context.Context, *apiPb.UpdateIncidentStatusRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s serverErrorThrow) GetIncidentById(context.Context, *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s serverErrorThrow) GetIncidentByRuleId(context.Context, *apiPb.RuleIdRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s serverErrorThrow) GetIncidentsList(context.Context, *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
+	panic("implement me")
 }
 
 func (s serverErrorThrow) GetSchedulerUptime(ctx context.Context, request *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {

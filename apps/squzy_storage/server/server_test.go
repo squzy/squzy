@@ -11,6 +11,26 @@ import (
 type dbErrorMock struct {
 }
 
+func (mock *dbErrorMock) InsertIncident(*apiPb.Incident) error {
+	panic("implement me")
+}
+
+func (mock *dbErrorMock) GetIncidentById(id string) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (mock *dbErrorMock) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (mock *dbErrorMock) UpdateIncidentStatus(id string, status apiPb.IncidentStatus) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (mock *dbErrorMock) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*apiPb.Incident, int64, error) {
+	panic("implement me")
+}
+
 func (*dbErrorMock) Migrate() error {
 	return nil
 }
@@ -68,6 +88,26 @@ func (*dbErrorMock) GetTransactionGroup(request *apiPb.GetTransactionGroupReques
 }
 
 type dbMock struct {
+}
+
+func (mock *dbMock) InsertIncident(*apiPb.Incident) error {
+	panic("implement me")
+}
+
+func (mock *dbMock) GetIncidentById(id string) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (mock *dbMock) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (mock *dbMock) UpdateIncidentStatus(id string, status apiPb.IncidentStatus) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (mock *dbMock) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*apiPb.Incident, int64, error) {
+	panic("implement me")
 }
 
 func (*dbMock) Migrate() error {

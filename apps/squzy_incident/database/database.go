@@ -11,7 +11,7 @@ import (
 type Database interface {
 	SaveRule(context.Context, *Rule) error
 	FindRuleById(context.Context, primitive.ObjectID) (*Rule, error)
-	FindRulesByOwnerId(ctx context.Context, ownerType apiPb.RuleOwnerType, ownerId string) ([]*Rule, error)
+	FindRulesByOwnerId(ctx context.Context, ownerType apiPb.RuleOwnerType, ownerId primitive.ObjectID) ([]*Rule, error)
 	RemoveRule(ctx context.Context, ruleId primitive.ObjectID) (*Rule, error)
 	ActivateRule(ctx context.Context, ruleId primitive.ObjectID) (*Rule, error)
 	DeactivateRule(ctx context.Context, ruleId primitive.ObjectID) (*Rule, error)
@@ -23,7 +23,7 @@ type Rule struct {
 	Name      string              `bson:"name,omitempty"`
 	AutoClose bool                `bson:"autoClose"`
 	OwnerType apiPb.RuleOwnerType `bson:"ownerType"`
-	OwnerId   string              `bson:"ownerId"`
+	OwnerId   primitive.ObjectID  `bson:"ownerId"`
 	Status    apiPb.RuleStatus    `bson:"status"`
 }
 
@@ -85,7 +85,7 @@ func (db *database) FindRuleById(ctx context.Context, id primitive.ObjectID) (*R
 	return rule, err
 }
 
-func (db *database) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.RuleOwnerType, ownerId string) ([]*Rule, error) {
+func (db *database) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.RuleOwnerType, ownerId primitive.ObjectID) ([]*Rule, error) {
 	var rules []*Rule
 	filter := bson.M{
 		"ownerType": ownerType,

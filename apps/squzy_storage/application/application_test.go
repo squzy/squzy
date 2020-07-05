@@ -67,6 +67,26 @@ func (*configMock) GetDbPassword() string {
 type mockApiStorage struct {
 }
 
+func (s mockApiStorage) SaveIncident(context.Context, *apiPb.Incident) (*empty.Empty, error) {
+	panic("implement me")
+}
+
+func (s mockApiStorage) UpdateIncidentStatus(context.Context, *apiPb.UpdateIncidentStatusRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s mockApiStorage) GetIncidentById(context.Context, *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s mockApiStorage) GetIncidentByRuleId(context.Context, *apiPb.RuleIdRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s mockApiStorage) GetIncidentsList(context.Context, *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
+	panic("implement me")
+}
+
 func (s mockApiStorage) GetSchedulerUptime(ctx context.Context, in *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {
 	panic("implement me")
 }

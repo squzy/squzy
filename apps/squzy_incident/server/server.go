@@ -35,7 +35,7 @@ func dbRuleToProto(rule *database.Rule) *apiPb.Rule {
 		Name:      rule.Name,
 		AutoClose: rule.AutoClose,
 		OwnerType: rule.OwnerType,
-		OwnerId:   rule.OwnerId,
+		OwnerId:   rule.OwnerId.Hex(),
 		Status:    rule.Status,
 	}
 }
@@ -69,6 +69,10 @@ func (s *server) DeactivateRule(ctx context.Context, request *apiPb.RuleIdReques
 }
 
 func (s *server) CreateRule(ctx context.Context, request *apiPb.CreateRuleRequest) (*apiPb.Rule, error) {
+	ownerId, err := primitive.ObjectIDFromHex(request.GetOwnerId())
+	if err != nil {
+		return nil, err
+	}
 	//	res, _ := s.ValidateRule(ctx, &apiPb.ValidateRuleRequest{ never return error
 	res, _ := s.ValidateRule(ctx, &apiPb.ValidateRuleRequest{
 		OwnerType: request.GetOwnerType(),
@@ -83,10 +87,10 @@ func (s *server) CreateRule(ctx context.Context, request *apiPb.CreateRuleReques
 		Name:      request.GetName(),
 		AutoClose: request.GetAutoClose(),
 		OwnerType: request.GetOwnerType(),
-		OwnerId:   request.GetOwnerId(),
+		OwnerId:   ownerId,
 		Status:    apiPb.RuleStatus_RULE_STATUS_ACTIVE,
 	}
-	err := s.ruleDb.SaveRule(ctx, rule)
+	err = s.ruleDb.SaveRule(ctx, rule)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +111,12 @@ func (s *server) GetRuleById(ctx context.Context, request *apiPb.RuleIdRequest) 
 }
 
 func (s *server) GetRulesByOwnerId(ctx context.Context, request *apiPb.GetRulesByOwnerIdRequest) (*apiPb.Rules, error) {
-	dbRules, err := s.ruleDb.FindRulesByOwnerId(ctx, request.OwnerType, request.GetOwnerId())
+	ownerId, err := primitive.ObjectIDFromHex(request.GetOwnerId())
+	if err != nil {
+		return nil, err
+	}
+
+	dbRules, err := s.ruleDb.FindRulesByOwnerId(ctx, request.OwnerType, ownerId)
 	rules := []*apiPb.Rule{}
 	for _, rule := range dbRules {
 		rules = append(rules, dbRuleToProto(rule))
@@ -163,7 +172,7 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 		if rule.Status != apiPb.RuleStatus_RULE_STATUS_ACTIVE {
 			continue
 		}
-		wasIncident := s.expr.ProcessRule(ownerType, ownerId, rule.Rule)
+		wasIncident := s.expr.ProcessRule(ownerType, ownerId.Hex(), rule.Rule)
 		incident, err := s.storage.GetIncidentByRuleId(ctx, &apiPb.RuleIdRequest{
 			RuleId: rule.Id.Hex(),
 		})
@@ -206,17 +215,29 @@ func (s *server) StudyIncident(ctx context.Context, request *apiPb.IncidentIdReq
 	return s.setStatus(ctx, request.GetIncidentId(), apiPb.IncidentStatus_INCIDENT_STATUS_STUDIED)
 }
 
-func getOwnerTypeAndId(request *apiPb.StorageRecord) (apiPb.RuleOwnerType, string, error) {
+func getOwnerTypeAndId(request *apiPb.StorageRecord) (apiPb.RuleOwnerType, primitive.ObjectID, error) {
 	if request.GetScheduler() != nil {
-		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT, request.GetScheduler().Id, nil
+		ownerId, err := primitive.ObjectIDFromHex(request.GetScheduler().Id)
+		if err != nil {
+			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
+		}
+		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT, ownerId, nil
 	}
 	if request.GetAgent() != nil {
-		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT, request.GetAgent().AgentId, nil
+		ownerId, err := primitive.ObjectIDFromHex(request.GetAgent().AgentId)
+		if err != nil {
+			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
+		}
+		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT, ownerId, nil
 	}
 	if request.GetTransaction() != nil {
-		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION, request.GetTransaction().Id, nil
+		ownerId, err := primitive.ObjectIDFromHex(request.GetTransaction().ApplicationId)
+		if err != nil {
+			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
+		}
+		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION, ownerId, nil
 	}
-	return 0, "", errors.New("ERROR_NO_RECORD")
+	return 0, primitive.ObjectID{}, errors.New("ERROR_NO_RECORD")
 }
 
 func isIncidentExist(incident *apiPb.Incident) bool {
