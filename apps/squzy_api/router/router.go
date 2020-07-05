@@ -94,15 +94,15 @@ type PaginationRequest struct {
 
 type ValidateRuleRequest struct {
 	OwnerType apiPb.RuleOwnerType `json:"ownerType"`
-	Rule      string              `json:"rule"`
+	Rule      string              `json:"rule" binding:"required"`
 }
 
 type CreateRuleRequest struct {
-	Rule      string              `json:"rule"`
+	Rule      string              `json:"rule" binding:"required"`
 	Name      string              `json:"name"`
 	AutoClose bool                `json:"autoClose"`
 	OwnerType apiPb.RuleOwnerType `json:"ownerType"`
-	OwnerId   string              `json:"ownerId"`
+	OwnerId   string              `json:"ownerId" binding:"required"`
 }
 
 type RuleIdRequest struct {
@@ -111,7 +111,7 @@ type RuleIdRequest struct {
 
 type ListRulesByOwnerIdRequest struct {
 	OwnerType apiPb.RuleOwnerType `form:"ownerType"`
-	OwnerId   string              `form:"ownerId"`
+	OwnerId   string              `form:"ownerId"  binding:"required"`
 }
 
 type Scheduler struct {
@@ -225,7 +225,7 @@ func (r *router) GetEngine() *gin.Engine {
 				err := context.ShouldBind(rq)
 
 				if err != nil {
-					errWrap(context, http.StatusUnprocessableEntity, err)
+					errWrap(context, http.StatusBadRequest, err)
 					return
 				}
 
@@ -299,7 +299,7 @@ func (r *router) GetEngine() *gin.Engine {
 				err := context.ShouldBind(rq)
 
 				if err != nil {
-					errWrap(context, http.StatusUnprocessableEntity, err)
+					errWrap(context, http.StatusBadRequest, err)
 					return
 				}
 
@@ -320,7 +320,7 @@ func (r *router) GetEngine() *gin.Engine {
 				ruleReq := &CreateRuleRequest{}
 				err := context.ShouldBindJSON(ruleReq)
 				if err != nil {
-					errWrap(context, http.StatusUnprocessableEntity, err)
+					errWrap(context, http.StatusBadRequest, err)
 					return
 				}
 
