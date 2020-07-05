@@ -168,10 +168,15 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 
 	wasError := false
 	for _, rule := range rules {
+
+		if rule.Status != apiPb.RuleStatus_RULE_STATUS_ACTIVE {
+			continue
+		}
 		wasIncident := s.expr.ProcessRule(ownerType, ownerId.Hex(), rule.Rule)
 		incident, err := s.storage.GetIncidentByRuleId(ctx, &apiPb.RuleIdRequest{
 			RuleId: rule.Id.Hex(),
 		})
+
 		if err != nil {
 			wasError = true
 			continue
