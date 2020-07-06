@@ -444,7 +444,7 @@ func convertFromIncident(data *Incident) *apiPb.Incident {
 }
 
 func convertFromIncidentHistories(data []*IncidentHistory) []*apiPb.Incident_HistoryItem {
-	histories := []*apiPb.Incident_HistoryItem
+	histories := []*apiPb.Incident_HistoryItem{}
 	for _, v := range data {
 		history := convertFromIncidentHistory(v)
 		if history != nil {
