@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
@@ -266,10 +265,8 @@ func isIncidentOpened(incident *apiPb.Incident) bool {
 }
 
 func (s *server) tryCloseIncident(ctx context.Context, autoClose bool, incident *apiPb.Incident) error {
-	fmt.Println(autoClose)
 	if autoClose {
 		_, err := s.setStatus(ctx, incident.GetId(), apiPb.IncidentStatus_INCIDENT_STATUS_CLOSED)
-		fmt.Println(err)
 		return err
 	}
 	_, err := s.setStatus(ctx, incident.GetId(), apiPb.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED)

@@ -52,8 +52,6 @@ var (
 
 func (p *Postgres) InsertIncident(data *apiPb.Incident) error {
 	incident := convertToIncident(data)
-	fmt.Println(data.Id)
-	fmt.Println(incident.IncidentId)
 	if err := p.Db.Table(dbIncidentCollection).Create(incident).Error; err != nil {
 		return errorDataBase
 	}
