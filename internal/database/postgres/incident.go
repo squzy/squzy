@@ -34,8 +34,9 @@ var (
 	incidentIdFilterString        = fmt.Sprintf(`"%s"."incidentId" = ?`, dbIncidentCollection)
 	incidentRuleIdFilterString    = fmt.Sprintf(`"%s"."ruleId" = ?`, dbIncidentCollection)
 	incidentStatusString          = fmt.Sprintf(`"%s"."status"`, dbIncidentCollection)
-	incidentEndTimeString         = fmt.Sprintf(`"%s"."endTime"`, dbIncidentCollection)
 	incidentStartTimeFilterString = fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dbIncidentCollection)
+	statusString                  = "status"
+	endTimeString                 = "endTime"
 
 	incidentOrderMap = map[apiPb.SortIncidentList]string{
 		apiPb.SortIncidentList_SORT_INCIDENT_LIST_UNSPECIFIED: fmt.Sprintf(`"%s"."startTime"`, dbIncidentCollection),
@@ -67,11 +68,8 @@ func (p *Postgres) UpdateIncidentStatus(id string, status apiPb.IncidentStatus) 
 	if err := p.Db.Table(dbIncidentCollection).Where(incidentIdFilterString, id).
 		Updates(
 			map[string]interface{}{
-				"status": int32(status),
-				"endTime": tNow,
-
-				//incidentStatusString:  int32(status),
-				//incidentEndTimeString: tNow,
+				statusString:  int32(status),
+				endTimeString: tNow,
 			}).Error; err != nil {
 
 		return nil, errorDataBase
