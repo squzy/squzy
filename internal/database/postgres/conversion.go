@@ -444,10 +444,7 @@ func convertFromIncident(data *Incident) *apiPb.Incident {
 }
 
 func convertFromIncidentHistories(data []*IncidentHistory) []*apiPb.Incident_HistoryItem {
-	if data == nil {
-		return nil
-	}
-	var histories []*apiPb.Incident_HistoryItem
+	histories := []*apiPb.Incident_HistoryItem
 	for _, v := range data {
 		history := convertFromIncidentHistory(v)
 		if history != nil {
@@ -461,10 +458,10 @@ func convertFromIncidentHistory(data *IncidentHistory) *apiPb.Incident_HistoryIt
 	if data == nil {
 		return nil
 	}
-	time, _ := ptypes.TimestampProto(time.Unix(0, data.Timestamp))
+	parsedTime, _ := ptypes.TimestampProto(time.Unix(0, data.Timestamp))
 	return &apiPb.Incident_HistoryItem{
 		Status:    apiPb.IncidentStatus(data.Status),
-		Timestamp: time,
+		Timestamp: parsedTime,
 	}
 
 }
