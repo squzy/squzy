@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"errors"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/jinzhu/gorm"
@@ -28,6 +29,8 @@ type IncidentHistory struct {
 const (
 	dbIncidentCollection        = "incidents"
 	dbIncidentHistoryCollection = "incident_histories"
+
+	NoIncident = "NO_INCIDENT"
 )
 
 var (
@@ -43,6 +46,8 @@ var (
 		apiPb.SortIncidentList_INCIDENT_LIST_BY_START_TIME:    fmt.Sprintf(`"%s"."startTime"`, dbIncidentCollection),
 		apiPb.SortIncidentList_INCIDENT_LIST_BY_END_TIME:      fmt.Sprintf(`"%s"."endTime"`, dbIncidentCollection),
 	}
+
+	errorNoIncident = errors.New(NoIncident)
 )
 
 func (p *Postgres) InsertIncident(data *apiPb.Incident) error {
@@ -107,7 +112,7 @@ func (p *Postgres) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, er
 		Where(getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_OPENED)).
 		First(&incident).Error; err != nil {
 
-		return nil, checkNoFoundError(err)
+		return checkNoFoundError(err)
 	}
 	return convertFromIncident(&incident), nil
 }
@@ -182,9 +187,10 @@ func getIncidentDirection(request *apiPb.SortingIncidentList) string {
 	return ` desc`
 }
 
-func checkNoFoundError(err error) error {
+//Return empty incident
+func checkNoFoundError(err error) (*apiPb.Incident, error) {
 	if gorm.IsRecordNotFoundError(err) {
-		return nil
+		return &apiPb.Incident{}, nil
 	}
-	return errorDataBase
+	return nil, errorDataBase
 }

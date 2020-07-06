@@ -172,7 +172,6 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 			continue
 		}
 		wasIncident := s.expr.ProcessRule(ownerType, ownerId.Hex(), rule.Rule)
-		// @TODO NIKITA HERE PROBLEM
 		incident, err := s.storage.GetIncidentByRuleId(ctx, &apiPb.RuleIdRequest{
 			RuleId: rule.Id.Hex(),
 		})
@@ -248,11 +247,11 @@ func getOwnerTypeAndId(request *apiPb.StorageRecord) (apiPb.RuleOwnerType, primi
 }
 
 func isIncidentExist(incident *apiPb.Incident) bool {
-	return incident != nil
+	return incident != nil && incident.Id != ""
 }
 
 func isIncidentOpened(incident *apiPb.Incident) bool {
-	if incident == nil {
+	if incident == nil || incident.Id == "" {
 		return false
 	}
 	return incident.GetStatus() == apiPb.IncidentStatus_INCIDENT_STATUS_OPENED

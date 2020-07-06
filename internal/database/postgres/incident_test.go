@@ -313,7 +313,7 @@ func Test_getIncidentDirection(t *testing.T) {
 
 func Test_checkNoFoundError(t *testing.T) {
 	t.Run("Should: return value from map", func(t *testing.T) {
-		err := checkNoFoundError(gorm.ErrRecordNotFound)
+		_, err := checkNoFoundError(gorm.ErrRecordNotFound)
 		assert.Nil(t, err)
 	})
 }
