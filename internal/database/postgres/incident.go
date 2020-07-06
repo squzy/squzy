@@ -159,7 +159,7 @@ func getIncidentRuleString(ruleId *wrappers.StringValue) string {
 	if ruleId == nil {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."ruleId" = %s`, dbIncidentCollection, ruleId.Value)
+	return fmt.Sprintf(`"%s"."ruleId" = '%s'`, dbIncidentCollection, ruleId.Value)
 }
 
 func getIncidentOrder(request *apiPb.SortingIncidentList) string {
