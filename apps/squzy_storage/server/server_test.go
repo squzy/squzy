@@ -84,6 +84,10 @@ func (m mockConfigDisable) GetIncidentServerAddress() string {
 	panic("implement me")
 }
 
+func (m mockConfigDisable) WithDbLogs() bool {
+	return false
+}
+
 func (m mockConfigDisable) WithIncident() bool {
 	return false
 }
@@ -120,6 +124,10 @@ func (m mockConfigEnable) GetIncidentServerAddress() string {
 }
 
 func (m mockConfigEnable) WithIncident() bool {
+	return true
+}
+
+func (m mockConfigEnable) WithDbLogs() bool {
 	return true
 }
 

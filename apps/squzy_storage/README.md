@@ -20,6 +20,7 @@ Bold is required
 - *DB_NAME* - postgresSQL name
 - *DB_USER* - postgresSQL user
 - *DB_PASSWORD* - postgresSQL password
+- DB_LOGS(false) - provide logs for DB
 
 ## Docker
 
