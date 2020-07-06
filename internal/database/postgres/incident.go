@@ -109,8 +109,11 @@ func (p *Postgres) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, er
 	if err := p.Db.Table(dbIncidentCollection).
 		Set("gorm:auto_preload", true).
 		Where(incidentRuleIdFilterString, ruleId).
-		Where(getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_OPENED)).
-		First(&incident).Error; err != nil {
+		Where(fmt.Sprintf(`%s OR %s OR %s`,
+			getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_OPENED),
+			getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED),
+			getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_STUDIED))).
+			First(&incident).Error; err != nil {
 
 		return checkNoFoundError(err)
 	}
