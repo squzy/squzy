@@ -98,7 +98,7 @@ func (p *Postgres) GetIncidentById(id string) (*apiPb.Incident, error) {
 	var incident Incident
 	if err := p.Db.Table(dbIncidentCollection).
 		Set("gorm:auto_preload", true).
-		Where(incidentStatusString, id).First(&incident).Error; err != nil {
+		Where(incidentIdFilterString, id).First(&incident).Error; err != nil {
 		return nil, errorDataBase
 	}
 	return convertFromIncident(&incident), nil
