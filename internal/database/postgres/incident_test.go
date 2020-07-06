@@ -86,6 +86,12 @@ func (s *SuiteIncident) Test_UpdateIncidentStatus() {
 		WithArgs(sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
+	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbIncidentHistoryCollection)
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
 	s.mock.ExpectBegin()
 	query = fmt.Sprintf(`UPDATE`)
 	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
@@ -121,6 +127,12 @@ func (s *SuiteIncident) Test_UpdateIncidentStatus_UpdateError() {
 		WithArgs(sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
+	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbIncidentHistoryCollection)
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
 	_, err := postgrIncident.UpdateIncidentStatus("", apiPb.IncidentStatus_INCIDENT_STATUS_OPENED)
 	require.Error(s.T(), err)
 }
@@ -129,6 +141,12 @@ func (s *SuiteIncident) Test_UpdateIncidentStatus_UpdateError() {
 func (s *SuiteIncident) Test_UpdateIncidentStatus_InsertError() {
 	query := fmt.Sprintf(`SELECT * FROM "%s"`, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{"id"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT * FROM "%s"`, dbIncidentHistoryCollection)
+	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg()).
 		WillReturnRows(rows)

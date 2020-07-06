@@ -20,7 +20,7 @@ type Incident struct {
 
 type IncidentHistory struct {
 	gorm.Model
-	IncidentID uint  `gorm:"column:incidentID"`
+	IncidentID uint  `gorm:"column:incidentId"`
 	Status     int32 `gorm:"column:status"`
 	Timestamp  int64 `gorm:"column:time"`
 }
@@ -46,6 +46,8 @@ var (
 
 func (p *Postgres) InsertIncident(data *apiPb.Incident) error {
 	incident := convertToIncident(data)
+	fmt.Println(data.Id)
+	fmt.Println(incident.IncidentId)
 	if err := p.Db.Table(dbIncidentCollection).Create(incident).Error; err != nil {
 		return errorDataBase
 	}
@@ -54,7 +56,9 @@ func (p *Postgres) InsertIncident(data *apiPb.Incident) error {
 
 func (p *Postgres) UpdateIncidentStatus(id string, status apiPb.IncidentStatus) (*apiPb.Incident, error) {
 	var incident Incident
-	if err := p.Db.Table(dbIncidentCollection).Where(incidentIdFilterString, id).First(&incident).Error; err != nil {
+	if err := p.Db.Table(dbIncidentCollection).
+		Set("gorm:auto_preload", true).
+		Where(incidentIdFilterString, id).First(&incident).Error; err != nil {
 		return nil, errorDataBase
 	}
 
@@ -63,8 +67,11 @@ func (p *Postgres) UpdateIncidentStatus(id string, status apiPb.IncidentStatus) 
 	if err := p.Db.Table(dbIncidentCollection).Where(incidentIdFilterString, id).
 		Updates(
 			map[string]interface{}{
-				incidentStatusString:  int32(status),
-				incidentEndTimeString: tNow,
+				"status": int32(status),
+				"endTime": tNow,
+
+				//incidentStatusString:  int32(status),
+				//incidentEndTimeString: tNow,
 			}).Error; err != nil {
 
 		return nil, errorDataBase
@@ -80,6 +87,7 @@ func (p *Postgres) UpdateIncidentStatus(id string, status apiPb.IncidentStatus) 
 		return nil, errorDataBase
 	}
 
+	incident.Histories = append(incident.Histories, history)
 	return convertFromIncident(&incident), nil
 }
 

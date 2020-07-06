@@ -88,6 +88,9 @@ func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interfa
 				return req
 			}
 		},
+		"Duration": func(snapshot *apiPb.SchedulerSnapshot) int64 {
+			return getTimeRange(snapshot.GetMeta().GetStartTime(), snapshot.GetMeta().GetEndTime())
+		},
 		//Transaction status keys
 		"Ok":            apiPb.SchedulerCode_OK,
 		"Error":         apiPb.SchedulerCode_ERROR,

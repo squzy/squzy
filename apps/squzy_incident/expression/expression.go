@@ -8,6 +8,7 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"strconv"
+	"time"
 )
 
 type Expression interface {
@@ -73,4 +74,16 @@ func convertToTimestamp(strTime string) *timestamp.Timestamp {
 		panic(err)
 	}
 	return res
+}
+
+func getTimeRange(start, end *timestamp.Timestamp) int64 {
+	startTime, err := ptypes.Timestamp(start)
+	if err != nil {
+		panic("No start time")
+	}
+	endTime, err := ptypes.Timestamp(end)
+	if err != nil {
+		panic("No end time")
+	}
+	return (endTime.UnixNano() - startTime.UnixNano()) / int64(time.Millisecond)
 }

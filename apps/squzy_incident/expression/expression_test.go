@@ -33,6 +33,10 @@ func (m mockStorage) GetSchedulerInformation(ctx context.Context, in *apiPb.GetS
 			{
 				Code: apiPb.SchedulerCode_OK,
 				Type: apiPb.SchedulerType_GRPC,
+				Meta: &apiPb.SchedulerSnapshot_MetaData{
+					StartTime: ptypes.TimestampNow(),
+					EndTime:   ptypes.TimestampNow(),
+				},
 			},
 		},
 	}, nil
@@ -268,6 +272,21 @@ func Test_convertToTimestamp(t *testing.T) {
 	t.Run("Should: panic", func(t *testing.T) {
 		panicFunc := func() {
 			_ = convertToTimestamp("0000-01-01T00:00:00.899Z")
+		}
+		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
+	})
+}
+
+func Test_getTimeRange(t *testing.T) {
+	t.Run("Should: panic", func(t *testing.T) {
+		panicFunc := func() {
+			_ = getTimeRange(nil, nil)
+		}
+		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
+	})
+	t.Run("Should: panic", func(t *testing.T) {
+		panicFunc := func() {
+			_ = getTimeRange(ptypes.TimestampNow(), nil)
 		}
 		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
 	})

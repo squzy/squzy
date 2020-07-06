@@ -127,6 +127,9 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				return req
 			}
 		},
+		"Duration": func(snapshot *apiPb.TransactionInfo) int64 {
+			return getTimeRange(snapshot.GetStartTime(), snapshot.GetEndTime())
+		},
 		//Transaction status keys
 		"Success": apiPb.TransactionStatus_TRANSACTION_SUCCESSFUL,
 		"Failed":  apiPb.TransactionStatus_TRANSACTION_FAILED,

@@ -39,6 +39,14 @@ func TestExpressionStruct_getSnapshotEnv(t *testing.T) {
 			`count(First(10, UseTimeTo("3/1/2021"), UseCode(Ok)), {.Type == GRPC}) == 1`)
 		assert.True(t, res)
 	})
+	//Duration
+	t.Run("Should: no panic", func(t *testing.T) {
+		res := exprCorr.ProcessRule(
+			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER,
+			"12345",
+			`count(First(10, UseTimeTo("3/1/2021"), UseCode(Ok)), {Duration(#) < 10}) == 1`)
+		assert.True(t, res)
+	})
 	t.Run("Should: no panic", func(t *testing.T) {
 		res := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER,
