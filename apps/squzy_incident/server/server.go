@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
@@ -171,7 +172,14 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 		if rule.Status != apiPb.RuleStatus_RULE_STATUS_ACTIVE {
 			continue
 		}
-		wasIncident := s.expr.ProcessRule(ownerType, ownerId.Hex(), rule.Rule)
+
+		wasIncident, err := s.expr.ProcessRule(ownerType, ownerId.Hex(), rule.Rule)
+
+		if err != nil {
+			wasError = true
+			continue
+		}
+
 		incident, err := s.storage.GetIncidentByRuleId(ctx, &apiPb.RuleIdRequest{
 			RuleId: rule.Id.Hex(),
 		})
@@ -258,8 +266,10 @@ func isIncidentOpened(incident *apiPb.Incident) bool {
 }
 
 func (s *server) tryCloseIncident(ctx context.Context, autoClose bool, incident *apiPb.Incident) error {
+	fmt.Println(autoClose)
 	if autoClose {
 		_, err := s.setStatus(ctx, incident.GetId(), apiPb.IncidentStatus_INCIDENT_STATUS_CLOSED)
+		fmt.Println(err)
 		return err
 	}
 	_, err := s.setStatus(ctx, incident.GetId(), apiPb.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED)

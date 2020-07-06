@@ -183,66 +183,66 @@ func TestNewExpression(t *testing.T) {
 
 func TestExpressionStruct_ProcessRule(t *testing.T) {
 	t.Run("Should: panic", func(t *testing.T) {
-		panicFunc := func() {
-			_ = exprCorr.ProcessRule(
-				10,
-				"",
-				"")
-		}
-		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
+		_, err := exprCorr.ProcessRule(
+			10,
+			"",
+			"")
+		assert.NotNil(t, err, "The code return error")
 	})
-	t.Run("Should: panic", func(t *testing.T) {
-		panicFunc := func() {
-			_ = exprCorr.ProcessRule(
-				apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
-				"12345",
-				"wrongString")
-		}
-		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
+	t.Run("Should: return error", func(t *testing.T) {
+		_, err := exprCorr.ProcessRule(
+			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
+			"12345",
+			"wrongString")
+
+		assert.NotNil(t, err, "The code return error")
 	})
 	t.Run("Should: panic because storage error", func(t *testing.T) {
-		panicFunc := func() {
-			_ = exprErr.ProcessRule(
-				apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
-				"12345",
-				"one(Last(10), {one(.CpuInfo.Cpus, {.Load <= 10})})")
-		}
-		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
+		_, err := exprErr.ProcessRule(
+			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
+			"12345",
+			"one(Last(10), {one(.CpuInfo.Cpus, {.Load <= 10})})")
+		assert.NotNil(t, err, "The code return error")
 	})
 	t.Run("Should: no panic", func(t *testing.T) {
-		res := exprCorr.ProcessRule(
+		res, err := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
 			"12345",
 			"one(Last(10), {one(.CpuInfo.Cpus, {.Load <= 10})})")
 		assert.True(t, res)
+		assert.Nil(t, err)
 	})
 	t.Run("Should: panic because not bool", func(t *testing.T) {
-		panicFunc :=
-			func() {
-				_ = exprCorr.ProcessRule(
-					apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
-					"12345",
-					"filter(Last(10), {one(.CpuInfo.Cpus, {.Load <= 10})})")
-			}
-		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
+		_, err := exprCorr.ProcessRule(
+			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
+			"12345",
+			"filter(Last(10), {one(.CpuInfo.Cpus, {.Load <= 10})})")
+		assert.NotNil(t, err, "The code return error")
 	})
 	t.Run("Should: no panic", func(t *testing.T) {
-		res := exprCorr.ProcessRule(
+		res, err := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
 			"12345",
 			"one(Last(10), {one(.CpuInfo.Cpus, {.Load < 5})})")
 		assert.False(t, res)
+		assert.Nil(t, err)
 	})
 }
 
 func TestExpressionStruct_IsValid(t *testing.T) {
-	t.Run("Should: panic", func(t *testing.T) {
+	t.Run("Should: error", func(t *testing.T) {
 		err := exprCorr.IsValid(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
 			"wrongString")
 		assert.Error(t, err)
 	})
-	t.Run("Should: no panic", func(t *testing.T) {
+	t.Run("Should: error", func(t *testing.T) {
+		err := exprCorr.IsValid(
+			9999,
+			"wrongString")
+		assert.Error(t, err)
+	})
+	t.Run("Should: no error", func(t *testing.T) {
 		err := exprCorr.IsValid(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
 			"one(Last(10), {one(.CpuInfo.Cpus, {.Load <= 10})})")

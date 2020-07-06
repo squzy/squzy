@@ -38,7 +38,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 		"Last": func(count int32, filters ...FilterTransaction) []*apiPb.TransactionInfo {
 			return e.GetTransactions(
 				applicationId,
-				apiPb.SortDirection_DESC,
+				apiPb.SortDirection_ASC,
 				&apiPb.Pagination{
 					Page:  -1,
 					Limit: count,

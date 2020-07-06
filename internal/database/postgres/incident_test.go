@@ -112,7 +112,6 @@ func (s *SuiteIncident) Test_UpdateIncidentStatus() {
 	require.NoError(s.T(), err)
 }
 
-
 //Based on fact, that if request is not mocked, it will return error
 func (s *SuiteIncident) Test_UpdateIncidentStatus_SelectError() {
 	_, err := postgrIncident.UpdateIncidentStatus("", apiPb.IncidentStatus_INCIDENT_STATUS_OPENED)
@@ -325,4 +324,3 @@ func (s *SuiteIncident) AfterTest(_, _ string) {
 func TestInitIncident(t *testing.T) {
 	suite.Run(t, new(SuiteIncident))
 }
-

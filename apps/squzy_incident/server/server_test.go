@@ -13,6 +13,17 @@ import (
 	"testing"
 )
 
+type mockExpr struct {
+}
+
+func (*mockExpr) ProcessRule(ruleType apiPb.RuleOwnerType, id string, rule string) (bool, error) {
+	return false, errors.New("asf")
+}
+
+func (*mockExpr) IsValid(ruleType apiPb.RuleOwnerType, rule string) error {
+	return nil
+}
+
 type mockStorage struct {
 }
 
@@ -231,6 +242,12 @@ func (m mockErrorDatabase) DeactivateRule(ctx context.Context, ruleId primitive.
 var (
 	ctx = context.Background()
 
+	ServermockExpressionError = &server{
+		ruleDb:  &mockDatabase{},
+		storage: &mockStorage{},
+		expr:    &mockExpr{},
+	}
+
 	s = &server{
 		ruleDb:  &mockDatabase{},
 		storage: &mockStorage{},
@@ -409,6 +426,16 @@ func TestServer_ProcessRecordFromStorage(t *testing.T) {
 			expr:    expression.NewExpression(&mockStorage{}),
 		}
 		_, err := sWithErrorStorage.ProcessRecordFromStorage(ctx, &apiPb.StorageRecord{
+			Record: &apiPb.StorageRecord_AgentMetric{
+				AgentMetric: &apiPb.Metric{
+					AgentId: primitive.NewObjectID().Hex(),
+				},
+			},
+		})
+		assert.Error(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		_, err := ServermockExpressionError.ProcessRecordFromStorage(ctx, &apiPb.StorageRecord{
 			Record: &apiPb.StorageRecord_AgentMetric{
 				AgentMetric: &apiPb.Metric{
 					AgentId: primitive.NewObjectID().Hex(),

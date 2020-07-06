@@ -37,7 +37,7 @@ func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interfa
 		"Last": func(count int32, filters ...FilterSnapshot) []*apiPb.SchedulerSnapshot {
 			return e.GetSnapshots(
 				schedulerId,
-				apiPb.SortDirection_DESC,
+				apiPb.SortDirection_ASC,
 				&apiPb.Pagination{
 					Page:  -1,
 					Limit: count,
