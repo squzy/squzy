@@ -29,7 +29,7 @@ func TestExpressionStruct_getSnapshotEnv(t *testing.T) {
 		res, err := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER,
 			"12345",
-			`count(Last(10, UseTimeFrom("3/1/2020"), UseTimeTo("3/1/2021"), UseCode(Ok)), {.Type == GRPC}) == 1`)
+			`len(Last(10, UseTimeFrom("3/1/2020"), UseTimeTo("3/1/2021"), UseCode(Ok))) == 1`)
 		assert.True(t, res)
 		assert.Nil(t, err)
 	})
@@ -37,7 +37,7 @@ func TestExpressionStruct_getSnapshotEnv(t *testing.T) {
 		res, err := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER,
 			"12345",
-			`count(First(10, UseTimeTo("3/1/2021"), UseCode(Ok)), {.Type == GRPC}) == 1`)
+			`len(First(10, UseTimeTo("3/1/2021"), UseCode(Ok))) == 1`)
 		assert.True(t, res)
 		assert.Nil(t, err)
 	})
@@ -54,7 +54,7 @@ func TestExpressionStruct_getSnapshotEnv(t *testing.T) {
 		res, err := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER,
 			"12345",
-			`count(Index(1, UseTimeTo("3/1/2021"), UseCode(Ok)), {.Type == GRPC}) == 1`)
+			`len(Index(1, UseTimeTo("3/1/2021"), UseCode(Ok))) == 1`)
 		assert.True(t, res)
 		assert.Nil(t, err)
 	})
