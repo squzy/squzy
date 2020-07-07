@@ -22,7 +22,7 @@ Bold is required
 
 # Rules definition
 
-For creating the Rule we use https://github.com/antonmedv/expr with a number of additional rules.
+For creating the Rule we use [**expr**](https://github.com/antonmedv/expr)  with a number of additional rules.
 
 ## Agent rules
 
