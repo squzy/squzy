@@ -31,7 +31,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	db := database.New(postgresDb.LogMode(true))
+	db := database.New(postgresDb.LogMode(cfg.WithDbLogs()))
 
 	err = db.Migrate()
 	if err != nil {

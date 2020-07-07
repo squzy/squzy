@@ -6,7 +6,7 @@ go_library(
 		"agent.go",
 		"expression.go",
 		"snapshot.go",
-		"transaction.go"
+		"application.go"
      ],
      importpath = "squzy/apps/squzy_incident/expression",
      visibility = ["//visibility:public"],
@@ -27,7 +27,7 @@ go_test(
 		"agent_test.go",
 		"expression_test.go",
 		"snapshot_test.go",
-		"transaction_test.go"
+		"application_test.go"
     ],
     deps =[
         "@com_github_stretchr_testify//assert:go_default_library",

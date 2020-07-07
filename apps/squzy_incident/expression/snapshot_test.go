@@ -26,32 +26,36 @@ func TestExpressionStruct_GetSnapshots(t *testing.T) {
 
 func TestExpressionStruct_getSnapshotEnv(t *testing.T) {
 	t.Run("Should: no panic", func(t *testing.T) {
-		res := exprCorr.ProcessRule(
+		res, err := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER,
 			"12345",
 			`count(Last(10, UseTimeFrom("3/1/2020"), UseTimeTo("3/1/2021"), UseCode(Ok)), {.Type == GRPC}) == 1`)
 		assert.True(t, res)
+		assert.Nil(t, err)
 	})
 	t.Run("Should: no panic", func(t *testing.T) {
-		res := exprCorr.ProcessRule(
+		res, err := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER,
 			"12345",
 			`count(First(10, UseTimeTo("3/1/2021"), UseCode(Ok)), {.Type == GRPC}) == 1`)
 		assert.True(t, res)
+		assert.Nil(t, err)
 	})
 	//Duration
 	t.Run("Should: no panic", func(t *testing.T) {
-		res := exprCorr.ProcessRule(
+		res, err := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER,
 			"12345",
 			`count(First(10, UseTimeTo("3/1/2021"), UseCode(Ok)), {Duration(#) < 10}) == 1`)
 		assert.True(t, res)
+		assert.Nil(t, err)
 	})
 	t.Run("Should: no panic", func(t *testing.T) {
-		res := exprCorr.ProcessRule(
+		res, err := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER,
 			"12345",
 			`count(Index(1, UseTimeTo("3/1/2021"), UseCode(Ok)), {.Type == GRPC}) == 1`)
 		assert.True(t, res)
+		assert.Nil(t, err)
 	})
 }

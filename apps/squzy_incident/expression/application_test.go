@@ -26,32 +26,36 @@ func TestExpressionStruct_GetTransactions(t *testing.T) {
 
 func TestExpressionStruct_getTransactionEnv(t *testing.T) {
 	t.Run("Should: no panic", func(t *testing.T) {
-		res := exprCorr.ProcessRule(
+		res, err := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION,
 			"12345",
 			`count(Last(10, UseTimeFrom("3/1/2020"), UseTimeTo("3/1/2021")), {.Meta.Host == "host"}) == 1`)
 		assert.True(t, res)
+		assert.Nil(t, err)
 	})
 	t.Run("Should: no panic", func(t *testing.T) {
-		res := exprCorr.ProcessRule(
+		res, err := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION,
 			"12345",
 			`count(First(10, UseTimeTo("3/1/2021")), {.Name == "name"}) == 1`)
 		assert.True(t, res)
+		assert.Nil(t, err)
 	})
 	//Duration
 	t.Run("Should: no panic", func(t *testing.T) {
-		res := exprCorr.ProcessRule(
+		res, err := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION,
 			"12345",
 			`count(First(10, UseTimeTo("3/1/2021")), {Duration(#) < 10}) == 1`)
 		assert.True(t, res)
+		assert.Nil(t, err)
 	})
 	t.Run("Should: no panic", func(t *testing.T) {
-		res := exprCorr.ProcessRule(
+		res, err := exprCorr.ProcessRule(
 			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION,
 			"12345",
 			`len(Index(1, UseType(DB), UseStatus(Success), UseHost("host"), UseName("name"), UsePath("path"), UseMethod("method"))) == 1`)
 		assert.True(t, res)
+		assert.Nil(t, err)
 	})
 }

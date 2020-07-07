@@ -11,7 +11,6 @@ import (
 )
 
 type mockClient struct {
-
 }
 
 func (m mockClient) CreateRule(ctx context.Context, in *apiPb.CreateRuleRequest, opts ...grpc.CallOption) (*apiPb.Rule, error) {
@@ -55,8 +54,8 @@ func (m mockClient) StudyIncident(ctx context.Context, in *apiPb.IncidentIdReque
 }
 
 type mockConfigDisable struct {
-
 }
+
 func (m mockConfigDisable) GetPort() int32 {
 	panic("implement me")
 }
@@ -85,12 +84,15 @@ func (m mockConfigDisable) GetIncidentServerAddress() string {
 	panic("implement me")
 }
 
+func (m mockConfigDisable) WithDbLogs() bool {
+	return false
+}
+
 func (m mockConfigDisable) WithIncident() bool {
 	return false
 }
 
 type mockConfigEnable struct {
-
 }
 
 func (m mockConfigEnable) GetPort() int32 {
@@ -122,6 +124,10 @@ func (m mockConfigEnable) GetIncidentServerAddress() string {
 }
 
 func (m mockConfigEnable) WithIncident() bool {
+	return true
+}
+
+func (m mockConfigEnable) WithDbLogs() bool {
 	return true
 }
 
@@ -293,7 +299,7 @@ func TestService_SaveResponseFromScheduler(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := server{
 			database: &dbErrorMock{},
-			cfg: mockConfigEnable{},
+			cfg:      mockConfigEnable{},
 		}
 		_, err := s.SaveResponseFromScheduler(context.Background(), nil)
 		assert.Error(t, err)
@@ -301,7 +307,7 @@ func TestService_SaveResponseFromScheduler(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := server{
 			database: &dbMock{},
-			cfg: mockConfigEnable{},
+			cfg:      mockConfigEnable{},
 		}
 		_, err := s.SaveResponseFromScheduler(context.Background(), nil)
 		assert.NoError(t, err)
@@ -309,7 +315,7 @@ func TestService_SaveResponseFromScheduler(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := server{
 			database: &dbMock{},
-			cfg: mockConfigEnable{},
+			cfg:      mockConfigEnable{},
 		}
 		_, err := s.SaveResponseFromScheduler(context.Background(), &apiPb.SchedulerResponse{
 			Snapshot: &apiPb.SchedulerSnapshot{},
@@ -322,7 +328,7 @@ func TestService_SaveResponseFromAgent(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := server{
 			database: &dbErrorMock{},
-			cfg: mockConfigDisable{},
+			cfg:      mockConfigDisable{},
 		}
 		_, err := s.SaveResponseFromAgent(context.Background(), nil)
 		assert.Error(t, err)
@@ -330,7 +336,7 @@ func TestService_SaveResponseFromAgent(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := server{
 			database: &dbMock{},
-			cfg: mockConfigDisable{},
+			cfg:      mockConfigDisable{},
 		}
 		_, err := s.SaveResponseFromAgent(context.Background(), nil)
 		assert.NoError(t, err)
@@ -338,7 +344,7 @@ func TestService_SaveResponseFromAgent(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := server{
 			database: &dbMock{},
-			cfg: mockConfigEnable{},
+			cfg:      mockConfigEnable{},
 		}
 		_, err := s.SaveResponseFromAgent(context.Background(), &apiPb.Metric{})
 		assert.NoError(t, err)
@@ -428,7 +434,7 @@ func TestService_SaveTransaction(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		s := server{
 			database: &dbErrorMock{},
-			cfg: mockConfigDisable{},
+			cfg:      mockConfigDisable{},
 		}
 		_, err := s.SaveTransaction(context.Background(), &apiPb.TransactionInfo{})
 		assert.Error(t, err)
@@ -436,7 +442,7 @@ func TestService_SaveTransaction(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := server{
 			database: &dbMock{},
-			cfg: mockConfigEnable{},
+			cfg:      mockConfigEnable{},
 		}
 		_, err := s.SaveTransaction(context.Background(), nil)
 		assert.NoError(t, err)
@@ -444,7 +450,7 @@ func TestService_SaveTransaction(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := server{
 			database: &dbMock{},
-			cfg: mockConfigEnable{},
+			cfg:      mockConfigEnable{},
 		}
 		_, err := s.SaveTransaction(context.Background(), &apiPb.TransactionInfo{})
 		assert.NoError(t, err)
@@ -562,9 +568,9 @@ func TestServer_GetIncidentsList(t *testing.T) {
 func TestServer_SendRecordToIncident(t *testing.T) {
 	t.Run("Should: not throw panic and send incidnet", func(t *testing.T) {
 		s := &server{
-			database: nil,
+			database:       nil,
 			incidentClient: &mockClient{},
-			cfg: &mockConfigEnable{},
+			cfg:            &mockConfigEnable{},
 		}
 		panicFn := func() {
 			s.SendRecordToIncident(nil)
@@ -574,7 +580,7 @@ func TestServer_SendRecordToIncident(t *testing.T) {
 	t.Run("Should: not send incident", func(t *testing.T) {
 		s := &server{
 			database: nil,
-			cfg: &mockConfigDisable{},
+			cfg:      &mockConfigDisable{},
 		}
 		panicFn := func() {
 			s.SendRecordToIncident(nil)
@@ -584,7 +590,7 @@ func TestServer_SendRecordToIncident(t *testing.T) {
 	t.Run("Should: not send incident", func(t *testing.T) {
 		s := &server{
 			database: nil,
-			cfg: &mockConfigEnable{},
+			cfg:      &mockConfigEnable{},
 		}
 		panicFn := func() {
 			s.SendRecordToIncident(nil)

@@ -1,6 +1,7 @@
 package expression
 
 import (
+	"errors"
 	"fmt"
 	"github.com/antonmedv/expr"
 	"github.com/araddon/dateparse"
@@ -12,7 +13,7 @@ import (
 )
 
 type Expression interface {
-	ProcessRule(ruleType apiPb.RuleOwnerType, id string, rule string) bool
+	ProcessRule(ruleType apiPb.RuleOwnerType, id string, rule string) (bool, error)
 	IsValid(ruleType apiPb.RuleOwnerType, rule string) error
 }
 
@@ -20,48 +21,54 @@ type expressionStruct struct {
 	storageClient apiPb.StorageClient
 }
 
+var (
+	errRuleTypeNotProvided = errors.New("rule type not provided")
+)
+
 func NewExpression(storage apiPb.StorageClient) Expression {
 	return &expressionStruct{
 		storageClient: storage,
 	}
 }
 
-func (e *expressionStruct) ProcessRule(ruleType apiPb.RuleOwnerType, id string, rule string) bool {
-	env := e.getEnv(ruleType, id)
+func (e *expressionStruct) ProcessRule(ruleType apiPb.RuleOwnerType, id string, rule string) (bool, error) {
+	env, err := e.getEnv(ruleType, id)
 
 	program, err := expr.Compile(rule, expr.Env(env))
 	if err != nil {
-		panic(err)
+		return false, err
 	}
 
 	output, err := expr.Run(program, env)
 	if err != nil {
-		panic(err)
+		return false, err
 	}
 	value, err := strconv.ParseBool(fmt.Sprintf("%v", output))
 	if err != nil {
-		panic(err)
+		return false, err
 	}
-	return value
+	return value, nil
 }
 
 func (e *expressionStruct) IsValid(ruleType apiPb.RuleOwnerType, rule string) error {
-	env := e.getEnv(ruleType, "id")
-
-	_, err := expr.Compile(rule, expr.Env(env))
+	env, err := e.getEnv(ruleType, "id")
+	if err != nil {
+		return err
+	}
+	_, err = expr.Compile(rule, expr.Env(env))
 	return err
 }
 
-func (e *expressionStruct) getEnv(owner apiPb.RuleOwnerType, id string) map[string]interface{} {
+func (e *expressionStruct) getEnv(owner apiPb.RuleOwnerType, id string) (map[string]interface{}, error) {
 	switch owner {
 	case apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER:
-		return e.getSnapshotEnv(id)
+		return e.getSnapshotEnv(id), nil
 	case apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT:
-		return e.getAgentEnv(id)
+		return e.getAgentEnv(id), nil
 	case apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION:
-		return e.getTransactionEnv(id)
+		return e.getTransactionEnv(id), nil
 	}
-	panic("RULE_TYPE_NOT_PROVIDED")
+	return nil, errRuleTypeNotProvided
 }
 
 func convertToTimestamp(strTime string) *timestamp.Timestamp {

@@ -52,8 +52,6 @@ var (
 
 func (p *Postgres) InsertIncident(data *apiPb.Incident) error {
 	incident := convertToIncident(data)
-	fmt.Println(data.Id)
-	fmt.Println(incident.IncidentId)
 	if err := p.Db.Table(dbIncidentCollection).Create(incident).Error; err != nil {
 		return errorDataBase
 	}
@@ -113,7 +111,7 @@ func (p *Postgres) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, er
 			getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_OPENED),
 			getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED),
 			getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_STUDIED))).
-			First(&incident).Error; err != nil {
+		First(&incident).Error; err != nil {
 
 		return checkNoFoundError(err)
 	}

@@ -45,6 +45,10 @@ func (*configErrorMock) WithIncident() bool {
 	return false
 }
 
+func (*configErrorMock) WithDbLogs() bool {
+	return false
+}
+
 type configMock struct {
 }
 
@@ -61,6 +65,10 @@ func (*configMock) GetIncidentServerAddress() string {
 }
 
 func (*configMock) WithIncident() bool {
+	return false
+}
+
+func (*configMock) WithDbLogs() bool {
 	return false
 }
 

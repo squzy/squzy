@@ -17,6 +17,7 @@ func TestNew(t *testing.T) {
 		assert.Equal(t, s.GetDbPassword(), "")
 		assert.Equal(t, s.GetIncidentServerAddress(), "")
 		assert.Equal(t, s.WithIncident(), false)
+		assert.Equal(t, s.WithDbLogs(), false)
 	})
 }
 
@@ -109,5 +110,16 @@ func TestCfg_WithIncident(t *testing.T) {
 		}
 		s := New()
 		assert.Equal(t, s.WithIncident(), true)
+	})
+}
+
+func TestCfg_WithDbLogs(t *testing.T) {
+	t.Run("Should: return from env", func(t *testing.T) {
+		err := os.Setenv(ENV_DB_LOGS, "true")
+		if err != nil {
+			assert.NotNil(t, nil)
+		}
+		s := New()
+		assert.Equal(t, s.WithDbLogs(), true)
 	})
 }

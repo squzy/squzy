@@ -13,6 +13,7 @@ const (
 	ENV_DB_NAME     = "DB_NAME"
 	ENV_DB_USER     = "DB_USER"
 	ENV_DB_PASSWORD = "DB_PASSWORD"
+	ENV_DB_LOGS     = "DB_LOGS"
 
 	ENV_INCIDENT_SERVER_HOST = "INCIDENT_SERVER_HOST"
 	ENV_ENABLE_INCIDENT      = "ENABLE_INCIDENT"
@@ -29,6 +30,7 @@ type cfg struct {
 	dbPassword     string
 	incidentServer string
 	withIncident   bool
+	withDbLogs     bool
 }
 
 func (c *cfg) GetPort() int32 {
@@ -63,6 +65,10 @@ func (c *cfg) WithIncident() bool {
 	return c.withIncident
 }
 
+func (c *cfg) WithDbLogs() bool {
+	return c.withDbLogs
+}
+
 type Config interface {
 	GetPort() int32
 	GetDbHost() string
@@ -72,6 +78,7 @@ type Config interface {
 	GetDbPassword() string
 	GetIncidentServerAddress() string
 	WithIncident() bool
+	WithDbLogs() bool
 }
 
 func New() Config {
@@ -92,6 +99,15 @@ func New() Config {
 			withIncident = value
 		}
 	}
+
+	withDbLog := false
+	dbLogsValue := os.Getenv(ENV_DB_LOGS)
+	if dbLogsValue != "" {
+		value, err := strconv.ParseBool(dbLogsValue)
+		if err == nil {
+			withDbLog = value
+		}
+	}
 	return &cfg{
 		port:           port,
 		dbHost:         os.Getenv(ENV_DB_HOST),
@@ -101,5 +117,6 @@ func New() Config {
 		dbPassword:     os.Getenv(ENV_DB_PASSWORD),
 		incidentServer: os.Getenv(ENV_INCIDENT_SERVER_HOST),
 		withIncident:   withIncident,
+		withDbLogs:     withDbLog,
 	}
 }
