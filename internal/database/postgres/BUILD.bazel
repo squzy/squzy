@@ -3,7 +3,8 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
      name = "go_default_library",
      srcs = [
-         "convertion.go",
+         "conversion.go",
+         "incident.go",
          "postgres.go",
          "snapshot.go",
          "stat_request.go",
@@ -26,8 +27,9 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
-        "convertion_test.go",
-        "postgres_test.go",
+         "conversion_test.go",
+         "incident_test.go",
+         "postgres_test.go",
          "snapshot_test.go",
          "stat_request_test.go",
          "transaction_info_test.go",

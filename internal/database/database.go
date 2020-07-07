@@ -20,6 +20,11 @@ type Database interface {
 	GetTransactionInfo(request *apiPb.GetTransactionsRequest) ([]*apiPb.TransactionInfo, int64, error)
 	GetTransactionByID(request *apiPb.GetTransactionByIdRequest) (*apiPb.TransactionInfo, []*apiPb.TransactionInfo, error)
 	GetTransactionGroup(request *apiPb.GetTransactionGroupRequest) (map[string]*apiPb.TransactionGroup, error)
+	InsertIncident(*apiPb.Incident) error
+	GetIncidentById(id string) (*apiPb.Incident, error)
+	GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, error)
+	UpdateIncidentStatus(id string, status apiPb.IncidentStatus) (*apiPb.Incident, error)
+	GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*apiPb.Incident, int64, error)
 	Migrate() error
 }
 

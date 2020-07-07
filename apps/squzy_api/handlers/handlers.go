@@ -30,6 +30,17 @@ type Handlers interface {
 	DisabledApplicationById(ctx context.Context, id string) (*apiPb.Application, error)
 	GetApplicationList(ctx context.Context) ([]*apiPb.Application, error)
 	GetTransactionById(ctx context.Context, id string) (*apiPb.GetTransactionByIdResponse, error)
+	CreateRule(ctx context.Context, rule *apiPb.CreateRuleRequest) (*apiPb.Rule, error)
+	ValidateRule(ctx context.Context, rule *apiPb.ValidateRuleRequest) (*apiPb.ValidateRuleResponse, error)
+	GetRulesByOwnerId(ctx context.Context, req *apiPb.GetRulesByOwnerIdRequest) (*apiPb.Rules, error)
+	GetRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error)
+	ActivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error)
+	DeactivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error)
+	RemoveRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error)
+	GetIncidentList(ctx context.Context, req *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error)
+	GetIncidentById(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error)
+	StudyIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error)
+	CloseIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error)
 }
 
 const (
@@ -41,6 +52,73 @@ type handlers struct {
 	monitoringClient            apiPb.SchedulersExecutorClient
 	storageClient               apiPb.StorageClient
 	applicationMonitoringClient apiPb.ApplicationMonitoringClient
+	incidentClient              apiPb.IncidentServerClient
+}
+
+func (h *handlers) StudyIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.incidentClient.StudyIncident(c, req)
+}
+
+func (h *handlers) CloseIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.incidentClient.CloseIncident(c, req)
+}
+
+func (h *handlers) GetIncidentById(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.storageClient.GetIncidentById(c, req)
+}
+
+func (h *handlers) GetIncidentList(ctx context.Context, req *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.storageClient.GetIncidentsList(c, req)
+}
+
+func (h *handlers) GetRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.incidentClient.GetRuleById(c, req)
+}
+
+func (h *handlers) ActivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.incidentClient.ActivateRule(c, req)
+}
+
+func (h *handlers) DeactivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.incidentClient.DeactivateRule(c, req)
+}
+
+func (h *handlers) RemoveRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.incidentClient.RemoveRule(c, req)
+}
+
+func (h *handlers) GetRulesByOwnerId(ctx context.Context, req *apiPb.GetRulesByOwnerIdRequest) (*apiPb.Rules, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.incidentClient.GetRulesByOwnerId(c, req)
+}
+
+func (h *handlers) ValidateRule(ctx context.Context, rule *apiPb.ValidateRuleRequest) (*apiPb.ValidateRuleResponse, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.incidentClient.ValidateRule(c, rule)
+}
+
+func (h *handlers) CreateRule(ctx context.Context, rule *apiPb.CreateRuleRequest) (*apiPb.Rule, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.incidentClient.CreateRule(c, rule)
 }
 
 func (h *handlers) ArchivedApplicationById(ctx context.Context, id string) (*apiPb.Application, error) {
@@ -209,11 +287,13 @@ func New(
 	monitoringClient apiPb.SchedulersExecutorClient,
 	storageClient apiPb.StorageClient,
 	applicationMonitoringClient apiPb.ApplicationMonitoringClient,
+	incidentClient apiPb.IncidentServerClient,
 ) Handlers {
 	return &handlers{
 		agentClient:                 agentClient,
 		monitoringClient:            monitoringClient,
 		storageClient:               storageClient,
 		applicationMonitoringClient: applicationMonitoringClient,
+		incidentClient:              incidentClient,
 	}
 }

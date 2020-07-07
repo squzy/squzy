@@ -106,8 +106,6 @@ func (p *Postgres) GetStatRequest(agentID string, pagination *apiPb.Pagination, 
 		return nil, -1, err
 	}
 
-	fmt.Println(agentID)
-
 	var count int64
 	err = p.Db.Table(dbStatRequestCollection).
 		Where(agentIdFilterString, agentID).

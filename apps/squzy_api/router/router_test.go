@@ -18,6 +18,50 @@ import (
 type mockOk struct {
 }
 
+func (m mockOk) CreateRule(ctx context.Context, rule *apiPb.CreateRuleRequest) (*apiPb.Rule, error) {
+	return &apiPb.Rule{}, nil
+}
+
+func (m mockOk) ValidateRule(ctx context.Context, rule *apiPb.ValidateRuleRequest) (*apiPb.ValidateRuleResponse, error) {
+	return &apiPb.ValidateRuleResponse{}, nil
+}
+
+func (m mockOk) GetRulesByOwnerId(ctx context.Context, req *apiPb.GetRulesByOwnerIdRequest) (*apiPb.Rules, error) {
+	return &apiPb.Rules{}, nil
+}
+
+func (m mockOk) GetRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	return &apiPb.Rule{}, nil
+}
+
+func (m mockOk) ActivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	return &apiPb.Rule{}, nil
+}
+
+func (m mockOk) DeactivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	return &apiPb.Rule{}, nil
+}
+
+func (m mockOk) RemoveRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	return &apiPb.Rule{}, nil
+}
+
+func (m mockOk) GetIncidentList(ctx context.Context, req *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
+	return &apiPb.GetIncidentsListResponse{}, nil
+}
+
+func (m mockOk) GetIncidentById(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	return &apiPb.Incident{}, nil
+}
+
+func (m mockOk) StudyIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	return &apiPb.Incident{}, nil
+}
+
+func (m mockOk) CloseIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	return &apiPb.Incident{}, nil
+}
+
 func (m mockOk) ArchivedApplicationById(ctx context.Context, id string) (*apiPb.Application, error) {
 	return &apiPb.Application{}, nil
 }
@@ -103,6 +147,50 @@ func (m mockOk) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) (
 }
 
 type mockError struct {
+}
+
+func (m mockError) CreateRule(ctx context.Context, rule *apiPb.CreateRuleRequest) (*apiPb.Rule, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) ValidateRule(ctx context.Context, rule *apiPb.ValidateRuleRequest) (*apiPb.ValidateRuleResponse, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) GetRulesByOwnerId(ctx context.Context, req *apiPb.GetRulesByOwnerIdRequest) (*apiPb.Rules, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) GetRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) ActivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) DeactivateRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) RemoveRuleById(ctx context.Context, req *apiPb.RuleIdRequest) (*apiPb.Rule, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) GetIncidentList(ctx context.Context, req *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) GetIncidentById(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) StudyIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) CloseIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	return nil, errors.New("")
 }
 
 func (m mockError) ArchivedApplicationById(ctx context.Context, id string) (*apiPb.Application, error) {
@@ -620,6 +708,115 @@ func TestRouter_GetEngine(t *testing.T) {
 				Method:       http.MethodPut,
 				ExpectedCode: http.StatusInternalServerError,
 			},
+			{
+				Path:         "/v1/rule/validate",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusUnprocessableEntity,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"rule": 213
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/rule/validate",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusInternalServerError,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"rule": "StatusInternalServerError"
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/incidents?dateFrom=12321323&dateTo=12321323",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusBadRequest,
+			},
+			{
+				Path:         "/v1/incidents?dateFrom=0000-01-01T00:00:00.899Z&dateTo=0000-01-01T00:00:00.899Z",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusUnprocessableEntity,
+			},
+			{
+				Path:         "/v1/incidents?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/incidents/incident",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/incidents/incident/close",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/incidents/incident/study",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/rules?ownerType=2020-05-07T19:17:05.899Z",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusBadRequest,
+			},
+			{
+				Path:         "/v1/rules?ownerType=0&ownerId=243",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/rules",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusBadRequest,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"rule": 213
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/rules",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusInternalServerError,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"rule": "213",
+							"ownerId": "214"
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/rules/23",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/rules/23",
+				Method:       http.MethodDelete,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/rules/23/activate",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/rules/23/deactivate",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusInternalServerError,
+			},
 		}
 
 		for _, test := range tt {
@@ -860,6 +1057,76 @@ func TestRouter_GetEngine(t *testing.T) {
 				Method:       http.MethodPut,
 				ExpectedCode: http.StatusAccepted,
 			},
+			{
+				Path:         "/v1/rule/validate",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusOK,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"rule": "sf"
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/incidents?dateFrom=2020-05-07T19:17:05.899Z&dateTo=2020-05-17T19:17:05.899Z",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/incidents/123",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/incidents/123/close",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/incidents/123/study",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/rules?ownerId=234234",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/rules",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusCreated,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"rule": "sf",
+							"ownerId": "1244"
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/rules/123",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/rules/123",
+				Method:       http.MethodDelete,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/rules/123/activate",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/rules/123/deactivate",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusOK,
+			},
 		}
 
 		for _, test := range tt {
@@ -886,6 +1153,15 @@ func TestGetSchedulerListSorting(t *testing.T) {
 	})
 	t.Run("Should: not return nil", func(t *testing.T) {
 		assert.NotNil(t, GetSchedulerListSorting(0, 1))
+	})
+}
+
+func TestGetIncidentListSorting(t *testing.T) {
+	t.Run("Should: return nil", func(t *testing.T) {
+		assert.Nil(t, GetIncidentListSorting(0, 0))
+	})
+	t.Run("Should: not return nil", func(t *testing.T) {
+		assert.NotNil(t, GetIncidentListSorting(0, 1))
 	})
 }
 

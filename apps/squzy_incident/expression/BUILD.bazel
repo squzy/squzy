@@ -1,0 +1,37 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+     name = "go_default_library",
+     srcs = [
+		"agent.go",
+		"expression.go",
+		"snapshot.go",
+		"application.go"
+     ],
+     importpath = "squzy/apps/squzy_incident/expression",
+     visibility = ["//visibility:public"],
+     deps = [
+             "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
+             "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
+             "@com_github_golang_protobuf//ptypes:go_default_library",
+             "@com_github_golang_protobuf//ptypes/wrappers:go_default_library",
+             "@com_github_antonmedv_expr//:go_default_library",
+             "@com_github_araddon_dateparse//:go_default_library",
+     ]
+)
+
+go_test(
+    name = "go_default_test",
+    embed = [":go_default_library"],
+    srcs = [
+		"agent_test.go",
+		"expression_test.go",
+		"snapshot_test.go",
+		"application_test.go"
+    ],
+    deps =[
+        "@com_github_stretchr_testify//assert:go_default_library",
+        "@org_golang_google_grpc//:go_default_library",
+        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
+    ]
+)

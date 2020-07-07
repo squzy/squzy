@@ -274,6 +274,6 @@ func (s *SuiteSnapshot) AfterTest(_, _ string) {
 	require.NoError(s.T(), s.mock.ExpectationsWereMet())
 }
 
-func TestInit(t *testing.T) {
+func TestInitSnapshot(t *testing.T) {
 	suite.Run(t, new(SuiteSnapshot))
 }

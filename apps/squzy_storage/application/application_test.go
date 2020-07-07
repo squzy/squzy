@@ -37,6 +37,18 @@ func (*configErrorMock) GetDbPassword() string {
 	panic("implement me!")
 }
 
+func (*configErrorMock) GetIncidentServerAddress() string {
+	return ""
+}
+
+func (*configErrorMock) WithIncident() bool {
+	return false
+}
+
+func (*configErrorMock) WithDbLogs() bool {
+	return false
+}
+
 type configMock struct {
 }
 
@@ -46,6 +58,18 @@ func (*configMock) GetPort() int32 {
 
 func (*configMock) GetDbHost() string {
 	panic("implement me!")
+}
+
+func (*configMock) GetIncidentServerAddress() string {
+	return ""
+}
+
+func (*configMock) WithIncident() bool {
+	return false
+}
+
+func (*configMock) WithDbLogs() bool {
+	return false
 }
 
 func (*configMock) GetDbPort() string {
@@ -65,6 +89,26 @@ func (*configMock) GetDbPassword() string {
 }
 
 type mockApiStorage struct {
+}
+
+func (s mockApiStorage) SaveIncident(context.Context, *apiPb.Incident) (*empty.Empty, error) {
+	panic("implement me")
+}
+
+func (s mockApiStorage) UpdateIncidentStatus(context.Context, *apiPb.UpdateIncidentStatusRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s mockApiStorage) GetIncidentById(context.Context, *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s mockApiStorage) GetIncidentByRuleId(context.Context, *apiPb.RuleIdRequest) (*apiPb.Incident, error) {
+	panic("implement me")
+}
+
+func (s mockApiStorage) GetIncidentsList(context.Context, *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
+	panic("implement me")
 }
 
 func (s mockApiStorage) GetSchedulerUptime(ctx context.Context, in *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error) {

@@ -92,6 +92,10 @@ func (p *Postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) 
 		Where(metaStartTimeFilterString, timeFrom, timeTo).
 		Count(&countAll).Error
 
+	if err != nil {
+		return nil, err
+	}
+
 	selectString := fmt.Sprintf(
 		`COUNT(*) as "count", AVG("%s"."metaEndTime"-"%s"."metaStartTime") as "latency"`,
 		dbSnapshotCollection,
@@ -108,7 +112,6 @@ func (p *Postgres) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) 
 	if err != nil {
 		return nil, err
 	}
-
 	return convertFromUptimeResult(&uptimeResult, countAll), nil
 }
 

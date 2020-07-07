@@ -79,8 +79,6 @@ func (p *Postgres) GetTransactionInfo(request *apiPb.GetTransactionsRequest) ([]
 		return nil, -1, err
 	}
 
-	fmt.Println(getTransactionTypeWhere(request.GetType()))
-	fmt.Println(getTransactionStatusWhere(request.GetStatus()))
 	var count int64
 	err = p.Db.Table(dbTransactionInfoCollection).
 		Where(applicationIdFilterString, request.GetApplicationId()).

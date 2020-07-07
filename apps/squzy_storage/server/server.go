@@ -3,26 +3,45 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc/codes"
 	grpcStatus "google.golang.org/grpc/status"
+	"squzy/apps/squzy_storage/config"
 	"squzy/internal/database"
+	"squzy/internal/helpers"
+	"time"
 )
 
 type server struct {
-	database database.Database
+	database       database.Database
+	incidentClient apiPb.IncidentServerClient
+	cfg            config.Config
 }
 
-func NewServer(db database.Database) apiPb.StorageServer {
+func NewServer(db database.Database, incidentClient apiPb.IncidentServerClient, cfg config.Config) apiPb.StorageServer {
 	return &server{
-		database: db,
+		database:       db,
+		incidentClient: incidentClient,
+		cfg:            cfg,
 	}
 }
 
 func (s *server) SaveResponseFromScheduler(ctx context.Context, request *apiPb.SchedulerResponse) (*empty.Empty, error) {
 	err := s.database.InsertSnapshot(request)
+	defer func() {
+		if request == nil {
+			return
+		}
+		s.SendRecordToIncident(&apiPb.StorageRecord{
+			Record: &apiPb.StorageRecord_Snapshot{
+				Snapshot: &apiPb.SchedulerSnapshotWithId{
+					Snapshot: request.GetSnapshot(),
+					Id:       request.GetSchedulerId(),
+				},
+			},
+		})
+	}()
 	if err != nil {
 		return nil, grpcStatus.Errorf(codes.Internal, err.Error())
 	}
@@ -31,6 +50,16 @@ func (s *server) SaveResponseFromScheduler(ctx context.Context, request *apiPb.S
 
 func (s *server) SaveResponseFromAgent(ctx context.Context, request *apiPb.Metric) (*empty.Empty, error) {
 	err := s.database.InsertStatRequest(request)
+	defer func() {
+		if request == nil {
+			return
+		}
+		s.SendRecordToIncident(&apiPb.StorageRecord{
+			Record: &apiPb.StorageRecord_AgentMetric{
+				AgentMetric: request,
+			},
+		})
+	}()
 	if err != nil {
 		return nil, grpcStatus.Errorf(codes.Internal, err.Error())
 	}
@@ -54,7 +83,6 @@ func (s *server) GetAgentInformation(ctx context.Context, request *apiPb.GetAgen
 	var res []*apiPb.GetAgentInformationResponse_Statistic
 	var count int32
 	var err error
-	fmt.Println("HERE: " + request.GetAgentId())
 	switch request.GetType() {
 	case apiPb.TypeAgentStat_ALL:
 		res, count, err = s.database.GetStatRequest(request.GetAgentId(), request.GetPagination(), request.GetTimeRange())
@@ -75,8 +103,18 @@ func (s *server) GetAgentInformation(ctx context.Context, request *apiPb.GetAgen
 	}, wrapError(err)
 }
 
-func (s *server) SaveTransaction(ctx context.Context, info *apiPb.TransactionInfo) (*empty.Empty, error) {
-	return &empty.Empty{}, wrapError(s.database.InsertTransactionInfo(info))
+func (s *server) SaveTransaction(ctx context.Context, req *apiPb.TransactionInfo) (*empty.Empty, error) {
+	defer func() {
+		if req == nil {
+			return
+		}
+		s.SendRecordToIncident(&apiPb.StorageRecord{
+			Record: &apiPb.StorageRecord_Transaction{
+				Transaction: req,
+			},
+		})
+	}()
+	return &empty.Empty{}, wrapError(s.database.InsertTransactionInfo(req))
 }
 
 func (s *server) GetTransactions(ctx context.Context, request *apiPb.GetTransactionsRequest) (*apiPb.GetTransactionsResponse, error) {
@@ -107,4 +145,45 @@ func wrapError(err error) error {
 		return grpcStatus.Errorf(codes.Internal, err.Error())
 	}
 	return nil
+}
+
+func (s *server) SaveIncident(ctx context.Context, request *apiPb.Incident) (*empty.Empty, error) {
+	return &empty.Empty{}, s.database.InsertIncident(request)
+}
+
+func (s *server) UpdateIncidentStatus(ctx context.Context, request *apiPb.UpdateIncidentStatusRequest) (*apiPb.Incident, error) {
+	return s.database.UpdateIncidentStatus(request.GetIncidentId(), request.GetStatus())
+}
+
+func (s *server) GetIncidentById(ctx context.Context, request *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
+	return s.database.GetIncidentById(request.GetIncidentId())
+}
+
+func (s *server) GetIncidentByRuleId(ctx context.Context, request *apiPb.RuleIdRequest) (*apiPb.Incident, error) {
+	return s.database.GetActiveIncidentByRuleId(request.GetRuleId())
+}
+
+func (s *server) GetIncidentsList(ctx context.Context, request *apiPb.GetIncidentsListRequest) (*apiPb.GetIncidentsListResponse, error) {
+	incidents, count, err := s.database.GetIncidents(request)
+	if err != nil {
+		return nil, err
+	}
+	return &apiPb.GetIncidentsListResponse{
+		Count:     count,
+		Incidents: incidents,
+	}, nil
+}
+
+func (s *server) SendRecordToIncident(rq *apiPb.StorageRecord) {
+	if !s.cfg.WithIncident() {
+		return
+	}
+	if s.incidentClient == nil {
+		return
+	}
+	go func() {
+		ctx, cancel := helpers.TimeoutContext(context.Background(), time.Second*5)
+		defer cancel()
+		_, _ = s.incidentClient.ProcessRecordFromStorage(ctx, rq)
+	}()
 }

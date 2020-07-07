@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+     name = "go_default_library",
+     srcs = ["config.go"],
+     importpath = "squzy/apps/squzy_incident/config",
+     visibility = ["//visibility:public"],
+     deps = [
+     ]
+)
+
+go_test(
+    name = "go_default_test",
+    embed = [":go_default_library"],
+    srcs = [
+        "config_test.go",
+    ],
+    deps =[
+        "@com_github_stretchr_testify//assert:go_default_library"
+    ]
+)

@@ -3,6 +3,7 @@ package postgres
 import (
 	"github.com/golang/protobuf/ptypes"
 	_struct "github.com/golang/protobuf/ptypes/struct"
+	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -213,7 +214,7 @@ func TestConvertFromUptimeResult(t *testing.T) {
 			Count:   10,
 			Latency: "qwe",
 		}, 10)
-		assert.Nil(t, res)
+		assert.NotNil(t, res)
 	})
 	t.Run("Test: error", func(t *testing.T) {
 		res := convertFromUptimeResult(&UptimeResult{
@@ -286,5 +287,26 @@ func TestGetThroughput(t *testing.T) {
 	t.Run("Test: error", func(t *testing.T) {
 		res := getThroughput(0, 10, 10)
 		assert.NotNil(t, res)
+	})
+}
+
+func Test_convertFromIncidentHistory(t *testing.T) {
+	t.Run("Should: return nil", func(t *testing.T) {
+		res := convertFromIncidentHistory(nil)
+		assert.Nil(t, res)
+	})
+}
+
+func Test_convertToIncidentHistory(t *testing.T) {
+	t.Run("Should: return nil", func(t *testing.T) {
+		res := convertToIncidentHistory(nil)
+		assert.Nil(t, res)
+	})
+	t.Run("Should: return nil", func(t *testing.T) {
+		maxValidSeconds := 253402300800
+		res := convertToIncidentHistory(&apiPb.Incident_HistoryItem{
+			Timestamp: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+		})
+		assert.Nil(t, res)
 	})
 }
