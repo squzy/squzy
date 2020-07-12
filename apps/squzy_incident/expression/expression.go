@@ -13,8 +13,8 @@ import (
 )
 
 type Expression interface {
-	ProcessRule(ruleType apiPb.RuleOwnerType, id string, rule string) (bool, error)
-	IsValid(ruleType apiPb.RuleOwnerType, rule string) error
+	ProcessRule(ruleType apiPb.ComponentOwnerType, id string, rule string) (bool, error)
+	IsValid(ruleType apiPb.ComponentOwnerType, rule string) error
 }
 
 type expressionStruct struct {
@@ -31,7 +31,7 @@ func NewExpression(storage apiPb.StorageClient) Expression {
 	}
 }
 
-func (e *expressionStruct) ProcessRule(ruleType apiPb.RuleOwnerType, id string, rule string) (bool, error) {
+func (e *expressionStruct) ProcessRule(ruleType apiPb.ComponentOwnerType, id string, rule string) (bool, error) {
 	env, err := e.getEnv(ruleType, id)
 
 	program, err := expr.Compile(rule, expr.Env(env))
@@ -50,7 +50,7 @@ func (e *expressionStruct) ProcessRule(ruleType apiPb.RuleOwnerType, id string, 
 	return value, nil
 }
 
-func (e *expressionStruct) IsValid(ruleType apiPb.RuleOwnerType, rule string) error {
+func (e *expressionStruct) IsValid(ruleType apiPb.ComponentOwnerType, rule string) error {
 	env, err := e.getEnv(ruleType, "id")
 	if err != nil {
 		return err
@@ -59,13 +59,13 @@ func (e *expressionStruct) IsValid(ruleType apiPb.RuleOwnerType, rule string) er
 	return err
 }
 
-func (e *expressionStruct) getEnv(owner apiPb.RuleOwnerType, id string) (map[string]interface{}, error) {
+func (e *expressionStruct) getEnv(owner apiPb.ComponentOwnerType, id string) (map[string]interface{}, error) {
 	switch owner {
-	case apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER:
+	case apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER:
 		return e.getSnapshotEnv(id), nil
-	case apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT:
+	case apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_AGENT:
 		return e.getAgentEnv(id), nil
-	case apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION:
+	case apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_APPLICATION:
 		return e.getTransactionEnv(id), nil
 	}
 	return nil, errRuleTypeNotProvided

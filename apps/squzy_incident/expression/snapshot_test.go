@@ -27,7 +27,7 @@ func TestExpressionStruct_GetSnapshots(t *testing.T) {
 func TestExpressionStruct_getSnapshotEnv(t *testing.T) {
 	t.Run("Should: no panic", func(t *testing.T) {
 		res, err := exprCorr.ProcessRule(
-			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER,
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
 			"12345",
 			`len(Last(10, UseTimeFrom("3/1/2020"), UseTimeTo("3/1/2021"), UseCode(Ok))) == 1`)
 		assert.True(t, res)
@@ -35,7 +35,7 @@ func TestExpressionStruct_getSnapshotEnv(t *testing.T) {
 	})
 	t.Run("Should: no panic", func(t *testing.T) {
 		res, err := exprCorr.ProcessRule(
-			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER,
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
 			"12345",
 			`len(First(10, UseTimeTo("3/1/2021"), UseCode(Ok))) == 1`)
 		assert.True(t, res)
@@ -44,7 +44,7 @@ func TestExpressionStruct_getSnapshotEnv(t *testing.T) {
 	//Duration
 	t.Run("Should: no panic", func(t *testing.T) {
 		res, err := exprCorr.ProcessRule(
-			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER,
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
 			"12345",
 			`count(First(10, UseTimeTo("3/1/2021"), UseCode(Ok)), {Duration(#) < 10}) == 1`)
 		assert.True(t, res)
@@ -52,7 +52,7 @@ func TestExpressionStruct_getSnapshotEnv(t *testing.T) {
 	})
 	t.Run("Should: no panic", func(t *testing.T) {
 		res, err := exprCorr.ProcessRule(
-			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER,
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
 			"12345",
 			`len(Index(1, UseTimeTo("3/1/2021"), UseCode(Ok))) == 1`)
 		assert.True(t, res)

@@ -93,16 +93,16 @@ type PaginationRequest struct {
 }
 
 type ValidateRuleRequest struct {
-	OwnerType apiPb.RuleOwnerType `json:"ownerType"`
-	Rule      string              `json:"rule" binding:"required"`
+	OwnerType apiPb.ComponentOwnerType `json:"ownerType"`
+	Rule      string                   `json:"rule" binding:"required"`
 }
 
 type CreateRuleRequest struct {
-	Rule      string              `json:"rule" binding:"required"`
-	Name      string              `json:"name"`
-	AutoClose bool                `json:"autoClose"`
-	OwnerType apiPb.RuleOwnerType `json:"ownerType"`
-	OwnerId   string              `json:"ownerId" binding:"required"`
+	Rule      string                   `json:"rule" binding:"required"`
+	Name      string                   `json:"name"`
+	AutoClose bool                     `json:"autoClose"`
+	OwnerType apiPb.ComponentOwnerType `json:"ownerType"`
+	OwnerId   string                   `json:"ownerId" binding:"required"`
 }
 
 type RuleIdRequest struct {
@@ -110,8 +110,8 @@ type RuleIdRequest struct {
 }
 
 type ListRulesByOwnerIdRequest struct {
-	OwnerType apiPb.RuleOwnerType `form:"ownerType"`
-	OwnerId   string              `form:"ownerId"  binding:"required"`
+	OwnerType apiPb.ComponentOwnerType `form:"ownerType"`
+	OwnerId   string                   `form:"ownerId"  binding:"required"`
 }
 
 type Scheduler struct {

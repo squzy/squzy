@@ -26,7 +26,7 @@ func TestExpressionStruct_GetAgents(t *testing.T) {
 func TestExpressionStruct_getAgentEnv(t *testing.T) {
 	t.Run("Should: no panic", func(t *testing.T) {
 		res, err := exprCorr.ProcessRule(
-			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_AGENT,
 			"12345",
 			`one(Last(10, UseTimeTo("3/1/2021 12:30"), UseType(CPU)), {one(.CpuInfo.Cpus, {.Load <= 10})})`)
 		assert.True(t, res)
@@ -34,7 +34,7 @@ func TestExpressionStruct_getAgentEnv(t *testing.T) {
 	})
 	t.Run("Should: no panic", func(t *testing.T) {
 		res, err := exprCorr.ProcessRule(
-			apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_AGENT,
 			"12345",
 			`one(Last(10, UseTimeFrom("3/1/2020"), UseTimeTo("3/1/2021"), UseType(All)), {one(.CpuInfo.Cpus, {.Load <= 10})})`)
 		assert.True(t, res)

@@ -16,11 +16,11 @@ import (
 type mockExpr struct {
 }
 
-func (*mockExpr) ProcessRule(ruleType apiPb.RuleOwnerType, id string, rule string) (bool, error) {
+func (*mockExpr) ProcessRule(ruleType apiPb.ComponentOwnerType, id string, rule string) (bool, error) {
 	return false, errors.New("asf")
 }
 
-func (*mockExpr) IsValid(ruleType apiPb.RuleOwnerType, rule string) error {
+func (*mockExpr) IsValid(ruleType apiPb.ComponentOwnerType, rule string) error {
 	return nil
 }
 
@@ -106,7 +106,7 @@ func (m mockDatabase) FindRuleById(context.Context, primitive.ObjectID) (*databa
 	return &database.Rule{}, nil
 }
 
-func (m mockDatabase) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.RuleOwnerType, ownerId primitive.ObjectID) ([]*database.Rule, error) {
+func (m mockDatabase) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.ComponentOwnerType, ownerId primitive.ObjectID) ([]*database.Rule, error) {
 	if ownerId == ruleIsNotActive {
 		return []*database.Rule{
 			{
@@ -223,7 +223,7 @@ func (m mockErrorDatabase) FindRuleById(context.Context, primitive.ObjectID) (*d
 	return nil, errors.New("ERROR")
 }
 
-func (m mockErrorDatabase) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.RuleOwnerType, ownerId primitive.ObjectID) ([]*database.Rule, error) {
+func (m mockErrorDatabase) FindRulesByOwnerId(ctx context.Context, ownerType apiPb.ComponentOwnerType, ownerId primitive.ObjectID) ([]*database.Rule, error) {
 	return nil, errors.New("ERROR")
 }
 
@@ -322,7 +322,7 @@ func TestServer_CreateRule(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		_, err := sErr.CreateRule(ctx, &apiPb.CreateRuleRequest{
 			OwnerId:   primitive.NewObjectID().Hex(),
-			OwnerType: apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
+			OwnerType: apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_AGENT,
 			Rule:      "len(Last(10)) > 0",
 		})
 		assert.Error(t, err)
@@ -330,7 +330,7 @@ func TestServer_CreateRule(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		_, err := s.CreateRule(ctx, &apiPb.CreateRuleRequest{
 			OwnerId:   primitive.NewObjectID().Hex(),
-			OwnerType: apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
+			OwnerType: apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_AGENT,
 			Rule:      "wrongRule",
 		})
 		assert.Error(t, err)
@@ -338,7 +338,7 @@ func TestServer_CreateRule(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		_, err := s.CreateRule(ctx, &apiPb.CreateRuleRequest{
 			OwnerId:   primitive.NewObjectID().Hex(),
-			OwnerType: apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT,
+			OwnerType: apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_AGENT,
 			Rule:      "len(Last(10)) > 0",
 		})
 		assert.NoError(t, err)

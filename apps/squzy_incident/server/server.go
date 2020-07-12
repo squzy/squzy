@@ -228,27 +228,27 @@ func (s *server) StudyIncident(ctx context.Context, request *apiPb.IncidentIdReq
 	return s.setStatus(ctx, request.GetIncidentId(), apiPb.IncidentStatus_INCIDENT_STATUS_STUDIED)
 }
 
-func getOwnerTypeAndId(request *apiPb.StorageRecord) (apiPb.RuleOwnerType, primitive.ObjectID, error) {
+func getOwnerTypeAndId(request *apiPb.StorageRecord) (apiPb.ComponentOwnerType, primitive.ObjectID, error) {
 	if request.GetSnapshot() != nil {
 		ownerId, err := primitive.ObjectIDFromHex(request.GetSnapshot().Id)
 		if err != nil {
 			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}
-		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER, ownerId, nil
+		return apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER, ownerId, nil
 	}
 	if request.GetAgentMetric() != nil {
 		ownerId, err := primitive.ObjectIDFromHex(request.GetAgentMetric().AgentId)
 		if err != nil {
 			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}
-		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT, ownerId, nil
+		return apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_AGENT, ownerId, nil
 	}
 	if request.GetTransaction() != nil {
 		ownerId, err := primitive.ObjectIDFromHex(request.GetTransaction().ApplicationId)
 		if err != nil {
 			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}
-		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION, ownerId, nil
+		return apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_APPLICATION, ownerId, nil
 	}
 	return 0, primitive.ObjectID{}, errors.New("ERROR_NO_RECORD")
 }
