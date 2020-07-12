@@ -34,6 +34,10 @@ func NewExpression(storage apiPb.StorageClient) Expression {
 func (e *expressionStruct) ProcessRule(ruleType apiPb.ComponentOwnerType, id string, rule string) (bool, error) {
 	env, err := e.getEnv(ruleType, id)
 
+	if err != nil {
+		return false, err
+	}
+
 	program, err := expr.Compile(rule, expr.Env(env))
 	if err != nil {
 		return false, err

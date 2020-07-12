@@ -159,9 +159,7 @@ func (p *Postgres) GetTransactionChildren(transactionId, passedString string) ([
 		if err != nil {
 			return nil, errorDataBase
 		}
-		for _, v := range subchildren {
-			res = append(res, v)
-		}
+		res = append(res, subchildren...)
 	}
 
 	return res, nil

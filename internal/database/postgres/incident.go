@@ -29,6 +29,7 @@ type IncidentHistory struct {
 const (
 	dbIncidentCollection        = "incidents"
 	dbIncidentHistoryCollection = "incident_histories"
+	descPrefix                  = " desc"
 
 	NoIncident = "NO_INCIDENT"
 )
@@ -180,12 +181,12 @@ func getIncidentOrder(request *apiPb.SortingIncidentList) string {
 
 func getIncidentDirection(request *apiPb.SortingIncidentList) string {
 	if request == nil {
-		return ` desc`
+		return descPrefix
 	}
 	if res, ok := directionMap[request.GetDirection()]; ok {
 		return res
 	}
-	return ` desc`
+	return descPrefix
 }
 
 //Return empty incident

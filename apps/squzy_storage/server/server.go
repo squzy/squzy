@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+const (
+	incidentTimeout = time.Second * 5
+)
+
 type server struct {
 	database       database.Database
 	incidentClient apiPb.IncidentServerClient
@@ -182,7 +186,7 @@ func (s *server) SendRecordToIncident(rq *apiPb.StorageRecord) {
 		return
 	}
 	go func() {
-		ctx, cancel := helpers.TimeoutContext(context.Background(), time.Second*5)
+		ctx, cancel := helpers.TimeoutContext(context.Background(), incidentTimeout)
 		defer cancel()
 		_, _ = s.incidentClient.ProcessRecordFromStorage(ctx, rq)
 	}()

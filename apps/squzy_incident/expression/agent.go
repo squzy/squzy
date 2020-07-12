@@ -16,10 +16,8 @@ func (e *expressionStruct) GetAgents(
 		AgentId:    agentId,
 		Pagination: pagination,
 	}
-	if filters != nil {
-		for _, filter := range filters {
-			req = filter(req)
-		}
+	for _, filter := range filters {
+		req = filter(req)
 	}
 	list, err := e.storageClient.GetAgentInformation(context.Background(), req)
 	if err != nil {

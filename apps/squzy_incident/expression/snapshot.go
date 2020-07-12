@@ -20,10 +20,8 @@ func (e *expressionStruct) GetSnapshots(
 			Direction: direction,
 		},
 	}
-	if filters != nil {
-		for _, filter := range filters {
-			req = filter(req)
-		}
+	for _, filter := range filters {
+		req = filter(req)
 	}
 	list, err := e.storageClient.GetSchedulerInformation(context.Background(), req)
 	if err != nil {

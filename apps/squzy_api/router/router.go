@@ -388,7 +388,6 @@ func (r *router) GetEngine() *gin.Engine {
 					successWrap(context, http.StatusOK, rule)
 				})
 			}
-
 		}
 
 		transaction := v1.Group("transaction")
