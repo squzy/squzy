@@ -2,11 +2,16 @@ package server
 
 import (
 	"context"
+	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 )
 
 type server struct {
 
+}
+
+func (s *server) Notify(ctx context.Context, request *apiPb.NotifyRequest) (*empty.Empty, error) {
+	panic("implement me")
 }
 
 func (s *server) CreateNotificationMethod(ctx context.Context, request *apiPb.CreateNotificationMethodRequest) (*apiPb.NotificationMethod, error) {
