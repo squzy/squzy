@@ -15,6 +15,7 @@ require (
 	github.com/jinzhu/gorm v1.9.12
 	github.com/shirou/gopsutil v2.19.11+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
+	github.com/slack-go/slack v0.6.5
 	github.com/squzy/mongo_helper v0.0.0-20200713232419-037a870c9d06
 	github.com/squzy/squzy_generated v1.9.1-0.20200713231102-650117ab97ba
 	github.com/stretchr/testify v1.5.1

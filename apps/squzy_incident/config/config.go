@@ -25,6 +25,10 @@ type cfg struct {
 	mongoCollection string
 }
 
+func (c *cfg) GetNoticationServerHost() string {
+	panic("implement me")
+}
+
 func (c *cfg) GetPort() int32 {
 	return c.port
 }
@@ -51,6 +55,7 @@ type Config interface {
 	GetMongoURI() string
 	GetMongoDb() string
 	GetMongoCollection() string
+	GetNoticationServerHost() string
 }
 
 func New() Config {

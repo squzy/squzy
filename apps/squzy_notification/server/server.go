@@ -7,11 +7,14 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"squzy/apps/squzy_notification/database"
+	"squzy/apps/squzy_notification/integrations"
 )
 
 type server struct {
-	nlDb database.NotificationListDb
-	nmDb database.NotificationMethodDb
+	nlDb         database.NotificationListDb
+	nmDb         database.NotificationMethodDb
+	client       apiPb.StorageClient
+	integrations integrations.Integrations
 }
 
 var (
@@ -48,7 +51,40 @@ func dbMethodToProto(method *database.NotificationMethod) (*apiPb.NotificationMe
 }
 
 func (s *server) Notify(ctx context.Context, request *apiPb.NotifyRequest) (*empty.Empty, error) {
-	panic("implement me")
+	ownerId, err := primitive.ObjectIDFromHex(request.OwnerId)
+
+	if err != nil {
+		return nil, err
+	}
+	incident, err := s.client.GetIncidentById(ctx, &apiPb.IncidentIdRequest{
+		IncidentId: request.IncidentId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	methods, err := s.nlDb.GetList(ctx, ownerId, request.OwnerType)
+	for _, method := range methods {
+		go func(m *database.Notification) {
+			config, err := s.nmDb.Get(ctx, m.NotificationMethodId)
+			if err != nil {
+				// @TODO log error
+				return
+			}
+			if config.Status != apiPb.NotificationMethodStatus_NOTIFICATION_STATUS_ACTIVE {
+				return
+			}
+			switch config.Type {
+			case apiPb.NotificationMethodType_NOTIFICATION_METHOD_SLACK:
+				s.integrations.Slack(ctx, incident, config.Slack)
+				return
+			case apiPb.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK:
+				s.integrations.Webhook(ctx, incident, config.WebHook)
+				return
+			}
+
+		}(method)
+	}
+	return &empty.Empty{}, nil
 }
 
 func (s *server) CreateNotificationMethod(ctx context.Context, request *apiPb.CreateNotificationMethodRequest) (*apiPb.NotificationMethod, error) {
@@ -210,6 +246,15 @@ func (s *server) GetList(ctx context.Context, request *apiPb.GetListRequest) (*a
 	}, nil
 }
 
-func New() apiPb.NotificationManagerServer {
-	return &server{}
+func New(
+	nlDb database.NotificationListDb,
+	nmDb database.NotificationMethodDb,
+	client apiPb.StorageClient,
+	integrations integrations.Integrations) apiPb.NotificationManagerServer {
+	return &server{
+		nlDb:         nlDb,
+		nmDb:         nmDb,
+		client:       client,
+		integrations: integrations,
+	}
 }

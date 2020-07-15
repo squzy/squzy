@@ -13,20 +13,22 @@ import (
 )
 
 type server struct {
-	ruleDb  database.Database
-	storage apiPb.StorageClient
-	expr    expression.Expression
+	ruleDb             database.Database
+	storage            apiPb.StorageClient
+	notificationClient apiPb.NotificationManagerClient
+	expr               expression.Expression
 }
 
 var (
 	errNotValidRule = errors.New("rule is not valid")
 )
 
-func NewIncidentServer(storage apiPb.StorageClient, db database.Database) apiPb.IncidentServerServer {
+func NewIncidentServer(notificationClient apiPb.NotificationManagerClient, storage apiPb.StorageClient, db database.Database) apiPb.IncidentServerServer {
 	return &server{
-		ruleDb:  db,
-		storage: storage,
-		expr:    expression.NewExpression(storage),
+		notificationClient: notificationClient,
+		ruleDb:             db,
+		storage:            storage,
+		expr:               expression.NewExpression(storage),
 	}
 }
 
@@ -191,10 +193,15 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 		if isIncidentExist(incident) && isIncidentOpened(incident) && !wasIncident {
 			if err := s.tryCloseIncident(ctx, rule.AutoClose, incident); err != nil {
 				wasError = true
+				// @TODO log error
+				_, _ = s.notificationClient.Notify(ctx, &apiPb.NotifyRequest{
+					IncidentId: incident.Id,
+					OwnerType:  rule.OwnerType,
+					OwnerId:    rule.OwnerId.Hex(),
+				})
 			}
 			continue
 		}
-
 		if !isIncidentExist(incident) && wasIncident {
 			incident = &apiPb.Incident{
 				Status: apiPb.IncidentStatus_INCIDENT_STATUS_OPENED,
@@ -209,6 +216,12 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 			}
 			if _, err := s.storage.SaveIncident(ctx, incident); err != nil {
 				wasError = true
+				// @TODO log error
+				_, _ = s.notificationClient.Notify(ctx, &apiPb.NotifyRequest{
+					IncidentId: incident.Id,
+					OwnerType:  rule.OwnerType,
+					OwnerId:    rule.OwnerId.Hex(),
+				})
 			}
 			continue
 		}
