@@ -92,7 +92,7 @@ func (n *notificationMethodDb) Get(ctx context.Context, id primitive.ObjectID) (
 	err := n.mongo.FindOne(ctx, bson.M{
 		"_id": id,
 	}, item)
-	if err !=nil {
+	if err != nil {
 		return nil, err
 	}
 	return item, nil

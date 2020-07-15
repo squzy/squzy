@@ -9,16 +9,16 @@ import (
 )
 
 type Notification struct {
-	Id primitive.ObjectID `bson:"_id"`
-	OwnerId primitive.ObjectID `bson:"ownerId"`
-	Type apiPb.NotificationMethodType `bson:"type"`
-	NotificationMethodId primitive.ObjectID `bson:"notificationMethodId"`
+	Id                   primitive.ObjectID       `bson:"_id"`
+	OwnerId              primitive.ObjectID       `bson:"ownerId"`
+	Type                 apiPb.ComponentOwnerType `bson:"type"`
+	NotificationMethodId primitive.ObjectID       `bson:"notificationMethodId"`
 }
 
-type NotificationList interface {
+type NotificationListDb interface {
 	Add(ctx context.Context, notification *Notification) error
 	Delete(ctx context.Context, id primitive.ObjectID) error
-	GetList(ctx context.Context, OwnerId primitive.ObjectID, Type apiPb.NotificationMethodType) ([]*Notification, error)
+	GetList(ctx context.Context, OwnerId primitive.ObjectID, Type apiPb.ComponentOwnerType) ([]*Notification, error)
 }
 
 type notificationList struct {
@@ -37,11 +37,11 @@ func (n *notificationList) Delete(ctx context.Context, id primitive.ObjectID) er
 	return err
 }
 
-func (n *notificationList) GetList(ctx context.Context, ownerId primitive.ObjectID, methodType apiPb.NotificationMethodType) ([]*Notification, error) {
+func (n *notificationList) GetList(ctx context.Context, ownerId primitive.ObjectID, methodType apiPb.ComponentOwnerType) ([]*Notification, error) {
 	list := []*Notification{}
 	err := n.mongo.FindAll(ctx, bson.M{
 		"ownerId": ownerId,
-		"type": methodType,
+		"type":    methodType,
 	}, &list)
 	if err != nil {
 		return nil, err
@@ -49,9 +49,8 @@ func (n *notificationList) GetList(ctx context.Context, ownerId primitive.Object
 	return list, nil
 }
 
-func NewList(mongo mongo_helper.Connector ) NotificationList {
+func NewList(mongo mongo_helper.Connector) NotificationListDb {
 	return &notificationList{
 		mongo: mongo,
 	}
 }
-
