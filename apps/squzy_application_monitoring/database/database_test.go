@@ -15,6 +15,10 @@ import (
 type mockOkStatusDisabledUpdateError struct {
 }
 
+func (m mockOkStatusDisabledUpdateError) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	panic("implement me")
+}
+
 func (m mockOkStatusDisabledUpdateError) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	panic("implement me")
 }
@@ -33,6 +37,10 @@ func (m mockOkStatusDisabledUpdateError) UpdateOne(ctx context.Context, filter i
 }
 
 type mockOkStatusDisabled struct {
+}
+
+func (m mockOkStatusDisabled) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	panic("implement me")
 }
 
 func (m mockOkStatusDisabled) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
@@ -55,13 +63,29 @@ func (m mockOkStatusDisabled) UpdateOne(ctx context.Context, filter interface{},
 type mockOk struct {
 }
 
+func (m mockOk) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	panic("implement me")
+}
+
 type mockError struct {
+}
+
+func (m mockError) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	panic("implement me")
 }
 
 type mockNotFoundOk struct {
 }
 
+func (m mockNotFoundOk) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	panic("implement me")
+}
+
 type mockNotFoundError struct {
+}
+
+func (m mockNotFoundError) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	panic("implement me")
 }
 
 func (m mockNotFoundError) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {

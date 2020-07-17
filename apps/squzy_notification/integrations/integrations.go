@@ -31,7 +31,7 @@ type integrations struct {
 }
 
 func (i *integrations) Slack(ctx context.Context, incident *api.Incident, config *database.SlackConfig) {
-	createdAt, updatedAt := gertIncidentTime(incident)
+	createdAt, updatedAt := getIncidentTime(incident)
 	msg := &slack.WebhookMessage{
 		Attachments: []slack.Attachment{
 			{
@@ -63,24 +63,21 @@ func (i *integrations) Slack(ctx context.Context, incident *api.Incident, config
 }
 
 func (i *integrations) Webhook(ctx context.Context, incident *api.Incident, config *database.WebHookConfig) {
-	createdAt, updatedAt := gertIncidentTime(incident)
+	createdAt, updatedAt := getIncidentTime(incident)
 	webHook := &WebhookRequest{
 		Id:        incident.Id,
 		Status:    incident.Status,
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
 	}
-	body, err := json.Marshal(webHook)
-	if err != nil {
-		// @TODO log error
-		return
-	}
+	// Skip error because we create that structure
+	body, _ := json.Marshal(webHook)
 	req, _ := http.NewRequest(http.MethodPost, config.Url, bytes.NewBuffer(body))
 
-	_, _, _ = i.httpTools.SendRequest(req)
+	_, _, _ = i.httpTools.SendRequest(req.WithContext(ctx))
 }
 
-func gertIncidentTime(incident *api.Incident) (createdAt string, updatedAt string) {
+func getIncidentTime(incident *api.Incident) (createdAt string, updatedAt string) {
 	if len(incident.Histories) > 0 {
 		createdAtTime, err := ptypes.Timestamp(incident.Histories[0].Timestamp)
 		if err == nil {

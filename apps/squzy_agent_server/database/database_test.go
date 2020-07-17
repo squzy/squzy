@@ -17,6 +17,10 @@ import (
 type mockError struct {
 }
 
+func (m mockError) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	panic("implement me")
+}
+
 func (m mockError) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	return nil, errors.New("")
 }
@@ -34,6 +38,10 @@ func (m mockError) UpdateOne(ctx context.Context, filter interface{}, update int
 }
 
 type mockOk struct {
+}
+
+func (m mockOk) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	panic("implement me")
 }
 
 func (m mockOk) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {

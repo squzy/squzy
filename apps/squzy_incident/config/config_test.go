@@ -68,3 +68,14 @@ func TestCfg_GetMongoCollection(t *testing.T) {
 		assert.Equal(t, s.GetMongoCollection(), "11124")
 	})
 }
+
+func TestCfg_GetNoticationServerHost(t *testing.T) {
+	t.Run("Should: return from env", func(t *testing.T) {
+		err := os.Setenv(ENV_NOTIFICATION_HOST, "localhost:9090")
+		if err != nil {
+			assert.NotNil(t, nil)
+		}
+		s := New()
+		assert.Equal(t, s.GetNoticationServerHost(), "localhost:9090")
+	})
+}

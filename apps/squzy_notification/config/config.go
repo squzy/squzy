@@ -1,5 +1,24 @@
 package config
 
+import (
+	"os"
+	"strconv"
+)
+
+const (
+	ENV_PORT             = "PORT"
+	ENV_STORAGE_HOST     = "STORAGE_HOST"
+	ENV_MONGO_DB         = "MONGO_DB"
+	ENV_MONGO_URI        = "MONGO_URI"
+	ENV_MONGO_LIST_COLLECTION = "MONGO_LIST_COLLECTION"
+	ENV_MONGO_METHOD_COLLECTION = "MONGO_METHOD_COLLECTION"
+
+	defaultPort       int32 = 9098
+	defaultMongoDb          = "notification_manager"
+	defaultListCollection       = "list"
+	defaultMethodCollection       = "methods"
+)
+
 type Config interface {
 	GetPort() int32
 	GetMongoURI() string
@@ -10,32 +29,68 @@ type Config interface {
 }
 
 type cfg struct {
+	storageHost string
+	port int32
+	mongoDB string
+	mongoURI string
+	notificationListCollection string
+	notificationMethodCollection string
 }
 
 func (c *cfg) GetStorageHost() string {
-	panic("implement me")
+	return c.storageHost
 }
 
 func (c *cfg) GetPort() int32 {
-	panic("implement me")
+	return c.port
 }
 
 func (c *cfg) GetMongoURI() string {
-	panic("implement me")
+	return c.mongoURI
 }
 
 func (c *cfg) GetMongoDB() string {
-	panic("implement me")
+	return c.mongoDB
 }
 
 func (c *cfg) GetNotificationMethodCollection() string {
-	panic("implement me")
+	return c.notificationMethodCollection
 }
 
 func (c *cfg) GetNotificationListCollection() string {
-	panic("implement me")
+	return c.notificationListCollection
 }
 
 func New() Config {
-	return &cfg{}
+	// Read port
+	portValue := os.Getenv(ENV_PORT)
+	port := defaultPort
+	if portValue != "" {
+		i, err := strconv.ParseInt(portValue, 10, 32)
+		if err == nil {
+			port = int32(i)
+		}
+	}
+
+	mongoDb := os.Getenv(ENV_MONGO_DB)
+	if mongoDb == "" {
+		mongoDb = defaultMongoDb
+	}
+	listCollection := os.Getenv(ENV_MONGO_LIST_COLLECTION)
+	if listCollection == "" {
+		listCollection = defaultListCollection
+	}
+	methodCollection := os.Getenv(ENV_MONGO_METHOD_COLLECTION)
+	if methodCollection == "" {
+		methodCollection = defaultMethodCollection
+	}
+
+	return &cfg{
+		port:            port,
+		storageHost:     os.Getenv(ENV_STORAGE_HOST),
+		mongoURI:        os.Getenv(ENV_MONGO_URI),
+		mongoDB:         mongoDb,
+		notificationListCollection: listCollection,
+		notificationMethodCollection: methodCollection,
+	}
 }
