@@ -41,7 +41,7 @@ func dbMethodToProto(method *database.NotificationMethod) (*apiPb.NotificationMe
 			Type:   apiPb.NotificationMethodType_NOTIFICATION_METHOD_SLACK,
 			Method: &apiPb.NotificationMethod_Slack{
 				Slack: &apiPb.SlackMethod{
-					Url: method.WebHook.Url,
+					Url: method.Slack.Url,
 				},
 			},
 		}, nil
@@ -52,7 +52,6 @@ func dbMethodToProto(method *database.NotificationMethod) (*apiPb.NotificationMe
 
 func (s *server) Notify(ctx context.Context, request *apiPb.NotifyRequest) (*empty.Empty, error) {
 	ownerId, err := primitive.ObjectIDFromHex(request.OwnerId)
-
 	if err != nil {
 		return nil, err
 	}
@@ -63,6 +62,9 @@ func (s *server) Notify(ctx context.Context, request *apiPb.NotifyRequest) (*emp
 		return nil, err
 	}
 	methods, err := s.nlDb.GetList(ctx, ownerId, request.OwnerType)
+	if err != nil {
+		return nil, err
+	}
 	for _, method := range methods {
 		go func(m *database.Notification) {
 			config, err := s.nmDb.Get(ctx, m.NotificationMethodId)
@@ -81,7 +83,6 @@ func (s *server) Notify(ctx context.Context, request *apiPb.NotifyRequest) (*emp
 				s.integrations.Webhook(ctx, incident, config.WebHook)
 				return
 			}
-
 		}(method)
 	}
 	return &empty.Empty{}, nil
@@ -104,7 +105,7 @@ func (s *server) CreateNotificationMethod(ctx context.Context, request *apiPb.Cr
 			Id:     primitive.NewObjectID(),
 			Status: apiPb.NotificationMethodStatus_NOTIFICATION_STATUS_ACTIVE,
 			Type:   request.Type,
-			Slack: &database.SlackConfig{
+			WebHook: &database.WebHookConfig{
 				Url: request.GetWebhook().Url,
 			},
 		}
