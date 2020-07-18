@@ -21,6 +21,10 @@ type mockNotification struct {
 	
 }
 
+func (m mockNotification) GetNotificationMethods(ctx context.Context, e *empty.Empty) (*apiPb.GetListResponse, error) {
+	panic("implement me")
+}
+
 func (m mockNotification) CreateNotificationMethod(ctx context.Context, request *apiPb.CreateNotificationMethodRequest) (*apiPb.NotificationMethod, error) {
 	panic("implement me")
 }

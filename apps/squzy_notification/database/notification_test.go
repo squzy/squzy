@@ -164,3 +164,16 @@ func TestNotificationMethodDb_Get(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 }
+
+func TestNotificationMethodDb_GetAll(t *testing.T) {
+	t.Run("Should: return no error", func(t *testing.T) {
+		s := NewMethods(&mockSuccess{})
+		_, err := s.GetAll(context.Background())
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := NewMethods(&mockError{})
+		_, err := s.GetAll(context.Background())
+		assert.NotNil(t, err)
+	})
+}

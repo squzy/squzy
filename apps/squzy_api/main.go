@@ -60,9 +60,18 @@ func main() {
 	}()
 	incidentClient := apiPb.NewIncidentServerClient(incidentConn)
 
+	notificationConn, err := tools.GetConnection(cfg.GetNotificationServerAddress(), 0, grpc.WithInsecure())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		_ = notificationConn.Close()
+	}()
+	notificicationClient := apiPb.NewNotificationManagerClient(notificationConn)
+
 	log.Fatal(
 		router.New(
-			handlers.New(agentServerClient, monitoringClient, storageClient, appMonClient, incidentClient),
+			handlers.New(agentServerClient, monitoringClient, storageClient, appMonClient, incidentClient, notificicationClient),
 		).GetEngine().Run(fmt.Sprintf(":%d", cfg.GetPort())),
 	)
 }

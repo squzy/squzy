@@ -15,8 +15,9 @@ import (
 )
 
 var (
-	errMissingConfig      = errors.New("missing config of scheduler")
-	errNotFoundConfigType = errors.New("not found config type")
+	errMissingConfig         = errors.New("missing config of scheduler")
+	errNotFoundConfigType    = errors.New("not found config type")
+	errWrongNotificationType = errors.New("wrong notification type")
 )
 
 type Router interface {
@@ -105,8 +106,25 @@ type CreateRuleRequest struct {
 	OwnerId   string                   `json:"ownerId" binding:"required"`
 }
 
+type CreateNotificationMethod struct {
+	Type          apiPb.NotificationMethodType `json:"type"`
+	Name          string                       `json:"name" binding:"required"`
+	SlackConfig   *apiPb.SlackMethod           `json:"slackConfig,omitempty"`
+	WebHookConfig *apiPb.WebHookMethod         `json:"webhookConfig,omitempty"`
+}
+
 type RuleIdRequest struct {
 	RuleId string `json:"ruleId"`
+}
+
+type ListOfNotificationMethods struct {
+	OwnerId   string                   `form:"ownerId"`
+	OwnerType apiPb.ComponentOwnerType `form:"ownerType"`
+}
+
+type LinkNotificationMethod struct {
+	OwnerId string `json:"ownerId" binding:"required"`
+	OwnerType apiPb.ComponentOwnerType `json:"ownerType" binding:"required"`
 }
 
 type ListRulesByOwnerIdRequest struct {
@@ -119,11 +137,11 @@ type Scheduler struct {
 	Interval        int32                      `json:"interval" binding:"required"`
 	Timeout         int32                      `json:"timeout"`
 	Name            string                     `json:"name"`
-	HTTPConfig      *apiPb.HttpConfig          `json:"httpConfig"`
-	TCPConfig       *apiPb.TcpConfig           `json:"tcpConfig"`
-	HTTPValueConfig *apiPb.HttpJsonValueConfig `json:"httpValueConfig"`
-	GRPCConfig      *apiPb.GrpcConfig          `json:"grpcConfig"`
-	SiteMapConfig   *apiPb.SiteMapConfig       `json:"siteMapConfig"`
+	HTTPConfig      *apiPb.HttpConfig          `json:"httpConfig,omitempty"`
+	TCPConfig       *apiPb.TcpConfig           `json:"tcpConfig,omitempty"`
+	HTTPValueConfig *apiPb.HttpJsonValueConfig `json:"httpValueConfig,omitempty"`
+	GRPCConfig      *apiPb.GrpcConfig          `json:"grpcConfig,omitempty"`
+	SiteMapConfig   *apiPb.SiteMapConfig       `json:"siteMapConfig,omitempty"`
 }
 
 type Application struct {
@@ -194,6 +212,146 @@ func (r *router) GetEngine() *gin.Engine {
 	engine.Use(gin.Recovery())
 	v1 := engine.Group("v1")
 	{
+		notifications := v1.Group("notifications")
+		{
+			notifications.POST("", func(context *gin.Context) {
+				createNotificationReq := &CreateNotificationMethod{}
+
+				err := context.ShouldBindJSON(createNotificationReq)
+				if err != nil {
+					errWrap(context, http.StatusUnprocessableEntity, err)
+					return
+				}
+				var req *apiPb.CreateNotificationMethodRequest
+				switch createNotificationReq.Type {
+				case apiPb.NotificationMethodType_NOTIFICATION_METHOD_SLACK:
+					req = &apiPb.CreateNotificationMethodRequest{
+						Type: apiPb.NotificationMethodType_NOTIFICATION_METHOD_SLACK,
+						Name: createNotificationReq.Name,
+						Method: &apiPb.CreateNotificationMethodRequest_Slack{
+							Slack: createNotificationReq.SlackConfig,
+						},
+					}
+				case apiPb.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK:
+					req = &apiPb.CreateNotificationMethodRequest{
+						Type: apiPb.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK,
+						Name: createNotificationReq.Name,
+						Method: &apiPb.CreateNotificationMethodRequest_Webhook{
+							Webhook: createNotificationReq.WebHookConfig,
+						},
+					}
+				default:
+					errWrap(context, http.StatusBadRequest, errWrongNotificationType)
+				}
+				method, err := r.handlers.CreateNotificationMethod(context, req)
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+				successWrap(context, http.StatusCreated, method)
+			})
+			notifications.GET("", func(context *gin.Context) {
+				rq := &ListOfNotificationMethods{}
+				err := context.ShouldBind(rq)
+
+				if err != nil {
+					errWrap(context, http.StatusBadRequest, err)
+					return
+				}
+
+				list, err := r.handlers.GetNotificationMethods(context, GetNotificationList(rq.OwnerType, rq.OwnerId))
+
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+
+				successWrap(context, http.StatusOK, list)
+			})
+			notification := notifications.Group(":method_id")
+			notification.GET("", func(context *gin.Context) {
+				methodId := context.Param("method_id")
+				method, err := r.handlers.GetMethodById(context, &apiPb.NotificationMethodIdRequest{
+					Id: methodId,
+				})
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+				successWrap(context, http.StatusOK, method)
+			})
+			notification.PUT("activate", func(context *gin.Context) {
+				methodId := context.Param("method_id")
+				method, err := r.handlers.ActivateById(context, &apiPb.NotificationMethodIdRequest{
+					Id: methodId,
+				})
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+				successWrap(context, http.StatusOK, method)
+			})
+			notification.POST("link", func(context *gin.Context) {
+				methodId := context.Param("method_id")
+				linkReq := &LinkNotificationMethod{}
+				err := context.ShouldBindJSON(linkReq)
+				if err != nil {
+					errWrap(context, http.StatusUnprocessableEntity, err)
+					return
+				}
+				method, err := r.handlers.LinkById(context, &apiPb.NotificationMethodRequest{
+					OwnerType:            linkReq.OwnerType,
+					OwnerId:              linkReq.OwnerId,
+					NotificationMethodId: methodId,
+				})
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+				successWrap(context, http.StatusOK, method)
+			})
+			notification.POST("unlink", func(context *gin.Context) {
+				methodId := context.Param("method_id")
+				linkReq := &LinkNotificationMethod{}
+				err := context.ShouldBindJSON(linkReq)
+				if err != nil {
+					errWrap(context, http.StatusUnprocessableEntity, err)
+					return
+				}
+				method, err := r.handlers.UnLinkById(context, &apiPb.NotificationMethodRequest{
+					OwnerType:            linkReq.OwnerType,
+					OwnerId:              linkReq.OwnerId,
+					NotificationMethodId: methodId,
+				})
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+				successWrap(context, http.StatusOK, method)
+			})
+			notification.PUT("deactivate", func(context *gin.Context) {
+				methodId := context.Param("method_id")
+				method, err := r.handlers.DeactivateById(context, &apiPb.NotificationMethodIdRequest{
+					Id: methodId,
+				})
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+				successWrap(context, http.StatusOK, method)
+			})
+			notification.DELETE("", func(context *gin.Context) {
+				methodId := context.Param("method_id")
+				method, err := r.handlers.DeleteById(context, &apiPb.NotificationMethodIdRequest{
+					Id: methodId,
+				})
+				if err != nil {
+					errWrap(context, http.StatusInternalServerError, err)
+					return
+				}
+				successWrap(context, http.StatusOK, method)
+			})
+		}
 		ruleMethod := v1.Group("rule")
 		{
 			ruleMethod.POST("validate", func(context *gin.Context) {
@@ -855,6 +1013,16 @@ func GetIncidentListSorting(direction apiPb.SortDirection, sortBy apiPb.SortInci
 	return &apiPb.SortingIncidentList{
 		Direction: direction,
 		SortBy:    sortBy,
+	}
+}
+
+func GetNotificationList(ownerType apiPb.ComponentOwnerType, ownerId string) *apiPb.GetListRequest {
+	if ownerType == apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_UNSPECIFIED {
+		return nil
+	}
+	return &apiPb.GetListRequest{
+		OwnerId: ownerId,
+		OwnerType: ownerType,
 	}
 }
 

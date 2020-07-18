@@ -27,6 +27,7 @@ func dbMethodToProto(method *database.NotificationMethod) (*apiPb.NotificationMe
 		return &apiPb.NotificationMethod{
 			Id:     method.Id.Hex(),
 			Status: method.Status,
+			Name:   method.Name,
 			Type:   apiPb.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK,
 			Method: &apiPb.NotificationMethod_Webhook{
 				Webhook: &apiPb.WebHookMethod{
@@ -38,6 +39,7 @@ func dbMethodToProto(method *database.NotificationMethod) (*apiPb.NotificationMe
 		return &apiPb.NotificationMethod{
 			Id:     method.Id.Hex(),
 			Status: method.Status,
+			Name:   method.Name,
 			Type:   apiPb.NotificationMethodType_NOTIFICATION_METHOD_SLACK,
 			Method: &apiPb.NotificationMethod_Slack{
 				Slack: &apiPb.SlackMethod{
@@ -48,6 +50,24 @@ func dbMethodToProto(method *database.NotificationMethod) (*apiPb.NotificationMe
 	default:
 		return nil, errTypeNotExist
 	}
+}
+
+func (s *server) GetNotificationMethods(ctx context.Context, e *empty.Empty) (*apiPb.GetListResponse, error) {
+	list, err := s.nmDb.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	arr := []*apiPb.NotificationMethod{}
+	for _, value := range list {
+		item, err := dbMethodToProto(value)
+		if err != nil {
+			return nil, err
+		}
+		arr = append(arr, item)
+	}
+	return &apiPb.GetListResponse{
+		Methods: arr,
+	}, nil
 }
 
 func (s *server) Notify(ctx context.Context, request *apiPb.NotifyRequest) (*empty.Empty, error) {
@@ -96,6 +116,7 @@ func (s *server) CreateNotificationMethod(ctx context.Context, request *apiPb.Cr
 			Id:     primitive.NewObjectID(),
 			Status: apiPb.NotificationMethodStatus_NOTIFICATION_STATUS_ACTIVE,
 			Type:   request.Type,
+			Name:   request.Name,
 			Slack: &database.SlackConfig{
 				Url: request.GetSlack().Url,
 			},
@@ -105,6 +126,7 @@ func (s *server) CreateNotificationMethod(ctx context.Context, request *apiPb.Cr
 			Id:     primitive.NewObjectID(),
 			Status: apiPb.NotificationMethodStatus_NOTIFICATION_STATUS_ACTIVE,
 			Type:   request.Type,
+			Name:   request.Name,
 			WebHook: &database.WebHookConfig{
 				Url: request.GetWebhook().Url,
 			},
@@ -121,7 +143,6 @@ func (s *server) CreateNotificationMethod(ctx context.Context, request *apiPb.Cr
 
 func (s *server) GetById(ctx context.Context, request *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error) {
 	id, err := primitive.ObjectIDFromHex(request.Id)
-
 	if err != nil {
 		return nil, err
 	}

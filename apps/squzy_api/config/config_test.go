@@ -60,3 +60,11 @@ func TestCfg_GetIncidentServerAddress(t *testing.T) {
 		assert.Equal(t, s.GetIncidentServerAddress(), "11124")
 	})
 }
+
+func TestCfg_GetNotificationServerAddress(t *testing.T) {
+	t.Run("Should: return from env", func(t *testing.T) {
+		os.Setenv(ENV_NOTIFICATION_SERVER, "11124")
+		s := New()
+		assert.Equal(t, s.GetNotificationServerAddress(), "11124")
+	})
+}

@@ -52,6 +52,10 @@ func (m mockNotifyServer) GetList(ctx context.Context, in *apiPb.GetListRequest,
 	panic("implement me")
 }
 
+func (m mockNotifyServer) GetNotificationMethods(ctx context.Context, empty *empty.Empty, opts ...grpc.CallOption)  (*apiPb.GetListResponse, error) {
+	return &apiPb.GetListResponse{}, nil
+}
+
 func (m mockNotifyServer) Notify(ctx context.Context, in *apiPb.NotifyRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	return &empty.Empty{}, nil
 }

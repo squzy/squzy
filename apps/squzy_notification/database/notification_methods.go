@@ -14,10 +14,12 @@ type NotificationMethodDb interface {
 	Activate(ctx context.Context, id primitive.ObjectID) error
 	Deactivate(ctx context.Context, id primitive.ObjectID) error
 	Get(ctx context.Context, id primitive.ObjectID) (*NotificationMethod, error)
+	GetAll(ctx context.Context) ([]*NotificationMethod, error)
 }
 
 type NotificationMethod struct {
 	Id      primitive.ObjectID             `bson:"_id"`
+	Name    string                         `bson:"name"`
 	Status  apiPb.NotificationMethodStatus `bson:"status"`
 	Type    apiPb.NotificationMethodType   `bson:"type"`
 	Slack   *SlackConfig                   `bson:"slackConfig,omitempty"`
@@ -42,6 +44,15 @@ var (
 		apiPb.NotificationMethodStatus_NOTIFICATION_STATUS_INACTIVE,
 	}
 )
+
+func (n *notificationMethodDb) GetAll(ctx context.Context) ([]*NotificationMethod, error) {
+	items := []*NotificationMethod{}
+	err := n.mongo.FindAll(ctx, bson.M{}, &items)
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 func (n *notificationMethodDb) Create(ctx context.Context, nm *NotificationMethod) error {
 	_, err := n.mongo.InsertOne(ctx, nm)
