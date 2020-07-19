@@ -17,11 +17,9 @@ type mockExpr struct {
 }
 
 type mockNotifyServer struct {
-	
 }
 
 type mockFullSuccessStorage struct {
-
 }
 
 func (m mockFullSuccessStorage) SaveResponseFromScheduler(ctx context.Context, in *apiPb.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
@@ -77,8 +75,8 @@ func (m mockFullSuccessStorage) GetIncidentByRuleId(ctx context.Context, in *api
 		return nil, nil
 	}
 	return &apiPb.Incident{
-			Id:     incidentExistIncidentOpenedIncident.Hex(),
-			Status: apiPb.IncidentStatus_INCIDENT_STATUS_OPENED,
+		Id:     incidentExistIncidentOpenedIncident.Hex(),
+		Status: apiPb.IncidentStatus_INCIDENT_STATUS_OPENED,
 	}, nil
 }
 
@@ -118,7 +116,7 @@ func (m mockNotifyServer) GetList(ctx context.Context, in *apiPb.GetListRequest,
 	panic("implement me")
 }
 
-func (m mockNotifyServer) GetNotificationMethods(ctx context.Context, empty *empty.Empty, opts ...grpc.CallOption)  (*apiPb.GetListResponse, error) {
+func (m mockNotifyServer) GetNotificationMethods(ctx context.Context, empty *empty.Empty, opts ...grpc.CallOption) (*apiPb.GetListResponse, error) {
 	return &apiPb.GetListResponse{}, nil
 }
 
@@ -409,28 +407,28 @@ var (
 	ctx = context.Background()
 
 	ServermockExpressionError = &server{
-		ruleDb:  &mockDatabase{},
-		storage: &mockStorage{},
-		expr:    &mockExpr{},
+		ruleDb:             &mockDatabase{},
+		storage:            &mockStorage{},
+		expr:               &mockExpr{},
 		notificationClient: mockNotifyServer{},
 	}
 
 	s = &server{
-		ruleDb:  &mockDatabase{},
-		storage: &mockStorage{},
-		expr:    expression.NewExpression(&mockStorage{}),
+		ruleDb:             &mockDatabase{},
+		storage:            &mockStorage{},
+		expr:               expression.NewExpression(&mockStorage{}),
 		notificationClient: mockNotifyServer{},
 	}
 	sSuccess = &server{
-		ruleDb:  &mockDatabase{},
-		storage: &mockFullSuccessStorage{},
-		expr:    expression.NewExpression(&mockStorage{}),
+		ruleDb:             &mockDatabase{},
+		storage:            &mockFullSuccessStorage{},
+		expr:               expression.NewExpression(&mockStorage{}),
 		notificationClient: mockNotifyServer{},
 	}
 	sErr = &server{
-		ruleDb:  &mockErrorDatabase{},
-		storage: &mockErrorStorage{},
-		expr:    expression.NewExpression(&mockErrorStorage{}),
+		ruleDb:             &mockErrorDatabase{},
+		storage:            &mockErrorStorage{},
+		expr:               expression.NewExpression(&mockErrorStorage{}),
 		notificationClient: mockNotifyServer{},
 	}
 
@@ -596,9 +594,9 @@ func TestServer_ProcessRecordFromStorage(t *testing.T) {
 	})
 	t.Run("Should: return error", func(t *testing.T) {
 		sWithErrorStorage := &server{
-			ruleDb:  &mockDatabase{},
-			storage: &mockErrorStorage{},
-			expr:    expression.NewExpression(&mockStorage{}),
+			ruleDb:             &mockDatabase{},
+			storage:            &mockErrorStorage{},
+			expr:               expression.NewExpression(&mockStorage{}),
 			notificationClient: &mockNotifyServer{},
 		}
 		_, err := sWithErrorStorage.ProcessRecordFromStorage(ctx, &apiPb.StorageRecord{

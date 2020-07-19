@@ -123,7 +123,7 @@ type ListOfNotificationMethods struct {
 }
 
 type LinkNotificationMethod struct {
-	OwnerId string `json:"ownerId" binding:"required"`
+	OwnerId   string                   `json:"ownerId" binding:"required"`
 	OwnerType apiPb.ComponentOwnerType `json:"ownerType" binding:"required"`
 }
 
@@ -1021,7 +1021,7 @@ func GetNotificationList(ownerType apiPb.ComponentOwnerType, ownerId string) *ap
 		return nil
 	}
 	return &apiPb.GetListRequest{
-		OwnerId: ownerId,
+		OwnerId:   ownerId,
 		OwnerType: ownerType,
 	}
 }

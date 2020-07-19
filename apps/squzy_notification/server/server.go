@@ -89,7 +89,7 @@ func (s *server) Notify(ctx context.Context, request *apiPb.NotifyRequest) (*emp
 	}
 	for _, method := range methods {
 		go func(m *database.Notification) {
-			c, cancel := helpers.TimeoutContext(context.Background(), time.Second * 5)
+			c, cancel := helpers.TimeoutContext(context.Background(), time.Second*5)
 			defer cancel()
 			config, err := s.nmDb.Get(c, m.NotificationMethodId)
 			if err != nil {

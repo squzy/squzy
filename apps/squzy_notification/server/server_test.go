@@ -13,7 +13,6 @@ import (
 )
 
 type mockMethodSuccessActiveWebhook struct {
-
 }
 
 func (m mockMethodSuccessActiveWebhook) GetAll(ctx context.Context) ([]*database.NotificationMethod, error) {
@@ -38,20 +37,19 @@ func (m mockMethodSuccessActiveWebhook) Deactivate(ctx context.Context, id primi
 
 func (m mockMethodSuccessActiveWebhook) Get(ctx context.Context, id primitive.ObjectID) (*database.NotificationMethod, error) {
 	return &database.NotificationMethod{
-		Status: api.NotificationMethodStatus_NOTIFICATION_STATUS_ACTIVE,
+		Status:  api.NotificationMethodStatus_NOTIFICATION_STATUS_ACTIVE,
 		Type:    api.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK,
-		WebHook:   &database.WebHookConfig{Url: ""},
+		WebHook: &database.WebHookConfig{Url: ""},
 	}, nil
 }
 
 type mockMethodSuccessActiveSlack struct {
-
 }
 
 func (m mockMethodSuccessActiveSlack) GetAll(ctx context.Context) ([]*database.NotificationMethod, error) {
 	return []*database.NotificationMethod{
 		{
-			Id: primitive.NewObjectID(),
+			Id:   primitive.NewObjectID(),
 			Type: api.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK,
 		},
 	}, nil
@@ -76,13 +74,12 @@ func (m mockMethodSuccessActiveSlack) Deactivate(ctx context.Context, id primiti
 func (m mockMethodSuccessActiveSlack) Get(ctx context.Context, id primitive.ObjectID) (*database.NotificationMethod, error) {
 	return &database.NotificationMethod{
 		Status: api.NotificationMethodStatus_NOTIFICATION_STATUS_ACTIVE,
-		Type:    api.NotificationMethodType_NOTIFICATION_METHOD_SLACK,
-		Slack:   &database.SlackConfig{Url: ""},
+		Type:   api.NotificationMethodType_NOTIFICATION_METHOD_SLACK,
+		Slack:  &database.SlackConfig{Url: ""},
 	}, nil
 }
 
 type mockIntegration struct {
-
 }
 
 func (m mockIntegration) Slack(ctx context.Context, incident *api.Incident, config *database.SlackConfig) {
@@ -94,7 +91,6 @@ func (m mockIntegration) Webhook(ctx context.Context, incident *api.Incident, co
 }
 
 type mockStorageError struct {
-
 }
 
 func (m mockStorageError) SaveResponseFromScheduler(ctx context.Context, in *api.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
@@ -154,7 +150,6 @@ func (m mockStorageError) GetIncidentsList(ctx context.Context, in *api.GetIncid
 }
 
 type mockStorageOk struct {
-
 }
 
 func (m mockStorageOk) SaveResponseFromScheduler(ctx context.Context, in *api.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
@@ -203,10 +198,10 @@ func (m mockStorageOk) UpdateIncidentStatus(ctx context.Context, in *api.UpdateI
 
 func (m mockStorageOk) GetIncidentById(ctx context.Context, in *api.IncidentIdRequest, opts ...grpc.CallOption) (*api.Incident, error) {
 	return &api.Incident{
-		Id:                   "",
-		Status:               0,
-		RuleId:               "",
-		Histories:            nil,
+		Id:        "",
+		Status:    0,
+		RuleId:    "",
+		Histories: nil,
 	}, nil
 }
 
@@ -219,13 +214,12 @@ func (m mockStorageOk) GetIncidentsList(ctx context.Context, in *api.GetIncident
 }
 
 type mockMethodSuccessTypeWrong struct {
-
 }
 
 func (m mockMethodSuccessTypeWrong) GetAll(ctx context.Context) ([]*database.NotificationMethod, error) {
 	return []*database.NotificationMethod{
 		{
-			Id: primitive.NewObjectID(),
+			Id:   primitive.NewObjectID(),
 			Type: 5,
 		},
 	}, nil
@@ -248,15 +242,14 @@ func (m mockMethodSuccessTypeWrong) Deactivate(ctx context.Context, id primitive
 }
 
 func (m mockMethodSuccessTypeWrong) Get(ctx context.Context, id primitive.ObjectID) (*database.NotificationMethod, error) {
-	return  &database.NotificationMethod{
-		Id:      primitive.ObjectID{},
-		Status:  0,
-		Type:    0,
+	return &database.NotificationMethod{
+		Id:     primitive.ObjectID{},
+		Status: 0,
+		Type:   0,
 	}, nil
 }
 
 type mockMethodSuccessSecond struct {
-
 }
 
 func (m mockMethodSuccessSecond) GetAll(ctx context.Context) ([]*database.NotificationMethod, error) {
@@ -281,15 +274,14 @@ func (m mockMethodSuccessSecond) Deactivate(ctx context.Context, id primitive.Ob
 
 func (m mockMethodSuccessSecond) Get(ctx context.Context, id primitive.ObjectID) (*database.NotificationMethod, error) {
 	return &database.NotificationMethod{
-		Id:      primitive.ObjectID{},
-		Status:  0,
-		Type:    api.NotificationMethodType_NOTIFICATION_METHOD_SLACK,
-		Slack:   &database.SlackConfig{Url: ""},
+		Id:     primitive.ObjectID{},
+		Status: 0,
+		Type:   api.NotificationMethodType_NOTIFICATION_METHOD_SLACK,
+		Slack:  &database.SlackConfig{Url: ""},
 	}, nil
 }
 
 type mockListSuccess struct {
-
 }
 
 func (m mockListSuccess) Add(ctx context.Context, notification *database.Notification) error {
@@ -303,14 +295,13 @@ func (m mockListSuccess) Delete(ctx context.Context, id primitive.ObjectID) erro
 func (m mockListSuccess) GetList(ctx context.Context, OwnerId primitive.ObjectID, Type api.ComponentOwnerType) ([]*database.Notification, error) {
 	return []*database.Notification{
 		{
-			Id: primitive.NewObjectID(),
+			Id:                   primitive.NewObjectID(),
 			NotificationMethodId: primitive.NewObjectID(),
 		},
 	}, nil
 }
 
 type mockListInternalError struct {
-
 }
 
 func (m mockListInternalError) Add(ctx context.Context, notification *database.Notification) error {
@@ -326,19 +317,18 @@ func (m mockListInternalError) GetList(ctx context.Context, OwnerId primitive.Ob
 }
 
 type mockMethodSuccess struct {
-	
 }
 
 func (m mockMethodSuccess) GetAll(ctx context.Context) ([]*database.NotificationMethod, error) {
 	return []*database.NotificationMethod{
 		{
-			Id: primitive.NewObjectID(),
-			Type: api.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK,
+			Id:      primitive.NewObjectID(),
+			Type:    api.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK,
 			WebHook: &database.WebHookConfig{Url: ""},
 		},
 		{
-			Id: primitive.NewObjectID(),
-			Type: api.NotificationMethodType_NOTIFICATION_METHOD_SLACK,
+			Id:    primitive.NewObjectID(),
+			Type:  api.NotificationMethodType_NOTIFICATION_METHOD_SLACK,
 			Slack: &database.SlackConfig{Url: ""},
 		},
 	}, nil
@@ -362,13 +352,12 @@ func (m mockMethodSuccess) Deactivate(ctx context.Context, id primitive.ObjectID
 
 func (m mockMethodSuccess) Get(ctx context.Context, id primitive.ObjectID) (*database.NotificationMethod, error) {
 	return &database.NotificationMethod{
-		Type: api.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK,
+		Type:    api.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK,
 		WebHook: &database.WebHookConfig{Url: ""},
 	}, nil
 }
 
 type mockMethodInternalError struct {
-	
 }
 
 func (m mockMethodInternalError) GetAll(ctx context.Context) ([]*database.NotificationMethod, error) {
@@ -396,7 +385,6 @@ func (m mockMethodInternalError) Get(ctx context.Context, id primitive.ObjectID)
 }
 
 type mockMethodNotFoundError struct {
-	
 }
 
 func (m mockMethodNotFoundError) GetAll(ctx context.Context) ([]*database.NotificationMethod, error) {
@@ -595,7 +583,7 @@ func TestServer_Add(t *testing.T) {
 	t.Run("Should: return error because not bson", func(t *testing.T) {
 		s := New(nil, nil, nil, nil)
 		_, err := s.Add(context.Background(), &api.NotificationMethodRequest{
-			OwnerId: primitive.NewObjectID().Hex(),
+			OwnerId:              primitive.NewObjectID().Hex(),
 			NotificationMethodId: "",
 		})
 		assert.NotNil(t, err)
@@ -603,7 +591,7 @@ func TestServer_Add(t *testing.T) {
 	t.Run("Should: throw error because internal error", func(t *testing.T) {
 		s := New(&mockListInternalError{}, nil, nil, nil)
 		_, err := s.Add(context.Background(), &api.NotificationMethodRequest{
-			OwnerId: primitive.NewObjectID().Hex(),
+			OwnerId:              primitive.NewObjectID().Hex(),
 			NotificationMethodId: primitive.NewObjectID().Hex(),
 		})
 		assert.NotNil(t, err)
@@ -611,7 +599,7 @@ func TestServer_Add(t *testing.T) {
 	t.Run("Should: throw error because internal error", func(t *testing.T) {
 		s := New(&mockListSuccess{}, &mockMethodNotFoundError{}, nil, nil)
 		_, err := s.Add(context.Background(), &api.NotificationMethodRequest{
-			OwnerId: primitive.NewObjectID().Hex(),
+			OwnerId:              primitive.NewObjectID().Hex(),
 			NotificationMethodId: primitive.NewObjectID().Hex(),
 		})
 		assert.NotNil(t, err)
@@ -619,7 +607,7 @@ func TestServer_Add(t *testing.T) {
 	t.Run("Should: not throw error", func(t *testing.T) {
 		s := New(&mockListSuccess{}, &mockMethodSuccess{}, nil, nil)
 		_, err := s.Add(context.Background(), &api.NotificationMethodRequest{
-			OwnerId: primitive.NewObjectID().Hex(),
+			OwnerId:              primitive.NewObjectID().Hex(),
 			NotificationMethodId: primitive.NewObjectID().Hex(),
 		})
 		assert.Nil(t, err)
@@ -675,9 +663,9 @@ func TestServer_CreateNotificationMethod(t *testing.T) {
 		_, err := s.CreateNotificationMethod(context.Background(), &api.CreateNotificationMethodRequest{
 			Type: api.NotificationMethodType_NOTIFICATION_METHOD_SLACK,
 			Method: &api.CreateNotificationMethodRequest_Slack{
-					Slack: &api.SlackMethod{
-						Url:                  "",
-					},
+				Slack: &api.SlackMethod{
+					Url: "",
+				},
 			},
 		})
 		assert.NotNil(t, err)
@@ -688,7 +676,7 @@ func TestServer_CreateNotificationMethod(t *testing.T) {
 			Type: api.NotificationMethodType_NOTIFICATION_METHOD_SLACK,
 			Method: &api.CreateNotificationMethodRequest_Slack{
 				Slack: &api.SlackMethod{
-					Url:                  "",
+					Url: "",
 				},
 			},
 		})
@@ -700,7 +688,7 @@ func TestServer_CreateNotificationMethod(t *testing.T) {
 			Type: api.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK,
 			Method: &api.CreateNotificationMethodRequest_Webhook{
 				Webhook: &api.WebHookMethod{
-					Url:                  "",
+					Url: "",
 				},
 			},
 		})

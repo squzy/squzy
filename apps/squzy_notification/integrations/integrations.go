@@ -25,11 +25,12 @@ type WebhookRequest struct {
 	Status    api.IncidentStatus `json:"status"`
 	CreatedAt string             `json:"createdAt,omitempty"`
 	UpdatedAt string             `json:"updatedAt,omitempty"`
+	Link      string             `json:"link,omitempty"`
 }
 
 type integrations struct {
 	httpTools httptools.HTTPTool
-	cfg config.Config
+	cfg       config.Config
 }
 
 func (i *integrations) Slack(ctx context.Context, incident *api.Incident, config *database.SlackConfig) {
@@ -60,7 +61,7 @@ func (i *integrations) Slack(ctx context.Context, incident *api.Incident, config
 							Type: slack.MBTSection,
 							Text: &slack.TextBlockObject{
 								Type: slack.MarkdownType,
-								Text: fmt.Sprintf("<%s|LINK>", fmt.Sprintf("%s/incidents/%s",i.cfg.GetDashboardHost(), incident.Id)),
+								Text: fmt.Sprintf("<%s|LINK>", fmt.Sprintf("%s/incidents/%s", i.cfg.GetDashboardHost(), incident.Id)),
 							},
 						},
 					},
@@ -78,6 +79,7 @@ func (i *integrations) Webhook(ctx context.Context, incident *api.Incident, conf
 		Status:    incident.Status,
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
+		Link:      fmt.Sprintf("%s/incidents/%s", i.cfg.GetDashboardHost(), incident.Id),
 	}
 	// Skip error because we create that structure
 	body, _ := json.Marshal(webHook)
@@ -104,6 +106,6 @@ func getIncidentTime(incident *api.Incident) (createdAt string, updatedAt string
 func New(httpTools httptools.HTTPTool, cfg config.Config) Integrations {
 	return &integrations{
 		httpTools: httpTools,
-		cfg:cfg,
+		cfg:       cfg,
 	}
 }

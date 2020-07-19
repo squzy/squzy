@@ -6,17 +6,17 @@ import (
 )
 
 const (
-	ENV_PORT             = "PORT"
-	ENV_STORAGE_HOST     = "STORAGE_HOST"
-	ENV_MONGO_DB         = "MONGO_DB"
-	ENV_MONGO_URI        = "MONGO_URI"
-	ENV_MONGO_LIST_COLLECTION = "MONGO_LIST_COLLECTION"
+	ENV_PORT                    = "PORT"
+	ENV_STORAGE_HOST            = "STORAGE_HOST"
+	ENV_MONGO_DB                = "MONGO_DB"
+	ENV_MONGO_URI               = "MONGO_URI"
+	ENV_MONGO_LIST_COLLECTION   = "MONGO_LIST_COLLECTION"
 	ENV_MONGO_METHOD_COLLECTION = "MONGO_METHOD_COLLECTION"
-	ENV_DASHBOARD_HOST = "DASHBOARD_HOST"
+	ENV_DASHBOARD_HOST          = "DASHBOARD_HOST"
 
-	defaultPort       int32 = 9098
-	defaultMongoDb          = "notification_manager"
-	defaultListCollection       = "list"
+	defaultPort             int32 = 9098
+	defaultMongoDb                = "notification_manager"
+	defaultListCollection         = "list"
 	defaultMethodCollection       = "methods"
 )
 
@@ -31,13 +31,13 @@ type Config interface {
 }
 
 type cfg struct {
-	storageHost string
-	port int32
-	mongoDB string
-	mongoURI string
-	notificationListCollection string
+	storageHost                  string
+	port                         int32
+	mongoDB                      string
+	mongoURI                     string
+	notificationListCollection   string
 	notificationMethodCollection string
-	dashboardHost string
+	dashboardHost                string
 }
 
 func (c *cfg) GetDashboardHost() string {
@@ -93,12 +93,12 @@ func New() Config {
 	}
 
 	return &cfg{
-		port:            port,
-		storageHost:     os.Getenv(ENV_STORAGE_HOST),
-		mongoURI:        os.Getenv(ENV_MONGO_URI),
-		mongoDB:         mongoDb,
-		notificationListCollection: listCollection,
+		port:                         port,
+		storageHost:                  os.Getenv(ENV_STORAGE_HOST),
+		mongoURI:                     os.Getenv(ENV_MONGO_URI),
+		mongoDB:                      mongoDb,
+		notificationListCollection:   listCollection,
 		notificationMethodCollection: methodCollection,
-		dashboardHost: os.Getenv(ENV_DASHBOARD_HOST),
+		dashboardHost:                os.Getenv(ENV_DASHBOARD_HOST),
 	}
 }

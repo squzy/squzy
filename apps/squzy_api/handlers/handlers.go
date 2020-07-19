@@ -355,7 +355,7 @@ func New(
 	storageClient apiPb.StorageClient,
 	applicationMonitoringClient apiPb.ApplicationMonitoringClient,
 	incidentClient apiPb.IncidentServerClient,
-	notificationClient          apiPb.NotificationManagerClient,
+	notificationClient apiPb.NotificationManagerClient,
 ) Handlers {
 	return &handlers{
 		agentClient:                 agentClient,
@@ -363,6 +363,6 @@ func New(
 		storageClient:               storageClient,
 		applicationMonitoringClient: applicationMonitoringClient,
 		incidentClient:              incidentClient,
-		notificationClient: notificationClient,
+		notificationClient:          notificationClient,
 	}
 }

@@ -13,7 +13,6 @@ import (
 )
 
 type mockCfg struct {
-
 }
 
 func (m mockCfg) GetPort() int32 {
@@ -45,11 +44,9 @@ func (m mockCfg) GetDashboardHost() string {
 }
 
 type mock struct {
-
 }
 
 type mockError struct {
-
 }
 
 func (m mockError) SendRequest(req *http.Request) (int, []byte, error) {
@@ -101,26 +98,26 @@ func TestNew(t *testing.T) {
 
 func TestIntegrations_Webhook(t *testing.T) {
 	t.Run("Should: not throw panic", func(t *testing.T) {
-		s := New(&mock{},&mockCfg{})
+		s := New(&mock{}, &mockCfg{})
 		assert.NotPanics(t, func() {
 			s.Webhook(context.Background(), &api.Incident{
 				Histories: []*api.Incident_HistoryItem{
 					{
 						Timestamp: ptypes.TimestampNow(),
-						Status: api.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED,
+						Status:    api.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED,
 					},
 				},
 			}, &database.WebHookConfig{})
 		})
 	})
 	t.Run("Should: not throw panic", func(t *testing.T) {
-		s := New(&mock{},&mockCfg{})
+		s := New(&mock{}, &mockCfg{})
 		assert.NotPanics(t, func() {
 			s.Webhook(context.Background(), &api.Incident{
 				Histories: []*api.Incident_HistoryItem{
 					{
 						Timestamp: ptypes.TimestampNow(),
-						Status: 123,
+						Status:    123,
 					},
 				},
 			}, &database.WebHookConfig{})
@@ -133,7 +130,7 @@ func TestIntegrations_Webhook(t *testing.T) {
 				Histories: []*api.Incident_HistoryItem{
 					{
 						Timestamp: ptypes.TimestampNow(),
-						Status: api.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED,
+						Status:    api.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED,
 					},
 				},
 			}, &database.WebHookConfig{})
@@ -149,7 +146,7 @@ func TestIntegrations_Slack(t *testing.T) {
 				Histories: []*api.Incident_HistoryItem{
 					{
 						Timestamp: ptypes.TimestampNow(),
-						Status: api.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED,
+						Status:    api.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED,
 					},
 				},
 			}, &database.SlackConfig{})

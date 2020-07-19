@@ -18,7 +18,6 @@ func TestNewServer(t *testing.T) {
 }
 
 type mockNotification struct {
-	
 }
 
 func (m mockNotification) GetNotificationMethods(ctx context.Context, e *empty.Empty) (*apiPb.GetListResponse, error) {

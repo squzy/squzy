@@ -882,13 +882,13 @@ func TestRouter_GetEngine(t *testing.T) {
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/notifications",
-				Method: http.MethodPost,
+				Path:         "/v1/notifications",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusUnprocessableEntity,
 			},
 			{
-				Path: "/v1/notifications",
-				Method: http.MethodPost,
+				Path:         "/v1/notifications",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusBadRequest,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -900,8 +900,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/notifications",
-				Method: http.MethodPost,
+				Path:         "/v1/notifications",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusInternalServerError,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -913,38 +913,38 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/notifications?ownerType=asfasfasf",
-				Method: http.MethodGet,
+				Path:         "/v1/notifications?ownerType=asfasfasf",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusBadRequest,
 			},
 			{
-				Path: "/v1/notifications?ownerType=1",
-				Method: http.MethodGet,
+				Path:         "/v1/notifications?ownerType=1",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/notifications/13",
-				Method: http.MethodGet,
+				Path:         "/v1/notifications/13",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/notifications/13/activate",
-				Method: http.MethodPut,
+				Path:         "/v1/notifications/13/activate",
+				Method:       http.MethodPut,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/notifications/13/deactivate",
-				Method: http.MethodPut,
+				Path:         "/v1/notifications/13/deactivate",
+				Method:       http.MethodPut,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/notifications/13",
-				Method: http.MethodDelete,
+				Path:         "/v1/notifications/13",
+				Method:       http.MethodDelete,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
-				Path: "/v1/notifications/13/link",
-				Method: http.MethodPost,
+				Path:         "/v1/notifications/13/link",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusUnprocessableEntity,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -956,8 +956,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/notifications/13/link",
-				Method: http.MethodPost,
+				Path:         "/v1/notifications/13/link",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusInternalServerError,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -969,8 +969,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/notifications/13/unlink",
-				Method: http.MethodPost,
+				Path:         "/v1/notifications/13/unlink",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusUnprocessableEntity,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -982,8 +982,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/notifications/13/unlink",
-				Method: http.MethodPost,
+				Path:         "/v1/notifications/13/unlink",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusInternalServerError,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -1305,8 +1305,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/notifications",
-				Method: http.MethodPost,
+				Path:         "/v1/notifications",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusCreated,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -1318,8 +1318,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/notifications",
-				Method: http.MethodPost,
+				Path:         "/v1/notifications",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusCreated,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -1331,33 +1331,33 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/notifications",
-				Method: http.MethodGet,
+				Path:         "/v1/notifications",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/notifications/123/activate",
-				Method: http.MethodPut,
+				Path:         "/v1/notifications/123/activate",
+				Method:       http.MethodPut,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/notifications/123/deactivate",
-				Method: http.MethodPut,
+				Path:         "/v1/notifications/123/deactivate",
+				Method:       http.MethodPut,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/notifications/123",
-				Method: http.MethodDelete,
+				Path:         "/v1/notifications/123",
+				Method:       http.MethodDelete,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/notifications/123",
-				Method: http.MethodGet,
+				Path:         "/v1/notifications/123",
+				Method:       http.MethodGet,
 				ExpectedCode: http.StatusOK,
 			},
 			{
-				Path: "/v1/notifications/123/link",
-				Method: http.MethodPost,
+				Path:         "/v1/notifications/123/link",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusOK,
 				Body: bytes.NewBuffer([]byte(
 					`
@@ -1369,8 +1369,8 @@ func TestRouter_GetEngine(t *testing.T) {
 				)),
 			},
 			{
-				Path: "/v1/notifications/123/unlink",
-				Method: http.MethodPost,
+				Path:         "/v1/notifications/123/unlink",
+				Method:       http.MethodPost,
 				ExpectedCode: http.StatusOK,
 				Body: bytes.NewBuffer([]byte(
 					`

@@ -12,7 +12,6 @@ import (
 )
 
 type mockSuccess struct {
-
 }
 
 func (m mockSuccess) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
@@ -36,7 +35,6 @@ func (m mockSuccess) UpdateOne(ctx context.Context, filter interface{}, update i
 }
 
 type mockError struct {
-
 }
 
 func (m mockError) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
@@ -98,12 +96,12 @@ func TestNotificationList_Delete(t *testing.T) {
 func TestNotificationList_GetList(t *testing.T) {
 	t.Run("Should: return no error", func(t *testing.T) {
 		s := NewList(&mockSuccess{})
-		_, err := s.GetList(context.Background(),  primitive.NewObjectID(), 1)
+		_, err := s.GetList(context.Background(), primitive.NewObjectID(), 1)
 		assert.Nil(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
 		s := NewList(&mockError{})
-		_, err := s.GetList(context.Background(),  primitive.NewObjectID(), 1)
+		_, err := s.GetList(context.Background(), primitive.NewObjectID(), 1)
 		assert.NotNil(t, err)
 	})
 }

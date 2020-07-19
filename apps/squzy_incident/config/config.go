@@ -6,12 +6,12 @@ import (
 )
 
 const (
-	ENV_PORT             = "PORT"
-	ENV_STORAGE_HOST     = "STORAGE_HOST"
-	ENV_MONGO_DB         = "MONGO_DB"
-	ENV_MONGO_URI        = "MONGO_URI"
-	ENV_MONGO_COLLECTION = "MONGO_COLLECTION"
-	ENV_NOTIFICATION_HOST     = "NOTIFICATION_HOST"
+	ENV_PORT              = "PORT"
+	ENV_STORAGE_HOST      = "STORAGE_HOST"
+	ENV_MONGO_DB          = "MONGO_DB"
+	ENV_MONGO_URI         = "MONGO_URI"
+	ENV_MONGO_COLLECTION  = "MONGO_COLLECTION"
+	ENV_NOTIFICATION_HOST = "NOTIFICATION_HOST"
 
 	defaultPort       int32 = 9097
 	defaultMongoDb          = "incident_manager"
@@ -19,11 +19,11 @@ const (
 )
 
 type cfg struct {
-	port            int32
-	storageHost     string
-	mongoURI        string
-	mongoDb         string
-	mongoCollection string
+	port             int32
+	storageHost      string
+	mongoURI         string
+	mongoDb          string
+	mongoCollection  string
 	notificationHost string
 }
 
@@ -81,11 +81,11 @@ func New() Config {
 	}
 
 	return &cfg{
-		port:            port,
-		storageHost:     os.Getenv(ENV_STORAGE_HOST),
-		mongoURI:        os.Getenv(ENV_MONGO_URI),
-		mongoDb:         mongoDb,
-		mongoCollection: collection,
+		port:             port,
+		storageHost:      os.Getenv(ENV_STORAGE_HOST),
+		mongoURI:         os.Getenv(ENV_MONGO_URI),
+		mongoDb:          mongoDb,
+		mongoCollection:  collection,
 		notificationHost: os.Getenv(ENV_NOTIFICATION_HOST),
 	}
 }
