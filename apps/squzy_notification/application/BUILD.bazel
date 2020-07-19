@@ -1,0 +1,26 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+     name = "go_default_library",
+     srcs = ["application.go"],
+     importpath = "squzy/apps/squzy_notification/application",
+     visibility = ["//visibility:public"],
+     deps = [
+        "@org_golang_google_grpc//:go_default_library",
+        "@com_github_grpc_ecosystem_go_grpc_middleware//:go_default_library",
+        "@com_github_grpc_ecosystem_go_grpc_middleware//recovery:go_default_library",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
+        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
+     ]
+)
+
+go_test(
+    name = "go_default_test",
+    embed = [":go_default_library"],
+    srcs = [
+        "application_test.go",
+    ],
+    deps =[
+        "@com_github_stretchr_testify//assert:go_default_library"
+    ]
+)

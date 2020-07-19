@@ -14,6 +14,10 @@ import (
 type mockMongo struct {
 }
 
+func (m mockMongo) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	panic("implement me")
+}
+
 func (m mockMongo) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	return nil, nil
 }
@@ -36,6 +40,10 @@ var (
 )
 
 type mockErrorMongo struct {
+}
+
+func (m mockErrorMongo) Delete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	panic("implement me")
 }
 
 func (m mockErrorMongo) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {

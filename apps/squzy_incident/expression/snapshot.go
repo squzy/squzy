@@ -20,10 +20,8 @@ func (e *expressionStruct) GetSnapshots(
 			Direction: direction,
 		},
 	}
-	if filters != nil {
-		for _, filter := range filters {
-			req = filter(req)
-		}
+	for _, filter := range filters {
+		req = filter(req)
 	}
 	list, err := e.storageClient.GetSchedulerInformation(context.Background(), req)
 	if err != nil {
@@ -92,7 +90,7 @@ func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interfa
 			return getTimeRange(snapshot.GetMeta().GetStartTime(), snapshot.GetMeta().GetEndTime())
 		},
 		//Transaction status keys
-		"Ok":            apiPb.SchedulerCode_OK,
-		"Error":         apiPb.SchedulerCode_ERROR,
+		"Ok":    apiPb.SchedulerCode_OK,
+		"Error": apiPb.SchedulerCode_ERROR,
 	}
 }

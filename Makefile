@@ -18,6 +18,8 @@ build_bin_storage: .build_bin_storage
 
 build_application_monitoring: .build_application_monitoring
 
+build_notification: .build_notification
+
 run_agent: .run_agent
 
 run_squzy: .run_squzy
@@ -50,6 +52,8 @@ default: build
 .build_incident:
 	./build.bash squzy_incident squzy_incident_$(version) $(version)
 
+.build_notification:
+	./build.bash squzy_notification squzy_notification_$(version) $(version)
 
 .build_bin_squzy:
 	./build.bash squzy_monitoring squzy_monitoring_$(version) $(version)

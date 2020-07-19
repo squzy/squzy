@@ -13,20 +13,22 @@ import (
 )
 
 type server struct {
-	ruleDb  database.Database
-	storage apiPb.StorageClient
-	expr    expression.Expression
+	ruleDb             database.Database
+	storage            apiPb.StorageClient
+	notificationClient apiPb.NotificationManagerClient
+	expr               expression.Expression
 }
 
 var (
 	errNotValidRule = errors.New("rule is not valid")
 )
 
-func NewIncidentServer(storage apiPb.StorageClient, db database.Database) apiPb.IncidentServerServer {
+func NewIncidentServer(notificationClient apiPb.NotificationManagerClient, storage apiPb.StorageClient, db database.Database) apiPb.IncidentServerServer {
 	return &server{
-		ruleDb:  db,
-		storage: storage,
-		expr:    expression.NewExpression(storage),
+		notificationClient: notificationClient,
+		ruleDb:             db,
+		storage:            storage,
+		expr:               expression.NewExpression(storage),
 	}
 }
 
@@ -191,10 +193,16 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 		if isIncidentExist(incident) && isIncidentOpened(incident) && !wasIncident {
 			if err := s.tryCloseIncident(ctx, rule.AutoClose, incident); err != nil {
 				wasError = true
+				// @TODO log error
+				continue
 			}
+			_, _ = s.notificationClient.Notify(ctx, &apiPb.NotifyRequest{
+				IncidentId: incident.Id,
+				OwnerType:  rule.OwnerType,
+				OwnerId:    rule.OwnerId.Hex(),
+			})
 			continue
 		}
-
 		if !isIncidentExist(incident) && wasIncident {
 			incident = &apiPb.Incident{
 				Status: apiPb.IncidentStatus_INCIDENT_STATUS_OPENED,
@@ -209,7 +217,14 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 			}
 			if _, err := s.storage.SaveIncident(ctx, incident); err != nil {
 				wasError = true
+				// @TODO log error
+				continue
 			}
+			_, _ = s.notificationClient.Notify(ctx, &apiPb.NotifyRequest{
+				IncidentId: incident.Id,
+				OwnerType:  rule.OwnerType,
+				OwnerId:    rule.OwnerId.Hex(),
+			})
 			continue
 		}
 	}
@@ -228,27 +243,27 @@ func (s *server) StudyIncident(ctx context.Context, request *apiPb.IncidentIdReq
 	return s.setStatus(ctx, request.GetIncidentId(), apiPb.IncidentStatus_INCIDENT_STATUS_STUDIED)
 }
 
-func getOwnerTypeAndId(request *apiPb.StorageRecord) (apiPb.RuleOwnerType, primitive.ObjectID, error) {
+func getOwnerTypeAndId(request *apiPb.StorageRecord) (apiPb.ComponentOwnerType, primitive.ObjectID, error) {
 	if request.GetSnapshot() != nil {
 		ownerId, err := primitive.ObjectIDFromHex(request.GetSnapshot().Id)
 		if err != nil {
 			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}
-		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_SCHEDULER, ownerId, nil
+		return apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER, ownerId, nil
 	}
 	if request.GetAgentMetric() != nil {
 		ownerId, err := primitive.ObjectIDFromHex(request.GetAgentMetric().AgentId)
 		if err != nil {
 			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}
-		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_AGENT, ownerId, nil
+		return apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_AGENT, ownerId, nil
 	}
 	if request.GetTransaction() != nil {
 		ownerId, err := primitive.ObjectIDFromHex(request.GetTransaction().ApplicationId)
 		if err != nil {
 			return 0, primitive.ObjectID{}, errors.New("ERROR_WRONG_ID")
 		}
-		return apiPb.RuleOwnerType_INCIDENT_OWNER_TYPE_APPLICATION, ownerId, nil
+		return apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_APPLICATION, ownerId, nil
 	}
 	return 0, primitive.ObjectID{}, errors.New("ERROR_NO_RECORD")
 }

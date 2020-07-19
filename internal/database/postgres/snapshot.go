@@ -134,10 +134,10 @@ func getSnapshotOrder(request *apiPb.SortingSchedulerList) string {
 
 func getSnapshotDirection(request *apiPb.SortingSchedulerList) string {
 	if request == nil {
-		return ` desc`
+		return descPrefix
 	}
 	if res, ok := directionMap[request.GetDirection()]; ok {
 		return res
 	}
-	return ` desc`
+	return descPrefix
 }

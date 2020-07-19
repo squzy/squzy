@@ -1,4 +1,4 @@
-# Squzy API - open source aggregation over grpc API
+# Squzy Application Monitoring - implementation for collect metric from applications
 
 [![version](https://img.shields.io/github/v/release/squzy/squzy.svg)](https://github.com/squzy/squzy)
 

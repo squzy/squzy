@@ -41,6 +41,14 @@ type Handlers interface {
 	GetIncidentById(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error)
 	StudyIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error)
 	CloseIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error)
+	CreateNotificationMethod(ctx context.Context, req *apiPb.CreateNotificationMethodRequest) (*apiPb.NotificationMethod, error)
+	GetNotificationMethods(ctx context.Context, req *apiPb.GetListRequest) ([]*apiPb.NotificationMethod, error)
+	GetMethodById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error)
+	ActivateById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error)
+	DeactivateById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error)
+	DeleteById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error)
+	LinkById(ctx context.Context, req *apiPb.NotificationMethodRequest) (*apiPb.NotificationMethod, error)
+	UnLinkById(ctx context.Context, req *apiPb.NotificationMethodRequest) (*apiPb.NotificationMethod, error)
 }
 
 const (
@@ -53,6 +61,65 @@ type handlers struct {
 	storageClient               apiPb.StorageClient
 	applicationMonitoringClient apiPb.ApplicationMonitoringClient
 	incidentClient              apiPb.IncidentServerClient
+	notificationClient          apiPb.NotificationManagerClient
+}
+
+func (h *handlers) LinkById(ctx context.Context, req *apiPb.NotificationMethodRequest) (*apiPb.NotificationMethod, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.notificationClient.Add(c, req)
+}
+
+func (h *handlers) UnLinkById(ctx context.Context, req *apiPb.NotificationMethodRequest) (*apiPb.NotificationMethod, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.notificationClient.Remove(c, req)
+}
+
+func (h *handlers) GetMethodById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.notificationClient.GetById(c, req)
+}
+
+func (h *handlers) ActivateById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.notificationClient.Activate(c, req)
+}
+
+func (h *handlers) DeactivateById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.notificationClient.Deactivate(c, req)
+}
+
+func (h *handlers) DeleteById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.notificationClient.DeleteById(c, req)
+}
+
+func (h *handlers) GetNotificationMethods(ctx context.Context, req *apiPb.GetListRequest) ([]*apiPb.NotificationMethod, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	var list *apiPb.GetListResponse
+	var err error
+	if req == nil {
+		list, err = h.notificationClient.GetNotificationMethods(c, &empty.Empty{})
+	} else {
+		list, err = h.notificationClient.GetList(ctx, req)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return list.Methods, nil
+}
+
+func (h *handlers) CreateNotificationMethod(ctx context.Context, req *apiPb.CreateNotificationMethodRequest) (*apiPb.NotificationMethod, error) {
+	c, cancel := helpers.TimeoutContext(ctx, defaultRequestTimeout)
+	defer cancel()
+	return h.notificationClient.CreateNotificationMethod(c, req)
 }
 
 func (h *handlers) StudyIncident(ctx context.Context, req *apiPb.IncidentIdRequest) (*apiPb.Incident, error) {
@@ -288,6 +355,7 @@ func New(
 	storageClient apiPb.StorageClient,
 	applicationMonitoringClient apiPb.ApplicationMonitoringClient,
 	incidentClient apiPb.IncidentServerClient,
+	notificationClient apiPb.NotificationManagerClient,
 ) Handlers {
 	return &handlers{
 		agentClient:                 agentClient,
@@ -295,5 +363,6 @@ func New(
 		storageClient:               storageClient,
 		applicationMonitoringClient: applicationMonitoringClient,
 		incidentClient:              incidentClient,
+		notificationClient:          notificationClient,
 	}
 }

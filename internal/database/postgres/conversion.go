@@ -423,7 +423,6 @@ func convertToIncidentHistory(data *apiPb.Incident_HistoryItem) *IncidentHistory
 		Status:    int32(data.GetStatus()),
 		Timestamp: time.UnixNano(),
 	}
-
 }
 
 func convertFromIncidents(data []*Incident) []*apiPb.Incident {
@@ -463,7 +462,6 @@ func convertFromIncidentHistory(data *IncidentHistory) *apiPb.Incident_HistoryIt
 		Status:    apiPb.IncidentStatus(data.Status),
 		Timestamp: parsedTime,
 	}
-
 }
 
 func convertFromUptimeResult(uptimeResult *UptimeResult, countAll int64) *apiPb.GetSchedulerUptimeResponse {

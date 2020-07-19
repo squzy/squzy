@@ -18,6 +18,38 @@ import (
 type mockOk struct {
 }
 
+func (m mockOk) CreateNotificationMethod(ctx context.Context, req *apiPb.CreateNotificationMethodRequest) (*apiPb.NotificationMethod, error) {
+	return &apiPb.NotificationMethod{}, nil
+}
+
+func (m mockOk) GetNotificationMethods(ctx context.Context, req *apiPb.GetListRequest) ([]*apiPb.NotificationMethod, error) {
+	return []*apiPb.NotificationMethod{}, nil
+}
+
+func (m mockOk) GetMethodById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error) {
+	return &apiPb.NotificationMethod{}, nil
+}
+
+func (m mockOk) ActivateById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error) {
+	return &apiPb.NotificationMethod{}, nil
+}
+
+func (m mockOk) DeactivateById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error) {
+	return &apiPb.NotificationMethod{}, nil
+}
+
+func (m mockOk) DeleteById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error) {
+	return &apiPb.NotificationMethod{}, nil
+}
+
+func (m mockOk) LinkById(ctx context.Context, req *apiPb.NotificationMethodRequest) (*apiPb.NotificationMethod, error) {
+	return &apiPb.NotificationMethod{}, nil
+}
+
+func (m mockOk) UnLinkById(ctx context.Context, req *apiPb.NotificationMethodRequest) (*apiPb.NotificationMethod, error) {
+	return &apiPb.NotificationMethod{}, nil
+}
+
 func (m mockOk) CreateRule(ctx context.Context, rule *apiPb.CreateRuleRequest) (*apiPb.Rule, error) {
 	return &apiPb.Rule{}, nil
 }
@@ -147,6 +179,38 @@ func (m mockOk) AddScheduler(ctx context.Context, scheduler *apiPb.AddRequest) (
 }
 
 type mockError struct {
+}
+
+func (m mockError) CreateNotificationMethod(ctx context.Context, req *apiPb.CreateNotificationMethodRequest) (*apiPb.NotificationMethod, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) GetNotificationMethods(ctx context.Context, req *apiPb.GetListRequest) ([]*apiPb.NotificationMethod, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) GetMethodById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) ActivateById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) DeactivateById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) DeleteById(ctx context.Context, req *apiPb.NotificationMethodIdRequest) (*apiPb.NotificationMethod, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) LinkById(ctx context.Context, req *apiPb.NotificationMethodRequest) (*apiPb.NotificationMethod, error) {
+	return nil, errors.New("")
+}
+
+func (m mockError) UnLinkById(ctx context.Context, req *apiPb.NotificationMethodRequest) (*apiPb.NotificationMethod, error) {
+	return nil, errors.New("")
 }
 
 func (m mockError) CreateRule(ctx context.Context, rule *apiPb.CreateRuleRequest) (*apiPb.Rule, error) {
@@ -817,6 +881,119 @@ func TestRouter_GetEngine(t *testing.T) {
 				Method:       http.MethodPut,
 				ExpectedCode: http.StatusInternalServerError,
 			},
+			{
+				Path:         "/v1/notifications",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusUnprocessableEntity,
+			},
+			{
+				Path:         "/v1/notifications",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusBadRequest,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"type": 0,
+							"name": "214"
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/notifications",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusInternalServerError,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"type": 1,
+							"name": "214"
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/notifications?ownerType=asfasfasf",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusBadRequest,
+			},
+			{
+				Path:         "/v1/notifications?ownerType=1",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/notifications/13",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/notifications/13/activate",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/notifications/13/deactivate",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/notifications/13",
+				Method:       http.MethodDelete,
+				ExpectedCode: http.StatusInternalServerError,
+			},
+			{
+				Path:         "/v1/notifications/13/link",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusUnprocessableEntity,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"ownerType": "0",
+							"ownerId": "214"
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/notifications/13/link",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusInternalServerError,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"ownerType": 1,
+							"ownerId": "214"
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/notifications/13/unlink",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusUnprocessableEntity,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"ownerType": "0",
+							"ownerId": "214"
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/notifications/13/unlink",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusInternalServerError,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"ownerType": 1,
+							"ownerId": "214"
+						}
+					`,
+				)),
+			},
 		}
 
 		for _, test := range tt {
@@ -1126,6 +1303,83 @@ func TestRouter_GetEngine(t *testing.T) {
 				Path:         "/v1/rules/123/deactivate",
 				Method:       http.MethodPut,
 				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/notifications",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusCreated,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"type": 1,
+							"name": "1244"
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/notifications",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusCreated,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"type": 2,
+							"name": "1244"
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/notifications",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/notifications/123/activate",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/notifications/123/deactivate",
+				Method:       http.MethodPut,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/notifications/123",
+				Method:       http.MethodDelete,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/notifications/123",
+				Method:       http.MethodGet,
+				ExpectedCode: http.StatusOK,
+			},
+			{
+				Path:         "/v1/notifications/123/link",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusOK,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"ownerType": 2,
+							"ownerId": "1244"
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/notifications/123/unlink",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusOK,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"ownerType": 2,
+							"ownerId": "1244"
+						}
+					`,
+				)),
 			},
 		}
 

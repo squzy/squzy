@@ -42,9 +42,17 @@ func main() {
 	defer func() {
 		_ = client.Disconnect(context.Background())
 	}()
-	connector := mongo_helper.New(client.Database(cfg.GetMongoDb()).Collection(cfg.GetMongoCollection()))
 
-	apiService := server.NewIncidentServer(storageClient, database.New(connector))
+	connector := mongo_helper.New(client.Database(cfg.GetMongoDb()).Collection(cfg.GetMongoCollection()))
+	notificationConn, err := tools.GetConnection(cfg.GetNoticationServerHost(), 0, grpc.WithInsecure())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		_ = notificationConn.Close()
+	}()
+	notificationClient := apiPb.NewNotificationManagerClient(notificationConn)
+	apiService := server.NewIncidentServer(notificationClient, storageClient, database.New(connector))
 	storageServ := application.NewApplication(apiService)
 	log.Fatal(storageServ.Run(cfg.GetPort()))
 }
