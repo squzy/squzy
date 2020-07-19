@@ -26,9 +26,10 @@ jobs:
 
     - name: Install bazel
       run: |
-        wget https://github.com/bazelbuild/bazel/releases/download/3.1.0/bazel-3.1.0-installer-linux-x86_64.sh -O bazel_installer.sh
-        chmod +x bazel_installer.sh
-        ./bazel_installer.sh --user
+        sudo apt install curl gnupg
+curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+        sudo apt update && sudo apt install bazel-3.1.0
         export PATH="$PATH:$HOME/bin"
         bazel --version
         touch ~/.netrc
