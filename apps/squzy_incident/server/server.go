@@ -194,12 +194,13 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 			if err := s.tryCloseIncident(ctx, rule.AutoClose, incident); err != nil {
 				wasError = true
 				// @TODO log error
-				_, _ = s.notificationClient.Notify(ctx, &apiPb.NotifyRequest{
-					IncidentId: incident.Id,
-					OwnerType:  rule.OwnerType,
-					OwnerId:    rule.OwnerId.Hex(),
-				})
+				continue
 			}
+			_, _ = s.notificationClient.Notify(ctx, &apiPb.NotifyRequest{
+				IncidentId: incident.Id,
+				OwnerType:  rule.OwnerType,
+				OwnerId:    rule.OwnerId.Hex(),
+			})
 			continue
 		}
 		if !isIncidentExist(incident) && wasIncident {
@@ -217,12 +218,13 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 			if _, err := s.storage.SaveIncident(ctx, incident); err != nil {
 				wasError = true
 				// @TODO log error
-				_, _ = s.notificationClient.Notify(ctx, &apiPb.NotifyRequest{
-					IncidentId: incident.Id,
-					OwnerType:  rule.OwnerType,
-					OwnerId:    rule.OwnerId.Hex(),
-				})
+				continue
 			}
+			_, _ = s.notificationClient.Notify(ctx, &apiPb.NotifyRequest{
+				IncidentId: incident.Id,
+				OwnerType:  rule.OwnerType,
+				OwnerId:    rule.OwnerId.Hex(),
+			})
 			continue
 		}
 	}

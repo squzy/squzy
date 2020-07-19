@@ -32,7 +32,7 @@ func (n *notificationList) Add(ctx context.Context, notification *Notification) 
 
 func (n *notificationList) Delete(ctx context.Context, id primitive.ObjectID) error {
 	_, err := n.mongo.Delete(ctx, bson.M{
-		"_id": id,
+		"notificationMethodId": id,
 	})
 	return err
 }

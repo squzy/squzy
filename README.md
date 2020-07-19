@@ -48,6 +48,18 @@ Squzy Web GUI - helps interact with squzy.
 
 Squzy API server for works GUI + applications
 
+### [Squzy Application Monitoring](https://github.com/squzy/squzy/tree/develop/apps/squzy_application_monitoring)
+
+Squzy Application Monitoring server - collect metric from application
+
+### [Squzy Incident Manager](https://github.com/squzy/squzy/tree/develop/apps/squzy_incident)
+
+Squzy Incident Manager  - analyze metric + create incident + manage rules
+
+### [Squzy Notification Manager](https://github.com/squzy/squzy/tree/develop/apps/squzy_notification)
+
+Squzy Notification Manager  - create and link notifications methods
+
 # Authors
 - [Iurii Panarin](https://github.com/PxyUp)
 - [Nikita Kharitonov](https://github.com/DreamAndDrum)

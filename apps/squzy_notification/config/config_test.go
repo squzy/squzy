@@ -66,3 +66,12 @@ func TestCfg_GetNotificationMethodCollection(t *testing.T) {
 		assert.Equal(t, s.GetNotificationMethodCollection(), "localhost:9090")
 	})
 }
+
+func TestCfg_GetDashboardHost(t *testing.T) {
+	t.Run("Should: get dashboard host", func(t *testing.T) {
+		err := os.Setenv(ENV_DASHBOARD_HOST, "localhost:9090")
+		assert.Nil(t, err)
+		s := New()
+		assert.Equal(t, s.GetDashboardHost(), "localhost:9090")
+	})
+}

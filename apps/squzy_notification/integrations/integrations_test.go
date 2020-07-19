@@ -12,6 +12,38 @@ import (
 	"time"
 )
 
+type mockCfg struct {
+
+}
+
+func (m mockCfg) GetPort() int32 {
+	panic("implement me")
+}
+
+func (m mockCfg) GetMongoURI() string {
+	panic("implement me")
+}
+
+func (m mockCfg) GetMongoDB() string {
+	panic("implement me")
+}
+
+func (m mockCfg) GetNotificationMethodCollection() string {
+	panic("implement me")
+}
+
+func (m mockCfg) GetNotificationListCollection() string {
+	panic("implement me")
+}
+
+func (m mockCfg) GetStorageHost() string {
+	panic("implement me")
+}
+
+func (m mockCfg) GetDashboardHost() string {
+	return ""
+}
+
 type mock struct {
 
 }
@@ -62,14 +94,14 @@ func (m mock) CreateRequest(method string, url string, headers *map[string]strin
 
 func TestNew(t *testing.T) {
 	t.Run("Shuld: not be nil", func(t *testing.T) {
-		s := New(nil)
+		s := New(nil, nil)
 		assert.NotNil(t, s)
 	})
 }
 
 func TestIntegrations_Webhook(t *testing.T) {
 	t.Run("Should: not throw panic", func(t *testing.T) {
-		s := New(&mock{})
+		s := New(&mock{},&mockCfg{})
 		assert.NotPanics(t, func() {
 			s.Webhook(context.Background(), &api.Incident{
 				Histories: []*api.Incident_HistoryItem{
@@ -82,7 +114,7 @@ func TestIntegrations_Webhook(t *testing.T) {
 		})
 	})
 	t.Run("Should: not throw panic", func(t *testing.T) {
-		s := New(&mock{})
+		s := New(&mock{},&mockCfg{})
 		assert.NotPanics(t, func() {
 			s.Webhook(context.Background(), &api.Incident{
 				Histories: []*api.Incident_HistoryItem{
@@ -95,7 +127,7 @@ func TestIntegrations_Webhook(t *testing.T) {
 		})
 	})
 	t.Run("Should: not throw panic", func(t *testing.T) {
-		s := New(&mockError{})
+		s := New(&mockError{}, &mockCfg{})
 		assert.NotPanics(t, func() {
 			s.Webhook(context.Background(), &api.Incident{
 				Histories: []*api.Incident_HistoryItem{
@@ -111,7 +143,7 @@ func TestIntegrations_Webhook(t *testing.T) {
 
 func TestIntegrations_Slack(t *testing.T) {
 	t.Run("Should: not throw panic", func(t *testing.T) {
-		s := New(&mock{})
+		s := New(&mock{}, &mockCfg{})
 		assert.NotPanics(t, func() {
 			s.Slack(context.Background(), &api.Incident{
 				Histories: []*api.Incident_HistoryItem{

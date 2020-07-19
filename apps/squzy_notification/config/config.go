@@ -12,6 +12,7 @@ const (
 	ENV_MONGO_URI        = "MONGO_URI"
 	ENV_MONGO_LIST_COLLECTION = "MONGO_LIST_COLLECTION"
 	ENV_MONGO_METHOD_COLLECTION = "MONGO_METHOD_COLLECTION"
+	ENV_DASHBOARD_HOST = "DASHBOARD_HOST"
 
 	defaultPort       int32 = 9098
 	defaultMongoDb          = "notification_manager"
@@ -26,6 +27,7 @@ type Config interface {
 	GetNotificationMethodCollection() string
 	GetNotificationListCollection() string
 	GetStorageHost() string
+	GetDashboardHost() string
 }
 
 type cfg struct {
@@ -35,6 +37,11 @@ type cfg struct {
 	mongoURI string
 	notificationListCollection string
 	notificationMethodCollection string
+	dashboardHost string
+}
+
+func (c *cfg) GetDashboardHost() string {
+	return c.dashboardHost
 }
 
 func (c *cfg) GetStorageHost() string {
@@ -92,5 +99,6 @@ func New() Config {
 		mongoDB:         mongoDb,
 		notificationListCollection: listCollection,
 		notificationMethodCollection: methodCollection,
+		dashboardHost: os.Getenv(ENV_DASHBOARD_HOST),
 	}
 }

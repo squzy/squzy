@@ -49,3 +49,4 @@ jobs:
         bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_storage:squzy_push_hub_ci
         bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_application_monitoring:squzy_push_hub_ci
         bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_incident:squzy_push_hub_ci
+        bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_notification:squzy_push_hub_ci

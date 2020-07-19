@@ -8,6 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"squzy/apps/squzy_notification/database"
 	"squzy/apps/squzy_notification/integrations"
+	"squzy/internal/helpers"
+	"time"
 )
 
 type server struct {
@@ -87,7 +89,9 @@ func (s *server) Notify(ctx context.Context, request *apiPb.NotifyRequest) (*emp
 	}
 	for _, method := range methods {
 		go func(m *database.Notification) {
-			config, err := s.nmDb.Get(ctx, m.NotificationMethodId)
+			c, cancel := helpers.TimeoutContext(context.Background(), time.Second * 5)
+			defer cancel()
+			config, err := s.nmDb.Get(c, m.NotificationMethodId)
 			if err != nil {
 				// @TODO log error
 				return

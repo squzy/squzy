@@ -50,7 +50,7 @@ func main() {
 				database.NewList(mongo_helper.New(client.Database(cfg.GetMongoDB()).Collection(cfg.GetNotificationListCollection()))),
 				database.NewMethods(mongo_helper.New(client.Database(cfg.GetMongoDB()).Collection(cfg.GetNotificationMethodCollection()))),
 				storageClient,
-				integrations.New(tools),
+				integrations.New(tools, cfg),
 			),
 		).Run(cfg.GetPort()))
 }

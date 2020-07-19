@@ -288,8 +288,8 @@ go_repository(
 go_repository(
     name = "com_github_squzy_squzy_generated",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:ZhNCKKY8OUuAxKczFn9pJXxcjFknPZCByhVg8eBDwqk=",
-    version = "v1.8.1-0.20200705203046-8abaccf55076",
+    sum = "h1:/KE6Kxw4ef/SAfvcvAvYQ44/ZsqNKnIRDN1hOPGNWU8=",
+    version = "v1.9.1-0.20200718121305-a98159f6a335",
 )
 
 go_repository(
@@ -708,8 +708,8 @@ go_repository(
 go_repository(
     name = "com_github_squzy_mongo_helper",
     importpath = "github.com/squzy/mongo_helper",
-    sum = "h1:4ufoIuMrHwWfD0aea+m26wwNWiQh+jsWq2iltaXbKb4=",
-    version = "v0.0.0-20200502155448-a2e6845a8ba0",
+    sum = "h1:NL6hCxYRb9Y24COaTkwklWcQjZTlsPoGKw/yd60KFiM=",
+    version = "v0.0.0-20200713232419-037a870c9d06",
 )
 
 go_repository(
@@ -983,4 +983,25 @@ go_repository(
     importpath = "github.com/sanity-io/litter",
     sum = "h1:DGJO0bxH/+C2EukzOSBmAlxmkhVMGqzvcx/rvySYw9M=",
     version = "v1.2.0",
+)
+
+go_repository(
+    name = "com_github_go_test_deep",
+    importpath = "github.com/go-test/deep",
+    sum = "h1:u2CU3YKy9I2pmu9pX0eq50wCgjfGIt539SqR7FbHiho=",
+    version = "v1.0.4",
+)
+
+go_repository(
+    name = "com_github_gorilla_websocket",
+    importpath = "github.com/gorilla/websocket",
+    sum = "h1:+/TMaTYc4QFitKJxsQ7Yye35DkWvkdLcvGKqM+x0Ufc=",
+    version = "v1.4.2",
+)
+
+go_repository(
+    name = "com_github_slack_go_slack",
+    importpath = "github.com/slack-go/slack",
+    sum = "h1:IkDKtJ2IROJNoe3d6mW870/NRKvq2fhLB/Q5XmzWk00=",
+    version = "v0.6.5",
 )

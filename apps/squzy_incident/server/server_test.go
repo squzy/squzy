@@ -20,6 +20,72 @@ type mockNotifyServer struct {
 	
 }
 
+type mockFullSuccessStorage struct {
+
+}
+
+func (m mockFullSuccessStorage) SaveResponseFromScheduler(ctx context.Context, in *apiPb.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, nil
+}
+
+func (m mockFullSuccessStorage) SaveResponseFromAgent(ctx context.Context, in *apiPb.Metric, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, nil
+}
+
+func (m mockFullSuccessStorage) SaveTransaction(ctx context.Context, in *apiPb.TransactionInfo, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, nil
+}
+
+func (m mockFullSuccessStorage) GetSchedulerInformation(ctx context.Context, in *apiPb.GetSchedulerInformationRequest, opts ...grpc.CallOption) (*apiPb.GetSchedulerInformationResponse, error) {
+	return nil, nil
+}
+
+func (m mockFullSuccessStorage) GetSchedulerUptime(ctx context.Context, in *apiPb.GetSchedulerUptimeRequest, opts ...grpc.CallOption) (*apiPb.GetSchedulerUptimeResponse, error) {
+	return nil, nil
+}
+
+func (m mockFullSuccessStorage) GetAgentInformation(ctx context.Context, in *apiPb.GetAgentInformationRequest, opts ...grpc.CallOption) (*apiPb.GetAgentInformationResponse, error) {
+	return nil, nil
+}
+
+func (m mockFullSuccessStorage) GetTransactionsGroup(ctx context.Context, in *apiPb.GetTransactionGroupRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionGroupResponse, error) {
+	return nil, nil
+}
+
+func (m mockFullSuccessStorage) GetTransactions(ctx context.Context, in *apiPb.GetTransactionsRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionsResponse, error) {
+	return nil, nil
+}
+
+func (m mockFullSuccessStorage) GetTransactionById(ctx context.Context, in *apiPb.GetTransactionByIdRequest, opts ...grpc.CallOption) (*apiPb.GetTransactionByIdResponse, error) {
+	return nil, nil
+}
+
+func (m mockFullSuccessStorage) SaveIncident(ctx context.Context, in *apiPb.Incident, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return &empty.Empty{}, nil
+}
+
+func (m mockFullSuccessStorage) UpdateIncidentStatus(ctx context.Context, in *apiPb.UpdateIncidentStatusRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
+	return &apiPb.Incident{}, nil
+}
+
+func (m mockFullSuccessStorage) GetIncidentById(ctx context.Context, in *apiPb.IncidentIdRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
+	return nil, nil
+}
+
+func (m mockFullSuccessStorage) GetIncidentByRuleId(ctx context.Context, in *apiPb.RuleIdRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
+	if in.RuleId == isIncidentExistwasIncident.Hex() {
+		return nil, nil
+	}
+	return &apiPb.Incident{
+			Id:     incidentExistIncidentOpenedIncident.Hex(),
+			Status: apiPb.IncidentStatus_INCIDENT_STATUS_OPENED,
+	}, nil
+}
+
+func (m mockFullSuccessStorage) GetIncidentsList(ctx context.Context, in *apiPb.GetIncidentsListRequest, opts ...grpc.CallOption) (*apiPb.GetIncidentsListResponse, error) {
+	return nil, nil
+}
+
 func (m mockNotifyServer) CreateNotificationMethod(ctx context.Context, in *apiPb.CreateNotificationMethodRequest, opts ...grpc.CallOption) (*apiPb.NotificationMethod, error) {
 	panic("implement me")
 }
@@ -71,42 +137,6 @@ func (*mockExpr) IsValid(ruleType apiPb.ComponentOwnerType, rule string) error {
 type mockStorage struct {
 }
 
-func (m mockStorage) CreateNotificationMethod(ctx context.Context, in *apiPb.CreateNotificationMethodRequest, opts ...grpc.CallOption) (*apiPb.NotificationMethod, error) {
-	panic("implement me")
-}
-
-func (m mockStorage) GetById(ctx context.Context, in *apiPb.NotificationMethodIdRequest, opts ...grpc.CallOption) (*apiPb.NotificationMethod, error) {
-	panic("implement me")
-}
-
-func (m mockStorage) DeleteById(ctx context.Context, in *apiPb.NotificationMethodIdRequest, opts ...grpc.CallOption) (*apiPb.NotificationMethod, error) {
-	panic("implement me")
-}
-
-func (m mockStorage) Activate(ctx context.Context, in *apiPb.NotificationMethodIdRequest, opts ...grpc.CallOption) (*apiPb.NotificationMethod, error) {
-	panic("implement me")
-}
-
-func (m mockStorage) Deactivate(ctx context.Context, in *apiPb.NotificationMethodIdRequest, opts ...grpc.CallOption) (*apiPb.NotificationMethod, error) {
-	panic("implement me")
-}
-
-func (m mockStorage) Add(ctx context.Context, in *apiPb.NotificationMethodRequest, opts ...grpc.CallOption) (*apiPb.NotificationMethod, error) {
-	panic("implement me")
-}
-
-func (m mockStorage) Remove(ctx context.Context, in *apiPb.NotificationMethodRequest, opts ...grpc.CallOption) (*apiPb.NotificationMethod, error) {
-	panic("implement me")
-}
-
-func (m mockStorage) GetList(ctx context.Context, in *apiPb.GetListRequest, opts ...grpc.CallOption) (*apiPb.GetListResponse, error) {
-	panic("implement me")
-}
-
-func (m mockStorage) Notify(ctx context.Context, in *apiPb.NotifyRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
-}
-
 func (m mockStorage) SaveResponseFromScheduler(ctx context.Context, in *apiPb.SchedulerResponse, opts ...grpc.CallOption) (*empty.Empty, error) {
 	return nil, nil
 }
@@ -147,7 +177,7 @@ func (m mockStorage) SaveIncident(ctx context.Context, in *apiPb.Incident, opts 
 	if in.RuleId == isIncidentExistwasIncident.Hex() {
 		return nil, errors.New("ERROR")
 	}
-	return nil, nil
+	return &empty.Empty{}, nil
 }
 
 func (m mockStorage) UpdateIncidentStatus(ctx context.Context, in *apiPb.UpdateIncidentStatusRequest, opts ...grpc.CallOption) (*apiPb.Incident, error) {
@@ -391,6 +421,12 @@ var (
 		expr:    expression.NewExpression(&mockStorage{}),
 		notificationClient: mockNotifyServer{},
 	}
+	sSuccess = &server{
+		ruleDb:  &mockDatabase{},
+		storage: &mockFullSuccessStorage{},
+		expr:    expression.NewExpression(&mockStorage{}),
+		notificationClient: mockNotifyServer{},
+	}
 	sErr = &server{
 		ruleDb:  &mockErrorDatabase{},
 		storage: &mockErrorStorage{},
@@ -612,6 +648,26 @@ func TestServer_ProcessRecordFromStorage(t *testing.T) {
 			Record: &apiPb.StorageRecord_AgentMetric{
 				AgentMetric: &apiPb.Metric{
 					AgentId: ruleIsNotActive.Hex(),
+				},
+			},
+		})
+		assert.NoError(t, err)
+	})
+	t.Run("Should: return no error", func(t *testing.T) {
+		_, err := sSuccess.ProcessRecordFromStorage(ctx, &apiPb.StorageRecord{
+			Record: &apiPb.StorageRecord_AgentMetric{
+				AgentMetric: &apiPb.Metric{
+					AgentId: primitive.NewObjectID().Hex(),
+				},
+			},
+		})
+		assert.NoError(t, err)
+	})
+	t.Run("Should: return no error", func(t *testing.T) {
+		_, err := sSuccess.ProcessRecordFromStorage(ctx, &apiPb.StorageRecord{
+			Record: &apiPb.StorageRecord_AgentMetric{
+				AgentMetric: &apiPb.Metric{
+					AgentId: isIncidentExistwasIncident.Hex(),
 				},
 			},
 		})

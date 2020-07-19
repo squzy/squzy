@@ -9,6 +9,7 @@ import (
 	"github.com/slack-go/slack"
 	api "github.com/squzy/squzy_generated/generated/proto/v1"
 	"net/http"
+	"squzy/apps/squzy_notification/config"
 	"squzy/apps/squzy_notification/database"
 	"squzy/internal/httptools"
 	"time"
@@ -28,6 +29,7 @@ type WebhookRequest struct {
 
 type integrations struct {
 	httpTools httptools.HTTPTool
+	cfg config.Config
 }
 
 func (i *integrations) Slack(ctx context.Context, incident *api.Incident, config *database.SlackConfig) {
@@ -52,6 +54,13 @@ func (i *integrations) Slack(ctx context.Context, incident *api.Incident, config
 							Text: &slack.TextBlockObject{
 								Type: slack.MarkdownType,
 								Text: fmt.Sprintf("CreatedAt: %s \n UpdatedAt: %s \n", createdAt, updatedAt),
+							},
+						},
+						slack.SectionBlock{
+							Type: slack.MBTSection,
+							Text: &slack.TextBlockObject{
+								Type: slack.MarkdownType,
+								Text: fmt.Sprintf("<%s|LINK>", fmt.Sprintf("%s/incidents/%s",i.cfg.GetDashboardHost(), incident.Id)),
 							},
 						},
 					},
@@ -92,8 +101,9 @@ func getIncidentTime(incident *api.Incident) (createdAt string, updatedAt string
 	return createdAt, updatedAt
 }
 
-func New(httpTools httptools.HTTPTool) Integrations {
+func New(httpTools httptools.HTTPTool, cfg config.Config) Integrations {
 	return &integrations{
 		httpTools: httpTools,
+		cfg:cfg,
 	}
 }
