@@ -610,7 +610,7 @@ func (r *router) GetEngine() *gin.Engine {
 					successWrap(context, http.StatusAccepted, res)
 				})
 
-				application.PUT("archived", func(context *gin.Context) {
+				application.DELETE("archived", func(context *gin.Context) {
 					applicationId := context.Param("applicationId")
 					res, err := r.handlers.ArchivedApplicationById(context, applicationId)
 					if err != nil {
