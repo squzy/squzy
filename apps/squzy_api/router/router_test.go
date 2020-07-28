@@ -769,7 +769,7 @@ func TestRouter_GetEngine(t *testing.T) {
 			},
 			{
 				Path:         "/v1/applications/app/archived",
-				Method:       http.MethodPut,
+				Method:       http.MethodDelete,
 				ExpectedCode: http.StatusInternalServerError,
 			},
 			{
@@ -1231,7 +1231,7 @@ func TestRouter_GetEngine(t *testing.T) {
 			},
 			{
 				Path:         "/v1/applications/app/archived",
-				Method:       http.MethodPut,
+				Method:       http.MethodDelete,
 				ExpectedCode: http.StatusAccepted,
 			},
 			{
