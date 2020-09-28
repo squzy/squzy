@@ -7,7 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
-	"log"
 	"squzy/apps/squzy_incident/application"
 	"squzy/apps/squzy_incident/config"
 	"squzy/apps/squzy_incident/database"
@@ -15,6 +14,7 @@ import (
 	_ "squzy/apps/squzy_incident/version"
 	"squzy/internal/grpctools"
 	"squzy/internal/helpers"
+	"squzy/internal/logger"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 	tools := grpctools.New()
 	conn, err := tools.GetConnection(cfg.GetStorageHost(), 0, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = conn.Close()
@@ -33,11 +33,11 @@ func main() {
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.GetMongoURI()))
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = client.Disconnect(context.Background())
@@ -46,7 +46,7 @@ func main() {
 	connector := mongo_helper.New(client.Database(cfg.GetMongoDb()).Collection(cfg.GetMongoCollection()))
 	notificationConn, err := tools.GetConnection(cfg.GetNoticationServerHost(), 0, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = notificationConn.Close()
@@ -54,5 +54,5 @@ func main() {
 	notificationClient := apiPb.NewNotificationManagerClient(notificationConn)
 	apiService := server.NewIncidentServer(notificationClient, storageClient, database.New(connector))
 	storageServ := application.NewApplication(apiService)
-	log.Fatal(storageServ.Run(cfg.GetPort()))
+	logger.Fatal(storageServ.Run(cfg.GetPort()).Error())
 }

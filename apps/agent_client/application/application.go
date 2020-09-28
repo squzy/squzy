@@ -7,12 +7,12 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
 	"io"
-	"log"
 	"os"
 	"os/signal"
 	"squzy/apps/agent_client/config"
 	agent_executor "squzy/internal/agent-executor"
 	"squzy/internal/helpers"
+	"squzy/internal/logger"
 	"sync"
 	"syscall"
 )
@@ -90,7 +90,7 @@ func (a *application) Run() error {
 	signal.Notify(a.interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer signal.Stop(a.interrupt)
 
-	log.Printf("Registred with ID=%s", agentID)
+	logger.Infof("Registred with ID=%s", agentID)
 
 	st := a.getStream()
 

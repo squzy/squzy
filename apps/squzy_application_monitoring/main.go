@@ -7,7 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
-	"log"
 	"squzy/apps/squzy_application_monitoring/application"
 	"squzy/apps/squzy_application_monitoring/config"
 	"squzy/apps/squzy_application_monitoring/database"
@@ -15,6 +14,7 @@ import (
 	_ "squzy/apps/squzy_application_monitoring/version"
 	"squzy/internal/grpctools"
 	"squzy/internal/helpers"
+	logger "squzy/internal/logger"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 	tools := grpctools.New()
 	conn, err := tools.GetConnection(cfg.GetStorageHost(), 0, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = conn.Close()
@@ -33,16 +33,16 @@ func main() {
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.GetMongoURI()))
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = client.Disconnect(context.Background())
 	}()
 	connector := mongo_helper.New(client.Database(cfg.GetMongoDb()).Collection(cfg.GetMongoCollection()))
 
-	log.Fatal(application.New(server.New(database.New(connector), cfg, storageClient)).Run(cfg.GetPort()))
+	logger.Fatal(application.New(server.New(database.New(connector), cfg, storageClient)).Run(cfg.GetPort()).Error())
 }

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
-	"log"
+	"squzy/internal/logger"
 	"squzy/internal/grpctools"
 	"squzy/internal/job"
 	"time"

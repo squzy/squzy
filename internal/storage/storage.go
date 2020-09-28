@@ -5,7 +5,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	logger "log"
+	logger "squzy/internal/logger"
 	"os"
 	"squzy/internal/job"
 	"time"

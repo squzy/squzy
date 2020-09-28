@@ -1,7 +1,7 @@
 package version
 
 import (
-	"log"
+	"squzy/internal/logger"
 )
 
 var (
@@ -9,7 +9,7 @@ var (
 )
 
 func init() {
-	log.Println("Version: " + GetVersion())
+	logger.Info("Version: " + GetVersion())
 }
 
 func GetVersion() string {

@@ -1,7 +1,7 @@
 package version
 
 import (
-	"log"
+	"squzy/internal/logger"
 )
 
 var (
