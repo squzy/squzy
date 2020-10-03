@@ -4,7 +4,7 @@ go_library(
     name = "go_default_library",
     srcs = ["logger.go"],
     importpath = "squzy/internal/logger",
-     visibility = ["//visibility:public"],
+    visibility = ["//visibility:public"],
     deps = [
         "@org_uber_go_zap//:go_default_library",
         "@org_uber_go_zap//zapcore:go_default_library",

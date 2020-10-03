@@ -5,7 +5,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log"
-	"squzy/config"
+	"squzy/internal/logger/config"
 )
 
 var (
