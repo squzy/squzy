@@ -5,6 +5,9 @@ go_library(
      srcs = ["version.go"],
     importpath = "squzy/apps/squzy_storage/version",
      visibility = ["//visibility:public"],
+     deps = [
+        "//internal/logger:go_default_library",
+],
 )
 
 go_test(

@@ -9,7 +9,7 @@ var (
 )
 
 func init() {
-	log.Println("Version: " + GetVersion())
+	logger.Infof("Version: " + GetVersion())
 }
 
 func GetVersion() string {

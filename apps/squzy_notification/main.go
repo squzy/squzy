@@ -27,18 +27,18 @@ func main() {
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.GetMongoURI()))
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = client.Disconnect(context.Background())
 	}()
 	conn, err := gtools.GetConnection(cfg.GetStorageHost(), 0, grpc.WithInsecure())
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = conn.Close()
@@ -52,5 +52,5 @@ func main() {
 				storageClient,
 				integrations.New(tools, cfg),
 			),
-		).Run(cfg.GetPort()))
+		).Run(cfg.GetPort()).Error())
 }

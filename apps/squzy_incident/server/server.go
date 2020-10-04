@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"squzy/apps/squzy_incident/database"
 	"squzy/apps/squzy_incident/expression"
+	"squzy/internal/logger"
 )
 
 type server struct {
@@ -193,7 +194,7 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 		if isIncidentExist(incident) && isIncidentOpened(incident) && !wasIncident {
 			if err := s.tryCloseIncident(ctx, rule.AutoClose, incident); err != nil {
 				wasError = true
-				// @TODO log error
+				logger.Error(err.Error())
 				continue
 			}
 			_, _ = s.notificationClient.Notify(ctx, &apiPb.NotifyRequest{
@@ -217,7 +218,7 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 			}
 			if _, err := s.storage.SaveIncident(ctx, incident); err != nil {
 				wasError = true
-				// @TODO log error
+				logger.Error(err.Error())
 				continue
 			}
 			_, _ = s.notificationClient.Notify(ctx, &apiPb.NotifyRequest{

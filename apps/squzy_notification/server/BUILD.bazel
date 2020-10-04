@@ -11,6 +11,7 @@ go_library(
         "@org_mongodb_go_mongo_driver//bson/primitive:go_default_library",
         "@org_mongodb_go_mongo_driver//bson:go_default_library",
         "@com_github_squzy_mongo_helper//:go_default_library",
+        "//internal/logger:go_default_library",
         "//apps/squzy_notification/database:go_default_library",
         "//apps/squzy_notification/config:go_default_library",
         "//apps/squzy_notification/integrations:go_default_library",

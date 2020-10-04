@@ -30,10 +30,10 @@ var (
 func NewExternalStorage(grpcTools grpctools.GrpcTool, address string, timeout time.Duration, fallBack Storage, options ...grpc.DialOption) Storage {
 	conn, err := grpcTools.GetConnection(address, timeout, options...)
 	if err != nil {
-		log.Println("Will wrote to in memory storage")
+		logger.Info("Will wrote to in memory storage")
 		return fallBack
 	}
-	log.Println(fmt.Sprintf("Will send log to client %s", address))
+	logger.Info(fmt.Sprintf("Will send log to client %s", address))
 	return &externalStorage{
 		client:   apiPb.NewStorageClient(conn),
 		fallback: fallBack,

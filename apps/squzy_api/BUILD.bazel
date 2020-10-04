@@ -9,6 +9,7 @@ go_library(
     ],
     importpath = "squzy/apps/squzy_api",
     deps = [
+        "//internal/logger:go_default_library",
         "//apps/squzy_api/config:go_default_library",
         "//apps/squzy_api/version:go_default_library",
         "//apps/squzy_api/router:go_default_library",

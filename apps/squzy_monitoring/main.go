@@ -34,11 +34,11 @@ func main() {
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.GetMongoURI()))
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = client.Disconnect(context.Background())
@@ -76,5 +76,5 @@ func main() {
 		jobExecutor,
 		configStorage,
 	)
-	logger.Fatal(app.Run(cfg.GetPort()))
+	logger.Fatal(app.Run(cfg.GetPort()).Error())
 }

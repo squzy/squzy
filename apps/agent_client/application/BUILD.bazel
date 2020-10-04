@@ -6,7 +6,8 @@ go_library(
      importpath = "squzy/apps/agent_client/application",
      visibility = ["//visibility:public"],
      deps = [
-         "@org_golang_google_grpc//:go_default_library",
+          "@org_golang_google_grpc//:go_default_library",
+          "//internal/logger:go_default_library",
           "//internal/agent-executor:go_default_library",
           "//apps/agent_client/config:go_default_library",
           "//internal/helpers:go_default_library",

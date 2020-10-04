@@ -5,6 +5,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log"
+	"os"
 	"squzy/internal/logger/config"
 )
 
@@ -13,31 +14,40 @@ var (
 )
 
 func init() {
-	var err error
-	cfg := zap.Config{
-		Level:             zap.NewAtomicLevelAt(getLevel()),
-		Development: false,
-		Encoding:          "json",
-		EncoderConfig:     zapcore.EncoderConfig{
-			TimeKey:        "ts",
-			LevelKey:       "level",
-			NameKey:        "logger",
-			CallerKey:      "caller",
-			MessageKey:     "msg",
-			StacktraceKey:  "stacktrace",
-			LineEnding:     zapcore.DefaultLineEnding,
-			EncodeLevel:    zapcore.LowercaseLevelEncoder,
-			EncodeTime:     zapcore.EpochTimeEncoder,
-			EncodeDuration: zapcore.SecondsDurationEncoder,
-			EncodeCaller:   zapcore.ShortCallerEncoder,
-		},
-		OutputPaths:       []string{"stderr"},
-		ErrorOutputPaths:  []string{"stderr"},
+	var encoderConfig = zapcore.EncoderConfig{
+		TimeKey:        "ts",
+		LevelKey:       "level",
+		NameKey:        "logger",
+		CallerKey:      "caller",
+		MessageKey:     "msg",
+		StacktraceKey:  "stacktrace",
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		EncodeTime:     zapcore.EpochTimeEncoder,
+		EncodeDuration: zapcore.SecondsDurationEncoder,
+		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
-	l, err = cfg.Build()
-	if err != nil {
-		log.Fatal("Could not build logger")
+
+	highPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl <= getLevel() && lvl >= zapcore.ErrorLevel
+	})
+	lowPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl < zapcore.ErrorLevel
+	})
+
+	var core zapcore.Core
+	if getLevel() < zap.ErrorLevel {
+		core = zapcore.NewTee(
+			zapcore.NewCore(zapcore.NewConsoleEncoder(encoderConfig), zapcore.Lock(os.Stdout), getLevel()),
+		)
+	} else {
+		core = zapcore.NewTee(
+			zapcore.NewCore(zapcore.NewConsoleEncoder(encoderConfig), zapcore.Lock(os.Stdout), lowPriority),
+			zapcore.NewCore(zapcore.NewConsoleEncoder(encoderConfig), zapcore.Lock(os.Stderr), highPriority),
+		)
 	}
+
+	l = zap.New(core, zap.AddCaller())
 }
 
 func Info(msg string) {
@@ -87,4 +97,3 @@ func getLevel() zapcore.Level {
 	}
 	return level
 }
-

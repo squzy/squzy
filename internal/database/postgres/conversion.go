@@ -7,6 +7,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	_struct "github.com/golang/protobuf/ptypes/struct"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"squzy/internal/logger"
 	"strconv"
 	"strings"
 	"time"
@@ -23,7 +24,9 @@ func ConvertFromPostgresSnapshots(snapshots []*Snapshot) []*apiPb.SchedulerSnaps
 		if err == nil {
 			res = append(res, snap)
 		}
-		//TODO: log if error
+		if err != nil {
+			logger.Error(err.Error())
+		}
 	}
 	return res
 }

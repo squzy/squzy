@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc"
 	"squzy/internal/httptools"
 	"squzy/internal/job"
+	"squzy/internal/logger"
 	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"squzy/internal/semaphore"
 	sitemap_storage "squzy/internal/sitemap-storage"
@@ -54,7 +55,11 @@ type executor struct {
 func (e *executor) Execute(schedulerID primitive.ObjectID) {
 	config, err := e.configStorage.Get(context.Background(), schedulerID)
 	if err != nil || config == nil {
-		// @TODO log error
+		if err != nil {
+			logger.Error(err.Error())
+		} else {
+			logger.Errorf("No config for schedulerID: %s", schedulerID)
+		}
 		return
 	}
 	id := schedulerID.Hex()

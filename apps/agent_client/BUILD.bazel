@@ -12,6 +12,7 @@ go_library(
         "@com_github_shirou_gopsutil//host:go_default_library",
         "@com_github_shirou_gopsutil//net:go_default_library",
         "@com_github_shirou_gopsutil//mem:go_default_library",
+        "//internal/logger:go_default_library",
         "//apps/agent_client/config:go_default_library",
         "//apps/agent_client/version:go_default_library",
         "//internal/agent:go_default_library",
