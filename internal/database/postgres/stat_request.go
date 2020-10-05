@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"squzy/internal/logger"
 	"time"
 )
 
@@ -94,7 +95,7 @@ func (p *Postgres) InsertStatRequest(data *apiPb.Metric) error {
 		return err
 	}
 	if err := p.Db.Table(dbStatRequestCollection).Create(pgData).Error; err != nil {
-		//TODO: log?
+		logger.Error(err.Error())
 		return errorDataBase
 	}
 	return nil

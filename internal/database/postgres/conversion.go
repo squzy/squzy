@@ -54,7 +54,9 @@ func ConvertFromPostgressStatRequests(data []*StatRequest) []*apiPb.GetAgentInfo
 		if err == nil {
 			res = append(res, stat)
 		}
-		//TODO: log if error
+		if err != nil {
+			logger.Error(err.Error())
+		}
 	}
 	return res
 }
@@ -419,7 +421,7 @@ func convertToIncidentHistory(data *apiPb.Incident_HistoryItem) *IncidentHistory
 	}
 	time, err := ptypes.Timestamp(data.GetTimestamp())
 	if err != nil {
-		//TODO: log
+		logger.Error(err.Error())
 		return nil
 	}
 	return &IncidentHistory{
@@ -486,23 +488,23 @@ func convertFromGroupResult(group []*GroupResult, upTime int64) map[string]*apiP
 	for _, v := range group {
 		latency, err := strconv.ParseFloat(strings.Split(v.Latency, ".")[0], 64)
 		if err != nil {
+			logger.Error(err.Error())
 			continue
-			//TODO: log?
 		}
 		minTime, err := strconv.ParseFloat(strings.Split(v.MinTime, ".")[0], 64)
 		if err != nil {
+			logger.Error(err.Error())
 			continue
-			//TODO: log?
 		}
 		maxTime, err := strconv.ParseFloat(strings.Split(v.MaxTime, ".")[0], 64)
 		if err != nil {
+			logger.Error(err.Error())
 			continue
-			//TODO: log?
 		}
 		lowTime, err := strconv.ParseFloat(strings.Split(v.LowTime, ".")[0], 64)
 		if err != nil {
+			logger.Error(err.Error())
 			continue
-			//TODO: log?
 		}
 		res[v.Name] = &apiPb.TransactionGroup{
 			Count:        v.Count,

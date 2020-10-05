@@ -66,21 +66,21 @@ func (e *executor) Execute(schedulerID primitive.ObjectID) {
 	switch config.Type {
 	case apiPb.SchedulerType_TCP:
 		_ = e.externalStorage.Write(e.execTCP(id, config.Timeout, config.TCPConfig))
-		// @TODO logger
+		logger.Infof("TCP job executed is used for scheduler id %s", schedulerID)
 	case apiPb.SchedulerType_GRPC:
 		_ = e.externalStorage.Write(e.execGrpc(id, config.Timeout, config.GrpcConfig, grpc.WithInsecure()))
-		// @TODO logger
+		logger.Infof("gRPC job executed is used for scheduler id %s", schedulerID)
 	case apiPb.SchedulerType_HTTP:
 		_ = e.externalStorage.Write(e.execHTTP(id, config.Timeout, config.HTTPConfig, e.httpTool))
-		// @TODO logger
+		logger.Infof("HTTP job executed is used for scheduler id %s", schedulerID)
 	case apiPb.SchedulerType_SITE_MAP:
 		_ = e.externalStorage.Write(e.execSiteMap(id, config.Timeout, config.SiteMapConfig, e.siteMapStorage, e.httpTool, e.semaphoreFactoryFn))
-		// @TODO logger
+		logger.Infof("Site map job executed is used for scheduler id %s", schedulerID)
 	case apiPb.SchedulerType_HTTP_JSON_VALUE:
 		_ = e.externalStorage.Write(e.execHTTPValue(id, config.Timeout, config.HTTPValueConfig, e.httpTool))
-		// @TODO logger
+		logger.Infof("HTTP JSON job executed is used for scheduler id %s", schedulerID)
 	default:
-		// @TODO log incorrect type
+		logger.Errorf("Incorrect config type passed to job executor: %s", config.Type)
 	}
 }
 
