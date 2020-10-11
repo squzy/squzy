@@ -7,7 +7,7 @@ import (
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
-	"log"
+	"squzy/internal/logger"
 	"os"
 	"squzy/apps/agent_client/application"
 	"squzy/apps/agent_client/config"
@@ -31,7 +31,7 @@ func main() {
 		cfg.GetInterval(),
 	)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	a := application.New(
 		executor,
@@ -42,6 +42,6 @@ func main() {
 	)
 	err = a.Run()
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 }

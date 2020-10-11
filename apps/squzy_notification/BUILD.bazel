@@ -17,6 +17,7 @@ go_library(
         "@org_mongodb_go_mongo_driver//mongo:go_default_library",
         "@org_mongodb_go_mongo_driver//mongo/options:go_default_library",
         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
+        "//internal/logger:go_default_library",
         "//internal/helpers:go_default_library",
         "//internal/grpctools:go_default_library",
         "//internal/httptools:go_default_library",

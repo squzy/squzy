@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
-	"log"
+	"squzy/internal/logger"
 	"squzy/apps/squzy_api/config"
 	"squzy/apps/squzy_api/handlers"
 	"squzy/apps/squzy_api/router"
@@ -19,7 +19,7 @@ func main() {
 	tools := grpctools.New()
 	agentServerConn, err := tools.GetConnection(cfg.GetAgentServerAddress(), 0, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = agentServerConn.Close()
@@ -27,7 +27,7 @@ func main() {
 	agentServerClient := apiPb.NewAgentServerClient(agentServerConn)
 	monitoringConn, err := tools.GetConnection(cfg.GetMonitoringServerAddress(), 0, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = monitoringConn.Close()
@@ -35,7 +35,7 @@ func main() {
 	monitoringClient := apiPb.NewSchedulersExecutorClient(monitoringConn)
 	storageConn, err := tools.GetConnection(cfg.GetStorageServerAddress(), 0, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = storageConn.Close()
@@ -44,7 +44,7 @@ func main() {
 
 	appMonConn, err := tools.GetConnection(cfg.GetApplicationMonitoringAddress(), 0, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = appMonConn.Close()
@@ -53,7 +53,7 @@ func main() {
 
 	incidentConn, err := tools.GetConnection(cfg.GetIncidentServerAddress(), 0, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = incidentConn.Close()
@@ -62,16 +62,16 @@ func main() {
 
 	notificationConn, err := tools.GetConnection(cfg.GetNotificationServerAddress(), 0, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = notificationConn.Close()
 	}()
 	notificicationClient := apiPb.NewNotificationManagerClient(notificationConn)
 
-	log.Fatal(
+	logger.Fatal(
 		router.New(
 			handlers.New(agentServerClient, monitoringClient, storageClient, appMonClient, incidentClient, notificicationClient),
-		).GetEngine().Run(fmt.Sprintf(":%d", cfg.GetPort())),
+		).GetEngine().Run(fmt.Sprintf(":%d", cfg.GetPort())).Error(),
 	)
 }

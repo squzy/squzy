@@ -13,6 +13,8 @@ go_library(
      importpath = "squzy/internal/database/postgres",
      visibility = ["//visibility:public"],
      deps = [
+        "//internal/logger:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
         "@com_github_jinzhu_gorm//:go_default_library",
         "@com_github_jinzhu_gorm//dialects/postgres:go_default_library",
         "@com_github_golang_protobuf//jsonpb:go_default_library",

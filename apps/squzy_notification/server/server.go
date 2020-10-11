@@ -9,6 +9,7 @@ import (
 	"squzy/apps/squzy_notification/database"
 	"squzy/apps/squzy_notification/integrations"
 	"squzy/internal/helpers"
+	"squzy/internal/logger"
 	"time"
 )
 
@@ -93,7 +94,7 @@ func (s *server) Notify(ctx context.Context, request *apiPb.NotifyRequest) (*emp
 			defer cancel()
 			config, err := s.nmDb.Get(c, m.NotificationMethodId)
 			if err != nil {
-				// @TODO log error
+				logger.Error(err.Error())
 				return
 			}
 			if config.Status != apiPb.NotificationMethodStatus_NOTIFICATION_STATUS_ACTIVE {

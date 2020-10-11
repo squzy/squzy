@@ -13,6 +13,7 @@ go_library(
         "//apps/squzy_monitoring/config:go_default_library",
         "//apps/squzy_monitoring/version:go_default_library",
         "//apps/squzy_monitoring/server:go_default_library",
+        "//internal/logger:go_default_library",
         "//internal/job:go_default_library",
         "//internal/semaphore:go_default_library",
         "//internal/scheduler:go_default_library",

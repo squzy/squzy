@@ -8,10 +8,10 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
 	"net"
-	"os"
 	"squzy/apps/squzy_monitoring/server"
 	"squzy/internal/helpers"
 	job_executor "squzy/internal/job-executor"
+	"squzy/internal/logger"
 	"squzy/internal/scheduler"
 	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	scheduler_storage "squzy/internal/scheduler-storage"
@@ -38,23 +38,21 @@ func New(
 func (s *app) SyncOne(config *scheduler_config_storage.SchedulerConfig) error {
 	sched, err := scheduler.New(config.ID, helpers.DurationFromSecond(config.Interval), s.jobExecutor)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf("SchedulerId: %s cant synced, error in config", config.ID.Hex()))
-		// @TODO logger here
+		logger.Errorf("SchedulerId: %s cant synced, error in config", config.ID.Hex())
 		return err
 	}
 	err = s.schedulerStorage.Set(sched)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf("SchedulerId: %s cant synced, error in memory storage", config.ID.Hex()))
-		// @TODO logger here
+		logger.Errorf("SchedulerId: %s cant synced, error in memory storage", config.ID.Hex())
 		return err
 	}
 	if config.Status == apiPb.SchedulerStatus_STOPPED {
-		fmt.Fprintln(os.Stdout, fmt.Sprintf("SchedulerId: %s synced and STOP", config.ID.Hex()))
+		logger.Infof("SchedulerId: %s synced and STOP", config.ID.Hex())
 		return nil
 	}
 	if config.Status == apiPb.SchedulerStatus_RUNNED {
 		sched.Run()
-		fmt.Fprintln(os.Stdout, fmt.Sprintf("SchedulerId: %s synced and RUN", config.ID.Hex()))
+		logger.Infof("SchedulerId: %s synced and RUN", config.ID.Hex())
 	}
 	return nil
 }
@@ -67,7 +65,7 @@ func (s *app) sync() error {
 	for _, config := range configs {
 		_ = s.SyncOne(config)
 	}
-	fmt.Fprintln(os.Stdout, "Sync done")
+	logger.Info("Sync done")
 	return nil
 }
 

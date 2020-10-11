@@ -6,6 +6,7 @@ go_library(
      importpath = "squzy/internal/job-executor",
      visibility = ["//visibility:public"],
      deps = [
+        "//internal/logger:go_default_library",
         "//internal/httptools:go_default_library",
         "//internal/storage:go_default_library",
         "//internal/semaphore:go_default_library",

@@ -8,6 +8,7 @@ go_library(
     visibility = ["//visibility:public"],
     importpath = "squzy/apps/squzy_monitoring/application",
     deps = [
+        "//internal/logger:go_default_library",
         "//apps/squzy_monitoring/server:go_default_library",
         "//internal/helpers:go_default_library",
         "//internal/job-executor:go_default_library",

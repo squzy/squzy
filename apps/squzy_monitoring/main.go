@@ -6,7 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
-	"log"
+	"squzy/internal/logger"
 	"squzy/apps/squzy_monitoring/application"
 	"squzy/apps/squzy_monitoring/config"
 	"squzy/apps/squzy_monitoring/version"
@@ -34,11 +34,11 @@ func main() {
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.GetMongoURI()))
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = client.Disconnect(context.Background())
@@ -76,5 +76,5 @@ func main() {
 		jobExecutor,
 		configStorage,
 	)
-	log.Fatal(app.Run(cfg.GetPort()))
+	logger.Fatal(app.Run(cfg.GetPort()).Error())
 }

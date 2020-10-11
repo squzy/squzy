@@ -1,10 +1,13 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "go_default_library",
-     srcs = ["version.go"],
+    name = "go_default_library",
+    srcs = ["version.go"],
     importpath = "squzy/apps/squzy_monitoring/version",
-     visibility = ["//visibility:public"],
+    visibility = ["//visibility:public"],
+    deps = [
+       "//internal/logger:go_default_library",],
+
 )
 
 go_test(

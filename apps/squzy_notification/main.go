@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
-	"log"
+	"squzy/internal/logger"
 	"squzy/apps/squzy_notification/application"
 	"squzy/apps/squzy_notification/config"
 	"squzy/apps/squzy_notification/database"
@@ -27,24 +27,24 @@ func main() {
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.GetMongoURI()))
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = client.Disconnect(context.Background())
 	}()
 	conn, err := gtools.GetConnection(cfg.GetStorageHost(), 0, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = conn.Close()
 	}()
 	storageClient := apiPb.NewStorageClient(conn)
-	log.Fatal(
+	logger.Fatal(
 		application.New(
 			server.New(
 				database.NewList(mongo_helper.New(client.Database(cfg.GetMongoDB()).Collection(cfg.GetNotificationListCollection()))),
@@ -52,5 +52,5 @@ func main() {
 				storageClient,
 				integrations.New(tools, cfg),
 			),
-		).Run(cfg.GetPort()))
+		).Run(cfg.GetPort()).Error())
 }

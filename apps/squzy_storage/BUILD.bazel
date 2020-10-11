@@ -15,6 +15,7 @@ go_library(
         "//apps/squzy_storage/version:go_default_library",
         "//internal/grpctools:go_default_library",
         "//internal/database:go_default_library",
+        "//internal/logger:go_default_library",
         "@com_github_jinzhu_gorm//:go_default_library",
         "@com_github_gin_gonic_gin//:go_default_library",
         "@com_github_squzy_mongo_helper//:go_default_library",

@@ -10,7 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
-	"log"
 	"squzy/apps/squzy_agent_server/application"
 	"squzy/apps/squzy_agent_server/config"
 	"squzy/apps/squzy_agent_server/database"
@@ -18,6 +17,7 @@ import (
 	_ "squzy/apps/squzy_agent_server/version"
 	"squzy/internal/grpctools"
 	"squzy/internal/helpers"
+	"squzy/internal/logger"
 	"time"
 )
 
@@ -26,7 +26,7 @@ func main() {
 	tools := grpctools.New()
 	conn, err := tools.GetConnection(cfg.GetStorageAddress(), 0, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = conn.Close()
@@ -36,11 +36,11 @@ func main() {
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.GetMongoURI()))
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = client.Disconnect(context.Background())
@@ -51,7 +51,7 @@ func main() {
 	// Before start left setup all agents to unregister
 	unregisterAll(db)
 	app := application.New(server.New(db, storageClient))
-	log.Fatal(app.Run(cfg.GetPort()))
+	logger.Fatal(app.Run(cfg.GetPort()).Error())
 }
 
 func unregisterAll(db database.Database) {

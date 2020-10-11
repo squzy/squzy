@@ -5,9 +5,8 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	logger "log"
-	"os"
 	"squzy/internal/job"
+	"squzy/internal/logger"
 	"time"
 )
 
@@ -16,8 +15,6 @@ type Storage interface {
 }
 
 type memory struct {
-	infoLogger *logger.Logger
-	errLogger  *logger.Logger
 }
 
 func (m *memory) Write(log job.CheckError) error {
@@ -36,7 +33,7 @@ func (m *memory) Write(log job.CheckError) error {
 	}
 
 	if logData.Snapshot.Code == apiPb.SchedulerCode_OK {
-		m.infoLogger.Println(fmt.Sprintf(
+		logger.Info(fmt.Sprintf(
 			"SchedulerId: %s, Value: %s, LogId: %s, Status: Ok, Type: %s, startTime: %s, endTime: %s, duration: %s",
 			logData.SchedulerId,
 			logData.Snapshot.Meta.Value,
@@ -48,7 +45,7 @@ func (m *memory) Write(log job.CheckError) error {
 		))
 		return nil
 	}
-	m.errLogger.Println(fmt.Sprintf(
+	logger.Error(fmt.Sprintf(
 		"SchedulerId: %s, LogId: %s, Error msg: %s, Type: %s, startTime: %s, endTime: %s, duration: %s",
 		logData.SchedulerId,
 		logID,
@@ -63,7 +60,5 @@ func (m *memory) Write(log job.CheckError) error {
 
 func GetInMemoryStorage() Storage {
 	return &memory{
-		infoLogger: logger.New(os.Stdout, "INFO: ", logger.Ldate|logger.Ltime),
-		errLogger:  logger.New(os.Stderr, "ERROR: ", logger.Ldate|logger.Ltime),
 	}
 }

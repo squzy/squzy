@@ -5,7 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
-	"log"
+	"squzy/internal/logger"
 	"squzy/apps/squzy_storage/application"
 	"squzy/apps/squzy_storage/config"
 	"squzy/apps/squzy_storage/server"
@@ -28,19 +28,19 @@ func main() {
 		))
 
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 
 	db := database.New(postgresDb.LogMode(cfg.WithDbLogs()))
 
 	err = db.Migrate()
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 
 	incidentConn, err := tools.GetConnection(cfg.GetIncidentServerAddress(), 0, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = incidentConn.Close()
@@ -49,5 +49,5 @@ func main() {
 
 	apiService := server.NewServer(db, incidentClient, cfg)
 	storageServ := application.NewApplication(cfg, apiService)
-	log.Fatal(storageServ.Run())
+	logger.Fatal(storageServ.Run().Error())
 }
