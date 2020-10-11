@@ -29,16 +29,16 @@ func init() {
 	}
 
 	highPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		return lvl <= getLevel() && lvl >= zapcore.ErrorLevel
+		return lvl >= zapcore.ErrorLevel
 	})
 	lowPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		return lvl < zapcore.ErrorLevel
+		return lvl >= getLevel() && lvl < zapcore.ErrorLevel
 	})
 
 	var core zapcore.Core
-	if getLevel() < zap.ErrorLevel {
+	if getLevel() >= zap.ErrorLevel {
 		core = zapcore.NewTee(
-			zapcore.NewCore(zapcore.NewConsoleEncoder(encoderConfig), zapcore.Lock(os.Stdout), getLevel()),
+			zapcore.NewCore(zapcore.NewConsoleEncoder(encoderConfig), zapcore.Lock(os.Stderr), getLevel()),
 		)
 	} else {
 		core = zapcore.NewTee(
