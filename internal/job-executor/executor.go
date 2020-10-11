@@ -55,11 +55,11 @@ type executor struct {
 func (e *executor) Execute(schedulerID primitive.ObjectID) {
 	config, err := e.configStorage.Get(context.Background(), schedulerID)
 	if err != nil || config == nil {
+		msg := schedulerID.Hex()
 		if err != nil {
-			logger.Error(err.Error())
-		} else {
-			logger.Errorf("No config for schedulerID: %s", schedulerID)
+			msg += err.Error()
 		}
+		logger.Errorf("Could not get config for schedulerID: %s", msg)
 		return
 	}
 	id := schedulerID.Hex()

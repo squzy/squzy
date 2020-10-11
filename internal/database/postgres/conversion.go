@@ -24,9 +24,7 @@ func ConvertFromPostgresSnapshots(snapshots []*Snapshot) []*apiPb.SchedulerSnaps
 		if err == nil {
 			res = append(res, snap)
 		}
-		if err != nil {
-			logger.Error(err.Error())
-		}
+		//TODO: log if error
 	}
 	return res
 }
@@ -54,9 +52,7 @@ func ConvertFromPostgressStatRequests(data []*StatRequest) []*apiPb.GetAgentInfo
 		if err == nil {
 			res = append(res, stat)
 		}
-		if err != nil {
-			logger.Error(err.Error())
-		}
+		//TODO: log if error
 	}
 	return res
 }
