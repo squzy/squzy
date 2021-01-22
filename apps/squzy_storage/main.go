@@ -5,13 +5,13 @@ import (
 	"github.com/jinzhu/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
-	"squzy/internal/logger"
 	"squzy/apps/squzy_storage/application"
 	"squzy/apps/squzy_storage/config"
 	"squzy/apps/squzy_storage/server"
 	_ "squzy/apps/squzy_storage/version"
 	"squzy/internal/database"
 	"squzy/internal/grpctools"
+	"squzy/internal/logger"
 )
 
 func main() {

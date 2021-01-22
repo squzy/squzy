@@ -191,6 +191,8 @@ github.com/squzy/mongo_helper v0.0.0-20200713232419-037a870c9d06 h1:NL6hCxYRb9Y2
 github.com/squzy/mongo_helper v0.0.0-20200713232419-037a870c9d06/go.mod h1:huDC/gEH+DyCTxygdxFmrdnbBSG7XiB2/fAhTelX0ro=
 github.com/squzy/squzy_generated v1.10.0 h1:Gj5IMIgnUqtQpBFESFZ8LZSyFMc7jvDMtbS9sG4bvc4=
 github.com/squzy/squzy_generated v1.10.0/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.10.1-0.20210122221402-f17b18982262 h1:WSsCVIIYULoBybCyaXoiDIShqRqzIw74xa/9bslrEZ4=
+github.com/squzy/squzy_generated v1.10.1-0.20210122221402-f17b18982262/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

@@ -19,6 +19,12 @@ type HTTPExecutor func(schedulerId string,
 	config *scheduler_config_storage.HTTPConfig,
 	httpTool httptools.HTTPTool) job.CheckError
 
+type SSLExpirationExecutor func(
+	schedulerId string,
+	timeout int32,
+	config *scheduler_config_storage.SslExpirationConfig,
+) job.CheckError
+
 type GrpcExecutor func(schedulerId string,
 	timeout int32,
 	config *scheduler_config_storage.GrpcConfig,
@@ -50,6 +56,7 @@ type executor struct {
 	execHTTP           HTTPExecutor
 	execSiteMap        SiteMapExecutor
 	execHTTPValue      HTTPValueExecutor
+	execSSLExpiration  SSLExpirationExecutor
 }
 
 func (e *executor) Execute(schedulerID primitive.ObjectID) {
@@ -79,6 +86,9 @@ func (e *executor) Execute(schedulerID primitive.ObjectID) {
 	case apiPb.SchedulerType_HTTP_JSON_VALUE:
 		_ = e.externalStorage.Write(e.execHTTPValue(id, config.Timeout, config.HTTPValueConfig, e.httpTool))
 		logger.Infof("HTTP JSON job executed is used for scheduler id %s", schedulerID)
+	case apiPb.SchedulerType_SSL_EXPIRATION:
+		_ = e.externalStorage.Write(e.execSSLExpiration(id, config.Timeout, config.SslExpirationConfig))
+		logger.Infof("SSL Expiration job executed is used for scheduler id %s", schedulerID)
 	default:
 		logger.Errorf("Incorrect config type passed to job executor: %s", config.Type)
 	}
@@ -99,6 +109,7 @@ func NewExecutor(
 	execHTTP HTTPExecutor,
 	execSiteMap SiteMapExecutor,
 	execHTTPValue HTTPValueExecutor,
+	execSSLExpiration SSLExpirationExecutor,
 ) JobExecutor {
 	return &executor{
 		externalStorage:    externalStorage,
@@ -111,5 +122,6 @@ func NewExecutor(
 		execHTTP:           execHTTP,
 		execSiteMap:        execSiteMap,
 		execHTTPValue:      execHTTPValue,
+		execSSLExpiration:  execSSLExpiration,
 	}
 }

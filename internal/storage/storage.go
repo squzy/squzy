@@ -59,6 +59,5 @@ func (m *memory) Write(log job.CheckError) error {
 }
 
 func GetInMemoryStorage() Storage {
-	return &memory{
-	}
+	return &memory{}
 }
