@@ -123,10 +123,36 @@ func TestExpressionStruct_getSnapshotEnv(t *testing.T) {
 		res, err := exprCorr.ProcessRule(
 			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
 			"12345",
-			"durationToSecond(Week) > 0 && durationToSecond(Day) > 0 && durationToSecond(Hour) > 0 && durationToSecond(Second) > 0 && durationToSecond(Minute) > 0")
+			"durationLess(mulDuration(4, Week), mulDuration(5, Week))")
 		assert.True(t, res)
 		assert.Nil(t, err)
 	})
 
+	t.Run("Should: no panic", func(t *testing.T) {
+		res, err := exprCorr.ProcessRule(
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
+			"12345",
+			"durationMore(mulDuration(5, Week), mulDuration(4, Week))")
+		assert.True(t, res)
+		assert.Nil(t, err)
+	})
+
+	t.Run("Should: no panic", func(t *testing.T) {
+		res, err := exprCorr.ProcessRule(
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
+			"12345",
+			"durationEqual(mulDuration(4, Week), mulDuration(4, Week))")
+		assert.True(t, res)
+		assert.Nil(t, err)
+	})
+
+	t.Run("Should: no panic", func(t *testing.T) {
+		res, err := exprCorr.ProcessRule(
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
+			"12345",
+			"durationToSecond(Week) > 0 && durationToSecond(Day) > 0 && durationToSecond(Hour) > 0 && durationToSecond(Second) > 0 && durationToSecond(Minute) > 0")
+		assert.True(t, res)
+		assert.Nil(t, err)
+	})
 
 }

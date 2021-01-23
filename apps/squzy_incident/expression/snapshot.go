@@ -97,10 +97,19 @@ func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interfa
 		"timeDiff": func(t1, t2 time.Time) time.Duration {
 			return t1.Sub(t2)
 		},
+		"durationLess": func(d1, d2 time.Duration) bool {
+			return d1 < d2
+		},
+		"durationMore": func(d1, d2 time.Duration) bool {
+			return d1 > d2
+		},
+		"durationEqual": func(d1, d2 time.Duration) bool {
+			return d1 == d2
+		},
 		"durationToSecond": func(d time.Duration) int64 {
 			return int64(d.Seconds())
 		},
-		"NowTime": func () time.Time {
+		"NowTime": func() time.Time {
 			return time.Now()
 		},
 		"float64ToInt64": func(v float64) int64 {
@@ -116,9 +125,12 @@ func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interfa
 			return time.Unix(0, unixNano)
 		},
 		"null": nil,
-		"Week": time.Hour * 24 * 7,
-		"Day": time.Hour * 24,
-		"Hour": time.Hour,
+		"mulDuration": func(f int, t time.Duration) time.Duration {
+			return time.Duration(f) * t
+		},
+		"Week":   time.Hour * 24 * 7,
+		"Day":    time.Hour * 24,
+		"Hour":   time.Hour,
 		"Minute": time.Minute,
 		"Second": time.Second,
 		//Transaction status keys

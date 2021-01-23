@@ -37,9 +37,7 @@ func (m mockStorage) GetSchedulerInformation(ctx context.Context, in *apiPb.GetS
 				Meta: &apiPb.SchedulerSnapshot_MetaData{
 					StartTime: ptypes.TimestampNow(),
 					EndTime:   ptypes.TimestampNow(),
-					Value: &structpb.Value{
-
-					},
+					Value:     &structpb.Value{},
 				},
 			},
 		},
