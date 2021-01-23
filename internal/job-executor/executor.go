@@ -2,6 +2,7 @@ package job_executor
 
 import (
 	"context"
+	"crypto/tls"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
@@ -23,6 +24,7 @@ type SSLExpirationExecutor func(
 	schedulerId string,
 	timeout int32,
 	config *scheduler_config_storage.SslExpirationConfig,
+	cfg *tls.Config,
 ) job.CheckError
 
 type GrpcExecutor func(schedulerId string,
@@ -87,7 +89,7 @@ func (e *executor) Execute(schedulerID primitive.ObjectID) {
 		_ = e.externalStorage.Write(e.execHTTPValue(id, config.Timeout, config.HTTPValueConfig, e.httpTool))
 		logger.Infof("HTTP JSON job executed is used for scheduler id %s", schedulerID)
 	case apiPb.SchedulerType_SSL_EXPIRATION:
-		_ = e.externalStorage.Write(e.execSSLExpiration(id, config.Timeout, config.SslExpirationConfig))
+		_ = e.externalStorage.Write(e.execSSLExpiration(id, config.Timeout, config.SslExpirationConfig, nil))
 		logger.Infof("SSL Expiration job executed is used for scheduler id %s", schedulerID)
 	default:
 		logger.Errorf("Incorrect config type passed to job executor: %s", config.Type)
