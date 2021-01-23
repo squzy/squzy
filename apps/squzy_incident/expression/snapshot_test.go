@@ -1,9 +1,11 @@
 package expression
 
 import (
+	"fmt"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
 func TestExpressionStruct_GetSnapshots(t *testing.T) {
@@ -54,8 +56,77 @@ func TestExpressionStruct_getSnapshotEnv(t *testing.T) {
 		res, err := exprCorr.ProcessRule(
 			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
 			"12345",
-			`len(Index(1, UseTimeTo("3/1/2021"), UseCode(Ok))) == 1`)
+			`Index(1, UseTimeTo("3/1/2021"), UseCode(Ok)) != null`)
 		assert.True(t, res)
 		assert.Nil(t, err)
 	})
+	//UnixNanoNow
+	t.Run("Should: no panic", func(t *testing.T) {
+		res, err := exprCorr.ProcessRule(
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
+			"12345",
+			`UnixNanoNow() - 1 > 0`)
+		assert.True(t, res)
+		assert.Nil(t, err)
+	})
+	// NowTime
+	t.Run("Should: no panic", func(t *testing.T) {
+		year := time.Now().Year()
+		res, err := exprCorr.ProcessRule(
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
+			"12345",
+			fmt.Sprintf("NowTime().Year() == %d", year))
+		assert.True(t, res)
+		assert.Nil(t, err)
+	})
+
+	//timeDiff
+	t.Run("Should: no panic", func(t *testing.T) {
+		res, err := exprCorr.ProcessRule(
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
+			"12345",
+			"durationToSecond(timeDiff(unixToTime(1611413752308 * 1000), unixToTime(1611413752308 * 1000))) == 0")
+		assert.True(t, res)
+		assert.Nil(t, err)
+	})
+	//timeDiff
+	t.Run("Should: no panic", func(t *testing.T) {
+		res, err := exprCorr.ProcessRule(
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
+			"12345",
+			"durationToSecond(timeDiff(unixNanoToTime(1611413752308 * 1000), unixNanoToTime(1611413752308 * 1000))) == 0")
+		assert.True(t, res)
+		assert.Nil(t, err)
+	})
+	// float64ToInt64
+	t.Run("Should: no panic", func(t *testing.T) {
+		res, err := exprCorr.ProcessRule(
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
+			"12345",
+			"float64ToInt64(0.0) == 0")
+		assert.True(t, res)
+		assert.Nil(t, err)
+	})
+
+	// getValue
+
+	t.Run("Should: no panic", func(t *testing.T) {
+		res, err := exprCorr.ProcessRule(
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
+			"12345",
+			"getValue(Index(1)) != null")
+		assert.True(t, res)
+		assert.Nil(t, err)
+	})
+
+	t.Run("Should: no panic", func(t *testing.T) {
+		res, err := exprCorr.ProcessRule(
+			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_SCHEDULER,
+			"12345",
+			"durationToSecond(Week) > 0 && durationToSecond(Day) > 0 && durationToSecond(Hour) > 0 && durationToSecond(Second) > 0 && durationToSecond(Minute) > 0")
+		assert.True(t, res)
+		assert.Nil(t, err)
+	})
+
+
 }
