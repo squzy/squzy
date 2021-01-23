@@ -21,6 +21,7 @@ High perfomance health check system
 3) GRPC - https://github.com/grpc/grpc/blob/master/doc/health-checking.md
 4) SiteMap.xml - https://www.sitemaps.org/protocol.html
 5) Value from http response by selectors(https://github.com/tidwall/gjson)
+6) SSL Expiration - validate expiration date
 
 ### [Squzy Agents](https://github.com/squzy/squzy/tree/develop/apps/agent_client)
 
