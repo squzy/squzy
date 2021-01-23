@@ -189,14 +189,8 @@ github.com/spf13/cobra v0.0.3/go.mod h1:1l0Ry5zgKvJasoi3XT1TypsSe7PqH0Sj9dhYf7v3
 github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
 github.com/squzy/mongo_helper v0.0.0-20200713232419-037a870c9d06 h1:NL6hCxYRb9Y24COaTkwklWcQjZTlsPoGKw/yd60KFiM=
 github.com/squzy/mongo_helper v0.0.0-20200713232419-037a870c9d06/go.mod h1:huDC/gEH+DyCTxygdxFmrdnbBSG7XiB2/fAhTelX0ro=
-github.com/squzy/squzy_generated v1.10.0 h1:Gj5IMIgnUqtQpBFESFZ8LZSyFMc7jvDMtbS9sG4bvc4=
-github.com/squzy/squzy_generated v1.10.0/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
-github.com/squzy/squzy_generated v1.10.1-0.20210122221402-f17b18982262 h1:WSsCVIIYULoBybCyaXoiDIShqRqzIw74xa/9bslrEZ4=
-github.com/squzy/squzy_generated v1.10.1-0.20210122221402-f17b18982262/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
-github.com/squzy/squzy_generated v1.10.1-0.20210123063555-db27fbf60922 h1:Q57rbjMeYhBzmu95R0TDGWrtMTJMQ9LiJOq/smArQXw=
-github.com/squzy/squzy_generated v1.10.1-0.20210123063555-db27fbf60922/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
-github.com/squzy/squzy_generated v1.10.1-0.20210123112331-b8a56c561123 h1:n+q5HIiJv3r1mUWFnKEWm9FugxdmOK3ts/Vt17vOBes=
-github.com/squzy/squzy_generated v1.10.1-0.20210123112331-b8a56c561123/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
+github.com/squzy/squzy_generated v1.11.0 h1:IEBpNzW/9/NU5bE2U/ugfEXT/hzRWLKS+5ItQvPlTyY=
+github.com/squzy/squzy_generated v1.11.0/go.mod h1:VVJE2MYsmy/GIEjGt+8UsM6DNDA5mp0+2Uhri7A5fco=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
