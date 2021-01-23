@@ -16,6 +16,7 @@ type GrpcConfig struct {
 
 type SslExpirationConfig struct {
 	Host string `bson:"host"`
+	Port int32  `bson:"port"`
 }
 
 type HTTPConfig struct {

@@ -3,6 +3,7 @@ package job
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	structType "github.com/golang/protobuf/ptypes/struct"
 	"github.com/golang/protobuf/ptypes/timestamp"
@@ -61,7 +62,7 @@ func newSSLError(schedulerID string, startTime *timestamp.Timestamp, endTime *ti
 func ExecSSL(schedulerID string, timeout int32, config *scheduler_config_storage.SslExpirationConfig) CheckError {
 	startTime := ptypes.TimestampNow()
 
-	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: helpers.DurationFromSecond(timeout)}, "tcp", config.Host, nil)
+	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: helpers.DurationFromSecond(timeout)}, "tcp", net.JoinHostPort(config.Host, fmt.Sprintf("%d", config.Port)), nil)
 
 	if err != nil {
 		return newSSLError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, err.Error(), nil)
