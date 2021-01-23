@@ -17,6 +17,7 @@ go_library(
              "@com_github_golang_protobuf//ptypes/wrappers:go_default_library",
              "@com_github_antonmedv_expr//:go_default_library",
              "@com_github_araddon_dateparse//:go_default_library",
+             "@com_github_golang_protobuf//ptypes/struct:go_default_library",
      ]
 )
 

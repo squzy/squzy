@@ -6,6 +6,7 @@ import (
 	"github.com/araddon/dateparse"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
+	structpb "github.com/golang/protobuf/ptypes/struct"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
@@ -36,6 +37,7 @@ func (m mockStorage) GetSchedulerInformation(ctx context.Context, in *apiPb.GetS
 				Meta: &apiPb.SchedulerSnapshot_MetaData{
 					StartTime: ptypes.TimestampNow(),
 					EndTime:   ptypes.TimestampNow(),
+					Value:     &structpb.Value{},
 				},
 			},
 		},

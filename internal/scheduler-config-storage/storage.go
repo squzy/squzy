@@ -14,6 +14,11 @@ type GrpcConfig struct {
 	Port    int32  `bson:"port"`
 }
 
+type SslExpirationConfig struct {
+	Host string `bson:"host"`
+	Port int32  `bson:"port"`
+}
+
 type HTTPConfig struct {
 	Method     string            `bson:"string"`
 	URL        string            `bson:"url"`
@@ -44,17 +49,18 @@ type SiteMapConfig struct {
 }
 
 type SchedulerConfig struct {
-	ID              primitive.ObjectID    `bson:"_id"`
-	Name            string                `bson:"name,omitempty"`
-	Type            apiPb.SchedulerType   `bson:"type"`
-	Status          apiPb.SchedulerStatus `bson:"status"`
-	Interval        int32                 `bson:"interval"`
-	Timeout         int32                 `bson:"timeout"`
-	TCPConfig       *TCPConfig            `bson:"tcpConfig,omitempty"`
-	SiteMapConfig   *SiteMapConfig        `bson:"siteMapConfig,omitempty"`
-	GrpcConfig      *GrpcConfig           `bson:"grpcConfig,omitempty"`
-	HTTPConfig      *HTTPConfig           `bson:"httpConfig,omitempty"`
-	HTTPValueConfig *HTTPValueConfig      `bson:"httpValueConfig,omitempty"`
+	ID                  primitive.ObjectID    `bson:"_id"`
+	Name                string                `bson:"name,omitempty"`
+	Type                apiPb.SchedulerType   `bson:"type"`
+	Status              apiPb.SchedulerStatus `bson:"status"`
+	Interval            int32                 `bson:"interval"`
+	Timeout             int32                 `bson:"timeout"`
+	TCPConfig           *TCPConfig            `bson:"tcpConfig,omitempty"`
+	SiteMapConfig       *SiteMapConfig        `bson:"siteMapConfig,omitempty"`
+	GrpcConfig          *GrpcConfig           `bson:"grpcConfig,omitempty"`
+	HTTPConfig          *HTTPConfig           `bson:"httpConfig,omitempty"`
+	HTTPValueConfig     *HTTPValueConfig      `bson:"httpValueConfig,omitempty"`
+	SslExpirationConfig *SslExpirationConfig  `bson:"sslExpirationConfig,omitempty"`
 }
 
 type Storage interface {

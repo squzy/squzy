@@ -54,7 +54,7 @@ func TestExpressionStruct_getTransactionEnv(t *testing.T) {
 		res, err := exprCorr.ProcessRule(
 			apiPb.ComponentOwnerType_COMPONENT_OWNER_TYPE_APPLICATION,
 			"12345",
-			`len(Index(1, UseType(DB), UseStatus(Success), UseHost("host"), UseName("name"), UsePath("path"), UseMethod("method"))) == 1`)
+			`Index(1, UseType(DB), UseStatus(Success), UseHost("host"), UseName("name"), UsePath("path"), UseMethod("method")).Type == DB`)
 		assert.True(t, res)
 		assert.Nil(t, err)
 	})

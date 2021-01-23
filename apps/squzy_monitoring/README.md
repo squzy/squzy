@@ -12,6 +12,7 @@ System allows monitoring resources with different type of check. It uses MONGO f
 3) GRPC - https://github.com/grpc/grpc/blob/master/doc/health-checking.md
 4) SiteMap.xml - https://www.sitemaps.org/protocol.html
 5) Value from http response by selectors(https://github.com/tidwall/gjson)
+6) SSL Expiration - monitoring when SSL cert is over
 
 # Usage
 
@@ -58,6 +59,21 @@ Check good use for monitoring open ports or not
   "interval": 10, - 10 second interval
   "timeout": 5, - // default timeout is 10 sec
   "tcp": {
+    "host": "localhost", - host
+    "port": 6345 - port
+  },
+}
+```
+
+### SSL Expiration check:
+
+Check can be used for validate SSL cert
+
+```shell script
+{
+  "interval": 10, - 10 second interval
+  "timeout": 5, - // default timeout is 10 sec
+  "ssl_expiration": {
     "host": "localhost", - host
     "port": 6345 - port
   },

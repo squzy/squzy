@@ -17,7 +17,7 @@ require (
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/slack-go/slack v0.6.5
 	github.com/squzy/mongo_helper v0.0.0-20200713232419-037a870c9d06
-	github.com/squzy/squzy_generated v1.10.0
+	github.com/squzy/squzy_generated v1.11.0
 	github.com/stretchr/testify v1.5.1
 	github.com/tidwall/gjson v1.6.0
 	go.mongodb.org/mongo-driver v1.3.2

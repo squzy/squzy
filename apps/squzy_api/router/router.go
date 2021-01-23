@@ -133,15 +133,16 @@ type ListRulesByOwnerIdRequest struct {
 }
 
 type Scheduler struct {
-	Type            apiPb.SchedulerType        `json:"type"`
-	Interval        int32                      `json:"interval" binding:"required"`
-	Timeout         int32                      `json:"timeout"`
-	Name            string                     `json:"name"`
-	HTTPConfig      *apiPb.HttpConfig          `json:"httpConfig,omitempty"`
-	TCPConfig       *apiPb.TcpConfig           `json:"tcpConfig,omitempty"`
-	HTTPValueConfig *apiPb.HttpJsonValueConfig `json:"httpValueConfig,omitempty"`
-	GRPCConfig      *apiPb.GrpcConfig          `json:"grpcConfig,omitempty"`
-	SiteMapConfig   *apiPb.SiteMapConfig       `json:"siteMapConfig,omitempty"`
+	Type                apiPb.SchedulerType        `json:"type"`
+	Interval            int32                      `json:"interval" binding:"required"`
+	Timeout             int32                      `json:"timeout"`
+	Name                string                     `json:"name"`
+	HTTPConfig          *apiPb.HttpConfig          `json:"httpConfig,omitempty"`
+	TCPConfig           *apiPb.TcpConfig           `json:"tcpConfig,omitempty"`
+	HTTPValueConfig     *apiPb.HttpJsonValueConfig `json:"httpValueConfig,omitempty"`
+	GRPCConfig          *apiPb.GrpcConfig          `json:"grpcConfig,omitempty"`
+	SiteMapConfig       *apiPb.SiteMapConfig       `json:"siteMapConfig,omitempty"`
+	SSLExpirationConfig *apiPb.SslExpirationConfig `json:"sslExpirationConfig,omitempty"`
 }
 
 type Application struct {
@@ -817,7 +818,16 @@ func (r *router) GetEngine() *gin.Engine {
 							Tcp: request.TCPConfig,
 						},
 					}
-
+				case apiPb.SchedulerType_SSL_EXPIRATION:
+					if request.SSLExpirationConfig == nil {
+						errWrap(context, http.StatusUnprocessableEntity, errMissingConfig)
+						return
+					}
+					addReq = &apiPb.AddRequest{
+						Config: &apiPb.AddRequest_SslExpiration{
+							SslExpiration: request.SSLExpirationConfig,
+						},
+					}
 				case apiPb.SchedulerType_GRPC:
 					if request.GRPCConfig == nil {
 						errWrap(context, http.StatusUnprocessableEntity, errMissingConfig)

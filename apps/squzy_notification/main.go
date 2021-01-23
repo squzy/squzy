@@ -7,7 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
-	"squzy/internal/logger"
 	"squzy/apps/squzy_notification/application"
 	"squzy/apps/squzy_notification/config"
 	"squzy/apps/squzy_notification/database"
@@ -17,6 +16,7 @@ import (
 	"squzy/internal/grpctools"
 	"squzy/internal/helpers"
 	"squzy/internal/httptools"
+	"squzy/internal/logger"
 )
 
 func main() {

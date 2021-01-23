@@ -25,6 +25,18 @@ var (
 		},
 	}
 
+	successSSLConfig = &scheduler_config_storage.SchedulerConfig{
+		ID:       primitive.NewObjectID(),
+		Type:     apiPb.SchedulerType_SSL_EXPIRATION,
+		Status:   0,
+		Interval: 0,
+		Timeout:  0,
+		SslExpirationConfig: &scheduler_config_storage.SslExpirationConfig{
+			Host: "",
+			Port: 0,
+		},
+	}
+
 	successHttpConfig = &scheduler_config_storage.SchedulerConfig{
 		ID:       primitive.NewObjectID(),
 		Type:     apiPb.SchedulerType_HTTP,
@@ -92,6 +104,7 @@ var (
 		successHttpConfig.ID:      successHttpConfig,
 		successHttpValueConfig.ID: successHttpValueConfig,
 		successSiteMapConfig.ID:   successSiteMapConfig,
+		successSSLConfig.ID:       successSSLConfig,
 		errorConfig.ID:            errorConfig,
 	}
 
@@ -151,6 +164,16 @@ var (
 					Service: "",
 					Host:    "",
 					Port:    0,
+				},
+			},
+		},
+		apiPb.SchedulerType_SSL_EXPIRATION: {
+			Interval: 10,
+			Timeout:  0,
+			Config: &apiPb.AddRequest_SslExpiration{
+				SslExpiration: &apiPb.SslExpirationConfig{
+					Host: "",
+					Port: 0,
 				},
 			},
 		},
@@ -353,6 +376,13 @@ func TestServer_GetSchedulerById(t *testing.T) {
 		})
 		assert.Equal(t, nil, err)
 	})
+	t.Run("Should: return ssl config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{})
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successSSLConfig.ID.Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
 	t.Run("Should: return grpc config", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageOk{})
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
@@ -511,6 +541,11 @@ func TestServer_Add(t *testing.T) {
 	t.Run("Should: add tcp check without error", func(t *testing.T) {
 		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
 		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_TCP])
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: add ssl check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_SSL_EXPIRATION])
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: add grcp check without error", func(t *testing.T) {

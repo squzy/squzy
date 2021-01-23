@@ -18,3 +18,4 @@ bazel-*
 bin
 .DS_Store
 main
+test.go

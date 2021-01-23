@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	ENV_SQUZY_LOG_LEVEL         = "SQUZY_AGENT_INTERVAL"
+	ENV_SQUZY_LOG_LEVEL = "SQUZY_AGENT_INTERVAL"
 )
 
 type Config interface {
@@ -13,7 +13,7 @@ type Config interface {
 }
 
 type cfg struct {
-	logLevel             string
+	logLevel string
 }
 
 func (c *cfg) GetLogLevel() string {
@@ -22,6 +22,6 @@ func (c *cfg) GetLogLevel() string {
 
 func New() Config {
 	return &cfg{
-		logLevel:             os.Getenv(ENV_SQUZY_LOG_LEVEL),
+		logLevel: os.Getenv(ENV_SQUZY_LOG_LEVEL),
 	}
 }
