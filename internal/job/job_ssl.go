@@ -2,7 +2,6 @@ package job
 
 import (
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	structType "github.com/golang/protobuf/ptypes/struct"
@@ -11,10 +10,6 @@ import (
 	"net"
 	"squzy/internal/helpers"
 	scheduler_config_storage "squzy/internal/scheduler-config-storage"
-)
-
-var (
-	noSSLCertErr = errors.New("host haven't ssl certificate")
 )
 
 type sslError struct {
@@ -59,10 +54,10 @@ func newSSLError(schedulerID string, startTime *timestamp.Timestamp, endTime *ti
 	}
 }
 
-func ExecSSL(schedulerID string, timeout int32, config *scheduler_config_storage.SslExpirationConfig) CheckError {
+func ExecSSL(schedulerID string, timeout int32, config *scheduler_config_storage.SslExpirationConfig, cfg *tls.Config) CheckError {
 	startTime := ptypes.TimestampNow()
 
-	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: helpers.DurationFromSecond(timeout)}, "tcp", net.JoinHostPort(config.Host, fmt.Sprintf("%d", config.Port)), nil)
+	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: helpers.DurationFromSecond(timeout)}, "tcp", net.JoinHostPort(config.Host, fmt.Sprintf("%d", config.Port)), cfg)
 
 	if err != nil {
 		return newSSLError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, err.Error(), nil)
@@ -72,19 +67,11 @@ func ExecSSL(schedulerID string, timeout int32, config *scheduler_config_storage
 		_ = conn.Close()
 	}()
 
-	chains := conn.ConnectionState().VerifiedChains
+	crt := conn.ConnectionState().PeerCertificates[0]
 
-	for _, chain := range chains {
-		for _, crt := range chain {
-			if !crt.IsCA {
-				return newSSLError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_OK, "", &structType.Value{
-					Kind: &structType.Value_NumberValue{
-						NumberValue: float64(crt.NotAfter.UnixNano()),
-					},
-				})
-			}
-		}
-	}
-
-	return newSSLError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, noSSLCertErr.Error(), nil)
+	return newSSLError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_OK, "", &structType.Value{
+		Kind: &structType.Value_NumberValue{
+			NumberValue: float64(crt.NotAfter.UnixNano()),
+		},
+	})
 }
