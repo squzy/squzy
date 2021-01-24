@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	ENV_SQUZY_LOG_LEVEL = "SQUZY_AGENT_INTERVAL"
+	ENV_SQUZY_LOG_LEVEL = "LOG_LEVEL"
 )
 
 type Config interface {
