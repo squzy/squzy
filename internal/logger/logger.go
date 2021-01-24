@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"squzy/internal/logger/config"
+	"time"
 )
 
 var (
@@ -23,7 +24,10 @@ func init() {
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
 		EncodeLevel:    zapcore.LowercaseLevelEncoder,
-		EncodeTime:     zapcore.EpochTimeEncoder,
+		EncodeTime:     zapcore.TimeEncoder(func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+			enc.AppendString(t.UTC().Format("2006-01-02T15:04:05Z0700"))
+			// 2019-08-13T04:39:11Z
+		}),
 		EncodeDuration: zapcore.SecondsDurationEncoder,
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
