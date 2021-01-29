@@ -22,6 +22,13 @@ func GetPortByURL(url string) int32 {
 	return httpPort
 }
 
+func DurationNotNegative(seconds int32) time.Duration {
+	if seconds <=0 {
+		return defaultTimeoutDuration
+	}
+	return DurationFromSecond(seconds)
+}
+
 func DurationFromSecond(seconds int32) time.Duration {
 	return time.Duration(seconds) * time.Second
 }

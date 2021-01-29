@@ -57,7 +57,7 @@ func newSSLError(schedulerID string, startTime *timestamp.Timestamp, endTime *ti
 func ExecSSL(schedulerID string, timeout int32, config *scheduler_config_storage.SslExpirationConfig, cfg *tls.Config) CheckError {
 	startTime := ptypes.TimestampNow()
 
-	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: helpers.DurationFromSecond(timeout)}, "tcp", net.JoinHostPort(config.Host, fmt.Sprintf("%d", config.Port)), cfg)
+	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: helpers.DurationNotNegative(timeout)}, "tcp", net.JoinHostPort(config.Host, fmt.Sprintf("%d", config.Port)), cfg)
 
 	if err != nil {
 		return newSSLError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, err.Error(), nil)
