@@ -24,6 +24,16 @@ func TestDurationFromSecond(t *testing.T) {
 	})
 }
 
+func TestDurationNotNegative(t *testing.T) {
+	t.Run("Should: be equal", func(t *testing.T) {
+		assert.Equal(t, time.Second*5, DurationNotNegative(5))
+	})
+
+	t.Run("Should: be default", func(t *testing.T) {
+		assert.Equal(t, defaultTimeoutDuration, DurationNotNegative(-5))
+	})
+}
+
 func TestTimeoutContext(t *testing.T) {
 	t.Run("Should: create context with timeout", func(t *testing.T) {
 		ctx, cancel := TimeoutContext(context.Background(), time.Second)
