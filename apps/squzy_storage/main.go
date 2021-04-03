@@ -1,37 +1,34 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
-	"github.com/jinzhu/gorm"
+	_ "github.com/ClickHouse/clickhouse-go"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
-	"squzy/internal/logger"
 	"squzy/apps/squzy_storage/application"
 	"squzy/apps/squzy_storage/config"
 	"squzy/apps/squzy_storage/server"
 	_ "squzy/apps/squzy_storage/version"
 	"squzy/internal/database"
 	"squzy/internal/grpctools"
+	"squzy/internal/logger"
 )
 
 func main() {
 	tools := grpctools.New()
 	cfg := config.New()
-	postgresDb, err := gorm.Open(
-		"postgres",
-		fmt.Sprintf("host=%s port=%s dbname=%s user=%s  password=%s connect_timeout=10 sslmode=disable",
-			cfg.GetDbHost(),
-			cfg.GetDbPort(),
-			cfg.GetDbName(),
-			cfg.GetDbUser(),
-			cfg.GetDbPassword(),
-		))
-
+	connect, err := sql.Open("clickhouse", fmt.Sprintf("tcp://%s:%s?username=%s&password=%s&database=%s&read_timeout=10&write_timeout=20",
+		cfg.GetDbHost(),
+		cfg.GetDbPort(),
+		cfg.GetDbUser(),
+		cfg.GetDbPassword(),
+		cfg.GetDbName(),
+	))
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
-
-	db := database.New(postgresDb.LogMode(cfg.WithDbLogs()))
+	db := database.New(connect)
 
 	err = db.Migrate()
 	if err != nil {

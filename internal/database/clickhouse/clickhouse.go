@@ -3,8 +3,9 @@ package clickhouse
 import (
 	"database/sql"
 	"errors"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/golang/protobuf/ptypes"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"time"
 )
 
 type Clickhouse struct {
@@ -27,73 +28,90 @@ var (
 	}
 )
 
+type Model struct {
+	ID        string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 func (c *Clickhouse) Migrate() error {
 	_, err := c.Db.Exec(`
-			CREATE TABLE IF NOT EXISTS snapshot (
-				SchedulerId String,
-				Code Int32,
-				Type        Int32,
-				Error   String,
-				MetaStartTime   Int64,
-				MetaEndTime   Int64,
-				MetaValue  Array(Int8)
-			)
+			CREATE TABLE IF NOT EXISTS snapshots (
+				id UUID,
+				created_at DateTime,
+				updated_at DateTime,
+				scheduler_id String,
+				code Int32,
+				type        Int32,
+				error   String,
+				meta_start_time   Int64,
+				meta_end_time   Int64,
+				meta_value  Array(Int8)
+			) ENGINE = MergeTree ORDER BY tuple()
 		`)
 	if err != nil {
 		return err
 	}
 
 	_, err = c.Db.Exec(`
-			CREATE TABLE IF NOT EXISTS stat_request (
-				AgentId String,
-				AgentName String,
-				CPUInfo Nested
+			CREATE TABLE IF NOT EXISTS stat_requests (
+				id UUID,
+				created_at DateTime,
+				updated_at DateTime,
+				agent_id String,
+				agent_name String,
+				cpu_info Nested
 					(
-						StatRequestID UInt32,
-						Load Float64
+						timestamp Int64,
+						stat_request_id UInt32,
+						load Float64
 					),
-				MemoryInfoMem Nested
+				memory_info_mem Nested
 					(
-						MemoryInfoID UInt32,
-						Total UInt64,
-						Used UInt64,
-						Free UInt64,
-						Shared UInt64,
-						UsedPercent Float64
+						timestamp Int64,
+						memory_info_id UInt32,
+						total UInt64,
+						used UInt64,
+						free UInt64,
+						shared UInt64,
+						used_percent Float64
 					),
-				MemoryInfoSwap Nested
+				memory_info_swap Nested
 					(
-						MemoryInfoID UInt32,
-						Total UInt64,
-						Used UInt64,
-						Free UInt64,
-						Shared UInt64,
-						UsedPercent Float64
+						timestamp Int64,
+						memory_info_id UInt32,
+						total UInt64,
+						used UInt64,
+						free UInt64,
+						shared UInt64,
+						used_percent Float64
 					),		
-				DiskInfo Nested
+				disk_info Nested
 					(
-						MemoryInfoID UInt32,
-						Total UInt64,
-						Used UInt64,
-						Free UInt64,
-						Shared UInt64,
-						UsedPercent Float64
+						timestamp Int64,
+						memory_info_id UInt32,
+						total UInt64,
+						used UInt64,
+						free UInt64,
+						shared UInt64,
+						used_percent Float64
 					),		
-				NetInfo Nested
-					(
-						StatRequestID UInt32,
-						Name String,
-						BytesSent UInt64,
-						BytesRecv UInt64,
-						PacketsSent UInt64,
-						PacketsRecv UInt64,
-						ErrIn UInt64,
-						ErrOut UInt64,
-						DropIn UInt64,
-						DropOut UInt64
+				net_info Nested
+					(	
+						timestamp Int64,
+						stat_request_id UInt32,
+						name String,
+						bytes_sent UInt64,
+						bytes_recv UInt64,
+						packets_sent UInt64,
+						packets_recv UInt64,
+						err_in UInt64,
+						err_out UInt64,
+						drop_in UInt64,
+						drop_out UInt64
 					),		
-				Time DateTime
-			)
+				time DateTime
+			) ENGINE = MergeTree ORDER BY tuple()
 		`)
 	if err != nil {
 		return err
@@ -101,39 +119,52 @@ func (c *Clickhouse) Migrate() error {
 
 	_, err = c.Db.Exec(`
 		CREATE TABLE IF NOT EXISTS transaction_info (
-					TransactionId String,
-					ApplicationId String,
-					ParentId String,
-					MetaHost String,
-					MetaPath String,
-					MetaMethod String,
-					Name String,
-					StartTime Int64,
-					EndTime Int64,
-					TransactionStatus Int32,
-					TransactionType Int32,
-					Error String
-				)
+					id UUID,
+			    	created_at DateTime,
+			    	updated_at DateTime,
+					transaction_id String,
+					application_id String,
+					parent_id String,
+					meta_host String,
+					meta_path String,
+					meta_method String,
+					name String,
+					start_time Int64,
+					end_time Int64,
+					transactionStatus Int32,
+					transaction_type Int32,
+					error String
+				) ENGINE = MergeTree ORDER BY tuple()
 			`)
 	if err != nil {
 		return err
 	}
 
 	_, err = c.Db.Exec(`
-			CREATE TABLE IF NOT EXISTS incident (
-				IncidentId String,
-				Status Int32,
-				RuleId String,
-				StartTime Int64,
-				EndTime Int64,
-				Histories Nested
-					(
-						IncidentID UInt32,
-						Status Int64,
-						Timestamp Int64
-					),		
-				Time DateTime
-			)
+			CREATE TABLE IF NOT EXISTS incidents (
+			    id UUID,
+			    created_at DateTime,
+			    updated_at DateTime,
+				incident_id String,
+				status Int32,
+				rule_id String,
+				start_time Int64,
+				end_time Int64
+			) ENGINE = MergeTree ORDER BY tuple()
+		`)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.Db.Exec(`
+			CREATE TABLE IF NOT EXISTS incidents_history (
+			    id UUID,
+			    created_at DateTime,
+			    updated_at DateTime,
+				incident_id String,
+				status Int32,
+				timestamp Int64
+			) ENGINE = MergeTree ORDER BY tuple()
 		`)
 	if err != nil {
 		return err
@@ -141,3 +172,47 @@ func (c *Clickhouse) Migrate() error {
 	return nil
 }
 
+func getTime(filter *apiPb.TimeFilter) (time.Time, time.Time, error) {
+	timeFrom := time.Unix(0, 0)
+	timeTo := time.Now()
+	var err error
+	if filter != nil {
+		if filter.GetFrom() != nil {
+			timeFrom, err = ptypes.Timestamp(filter.From)
+		}
+		if filter.GetTo() != nil {
+			timeTo, err = ptypes.Timestamp(filter.To)
+		}
+	}
+	return timeFrom, timeTo, err
+}
+
+//Return time unixNanos
+func getTimeInt64(filter *apiPb.TimeFilter) (int64, int64, error) {
+	timeFrom := time.Unix(0, 0)
+	timeTo := time.Now()
+	var err error
+	if filter != nil {
+		if filter.GetFrom() != nil {
+			timeFrom, err = ptypes.Timestamp(filter.From)
+		}
+		if filter.GetTo() != nil {
+			timeTo, err = ptypes.Timestamp(filter.To)
+		}
+	}
+	if err != nil {
+		return 0, 0, err
+	}
+	return timeFrom.UnixNano(), timeTo.UnixNano(), nil
+}
+
+//Return offset and limit
+func getOffsetAndLimit(count int64, pagination *apiPb.Pagination) (int, int) {
+	if pagination != nil {
+		if pagination.Page == -1 {
+			return int(count) - int(pagination.Limit), int(pagination.Limit)
+		}
+		return int(pagination.GetLimit() * (pagination.GetPage() - 1)), int(pagination.GetLimit())
+	}
+	return 0, int(count)
+}
