@@ -9,6 +9,7 @@ go_library(
          "job_tcp.go",
          "job_sitemap.go",
          "job_json_http_value.go",
+         "job_ssl.go",
      ],
      importpath = "squzy/internal/job",
      visibility = ["//visibility:public"],
@@ -40,6 +41,7 @@ go_test(
         "job_tcp_test.go",
         "job_sitemap_test.go",
         "job_json_http_value_test.go",
+        "job_ssl_test.go",
     ],
     embed = [":go_default_library"],
     deps = [

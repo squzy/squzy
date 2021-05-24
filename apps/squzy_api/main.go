@@ -5,12 +5,12 @@ import (
 	"github.com/gin-gonic/gin"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
-	"squzy/internal/logger"
 	"squzy/apps/squzy_api/config"
 	"squzy/apps/squzy_api/handlers"
 	"squzy/apps/squzy_api/router"
 	_ "squzy/apps/squzy_api/version"
 	"squzy/internal/grpctools"
+	"squzy/internal/logger"
 )
 
 func main() {

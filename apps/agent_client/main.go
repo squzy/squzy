@@ -7,13 +7,13 @@ import (
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
-	"squzy/internal/logger"
 	"os"
 	"squzy/apps/agent_client/application"
 	"squzy/apps/agent_client/config"
 	_ "squzy/apps/agent_client/version"
 	"squzy/internal/agent"
 	agent_executor "squzy/internal/agent-executor"
+	"squzy/internal/logger"
 )
 
 func main() {

@@ -129,6 +129,21 @@ func (s *server) GetSchedulerById(ctx context.Context, rq *apiPb.GetSchedulerByI
 				},
 			},
 		}, nil
+	case apiPb.SchedulerType_SSL_EXPIRATION:
+		return &apiPb.Scheduler{
+			Id:       id,
+			Name:     config.Name,
+			Type:     apiPb.SchedulerType_SSL_EXPIRATION,
+			Status:   config.Status,
+			Interval: config.Interval,
+			Timeout:  config.Timeout,
+			Config: &apiPb.Scheduler_SslExpiration{
+				SslExpiration: &apiPb.SslExpirationConfig{
+					Host: config.SslExpirationConfig.Host,
+					Port: config.SslExpirationConfig.Port,
+				},
+			},
+		}, nil
 	case apiPb.SchedulerType_HTTP_JSON_VALUE:
 		return &apiPb.Scheduler{
 			Id:       id,
@@ -292,6 +307,20 @@ func (s *server) Add(ctx context.Context, rq *apiPb.AddRequest) (*apiPb.AddRespo
 				Selectors: helpers.SelectorsToDb(config.HttpValue.Selectors),
 			},
 		}
+	case *apiPb.AddRequest_SslExpiration:
+		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
+			ID:       schld.GetIDBson(),
+			Name:     rq.Name,
+			Type:     apiPb.SchedulerType_SSL_EXPIRATION,
+			Status:   apiPb.SchedulerStatus_STOPPED,
+			Interval: rq.Interval,
+			Timeout:  rq.Timeout,
+			SslExpirationConfig: &scheduler_config_storage.SslExpirationConfig{
+				Host: config.SslExpiration.Host,
+				Port: config.SslExpiration.Port,
+			},
+		}
+
 	default:
 		return nil, errInvalidTypeError
 	}

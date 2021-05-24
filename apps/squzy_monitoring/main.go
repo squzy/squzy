@@ -6,7 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
-	"squzy/internal/logger"
 	"squzy/apps/squzy_monitoring/application"
 	"squzy/apps/squzy_monitoring/config"
 	"squzy/apps/squzy_monitoring/version"
@@ -15,6 +14,7 @@ import (
 	"squzy/internal/httptools"
 	"squzy/internal/job"
 	job_executor "squzy/internal/job-executor"
+	"squzy/internal/logger"
 	"squzy/internal/parsers"
 	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	scheduler_storage "squzy/internal/scheduler-storage"
@@ -70,6 +70,7 @@ func main() {
 		job.ExecHTTP,
 		job.ExecSiteMap,
 		job.ExecHTTPValue,
+		job.ExecSSL,
 	)
 	app := application.New(
 		scheduler_storage.New(),

@@ -53,7 +53,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 				},
 				filters...)
 		},
-		"Index": func(index int32, filters ...FilterTransaction) []*apiPb.TransactionInfo {
+		"Index": func(index int32, filters ...FilterTransaction) *apiPb.TransactionInfo {
 			return e.GetTransactions(
 				applicationId,
 				apiPb.SortDirection_ASC,
@@ -61,7 +61,7 @@ func (e *expressionStruct) getTransactionEnv(applicationId string) map[string]in
 					Page:  index,
 					Limit: 1,
 				},
-				filters...)
+				filters...)[0]
 		},
 		"UseType": func(trType apiPb.TransactionType) FilterTransaction {
 			return func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest {

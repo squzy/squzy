@@ -454,6 +454,20 @@ func TestRouter_GetEngine(t *testing.T) {
 						{
 							"interval": 10,
 							"timeout": 10,
+							"type": 6
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/schedulers",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusUnprocessableEntity,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"interval": 10,
+							"timeout": 10,
 							"type": 3,
 							"siteMapConfig": {}
 						}
@@ -500,6 +514,24 @@ func TestRouter_GetEngine(t *testing.T) {
 							"timeout": 10,
 							"type": 1,
 							"tcpConfig": {
+								"host": "GET",
+								"port": 32
+							}
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/schedulers",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusUnprocessableEntity,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"interval": 10,
+							"timeout": 10,
+							"type": 6,
+							"sslExpirationConfig": {
 								"host": "GET",
 								"port": 32
 							}
@@ -1058,6 +1090,24 @@ func TestRouter_GetEngine(t *testing.T) {
 							"timeout": 10,
 							"type": 1,
 							"tcpConfig": {
+								"host": "GET",
+								"port": 32
+							}
+						}
+					`,
+				)),
+			},
+			{
+				Path:         "/v1/schedulers",
+				Method:       http.MethodPost,
+				ExpectedCode: http.StatusCreated,
+				Body: bytes.NewBuffer([]byte(
+					`
+						{
+							"interval": 10,
+							"timeout": 10,
+							"type": 6,
+							"sslExpirationConfig": {
 								"host": "GET",
 								"port": 32
 							}

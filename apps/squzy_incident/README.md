@@ -202,6 +202,34 @@ The additional to exec functions which can be used with transactions:
 
 - `Duration(snapshot)` - calculate the duration of given snapshot.
 
+- `UnixNanoNow()` - return time.Now() in unixNano
+
+- `timeDiff(t1, t2)` - return t1 - t2
+
+- `durationLess(d1, d2)` - check is d1 < d2
+
+- `durationMore(d1, d2)` - check is d1 > d2
+
+- `durationEqual(d1, d2)` - check is d1 == d2
+
+- `durationToSecond(d1)` - convert duration in seconds
+
+- `NowTime()` - return time.Now()
+
+- `float64ToInt64(f1)` - convert float64 to int64
+
+- `getValue(snapshot)` - get value from snapshot
+
+- `unixToTime(u)` - convert unix to time.Time 
+
+- `unixNanoToTime(u)` - convert unixnano to time.Time
+
+- `null` - it is nil
+
+- `mulDuration(int, duration)` - multiply duration on integer
+
+- `Week/Day/Hour/Minute/Second` - constant for duration
+
 Possible filters:
 
 - `UseTimeFrom("05/02/2020")`: set the time from which entities should be taken
