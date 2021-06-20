@@ -27,8 +27,7 @@ type IncidentHistory struct {
 }
 
 const (
-	dbIncidentCollection = "incidents"
-	descPrefix           = " DESC"
+	descPrefix = " DESC"
 )
 
 var (
@@ -40,20 +39,20 @@ var (
 	incidentEndTimeString   = fmt.Sprintf(`"end_time" = ?`)
 	incidentCreatedAtString = fmt.Sprintf(`"created_at" = ?`)
 	incidentUpdatedAtString = fmt.Sprintf(`"updated_at" = ?`)
-	incidentDeletedAtString = fmt.Sprintf(`"deleted_at" = ?`)
 	incidentHistoriesString = fmt.Sprintf(`"histories.status" = ? , "histories.timestamp" = ?`)
+	startTimeFilterString   = `start_time >= ? AND start_time <= ?`
 
 	incidentOrderMap = map[apiPb.SortIncidentList]string{
-		apiPb.SortIncidentList_SORT_INCIDENT_LIST_UNSPECIFIED: "startTime",
-		apiPb.SortIncidentList_INCIDENT_LIST_BY_START_TIME:    "startTime",
-		apiPb.SortIncidentList_INCIDENT_LIST_BY_END_TIME:      "endTime",
+		apiPb.SortIncidentList_SORT_INCIDENT_LIST_UNSPECIFIED: "start_time",
+		apiPb.SortIncidentList_INCIDENT_LIST_BY_START_TIME:    "start_time",
+		apiPb.SortIncidentList_INCIDENT_LIST_BY_END_TIME:      "end_time",
 	}
 )
 
 func (c *Clickhouse) InsertIncident(data *apiPb.Incident) error {
 	now := time.Now()
 
-	incident := convertToIncident(data)
+	incident := convertToIncident(data, now)
 
 	err := c.insertIncident(now, incident)
 	if err != nil {
@@ -78,7 +77,7 @@ func (c *Clickhouse) insertIncident(now time.Time, incident *Incident) error {
 		return err
 	}
 
-	q := fmt.Sprintf(`INSERT INTO incidents (%s) VALUES ('$0', '$1', '$2', '$3', '$4', '$5', '$6', '$7')`, incidentFields)
+	q := fmt.Sprintf(`INSERT INTO incidents (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7)`, incidentFields)
 	_, err = tx.Exec(q,
 		clickhouse.UUID(uuid.NewV4().String()),
 		now,
@@ -105,7 +104,7 @@ func (c *Clickhouse) insertIncidentHistory(incidentId string, now time.Time, sta
 		return err
 	}
 
-	q := fmt.Sprintf(`INSERT INTO incidents_history (%s) VALUES ('$0', '$1', '$2', '$3', '$4')`, incidentHistoriesFields)
+	q := fmt.Sprintf(`INSERT INTO incidents_history (%s) VALUES ($0, $1, $2, $3, $4)`, incidentHistoriesFields)
 	_, err = tx.Exec(q,
 		clickhouse.UUID(uuid.NewV4().String()),
 		now,
@@ -127,7 +126,13 @@ func (c *Clickhouse) UpdateIncidentStatus(id string, status apiPb.IncidentStatus
 	now := time.Now()
 	uNow := now.UnixNano()
 
-	err := c.updateIncident(id, status, now, uNow)
+	oldInc, err := c.getIncidentById(id)
+	if err != nil {
+		logger.Error(err.Error())
+		return nil, errorDataBase
+	}
+
+	err = c.updateIncident(now, status, oldInc)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil, errorDataBase
@@ -139,32 +144,34 @@ func (c *Clickhouse) UpdateIncidentStatus(id string, status apiPb.IncidentStatus
 		return nil, errorDataBase
 	}
 
-	incident, err := c.GetIncidentById(id)
+	newInc, err := c.GetIncidentById(id)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil, errorDataBase
 	}
-	return incident, nil
+	return newInc, nil
 }
 
-func (c *Clickhouse) updateIncident(id string, status apiPb.IncidentStatus, tNow time.Time, tUNow int64) error {
+func (c *Clickhouse) updateIncident(now time.Time, status apiPb.IncidentStatus, incident *Incident) error {
 	tx, err := c.Db.Begin()
 	if err != nil {
 		return err
 	}
 
-	q := fmt.Sprintf(`ALTER TABLE incidents UPDATE %s , %s , %s WHERE %s`,
-		incidentStatusString,
-		incidentUpdatedAtString,
-		incidentEndTimeString,
-		incidentIdString)
+	q := fmt.Sprintf(`INSERT INTO incidents (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7)`, incidentFields)
 	_, err = tx.Exec(q,
+		clickhouse.UUID(uuid.NewV4().String()),
+		incident.Model.CreatedAt,
+		now,
+		incident.IncidentId,
 		int32(status),
-		tNow,
-		tUNow,
-		id,
+		incident.RuleId,
+		incident.StartTime,
+		incident.EndTime,
 	)
-
+	if err != nil {
+		return err
+	}
 	err = tx.Commit()
 	if err != nil {
 		return err
@@ -173,25 +180,33 @@ func (c *Clickhouse) updateIncident(id string, status apiPb.IncidentStatus, tNow
 }
 
 func (c *Clickhouse) GetIncidentById(id string) (*apiPb.Incident, error) {
-	inc, err := c.getIncident(id)
+	inc, err := c.getIncidentById(id)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil, errorDataBase
 	}
-
-	histories, err := c.getIncidentHistories(id)
-	if err != nil {
-		logger.Error(err.Error())
-		return nil, errorDataBase
-	}
-
-	inc.Histories = histories
 
 	return convertFromIncident(inc), nil
 }
 
+func (c *Clickhouse) getIncidentById(id string) (*Incident, error) {
+	inc, err := c.getIncident(id)
+	if err != nil {
+		return nil, err
+	}
+
+	histories, err := c.getIncidentHistories(id)
+	if err != nil {
+		return nil, err
+	}
+
+	inc.Histories = histories
+
+	return inc, nil
+}
+
 func (c *Clickhouse) getIncident(id string) (*Incident, error) {
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM incidents WHERE %s LIMIT 1`, incidentFields, incidentIdString), id)
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM incidents FINAL WHERE %s LIMIT 1`, incidentFields, incidentIdString), id)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +250,7 @@ func (c *Clickhouse) getIncidentHistories(id string) ([]*IncidentHistory, error)
 		}
 	}()
 
-	if next := rows.Next(); next {
+	for rows.Next() {
 		inc := &IncidentHistory{}
 		if err := rows.Scan(&inc.Model.ID, &inc.Model.CreatedAt, &inc.IncidentID, &inc.Status, &inc.Timestamp); err != nil {
 			logger.Error(err.Error())
@@ -323,12 +338,12 @@ func (c *Clickhouse) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*ap
 		incidentFields,
 		incidentStatusString,
 		incidentRuleIdString,
-		`start_time >= ? AND start_time <= ?`,
+		startTimeFilterString,
 		getIncidentOrder(request.GetSort())+getIncidentDirection(request.GetSort()),
 		limit,
 		offset),
-		request.Status,
-		request.RuleId,
+		int32(request.Status),
+		request.RuleId.Value,
 		timeFrom,
 		timeTo,
 	)
@@ -360,6 +375,7 @@ func (c *Clickhouse) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*ap
 		}
 
 		inc.Histories = histories
+		incs = append(incs, inc)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -375,8 +391,8 @@ func (c *Clickhouse) countIncidents(request *apiPb.GetIncidentsListRequest, time
 	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM incidents WHERE %s AND %s AND %s`,
 		incidentStatusString,
 		incidentRuleIdString,
-		`start_time >= ? AND start_time <= ?`),
-		request.Status,
+		startTimeFilterString),
+		int32(request.Status),
 		request.RuleId.Value,
 		timeFrom,
 		timeTo)

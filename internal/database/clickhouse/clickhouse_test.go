@@ -9,6 +9,7 @@ import (
 	"github.com/ClickHouse/clickhouse-go"
 	_ "github.com/ClickHouse/clickhouse-go"
 	"github.com/docker/go-connections/nat"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
@@ -162,7 +163,6 @@ func TestUpdateIncidentStatus(t *testing.T) {
 	if err != nil {
 		assert.Fail(t, err.Error())
 	}
-
 	inc, err := clickh.UpdateIncidentStatus(lo.Id, apiPb.IncidentStatus(2))
 	if err != nil {
 		assert.Fail(t, err.Error())
@@ -170,9 +170,8 @@ func TestUpdateIncidentStatus(t *testing.T) {
 	assert.NotNil(t, inc)
 	assert.Equal(t, lo.Id, inc.Id)
 	assert.Equal(t, apiPb.IncidentStatus(2), inc.Status)
-	assert.Equal(t, lo.RuleId, inc.RuleId)
-	assert.Equal(t, lo.Histories[0].Status, inc.Histories[0].Status)
-	assert.Equal(t, lo.Histories[0].Timestamp, inc.Histories[0].Timestamp)
+	assert.Equal(t, 2, len(inc.Histories))
+
 }
 
 func TestGetActiveIncidentByRuleId(t *testing.T) {
@@ -209,9 +208,9 @@ func TestGetIncidents(t *testing.T) {
 	lo := &apiPb.Incident{
 		Id:     "incidents",
 		Status: 1,
-		RuleId: "433",
+		RuleId: "999",
 		Histories: []*apiPb.Incident_HistoryItem{&apiPb.Incident_HistoryItem{
-			Status: 0,
+			Status: 1,
 			Timestamp: &timestamp.Timestamp{
 				Seconds: 3324,
 				Nanos:   0,
@@ -221,9 +220,9 @@ func TestGetIncidents(t *testing.T) {
 	lo2 := &apiPb.Incident{
 		Id:     "incidents2",
 		Status: 1,
-		RuleId: "433",
+		RuleId: "999",
 		Histories: []*apiPb.Incident_HistoryItem{&apiPb.Incident_HistoryItem{
-			Status: 0,
+			Status: 1,
 			Timestamp: &timestamp.Timestamp{
 				Seconds: 3424,
 				Nanos:   0,
@@ -233,14 +232,7 @@ func TestGetIncidents(t *testing.T) {
 	lo3 := &apiPb.Incident{
 		Id:     "incidents3",
 		Status: 3,
-		RuleId: "433",
-		Histories: []*apiPb.Incident_HistoryItem{&apiPb.Incident_HistoryItem{
-			Status: 0,
-			Timestamp: &timestamp.Timestamp{
-				Seconds: 3324,
-				Nanos:   0,
-			},
-		}},
+		RuleId: "999",
 	}
 
 	err := clickh.InsertIncident(lo)
@@ -258,30 +250,34 @@ func TestGetIncidents(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
+	timeTo, err := ptypes.TimestampProto(time.Now().Add(time.Second * 5))
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
 	incs, count, err := clickh.GetIncidents(&apiPb.GetIncidentsListRequest{
-		Status:               lo.Status,
-		RuleId:               &wrappers.StringValue{Value:lo.RuleId},
-		Pagination:           &apiPb.Pagination{
-			Page:                 2,
-			Limit:                2,
+		Status: 1,
+		RuleId: &wrappers.StringValue{Value: "999"},
+		Pagination: &apiPb.Pagination{
+			Page:  1,
+			Limit: 10,
 		},
-		TimeRange:            &apiPb.TimeFilter{
-			From:                 lo.Histories[0].Timestamp,
-			To:                   lo2.Histories[0].Timestamp,
+		TimeRange: &apiPb.TimeFilter{
+			From: lo.Histories[0].Timestamp,
+			To:   timeTo,
 		},
-		Sort:                 &apiPb.SortingIncidentList{
-			SortBy:               0,
-			Direction:            0,
+		Sort: &apiPb.SortingIncidentList{
+			SortBy:    0,
+			Direction: 0,
 		},
 	})
 	if err != nil {
 		assert.Fail(t, err.Error())
 	}
+	assert.Equal(t, 2, int(count))
 	assert.NotNil(t, incs)
-	assert.Equal(t, 2, count)
-	assert.Equal(t, 1, incs[0].Status)
+	assert.Equal(t, 1, int(incs[0].Status))
 	assert.Equal(t, lo.RuleId, incs[0].RuleId)
-	assert.Equal(t, 1, incs[1].Status)
+	assert.Equal(t, 1, int(incs[1].Status))
 	assert.Equal(t, lo.RuleId, incs[1].RuleId)
 
 }

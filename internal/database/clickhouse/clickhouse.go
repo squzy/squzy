@@ -150,7 +150,7 @@ func (c *Clickhouse) Migrate() error {
 				rule_id String,
 				start_time Int64,
 				end_time Int64
-			) ENGINE = MergeTree ORDER BY tuple()
+			) ENGINE = ReplacingMergeTree(updated_at) ORDER BY tuple(incident_id)
 		`)
 	if err != nil {
 		return err
@@ -164,7 +164,7 @@ func (c *Clickhouse) Migrate() error {
 				incident_id String,
 				status Int32,
 				timestamp Int64
-			) ENGINE = MergeTree ORDER BY tuple()
+			) ENGINE = StripeLog
 		`)
 	if err != nil {
 		return err

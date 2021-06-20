@@ -1,6 +1,11 @@
 package clickhouse
 
 import (
+	"bytes"
+	"errors"
+	"github.com/golang/protobuf/jsonpb"
+	_struct "github.com/golang/protobuf/ptypes/struct"
+
 	//nolint:staticcheck
 	"github.com/golang/protobuf/ptypes"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
@@ -8,15 +13,15 @@ import (
 	"time"
 )
 
-func convertToIncident(data *apiPb.Incident) *Incident {
+func convertToIncident(data *apiPb.Incident, t time.Time) *Incident {
 	if data == nil {
 		return nil
 	}
 	histories, startTime, endTime := convertToIncidentHistories(data.GetHistories())
 
 	if startTime == 0 || endTime == 0 {
-		startTime = time.Now().UnixNano()
-		endTime = time.Now().UnixNano()
+		startTime = t.UnixNano()
+		endTime = t.UnixNano()
 	}
 	return &Incident{
 		IncidentId: data.GetId(),
@@ -53,14 +58,14 @@ func convertToIncidentHistory(data *apiPb.Incident_HistoryItem) *IncidentHistory
 	if data == nil {
 		return nil
 	}
-	time, err := ptypes.Timestamp(data.GetTimestamp())
+	t, err := ptypes.Timestamp(data.GetTimestamp())
 	if err != nil {
 		logger.Error(err.Error())
 		return nil
 	}
 	return &IncidentHistory{
 		Status:    int32(data.GetStatus()),
-		Timestamp: time.UnixNano(),
+		Timestamp: t.UnixNano(),
 	}
 }
 
@@ -82,7 +87,7 @@ func convertFromIncident(data *Incident) *apiPb.Incident {
 }
 
 func convertFromIncidentHistories(data []*IncidentHistory) []*apiPb.Incident_HistoryItem {
-	histories := []*apiPb.Incident_HistoryItem{}
+	var histories []*apiPb.Incident_HistoryItem
 	for _, v := range data {
 		history := convertFromIncidentHistory(v)
 		if history != nil {
