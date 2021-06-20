@@ -46,7 +46,7 @@ func (c *Clickhouse) Migrate() error {
 				error   String,
 				meta_start_time   Int64,
 				meta_end_time   Int64,
-				meta_value  Array(Int8)
+				meta_value  Array(UInt8)
 			) ENGINE = MergeTree ORDER BY tuple()
 		`)
 	if err != nil {

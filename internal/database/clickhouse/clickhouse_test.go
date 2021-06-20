@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"google.golang.org/protobuf/types/known/structpb"
 	"os"
 	"sort"
 	"squzy/internal/logger"
@@ -92,7 +93,7 @@ func setup(ctx context.Context) error {
 	return nil
 }
 
-func TestInsert(t *testing.T) {
+func TestInsertIncident(t *testing.T) {
 	lo := &apiPb.Incident{
 		Id:     "insert",
 		Status: 0,
@@ -266,8 +267,8 @@ func TestGetIncidents(t *testing.T) {
 			To:   timeTo,
 		},
 		Sort: &apiPb.SortingIncidentList{
-			SortBy:    0,
-			Direction: 0,
+			SortBy:    apiPb.SortIncidentList_INCIDENT_LIST_BY_START_TIME,
+			Direction: apiPb.SortDirection_ASC,
 		},
 	})
 	if err != nil {
@@ -275,10 +276,167 @@ func TestGetIncidents(t *testing.T) {
 	}
 	assert.Equal(t, 2, int(count))
 	assert.NotNil(t, incs)
+	assert.Equal(t, lo.Id, incs[0].Id)
 	assert.Equal(t, 1, int(incs[0].Status))
-	assert.Equal(t, lo.RuleId, incs[0].RuleId)
+	assert.Equal(t, lo.Histories[0].Status, incs[0].Histories[0].Status)
+	assert.Equal(t, lo.Histories[0].Timestamp, incs[0].Histories[0].Timestamp)
+	assert.Equal(t, lo2.RuleId, incs[0].RuleId)
+	assert.Equal(t, lo2.Id, incs[1].Id)
 	assert.Equal(t, 1, int(incs[1].Status))
-	assert.Equal(t, lo.RuleId, incs[1].RuleId)
+	assert.Equal(t, lo2.RuleId, incs[1].RuleId)
+	assert.Equal(t, lo2.Histories[0].Status, incs[1].Histories[0].Status)
+	assert.Equal(t, lo2.Histories[0].Timestamp, incs[1].Histories[0].Timestamp)
+}
+
+func TestInsertSnapshot(t *testing.T) {
+	sn := &apiPb.SchedulerResponse{
+		SchedulerId: "insert",
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code:  apiPb.SchedulerCode_OK,
+			Type:  apiPb.SchedulerType_TCP,
+			Error: nil,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: &timestamp.Timestamp{
+					Seconds: 3324,
+					Nanos:   0,
+				},
+				EndTime: &timestamp.Timestamp{
+					Seconds: 3324,
+					Nanos:   0,
+				},
+				Value: &structpb.Value{
+					Kind: &structpb.Value_StringValue{
+						StringValue: "Value",
+					},
+				},
+			},
+		},
+	}
+	err := clickh.InsertSnapshot(sn)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+}
+
+func TestGetSnapshots(t *testing.T) {
+	sn := &apiPb.SchedulerResponse{
+		SchedulerId: "getSnapshots",
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code:  apiPb.SchedulerCode_OK,
+			Type:  apiPb.SchedulerType_TCP,
+			Error: nil,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: &timestamp.Timestamp{
+					Seconds: 3324,
+					Nanos:   0,
+				},
+				EndTime: &timestamp.Timestamp{
+					Seconds: 3324,
+					Nanos:   0,
+				},
+				Value: &structpb.Value{
+					Kind: &structpb.Value_StringValue{
+						StringValue: "Value",
+					},
+				},
+			},
+		},
+	}
+
+	sn2 := &apiPb.SchedulerResponse{
+		SchedulerId: "getSnapshots",
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code:  apiPb.SchedulerCode_OK,
+			Type:  apiPb.SchedulerType_TCP,
+			Error: nil,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: &timestamp.Timestamp{
+					Seconds: 3324,
+					Nanos:   0,
+				},
+				EndTime: &timestamp.Timestamp{
+					Seconds: 3324,
+					Nanos:   0,
+				},
+				Value: &structpb.Value{
+					Kind: &structpb.Value_StringValue{
+						StringValue: "Value",
+					},
+				},
+			},
+		},
+	}
+
+	sn3 := &apiPb.SchedulerResponse{
+		SchedulerId: "getSnapshots",
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code:  apiPb.SchedulerCode_ERROR,
+			Type:  apiPb.SchedulerType_TCP,
+			Error: nil,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: &timestamp.Timestamp{
+					Seconds: 3324,
+					Nanos:   0,
+				},
+				EndTime: &timestamp.Timestamp{
+					Seconds: 3324,
+					Nanos:   0,
+				},
+				Value: &structpb.Value{
+					Kind: &structpb.Value_StringValue{
+						StringValue: "Value",
+					},
+				},
+			},
+		},
+	}
+
+	err := clickh.InsertSnapshot(sn)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	err = clickh.InsertSnapshot(sn2)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	err = clickh.InsertSnapshot(sn3)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	timeTo, err := ptypes.TimestampProto(time.Now().Add(time.Second * 5))
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+	snaps, count, err := clickh.GetSnapshots(&apiPb.GetSchedulerInformationRequest{
+		SchedulerId: "getSnapshots",
+		Pagination: &apiPb.Pagination{
+			Page:  1,
+			Limit: 10,
+		},
+		TimeRange: &apiPb.TimeFilter{
+			From: sn.Snapshot.Meta.StartTime,
+			To:   timeTo,
+		},
+		Sort: &apiPb.SortingSchedulerList{
+			SortBy:    apiPb.SortSchedulerList_BY_START_TIME,
+			Direction: apiPb.SortDirection_ASC,
+		},
+		Status: apiPb.SchedulerCode_OK,
+	})
+
+	assert.Equal(t, 2, int(count))
+	assert.NotNil(t, snaps)
+	assert.Equal(t, sn.Snapshot.Code, snaps[0].Code)
+	assert.Equal(t, sn.Snapshot.Type, snaps[0].Type)
+	assert.Equal(t, sn.Snapshot.Error, snaps[0].Error)
+	assert.Equal(t, sn.Snapshot.Meta, snaps[0].Meta)
+	assert.Equal(t, sn.Snapshot.Code, snaps[1].Code)
+	assert.Equal(t, sn.Snapshot.Type, snaps[1].Type)
+	assert.Equal(t, sn.Snapshot.Error, snaps[1].Error)
+	assert.Equal(t, sn.Snapshot.Meta, snaps[1].Meta)
 
 }
 
