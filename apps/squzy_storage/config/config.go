@@ -8,6 +8,8 @@ import (
 const (
 	ENV_PORT = "PORT"
 
+	ENV_DB_CHOICE = "DB_CHOICE"
+
 	ENV_DB_HOST     = "DB_HOST"
 	ENV_DB_PORT     = "DB_PORT"
 	ENV_DB_NAME     = "DB_NAME"
@@ -23,6 +25,7 @@ const (
 
 type cfg struct {
 	port           int32
+	dbChoice       string
 	dbHost         string
 	dbPort         string
 	dbName         string
@@ -35,6 +38,10 @@ type cfg struct {
 
 func (c *cfg) GetPort() int32 {
 	return c.port
+}
+
+func (c *cfg) GetDbChoice() string {
+	return c.dbHost
 }
 
 func (c *cfg) GetDbHost() string {
@@ -71,6 +78,7 @@ func (c *cfg) WithDbLogs() bool {
 
 type Config interface {
 	GetPort() int32
+	GetDbChoice() string
 	GetDbHost() string
 	GetDbPort() string
 	GetDbName() string
@@ -110,6 +118,7 @@ func New() Config {
 	}
 	return &cfg{
 		port:           port,
+		dbChoice:       os.Getenv(ENV_DB_CHOICE),
 		dbHost:         os.Getenv(ENV_DB_HOST),
 		dbPort:         os.Getenv(ENV_DB_PORT),
 		dbName:         os.Getenv(ENV_DB_NAME),

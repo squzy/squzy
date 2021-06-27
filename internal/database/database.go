@@ -1,9 +1,9 @@
 package database
 
 import (
-	"github.com/jinzhu/gorm"
+	"database/sql"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/database/postgres"
+	"squzy/internal/database/clickhouse"
 )
 
 type Database interface {
@@ -28,8 +28,8 @@ type Database interface {
 	Migrate() error
 }
 
-func New(pgDb *gorm.DB) Database {
-	return &postgres.Postgres{
-		Db: pgDb,
+func New(chDb *sql.DB) Database {
+	return &clickhouse.Clickhouse{
+		Db: chDb,
 	}
 }
