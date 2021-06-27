@@ -320,7 +320,7 @@ func TestInsertSnapshot(t *testing.T) {
 
 func TestGetSnapshots(t *testing.T) {
 	sn := &apiPb.SchedulerResponse{
-		SchedulerId: "getSnapshots",
+		SchedulerId: "GetSnapshots",
 		Snapshot: &apiPb.SchedulerSnapshot{
 			Code:  apiPb.SchedulerCode_OK,
 			Type:  apiPb.SchedulerType_TCP,
@@ -344,7 +344,7 @@ func TestGetSnapshots(t *testing.T) {
 	}
 
 	sn2 := &apiPb.SchedulerResponse{
-		SchedulerId: "getSnapshots",
+		SchedulerId: "GetSnapshots",
 		Snapshot: &apiPb.SchedulerSnapshot{
 			Code:  apiPb.SchedulerCode_OK,
 			Type:  apiPb.SchedulerType_TCP,
@@ -368,11 +368,13 @@ func TestGetSnapshots(t *testing.T) {
 	}
 
 	sn3 := &apiPb.SchedulerResponse{
-		SchedulerId: "getSnapshots",
+		SchedulerId: "GetSnapshots",
 		Snapshot: &apiPb.SchedulerSnapshot{
 			Code:  apiPb.SchedulerCode_ERROR,
 			Type:  apiPb.SchedulerType_TCP,
-			Error: nil,
+			Error: &apiPb.SchedulerSnapshot_Error{
+				Message:              "Error",
+			},
 			Meta: &apiPb.SchedulerSnapshot_MetaData{
 				StartTime: &timestamp.Timestamp{
 					Seconds: 3324,
@@ -411,7 +413,7 @@ func TestGetSnapshots(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 	snaps, count, err := clickh.GetSnapshots(&apiPb.GetSchedulerInformationRequest{
-		SchedulerId: "getSnapshots",
+		SchedulerId: "GetSnapshots",
 		Pagination: &apiPb.Pagination{
 			Page:  1,
 			Limit: 10,
@@ -437,6 +439,116 @@ func TestGetSnapshots(t *testing.T) {
 	assert.Equal(t, sn.Snapshot.Type, snaps[1].Type)
 	assert.Equal(t, sn.Snapshot.Error, snaps[1].Error)
 	assert.Equal(t, sn.Snapshot.Meta, snaps[1].Meta)
+
+}
+
+func TestGetSnapshotsUptime(t *testing.T) {
+	sn := &apiPb.SchedulerResponse{
+		SchedulerId: "GetSnapshotsUptime",
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code:  apiPb.SchedulerCode_OK,
+			Type:  apiPb.SchedulerType_TCP,
+			Error: nil,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: &timestamp.Timestamp{
+					Seconds: 10000,
+					Nanos:   0,
+				},
+				EndTime: &timestamp.Timestamp{
+					Seconds: 10000,
+					Nanos:   10,
+				},
+				Value: &structpb.Value{
+					Kind: &structpb.Value_StringValue{
+						StringValue: "Value",
+					},
+				},
+			},
+		},
+	}
+
+	sn2 := &apiPb.SchedulerResponse{
+		SchedulerId: "GetSnapshotsUptime",
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code:  apiPb.SchedulerCode_OK,
+			Type:  apiPb.SchedulerType_TCP,
+			Error: nil,
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: &timestamp.Timestamp{
+					Seconds: 10000,
+					Nanos:   0,
+				},
+				EndTime: &timestamp.Timestamp{
+					Seconds: 10000,
+					Nanos:   20,
+				},
+				Value: &structpb.Value{
+					Kind: &structpb.Value_StringValue{
+						StringValue: "Value",
+					},
+				},
+			},
+		},
+	}
+
+	sn3 := &apiPb.SchedulerResponse{
+			SchedulerId: "GetSnapshots",
+			Snapshot: &apiPb.SchedulerSnapshot{
+				Code:  apiPb.SchedulerCode_ERROR,
+				Type:  apiPb.SchedulerType_TCP,
+				Error: &apiPb.SchedulerSnapshot_Error{
+					Message:              "Error",
+				},
+				Meta: &apiPb.SchedulerSnapshot_MetaData{
+					StartTime: &timestamp.Timestamp{
+						Seconds: 1000,
+						Nanos:   0,
+					},
+					EndTime: &timestamp.Timestamp{
+						Seconds: 5000,
+						Nanos:   0,
+					},
+					Value: &structpb.Value{
+						Kind: &structpb.Value_StringValue{
+							StringValue: "Value",
+						},
+					},
+				},
+			},
+		}
+
+	err := clickh.InsertSnapshot(sn)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	err = clickh.InsertSnapshot(sn2)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	err = clickh.InsertSnapshot(sn3)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+
+	timeTo, err := ptypes.TimestampProto(time.Now().Add(time.Second * 5))
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+	resp, err := clickh.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
+		SchedulerId: "GetSnapshotsUptime",
+		TimeRange: &apiPb.TimeFilter{
+			From: nil,
+			To: timeTo,
+		},
+	})
+
+	assert.Nil(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, float64(15), resp.Latency)
+	assert.Equal(t, float64(1), resp.Uptime)
 
 }
 

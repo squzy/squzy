@@ -189,7 +189,6 @@ func (c *Clickhouse) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest
 		return nil, err
 	}
 	countAll, err := c.countAllSnapshots(request, timeFrom, timeTo)
-
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +203,7 @@ func (c *Clickhouse) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest
 
 func (c *Clickhouse) countAllSnapshots(request *apiPb.GetSchedulerUptimeRequest, timeFrom int64, timeTo int64) (int64, error) {
 	var count int64
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM snapshots WHERE %s AND (%s) LIMIT 1`,
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM snapshots WHERE %s AND (%s)`,
 		snapshotSchedulerIdString,
 		snapshotMetaStartTimeFilterString),
 		request.SchedulerId,
@@ -242,14 +241,14 @@ func (c *Clickhouse) countAllSnapshots(request *apiPb.GetSchedulerUptimeRequest,
 
 func (c *Clickhouse) countSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest, timeFrom int64, timeTo int64) (UptimeResult, error) {
 	var result UptimeResult
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) as "count", AVG(metaEndTime-metaStartTime) as "latency" FROM snapshots WHERE %s AND (%s) AND %s`,
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) as "count", avg(meta_end_time-meta_start_time) as "latency" FROM snapshots WHERE %s AND (%s) AND %s`,
 		snapshotSchedulerIdString,
 		snapshotMetaStartTimeFilterString,
 		snapshotCodeString),
 		request.SchedulerId,
 		timeFrom,
 		timeTo,
-		getCodeString(apiPb.SchedulerCode_OK))
+		int32(apiPb.SchedulerCode_OK))
 
 	if err != nil {
 		logger.Error(err.Error())
@@ -289,6 +288,7 @@ func (c *Clickhouse) countSnapshotsUptime(request *apiPb.GetSchedulerUptimeReque
 		}, errorDataBase
 
 	}
+
 	return result, nil
 }
 
