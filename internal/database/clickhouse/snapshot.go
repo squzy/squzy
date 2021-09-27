@@ -28,7 +28,6 @@ type UptimeResult struct {
 var (
 	snapshotFields                    = "id, created_at, updated_at, scheduler_id, code, type, error, meta_start_time, meta_end_time, meta_value"
 	snapshotSchedulerIdString         = fmt.Sprintf(`"scheduler_id" = ?`)
-	snapshotCodeString                = fmt.Sprintf(`"code" = ?`)
 	snapshotMetaStartTimeFilterString = fmt.Sprintf(`"meta_start_time" BETWEEN ? and ?`)
 
 	snapOrderMap = map[apiPb.SortSchedulerList]string{
@@ -148,11 +147,10 @@ func (c *Clickhouse) countSnapshots(request *apiPb.GetSchedulerInformationReques
 	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM snapshots WHERE %s AND (%s) AND %s LIMIT 1`,
 		snapshotSchedulerIdString,
 		snapshotMetaStartTimeFilterString,
-		snapshotCodeString),
+		getCodeString(request.Status)),
 		request.SchedulerId,
 		timeFrom,
-		timeTo,
-		request.Status)
+		timeTo)
 
 	if err != nil {
 		logger.Error(err.Error())
@@ -244,11 +242,10 @@ func (c *Clickhouse) countSnapshotsUptime(request *apiPb.GetSchedulerUptimeReque
 	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) as "count", avg(meta_end_time-meta_start_time) as "latency" FROM snapshots WHERE %s AND (%s) AND %s`,
 		snapshotSchedulerIdString,
 		snapshotMetaStartTimeFilterString,
-		snapshotCodeString),
+		getCodeString(apiPb.SchedulerCode_OK)),
 		request.SchedulerId,
 		timeFrom,
-		timeTo,
-		int32(apiPb.SchedulerCode_OK))
+		timeTo)
 
 	if err != nil {
 		logger.Error(err.Error())

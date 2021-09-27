@@ -36,10 +36,6 @@ var (
 	incidentIdString              = fmt.Sprintf(`"incident_id" = ?`)
 	incidentRuleIdString          = fmt.Sprintf(`"rule_id" = ?`)
 	incidentStatusString          = fmt.Sprintf(`"status" = ?`)
-	incidentEndTimeString         = fmt.Sprintf(`"end_time" = ?`)
-	incidentCreatedAtString       = fmt.Sprintf(`"created_at" = ?`)
-	incidentUpdatedAtString       = fmt.Sprintf(`"updated_at" = ?`)
-	incidentHistoriesFilterString = fmt.Sprintf(`"histories.status" = ? , "histories.timestamp" = ?`)
 	startTimeFilterString         = `start_time >= ? AND start_time <= ?`
 
 	incidentOrderMap = map[apiPb.SortIncidentList]string{
@@ -273,13 +269,11 @@ func (c *Clickhouse) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, 
 		return nil, errorDataBase
 	}
 
-	histories, err := c.getIncidentHistories(inc.IncidentId)
+	inc.Histories, err = c.getIncidentHistories(inc.IncidentId)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil, errorDataBase
 	}
-
-	inc.Histories = histories
 
 	return convertFromIncident(inc), nil
 }

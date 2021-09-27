@@ -149,3 +149,83 @@ func TestConvertFromUptimeResult(t *testing.T) {
 		assert.NotNil(t, res)
 	})
 }
+
+func TestConvertToPostgressStatRequest(t *testing.T) {
+	t.Run("Test: error", func(t *testing.T) {
+		_, err := ConvertToClickhouseStatRequest(&apiPb.Metric{
+			Time: nil,
+		})
+		assert.Error(t, err)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		_, err := ConvertToClickhouseStatRequest(&apiPb.Metric{
+			Time: ptypes.TimestampNow(),
+		})
+		assert.NoError(t, err)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		_, err := ConvertToClickhouseStatRequest(&apiPb.Metric{
+			CpuInfo: &apiPb.CpuInfo{
+				Cpus: []*apiPb.CpuInfo_CPU{{}},
+			},
+			MemoryInfo: &apiPb.MemoryInfo{
+				Mem:  &apiPb.MemoryInfo_Memory{},
+				Swap: &apiPb.MemoryInfo_Memory{},
+			},
+			DiskInfo: &apiPb.DiskInfo{
+				Disks: map[string]*apiPb.DiskInfo_Disk{
+					"": {},
+				},
+			},
+			NetInfo: &apiPb.NetInfo{
+				Interfaces: map[string]*apiPb.NetInfo_Interface{
+					"": {},
+				},
+			},
+			Time: ptypes.TimestampNow(),
+		})
+		assert.NoError(t, err)
+	})
+}
+
+func TestConvertFromClickhouseStatRequest(t *testing.T) {
+	t.Run("Test: error", func(t *testing.T) {
+		_, err := ConvertFromClickhouseStatRequest(&StatRequest{
+			Time: time.Unix(-62135596888, -100000000), //Protobuf validate this as error
+		})
+		assert.Error(t, err)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		_, err := ConvertFromClickhouseStatRequest(&StatRequest{
+			CPUInfo:    nil,
+			MemoryInfo: nil,
+			DiskInfo:   nil,
+			NetInfo:    nil,
+			Time:       time.Time{},
+		})
+		assert.NoError(t, err)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		_, err := ConvertFromClickhouseStatRequest(&StatRequest{
+			CPUInfo:    []*CPUInfo{{}},
+			MemoryInfo: &MemoryInfo{},
+			DiskInfo:   []*DiskInfo{{}},
+			NetInfo:    []*NetInfo{{}},
+			Time:       time.Time{},
+		})
+		assert.NoError(t, err)
+	})
+	t.Run("Test: no error", func(t *testing.T) {
+		_, err := ConvertFromClickhouseStatRequest(&StatRequest{
+			CPUInfo: []*CPUInfo{{}},
+			MemoryInfo: &MemoryInfo{
+				Mem:  &MemoryMem{},
+				Swap: &MemorySwap{},
+			},
+			DiskInfo: []*DiskInfo{{}},
+			NetInfo:  []*NetInfo{{}},
+			Time:     time.Time{},
+		})
+		assert.NoError(t, err)
+	})
+}

@@ -59,7 +59,7 @@ func setup(ctx context.Context) error {
 	var err error
 	req := testcontainers.ContainerRequest{
 		Image:        "yandex/clickhouse-server",
-		ExposedPorts: []string{"9000/tcp"},
+		ExposedPorts: []string{"9000/tcp","8123/tcp"},
 		WaitingFor:   wait.ForListeningPort(nat.Port("9000/tcp")),
 	}
 	testContainer, err = testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
@@ -79,6 +79,12 @@ func setup(ctx context.Context) error {
 		return err
 	}
 	db, err = sql.Open("clickhouse", fmt.Sprintf("tcp://%s:%s?debug=true", ip, port.Port()))
+
+	clientPort, err := testContainer.MappedPort(ctx, "8123")
+	if err != nil {
+		return err
+	}
+	fmt.Println("client connection string:", fmt.Sprintf("tcp://%s:%s?debug=true", ip, clientPort.Port()))
 	if err != nil {
 		return err
 	}
@@ -370,10 +376,10 @@ func TestGetSnapshots(t *testing.T) {
 	sn3 := &apiPb.SchedulerResponse{
 		SchedulerId: "GetSnapshots",
 		Snapshot: &apiPb.SchedulerSnapshot{
-			Code:  apiPb.SchedulerCode_ERROR,
-			Type:  apiPb.SchedulerType_TCP,
+			Code: apiPb.SchedulerCode_ERROR,
+			Type: apiPb.SchedulerType_TCP,
 			Error: &apiPb.SchedulerSnapshot_Error{
-				Message:              "Error",
+				Message: "Error",
 			},
 			Meta: &apiPb.SchedulerSnapshot_MetaData{
 				StartTime: &timestamp.Timestamp{
@@ -492,30 +498,30 @@ func TestGetSnapshotsUptime(t *testing.T) {
 	}
 
 	sn3 := &apiPb.SchedulerResponse{
-			SchedulerId: "GetSnapshots",
-			Snapshot: &apiPb.SchedulerSnapshot{
-				Code:  apiPb.SchedulerCode_ERROR,
-				Type:  apiPb.SchedulerType_TCP,
-				Error: &apiPb.SchedulerSnapshot_Error{
-					Message:              "Error",
+		SchedulerId: "GetSnapshots",
+		Snapshot: &apiPb.SchedulerSnapshot{
+			Code: apiPb.SchedulerCode_ERROR,
+			Type: apiPb.SchedulerType_TCP,
+			Error: &apiPb.SchedulerSnapshot_Error{
+				Message: "Error",
+			},
+			Meta: &apiPb.SchedulerSnapshot_MetaData{
+				StartTime: &timestamp.Timestamp{
+					Seconds: 1000,
+					Nanos:   0,
 				},
-				Meta: &apiPb.SchedulerSnapshot_MetaData{
-					StartTime: &timestamp.Timestamp{
-						Seconds: 1000,
-						Nanos:   0,
-					},
-					EndTime: &timestamp.Timestamp{
-						Seconds: 5000,
-						Nanos:   0,
-					},
-					Value: &structpb.Value{
-						Kind: &structpb.Value_StringValue{
-							StringValue: "Value",
-						},
+				EndTime: &timestamp.Timestamp{
+					Seconds: 5000,
+					Nanos:   0,
+				},
+				Value: &structpb.Value{
+					Kind: &structpb.Value_StringValue{
+						StringValue: "Value",
 					},
 				},
 			},
-		}
+		},
+	}
 
 	err := clickh.InsertSnapshot(sn)
 	if err != nil {
@@ -532,7 +538,6 @@ func TestGetSnapshotsUptime(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-
 	timeTo, err := ptypes.TimestampProto(time.Now().Add(time.Second * 5))
 	if err != nil {
 		assert.Fail(t, err.Error())
@@ -541,7 +546,7 @@ func TestGetSnapshotsUptime(t *testing.T) {
 		SchedulerId: "GetSnapshotsUptime",
 		TimeRange: &apiPb.TimeFilter{
 			From: nil,
-			To: timeTo,
+			To:   timeTo,
 		},
 	})
 
@@ -550,6 +555,188 @@ func TestGetSnapshotsUptime(t *testing.T) {
 	assert.Equal(t, float64(15), resp.Latency)
 	assert.Equal(t, float64(1), resp.Uptime)
 
+}
+
+func TestInsertStatRequest(t *testing.T) {
+	di := map[string]*apiPb.DiskInfo_Disk{"1": {
+		Total:       100,
+		Used:        100,
+		Free:        100,
+		UsedPercent: 100,
+	}}
+
+	ni := map[string]*apiPb.NetInfo_Interface{"1": {
+		BytesSent:   100,
+		BytesRecv:   100,
+		PacketsSent: 100,
+		PacketsRecv: 100,
+		ErrIn:       100,
+		ErrOut:      100,
+		DropIn:      100,
+		DropOut:     100,
+	}}
+
+	sr := &apiPb.Metric{
+		AgentId:   "insertStatRequest",
+		AgentName: "AgentName",
+		CpuInfo: &apiPb.CpuInfo{
+			Cpus: []*apiPb.CpuInfo_CPU{&apiPb.CpuInfo_CPU{
+				Load: 100.0,
+			}},
+		},
+		MemoryInfo: &apiPb.MemoryInfo{
+			Mem: &apiPb.MemoryInfo_Memory{
+				Total:       100,
+				Used:        100,
+				Free:        100,
+				Shared:      100,
+				UsedPercent: 100,
+			},
+			Swap: &apiPb.MemoryInfo_Memory{
+				Total:       100,
+				Used:        100,
+				Free:        100,
+				Shared:      100,
+				UsedPercent: 100,
+			},
+		},
+		DiskInfo: &apiPb.DiskInfo{
+			Disks: di,
+		},
+		NetInfo: &apiPb.NetInfo{
+			Interfaces: ni,
+		},
+		Time: &timestamp.Timestamp{
+			Seconds: 1789,
+			Nanos:   0,
+		},
+	}
+	err := clickh.InsertStatRequest(sr)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+}
+
+func TestGetStatRequest(t *testing.T) {
+	di := map[string]*apiPb.DiskInfo_Disk{"1": {
+		Total:       100,
+		Used:        100,
+		Free:        100,
+		UsedPercent: 100,
+	}}
+
+	ni := map[string]*apiPb.NetInfo_Interface{"1": {
+		BytesSent:   100,
+		BytesRecv:   100,
+		PacketsSent: 100,
+		PacketsRecv: 100,
+		ErrIn:       100,
+		ErrOut:      100,
+		DropIn:      100,
+		DropOut:     100,
+	}}
+
+	sr := &apiPb.Metric{
+		AgentId:   "getStatRequest",
+		AgentName: "AgentName",
+		CpuInfo: &apiPb.CpuInfo{
+			Cpus: []*apiPb.CpuInfo_CPU{&apiPb.CpuInfo_CPU{
+				Load: 100.0,
+			}},
+		},
+		MemoryInfo: &apiPb.MemoryInfo{
+			Mem: &apiPb.MemoryInfo_Memory{
+				Total:       100,
+				Used:        100,
+				Free:        100,
+				Shared:      100,
+				UsedPercent: 100,
+			},
+			Swap: &apiPb.MemoryInfo_Memory{
+				Total:       100,
+				Used:        100,
+				Free:        100,
+				Shared:      100,
+				UsedPercent: 100,
+			},
+		},
+		DiskInfo: &apiPb.DiskInfo{
+			Disks: di,
+		},
+		NetInfo: &apiPb.NetInfo{
+			Interfaces: ni,
+		},
+		Time: &timestamp.Timestamp{
+			Seconds: 1788,
+			Nanos:   0,
+		},
+	}
+
+	sr2 := &apiPb.Metric{
+		AgentId:   "getStatRequest",
+		AgentName: "AgentName",
+		CpuInfo: &apiPb.CpuInfo{
+			Cpus: []*apiPb.CpuInfo_CPU{&apiPb.CpuInfo_CPU{
+				Load: 100.0,
+			}},
+		},
+		MemoryInfo: &apiPb.MemoryInfo{
+			Mem: &apiPb.MemoryInfo_Memory{
+				Total:       100,
+				Used:        100,
+				Free:        100,
+				Shared:      100,
+				UsedPercent: 100,
+			},
+			Swap: &apiPb.MemoryInfo_Memory{
+				Total:       100,
+				Used:        100,
+				Free:        100,
+				Shared:      100,
+				UsedPercent: 100,
+			},
+		},
+		DiskInfo: &apiPb.DiskInfo{
+			Disks: di,
+		},
+		NetInfo: &apiPb.NetInfo{
+			Interfaces: ni,
+		},
+		Time: &timestamp.Timestamp{
+			Seconds: 1789,
+			Nanos:   0,
+		},
+	}
+
+	err := clickh.InsertStatRequest(sr)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+	err = clickh.InsertStatRequest(sr2)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	srs, count, err := clickh.GetStatRequest(sr.AgentId, &apiPb.Pagination{
+		Page:  1,
+		Limit: 10,
+	}, &apiPb.TimeFilter{
+		From: &timestamp.Timestamp{
+			Seconds: 0,
+			Nanos:   0,
+		},
+		To: &timestamp.Timestamp{
+			Seconds: 1789,
+			Nanos:   0,
+		},
+	})
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	assert.Equal(t, float64(100), srs[0].CpuInfo.Cpus[0].Load)
+	assert.Equal(t, float64(100), srs[1].CpuInfo.Cpus[0].Load)
+	assert.Equal(t, count, int64(2))
 }
 
 func TestClickhouse_Migrate_error(t *testing.T) {
