@@ -90,7 +90,7 @@ var (
 	statRequestFields            = "id, created_at, agent_id, agent_name, time"
 	statRequestsCpuInfoFields    = "id, created_at, stat_request_id, load"
 	statRequestsMemoryInfoFields = "id, created_at, stat_request_id, memory_info_id, total, used, free, shared, used_percent"
-	statRequestsDiskInfoFields   = "id, created_at, stat_request_id, total, used, free, used_percent"
+	statRequestsDiskInfoFields   = "id, created_at, stat_request_id, name, total, used, free, used_percent"
 	statRequestsNetInfoFields    = "id, created_at, stat_request_id, name, bytes_sent, bytes_recv, packets_sent, packets_recv, err_in, err_out, drop_in, drop_out"
 	statRequestIdFilterString    = fmt.Sprintf(`"stat_request_id" = ?`)
 	agentIdFilterString          = fmt.Sprintf(`"agent_id" = ?`)
@@ -259,11 +259,12 @@ func (c *Clickhouse) insertStatRequestsDiskInfo(now time.Time, sr_id clickhouse.
 		return err
 	}
 
-	q := fmt.Sprintf(`INSERT INTO stat_requests_disk_info (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7)`, statRequestsDiskInfoFields)
+	q := fmt.Sprintf(`INSERT INTO stat_requests_disk_info (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8)`, statRequestsDiskInfoFields)
 	_, err = tx.Exec(q,
 		clickhouse.UUID(uuid.NewV4().String()),
 		now,
 		sr_id,
+		diskInfo.Name,
 		diskInfo.Total,
 		diskInfo.Used,
 		diskInfo.Free,
@@ -556,7 +557,7 @@ func (c *Clickhouse) getStatRequestsDiskInfo(id string) ([]*DiskInfo, error) {
 
 	for rows.Next() {
 		dis := &DiskInfo{}
-		if err := rows.Scan(&dis.Model.ID, &dis.Model.CreatedAt, &dis.StatRequestID, &dis.Total, &dis.Used, &dis.Free, &dis.UsedPercent); err != nil {
+		if err := rows.Scan(&dis.Model.ID, &dis.Model.CreatedAt, &dis.StatRequestID, &dis.Name, &dis.Total, &dis.Used, &dis.Free, &dis.UsedPercent); err != nil {
 			logger.Error(err.Error())
 			return nil, err
 		}

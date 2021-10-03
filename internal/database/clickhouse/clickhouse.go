@@ -122,6 +122,7 @@ func (c *Clickhouse) Migrate() error {
 				updated_at DateTime,
 				stat_request_id UUID,
 				memory_info_id UUID,
+				name String,
 				total UInt64,
 				used UInt64,
 				free UInt64,

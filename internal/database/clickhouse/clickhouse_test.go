@@ -59,7 +59,7 @@ func setup(ctx context.Context) error {
 	var err error
 	req := testcontainers.ContainerRequest{
 		Image:        "yandex/clickhouse-server",
-		ExposedPorts: []string{"9000/tcp","8123/tcp"},
+		ExposedPorts: []string{"9000/tcp", "8123/tcp"},
 		WaitingFor:   wait.ForListeningPort(nat.Port("9000/tcp")),
 	}
 	testContainer, err = testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
@@ -736,7 +736,102 @@ func TestGetStatRequest(t *testing.T) {
 
 	assert.Equal(t, float64(100), srs[0].CpuInfo.Cpus[0].Load)
 	assert.Equal(t, float64(100), srs[1].CpuInfo.Cpus[0].Load)
+	assert.Equal(t, uint64(100), srs[0].NetInfo.Interfaces["1"].BytesRecv)
+	assert.Equal(t, uint64(100), srs[1].NetInfo.Interfaces["1"].BytesRecv)
+	assert.Equal(t, uint64(100), srs[0].DiskInfo.Disks["1"].Free)
+	assert.Equal(t, uint64(100), srs[1].DiskInfo.Disks["1"].Free)
+	assert.Equal(t, uint64(100), srs[0].MemoryInfo.Mem.Free)
+	assert.Equal(t, uint64(100), srs[0].MemoryInfo.Swap.Free)
+	assert.Equal(t, uint64(100), srs[1].MemoryInfo.Mem.Free)
+	assert.Equal(t, uint64(100), srs[1].MemoryInfo.Swap.Free)
 	assert.Equal(t, count, int64(2))
+
+	//todo: move test
+	srsCPU, count, err := clickh.GetCPUInfoLazy(sr.AgentId, &apiPb.Pagination{
+		Page:  1,
+		Limit: 10,
+	}, &apiPb.TimeFilter{
+		From: &timestamp.Timestamp{
+			Seconds: 0,
+			Nanos:   0,
+		},
+		To: &timestamp.Timestamp{
+			Seconds: 1789,
+			Nanos:   0,
+		},
+	})
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	assert.Equal(t, float64(100), srsCPU[0].CpuInfo.Cpus[0].Load)
+	assert.Equal(t, float64(100), srsCPU[1].CpuInfo.Cpus[0].Load)
+	assert.Equal(t, count, int64(2))
+
+	srsMem, count, err := clickh.GetMemoryInfoLazy(sr.AgentId, &apiPb.Pagination{
+		Page:  1,
+		Limit: 10,
+	}, &apiPb.TimeFilter{
+		From: &timestamp.Timestamp{
+			Seconds: 0,
+			Nanos:   0,
+		},
+		To: &timestamp.Timestamp{
+			Seconds: 1789,
+			Nanos:   0,
+		},
+	})
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	assert.Equal(t, uint64(100), srsMem[0].MemoryInfo.Mem.Free)
+	assert.Equal(t, uint64(100), srsMem[0].MemoryInfo.Swap.Free)
+	assert.Equal(t, uint64(100), srsMem[1].MemoryInfo.Mem.Free)
+	assert.Equal(t, uint64(100), srsMem[1].MemoryInfo.Swap.Free)
+	assert.Equal(t, count, int64(2))
+
+	srsDisk, count, err := clickh.GetDiskInfoLazy(sr.AgentId, &apiPb.Pagination{
+		Page:  1,
+		Limit: 10,
+	}, &apiPb.TimeFilter{
+		From: &timestamp.Timestamp{
+			Seconds: 0,
+			Nanos:   0,
+		},
+		To: &timestamp.Timestamp{
+			Seconds: 1789,
+			Nanos:   0,
+		},
+	})
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	assert.Equal(t, uint64(100), srsDisk[0].DiskInfo.Disks["1"].Free)
+	assert.Equal(t, uint64(100), srsDisk[1].DiskInfo.Disks["1"].Free)
+	assert.Equal(t, count, int64(2))
+
+	srsNet, count, err := clickh.GetNetInfoLazy(sr.AgentId, &apiPb.Pagination{
+			Page:  1,
+			Limit: 10,
+		}, &apiPb.TimeFilter{
+			From: &timestamp.Timestamp{
+				Seconds: 0,
+				Nanos:   0,
+			},
+			To: &timestamp.Timestamp{
+				Seconds: 1789,
+				Nanos:   0,
+			},
+		})
+		if err != nil {
+			assert.Fail(t, err.Error())
+		}
+
+		assert.Equal(t, uint64(100), srsNet[0].NetInfo.Interfaces["1"].BytesRecv)
+		assert.Equal(t, uint64(100), srsNet[1].NetInfo.Interfaces["1"].BytesRecv)
+		assert.Equal(t, count, int64(2))
 }
 
 func TestClickhouse_Migrate_error(t *testing.T) {
