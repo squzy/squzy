@@ -243,7 +243,6 @@ func getTimeInt64(filter *apiPb.TimeFilter) (int64, int64, error) {
 	return timeFrom.UnixNano(), timeTo.UnixNano(), nil
 }
 
-//Return offset and limit
 func getOffsetAndLimit(count int64, pagination *apiPb.Pagination) (int, int) {
 	if pagination != nil {
 		if pagination.Page == -1 {

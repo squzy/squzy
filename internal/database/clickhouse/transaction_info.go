@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
 	"github.com/golang/protobuf/ptypes/wrappers"
-	"github.com/jinzhu/gorm"
 	uuid "github.com/satori/go.uuid"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"squzy/internal/logger"
@@ -14,7 +13,7 @@ import (
 )
 
 type TransactionInfo struct {
-	gorm.Model
+	Model
 	TransactionId     string
 	ApplicationId     string
 	ParentId          string
