@@ -408,3 +408,128 @@ func convertFromNetInfo(data []*NetInfo) *apiPb.NetInfo {
 	}
 	return &apiPb.NetInfo{Interfaces: interfaces}
 }
+
+func convertToTransactionInfo(data *apiPb.TransactionInfo) (*TransactionInfo, error) {
+	startTime, err := ptypes.Timestamp(data.GetStartTime())
+	if err != nil {
+		return nil, err
+	}
+	endTime, err := ptypes.Timestamp(data.GetEndTime())
+	if err != nil {
+		return nil, err
+	}
+	if data.GetMeta() == nil {
+		data.Meta = &apiPb.TransactionInfo_Meta{
+			Host:   "",
+			Path:   "",
+			Method: "",
+		}
+	}
+	if data.Error == nil {
+		data.Error = &apiPb.TransactionInfo_Error{
+			Message: "",
+		}
+	}
+	return &TransactionInfo{
+		TransactionId:     data.GetId(),
+		ApplicationId:     data.GetApplicationId(),
+		ParentId:          data.GetParentId(),
+		MetaHost:          data.GetMeta().GetHost(),
+		MetaPath:          data.GetMeta().GetPath(),
+		MetaMethod:        data.GetMeta().GetMethod(),
+		Name:              data.GetName(),
+		StartTime:         startTime.UnixNano(),
+		EndTime:           endTime.UnixNano(),
+		TransactionStatus: int32(data.GetStatus()),
+		TransactionType:   int32(data.GetType()),
+		Error:             data.GetError().GetMessage(),
+	}, nil
+}
+
+func convertFromTransaction(data *TransactionInfo) *apiPb.TransactionInfo {
+	//Skip error, because this convertion is always correct (data.StartTime < maximum possible value)
+	startTime, _ := ptypes.TimestampProto(time.Unix(0, data.StartTime))
+	endTime, _ := ptypes.TimestampProto(time.Unix(0, data.EndTime))
+
+	transactionMeta := &apiPb.TransactionInfo_Meta{
+		Host:   data.MetaHost,
+		Path:   data.MetaPath,
+		Method: data.MetaMethod,
+	}
+	if data.MetaPath == "" && data.MetaHost == "" && data.MetaMethod == "" {
+		transactionMeta = nil
+	}
+	transactionError := &apiPb.TransactionInfo_Error{
+		Message: data.Error,
+	}
+	if data.Error == "" {
+		transactionError = nil
+	}
+	return &apiPb.TransactionInfo{
+
+		Id:            data.TransactionId,
+		ApplicationId: data.ApplicationId,
+		ParentId:      data.ParentId,
+		Meta:          transactionMeta,
+		Name:          data.Name,
+		StartTime:     startTime,
+		EndTime:       endTime,
+		Status:        apiPb.TransactionStatus(data.TransactionStatus),
+		Type:          apiPb.TransactionType(data.TransactionType),
+		Error:         transactionError,
+	}
+}
+
+func convertFromTransactions(data []*TransactionInfo) []*apiPb.TransactionInfo {
+	var res []*apiPb.TransactionInfo
+	for _, request := range data {
+		stat := convertFromTransaction(request)
+		if stat != nil {
+			res = append(res, stat)
+		}
+	}
+	return res
+}
+
+func convertFromGroupResult(group []*GroupResult, upTime int64) map[string]*apiPb.TransactionGroup {
+	res := map[string]*apiPb.TransactionGroup{}
+	for _, v := range group {
+		latency, err := strconv.ParseFloat(strings.Split(v.Latency, ".")[0], 64)
+		if err != nil {
+			logger.Error(err.Error())
+			continue
+		}
+		minTime, err := strconv.ParseFloat(strings.Split(v.MinTime, ".")[0], 64)
+		if err != nil {
+			logger.Error(err.Error())
+			continue
+		}
+		maxTime, err := strconv.ParseFloat(strings.Split(v.MaxTime, ".")[0], 64)
+		if err != nil {
+			logger.Error(err.Error())
+			continue
+		}
+		lowTime, err := strconv.ParseFloat(strings.Split(v.LowTime, ".")[0], 64)
+		if err != nil {
+			logger.Error(err.Error())
+			continue
+		}
+		res[v.Name] = &apiPb.TransactionGroup{
+			Count:        v.Count,
+			SuccessRatio: float64(v.SuccessCount) / float64(v.Count),
+			AverageTime:  latency / 1000000, //div 1000 in order to get milliseconds
+			MinTime:      minTime / 1000000,
+			MaxTime:      maxTime / 1000000,
+			Throughput:   getThroughput(v.Count, lowTime, upTime), //Take minutes and div by count
+		}
+	}
+	return res
+}
+
+func getThroughput(count int64, lowTime float64, upTime int64) float64 {
+	timeDiapasonMinutes := (float64(upTime) - lowTime) / 60000000000
+	if timeDiapasonMinutes == 0 {
+		return 0
+	}
+	return float64(count) / timeDiapasonMinutes
+}

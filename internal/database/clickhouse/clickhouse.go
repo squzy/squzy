@@ -14,7 +14,7 @@ type Clickhouse struct {
 
 const (
 	dbSnapshotCollection        = "snapshots"
-	dbTransactionInfoCollection = "transaction_infos"
+	dbTransactionInfoCollection = "transaction_info"
 	dbStatRequestCollection     = "stat_requests"
 )
 

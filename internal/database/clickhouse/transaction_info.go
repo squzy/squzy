@@ -1,10 +1,16 @@
 package clickhouse
+
 //
 import (
 	"fmt"
+	"github.com/ClickHouse/clickhouse-go"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/jinzhu/gorm"
+	uuid "github.com/satori/go.uuid"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"squzy/internal/logger"
+	"strings"
+	"time"
 )
 
 type TransactionInfo struct {
@@ -34,6 +40,7 @@ type GroupResult struct {
 }
 
 const (
+	transactionInfoFields   = "id, created_at, updated_at, transaction_id, application_id, parent_id, meta_host, meta_path, meta_method, name, start_time, end_time, transactionStatus, transaction_type, error"
 	transNameStr            = "name"
 	transMetaHostStr        = "metaHost"
 	transMetaMethodStr      = "metaMethod"
@@ -42,8 +49,8 @@ const (
 )
 
 var (
-	applicationIdFilterString        = fmt.Sprintf(`"%s"."applicationId" = ?`, dbTransactionInfoCollection)
-	applicationStartTimeFilterString = fmt.Sprintf(`"%s"."startTime" BETWEEN ? and ?`, dbTransactionInfoCollection)
+	applicationIdFilterString        = fmt.Sprintf(`"applicationId" = ?`)
+	applicationStartTimeFilterString = fmt.Sprintf(`"startTime" BETWEEN ? and ?`)
 
 	transOrderMap = map[apiPb.SortTransactionList]string{
 		apiPb.SortTransactionList_SORT_TRANSACTION_LIST_UNSPECIFIED: fmt.Sprintf(`"%s"."startTime"`, dbTransactionInfoCollection),
@@ -61,146 +68,309 @@ var (
 	}
 )
 
-//func (p *Postgres) InsertTransactionInfo(data *apiPb.TransactionInfo) error {
-//	info, err := convertToTransactionInfo(data)
-//	if err != nil {
-//		return err
-//	}
-//	if err := p.Db.Table(dbTransactionInfoCollection).Create(info).Error; err != nil {
-//		return errorDataBase
-//	}
-//	return nil
-//}
-//
-//func (p *Postgres) GetTransactionInfo(request *apiPb.GetTransactionsRequest) ([]*apiPb.TransactionInfo, int64, error) {
-//	timeFrom, timeTo, err := getTimeInt64(request.TimeRange)
-//	if err != nil {
-//		return nil, -1, err
-//	}
-//
-//	var count int64
-//	err = p.Db.Table(dbTransactionInfoCollection).
-//		Where(applicationIdFilterString, request.GetApplicationId()).
-//		Where(applicationStartTimeFilterString, timeFrom, timeTo).
-//		Where(getTransactionsByString(transMetaHostStr, request.GetHost())).
-//		Where(getTransactionsByString(transNameStr, request.GetName())).
-//		Where(getTransactionsByString(transMetaPathStr, request.GetPath())).
-//		Where(getTransactionsByString(transMetaMethodStr, request.GetMethod())).
-//		Where(getTransactionTypeWhere(request.GetType())).
-//		Where(getTransactionStatusWhere(request.GetStatus())).
-//		Count(&count).Error
-//	if err != nil {
-//		return nil, -1, err
-//	}
-//
-//	offset, limit := getOffsetAndLimit(count, request.GetPagination())
-//
-//	//TODO: order
-//	var statRequests []*TransactionInfo
-//	err = p.Db.Table(dbTransactionInfoCollection).
-//		Where(applicationIdFilterString, request.GetApplicationId()).
-//		Where(applicationStartTimeFilterString, timeFrom, timeTo).
-//		Where(getTransactionsByString(transMetaHostStr, request.GetHost())).
-//		Where(getTransactionsByString(transNameStr, request.GetName())).
-//		Where(getTransactionsByString(transMetaPathStr, request.GetPath())).
-//		Where(getTransactionsByString(transMetaMethodStr, request.GetMethod())).
-//		Where(getTransactionTypeWhere(request.GetType())).
-//		Where(getTransactionStatusWhere(request.GetStatus())).
-//		Order(getTransactionOrder(request.GetSort()) + getTransactionDirection(request.GetSort())). //TODO
-//		Offset(offset).
-//		Limit(limit).
-//		Find(&statRequests).
-//		Error
-//
-//	if err != nil {
-//		return nil, -1, errorDataBase
-//	}
-//
-//	return convertFromTransactions(statRequests), count, nil
-//}
-//
-//func (p *Postgres) GetTransactionByID(request *apiPb.GetTransactionByIdRequest) (*apiPb.TransactionInfo, []*apiPb.TransactionInfo, error) {
-//	var transaction TransactionInfo
-//	err := p.Db.Table(dbTransactionInfoCollection).
-//		Where(fmt.Sprintf(`"%s"."transactionId" = ?`, dbTransactionInfoCollection), request.GetTransactionId()).
-//		First(&transaction).
-//		Error
-//	if err != nil || &transaction == nil {
-//		return nil, nil, err
-//	}
-//
-//	children, err := p.GetTransactionChildren(transaction.TransactionId, "")
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	return convertFromTransaction(&transaction), convertFromTransactions(children), nil
-//}
-//
-////passedString is used in order to prevent cycles
-//func (p *Postgres) GetTransactionChildren(transactionId, passedString string) ([]*TransactionInfo, error) {
-//	if strings.Contains(passedString, transactionId) {
-//		return nil, nil
-//	}
-//
-//	var childrenTransactions []*TransactionInfo
-//	err := p.Db.Table(dbTransactionInfoCollection).
-//		Where(fmt.Sprintf(`"%s"."parentId" = ?`, dbTransactionInfoCollection), transactionId).
-//		Find(&childrenTransactions).
-//		Error
-//	if err != nil {
-//		return nil, errorDataBase
-//	}
-//
-//	res := childrenTransactions
-//	for _, v := range childrenTransactions {
-//		subchildren, err := p.GetTransactionChildren(v.TransactionId, passedString+" "+v.ParentId)
-//		if err != nil {
-//			return nil, errorDataBase
-//		}
-//		res = append(res, subchildren...)
-//	}
-//
-//	return res, nil
-//}
-//
-//func (p *Postgres) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest) (map[string]*apiPb.TransactionGroup, error) {
-//	timeFrom, timeTo, err := getTimeInt64(request.TimeRange)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	selectString := fmt.Sprintf(
-//		`%s as "groupName", COUNT(%s) as "count", COUNT(CASE WHEN "%s"."transactionStatus" = '1' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."endTime"-"%s"."startTime") as "latency", min("%s"."endTime"-"%s"."startTime") as "minTime", max("%s"."endTime"-"%s"."startTime") as "maxTime", min("%s"."endTime") as "lowTime"`,
-//		getTransactionsGroupBy(request.GetGroupType()),
-//		getTransactionsGroupBy(request.GetGroupType()),
-//		dbTransactionInfoCollection,
-//		dbTransactionInfoCollection,
-//		dbTransactionInfoCollection,
-//		dbTransactionInfoCollection,
-//		dbTransactionInfoCollection,
-//		dbTransactionInfoCollection,
-//		dbTransactionInfoCollection,
-//		dbTransactionInfoCollection,
-//	)
-//
-//	//TODO: order
-//	var groupResult []*GroupResult
-//	err = p.Db.Table(dbTransactionInfoCollection).
-//		Select(selectString).
-//		Where(applicationIdFilterString, request.GetApplicationId()).
-//		Where(applicationStartTimeFilterString, timeFrom, timeTo).
-//		Where(getTransactionTypeWhere(request.GetType())).
-//		Where(getTransactionStatusWhere(request.GetStatus())).
-//		Group(getTransactionsGroupBy(request.GetGroupType())).
-//		Find(&groupResult).
-//		Error
-//	if err != nil {
-//		return nil, errorDataBase
-//	}
-//
-//	return convertFromGroupResult(groupResult, timeTo), nil
-//}
+func (c *Clickhouse) InsertTransactionInfo(data *apiPb.TransactionInfo) error {
+	now := time.Now()
+
+	info, err := convertToTransactionInfo(data)
+	if err != nil {
+		return err
+	}
+
+	tx, err := c.Db.Begin()
+	if err != nil {
+		return err
+	}
+
+	q := fmt.Sprintf(`INSERT INTO transaction_info (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, transactionInfoFields)
+	_, err = tx.Exec(q,
+		clickhouse.UUID(uuid.NewV4().String()),
+		now,
+		now,
+		info.TransactionId,
+		info.ApplicationId,
+		info.ParentId,
+		info.MetaHost,
+		info.MetaPath,
+		info.MetaHost,
+		info.Name,
+		info.StartTime,
+		info.EndTime,
+		info.TransactionStatus,
+		info.TransactionType,
+		info.Error,
+	)
+	if err != nil {
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Clickhouse) GetTransactionInfo(request *apiPb.GetTransactionsRequest) ([]*apiPb.TransactionInfo, int64, error) {
+	timeFrom, timeTo, err := getTimeInt64(request.TimeRange)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	var count int64
+	count, err = c.countTransactions(request, timeFrom, timeTo)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	offset, limit := getOffsetAndLimit(count, request.GetPagination())
+
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM transaction_info WHERE (%s AND %s AND %s AND %s AND %s AND %s AND %s, AND %s) ORDER BY %s LIMIT %d OFFSET %d`,
+		transactionInfoFields,
+		applicationIdFilterString,
+		applicationStartTimeFilterString,
+		getTransactionsByString(transMetaHostStr, request.GetHost()),
+		getTransactionsByString(transNameStr, request.GetName()),
+		getTransactionsByString(transMetaPathStr, request.GetPath()),
+		getTransactionsByString(transMetaMethodStr, request.GetMethod()),
+		getTransactionTypeWhere(request.GetType()),
+		getTransactionStatusWhere(request.GetStatus()),
+		getTransactionOrder(request.GetSort())+getTransactionDirection(request.GetSort()), // todo
+		limit,
+		offset),
+		request.ApplicationId,
+		timeFrom,
+		timeTo,
+	)
+
+	if err != nil {
+		logger.Error(err.Error())
+		return nil, -1, errorDataBase
+	}
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}()
+
+	var infos []*TransactionInfo
+	for rows.Next() {
+		inf := &TransactionInfo{}
+		if err := rows.Scan(&inf.Model.ID, &inf.Model.CreatedAt, &inf.Model.UpdatedAt,
+			&inf.ApplicationId, &inf.ParentId, &inf.MetaHost, &inf.MetaPath,
+			&inf.MetaMethod, &inf.Name, &inf.StartTime, &inf.EndTime,
+			&inf.TransactionStatus, &inf.TransactionType, &inf.Error); err != nil {
+			logger.Error(err.Error())
+			return nil, -1, err
+		}
+
+		infos = append(infos, inf)
+	}
+
+	if err := rows.Err(); err != nil {
+		logger.Error(err.Error())
+		return nil, -1, errorDataBase
+	}
+
+	return convertFromTransactions(infos), count, nil
+}
+
+func (c *Clickhouse) countTransactions(request *apiPb.GetTransactionsRequest, timeFrom int64, timeTo int64) (int64, error) {
+	var count int64
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM transaction_info WHERE %s AND (%s) AND %s AND %s AND %s AND %s AND %s AND %s LIMIT 1`,
+		applicationIdFilterString,
+		applicationStartTimeFilterString,
+		getTransactionsByString(transMetaHostStr, request.GetHost()),
+		getTransactionsByString(transNameStr, request.GetName()),
+		getTransactionsByString(transMetaPathStr, request.GetPath()),
+		getTransactionsByString(transMetaMethodStr, request.GetMethod()),
+		getTransactionTypeWhere(request.GetType()),
+		getTransactionStatusWhere(request.GetStatus())),
+		request.ApplicationId,
+		timeFrom,
+		timeTo)
+
+	if err != nil {
+		logger.Error(err.Error())
+		return -1, errorDataBase
+	}
+
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}()
+
+	if ok := rows.Next(); !ok {
+		return -1, errorDataBase
+	}
+
+	if err := rows.Scan(&count); err != nil {
+		logger.Error(err.Error())
+		return -1, errorDataBase
+	}
+
+	if err := rows.Err(); err != nil {
+		logger.Error(err.Error())
+		return -1, errorDataBase
+
+	}
+	return count, nil
+}
+
+func (c *Clickhouse) GetTransactionByID(request *apiPb.GetTransactionByIdRequest) (*apiPb.TransactionInfo, []*apiPb.TransactionInfo, error) {
+	transaction, err := c.getTransaction(request.TransactionId)
+	if err != nil || &transaction == nil {
+		return nil, nil, err
+	}
+
+	children, err := c.GetTransactionChildren(transaction.TransactionId, "")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return convertFromTransaction(transaction), convertFromTransactions(children), nil
+}
+
+func (c *Clickhouse) getTransaction(id string) (*TransactionInfo, error) {
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM transaction_info WHERE "transactionId" = ? LIMIT 1`, transactionInfoFields), id)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}()
+
+	inf := &TransactionInfo{}
+
+	if ok := rows.Next(); !ok {
+		return nil, err
+	}
+
+	if err := rows.Scan(&inf.Model.ID, &inf.Model.CreatedAt, &inf.Model.UpdatedAt,
+		&inf.ApplicationId, &inf.ParentId, &inf.MetaHost, &inf.MetaPath,
+		&inf.MetaMethod, &inf.Name, &inf.StartTime, &inf.EndTime,
+		&inf.TransactionStatus, &inf.TransactionType, &inf.Error); err != nil {
+		logger.Error(err.Error())
+		return nil, err
+	}
+
+	if err := rows.Err(); err != nil {
+		logger.Error(err.Error())
+		return nil, err
+	}
+	return inf, nil
+}
+
+func (c *Clickhouse) GetTransactionChildren(transactionId, cyclicalLoopCheck string) ([]*TransactionInfo, error) {
+	if strings.Contains(cyclicalLoopCheck, transactionId) {
+		return nil, nil
+	}
+
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM transaction_info WHERE "parentId" = ?`, transactionInfoFields), transactionId)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}()
+
+	var childTransactions []*TransactionInfo
+	for rows.Next() {
+		child := &TransactionInfo{}
+		if err := rows.Scan(&child.Model.ID, &child.Model.CreatedAt, &child.Model.UpdatedAt,
+			&child.ApplicationId, &child.ParentId, &child.MetaHost, &child.MetaPath,
+			&child.MetaMethod, &child.Name, &child.StartTime, &child.EndTime,
+			&child.TransactionStatus, &child.TransactionType, &child.Error); err != nil {
+			logger.Error(err.Error())
+			return nil, err
+		}
+
+		childTransactions = append(childTransactions, child)
+	}
+
+	for _, v := range childTransactions {
+		grandChildren, err := c.GetTransactionChildren(v.TransactionId, cyclicalLoopCheck+" "+v.ParentId)
+		if err != nil {
+			return nil, errorDataBase
+		}
+		childTransactions = append(grandChildren, grandChildren...)
+	}
+
+	if err := rows.Err(); err != nil {
+		logger.Error(err.Error())
+		return nil, err
+	}
+	return childTransactions, nil
+}
+
+func (c *Clickhouse) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest) (map[string]*apiPb.TransactionGroup, error) {
+	timeFrom, timeTo, err := getTimeInt64(request.TimeRange)
+	if err != nil {
+		return nil, err
+	}
+
+	selection := fmt.Sprintf(
+		`%s as "groupName", COUNT(%s) as "count", COUNT(CASE WHEN "%s"."transactionStatus" = '1' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."endTime"-"%s"."startTime") as "latency", min("%s"."endTime"-"%s"."startTime") as "minTime", max("%s"."endTime"-"%s"."startTime") as "maxTime", min("%s"."endTime") as "lowTime"`,
+		getTransactionsGroupBy(request.GetGroupType()),
+		getTransactionsGroupBy(request.GetGroupType()),
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+	)
+
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s transaction_info WHERE %s AND %s AND %s AND %s ORDER BY %s`,
+		selection,
+		applicationIdFilterString,
+		applicationStartTimeFilterString,
+		getTransactionTypeWhere(request.GetType()),
+		getTransactionStatusWhere(request.GetStatus()),
+		getTransactionsGroupBy(request.GetGroupType())),
+		request.ApplicationId,
+		timeFrom,
+		timeTo,
+	)
+
+	if err != nil {
+		logger.Error(err.Error())
+		return nil, errorDataBase
+	}
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}()
+
+	var groupResults []*GroupResult
+	for rows.Next() {
+		res := &GroupResult{}
+		if err := rows.Scan(&res.Name, &res.Count, &res.SuccessCount, &res.Latency, &res.MinTime, &res.MaxTime, &res.LowTime); err != nil {
+			logger.Error(err.Error())
+			return nil, err
+		}
+
+		groupResults = append(groupResults, res)
+	}
+
+	if err := rows.Err(); err != nil {
+		logger.Error(err.Error())
+		return nil, errorDataBase
+	}
+
+	return convertFromGroupResult(groupResults, timeTo), nil
+}
 
 func getTransactionOrder(request *apiPb.SortingTransactionList) string {
 	if request == nil {

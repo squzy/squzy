@@ -311,7 +311,7 @@ func (c *Clickhouse) insertStatRequestsNetInfo(now time.Time, sr_id clickhouse.U
 	return nil
 }
 
-func (c *Clickhouse) GetStatRequest(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int64, error) {
+func (c *Clickhouse) GetStatRequest(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
 	srs, count, err := c.getStatRequests(agentID, pagination, filter)
 	if err != nil {
 		return nil, -1, err
@@ -320,7 +320,7 @@ func (c *Clickhouse) GetStatRequest(agentID string, pagination *apiPb.Pagination
 	return ConvertFromClickhouseStatRequests(srs), count, nil
 }
 
-func (c *Clickhouse) getStatRequests(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*StatRequest, int64, error) {
+func (c *Clickhouse) getStatRequests(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*StatRequest, int32, error) {
 	rows, count, err := c.getStatRequestsRows(agentID, pagination, filter)
 	if err != nil {
 		return nil, -1, err
@@ -386,7 +386,7 @@ func (c *Clickhouse) getStatRequests(agentID string, pagination *apiPb.Paginatio
 	return statRequests, count, nil
 }
 
-func (c *Clickhouse) getStatRequestsRows(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) (*sql.Rows, int64, error) {
+func (c *Clickhouse) getStatRequestsRows(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) (*sql.Rows, int32, error) {
 	timeFrom, timeTo, err := getTime(filter)
 	if err != nil {
 		return nil, -1, err
@@ -397,7 +397,7 @@ func (c *Clickhouse) getStatRequestsRows(agentID string, pagination *apiPb.Pagin
 		return nil, -1, err
 	}
 
-	offset, limit := getOffsetAndLimit(count, pagination)
+	offset, limit := getOffsetAndLimit(int64(count), pagination)
 
 	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM stat_requests WHERE (%s AND %s) ORDER BY %s LIMIT %d OFFSET %d`,
 		statRequestFields,
@@ -415,10 +415,10 @@ func (c *Clickhouse) getStatRequestsRows(agentID string, pagination *apiPb.Pagin
 		logger.Error(err.Error())
 		return nil, -1, errorDataBase
 	}
-	return rows, count, nil
+	return rows, int32(count), nil
 }
 
-func (c *Clickhouse) countStatRequests(agentID string, timeFrom time.Time, timeTo time.Time) (int64, error) {
+func (c *Clickhouse) countStatRequests(agentID string, timeFrom time.Time, timeTo time.Time) (int32, error) {
 	var count int64
 	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM stat_requests WHERE %s AND %s`,
 		agentIdFilterString,
@@ -453,7 +453,7 @@ func (c *Clickhouse) countStatRequests(agentID string, timeFrom time.Time, timeT
 		return -1, errorDataBase
 
 	}
-	return count, nil
+	return int32(count), nil
 }
 func (c *Clickhouse) getStatRequestsCpuInfo(id string) ([]*CPUInfo, error) {
 	var cpuInfos []*CPUInfo
@@ -600,7 +600,7 @@ func (c *Clickhouse) getStatRequestsNetInfo(id string) ([]*NetInfo, error) {
 	return netInfos, nil
 }
 
-func (c *Clickhouse) GetCPUInfoLazy(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int64, error) {
+func (c *Clickhouse) GetCPUInfo(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
 	rows, count, err := c.getStatRequestsRows(agentID, pagination, filter)
 	if err != nil {
 		return nil, -1, err
@@ -637,7 +637,7 @@ func (c *Clickhouse) GetCPUInfoLazy(agentID string, pagination *apiPb.Pagination
 	return ConvertFromClickhouseStatRequests(statRequests), count, nil
 }
 
-func (c *Clickhouse) GetMemoryInfoLazy(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int64, error) {
+func (c *Clickhouse) GetMemoryInfo(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
 	rows, count, err := c.getStatRequestsRows(agentID, pagination, filter)
 	if err != nil {
 		return nil, -1, err
@@ -687,7 +687,7 @@ func (c *Clickhouse) GetMemoryInfoLazy(agentID string, pagination *apiPb.Paginat
 	return ConvertFromClickhouseStatRequests(statRequests), count, nil
 }
 
-func (c *Clickhouse) GetDiskInfoLazy(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int64, error) {
+func (c *Clickhouse) GetDiskInfo(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
 	rows, count, err := c.getStatRequestsRows(agentID, pagination, filter)
 	if err != nil {
 		return nil, -1, err
@@ -724,7 +724,7 @@ func (c *Clickhouse) GetDiskInfoLazy(agentID string, pagination *apiPb.Paginatio
 	return ConvertFromClickhouseStatRequests(statRequests), count, nil
 }
 
-func (c *Clickhouse) GetNetInfoLazy(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int64, error) {
+func (c *Clickhouse) GetNetInfo(agentID string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error) {
 	rows, count, err := c.getStatRequestsRows(agentID, pagination, filter)
 	if err != nil {
 		return nil, -1, err

@@ -2,10 +2,10 @@ package clickhouse
 
 import (
 	"github.com/golang/protobuf/ptypes"
-	_struct "github.com/golang/protobuf/ptypes/struct"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/structpb"
 	"testing"
 	"time"
 )
@@ -81,9 +81,9 @@ func TestConvertToSnapshot(t *testing.T) {
 				Meta: &apiPb.SchedulerSnapshot_MetaData{
 					StartTime: correctTime,
 					EndTime:   correctTime,
-					Value: &_struct.Value{
-						Kind: &_struct.Value_StringValue{
-							StringValue: "HUY",
+					Value: &structpb.Value{
+						Kind: &structpb.Value_StringValue{
+							StringValue: "hey",
 						},
 					},
 				},
@@ -150,7 +150,7 @@ func TestConvertFromUptimeResult(t *testing.T) {
 	})
 }
 
-func TestConvertToPostgressStatRequest(t *testing.T) {
+func TestConvertToClickhouseStatRequest(t *testing.T) {
 	t.Run("Test: error", func(t *testing.T) {
 		_, err := ConvertToClickhouseStatRequest(&apiPb.Metric{
 			Time: nil,
