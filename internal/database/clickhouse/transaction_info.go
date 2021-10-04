@@ -309,6 +309,7 @@ func (c *Clickhouse) GetTransactionChildren(transactionId, cyclicalLoopCheck str
 	return childTransactions, nil
 }
 
+// todo order
 func (c *Clickhouse) GetTransactionGroup(request *apiPb.GetTransactionGroupRequest) (map[string]*apiPb.TransactionGroup, error) {
 	timeFrom, timeTo, err := getTimeInt64(request.TimeRange)
 	if err != nil {

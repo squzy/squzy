@@ -13,10 +13,6 @@ import (
 type configErrorMock struct {
 }
 
-func (m *configErrorMock) GetDbChoice() string {
-	panic("implement me")
-}
-
 func (*configErrorMock) GetPort() int32 {
 	return 1000000
 }
@@ -54,10 +50,6 @@ func (*configErrorMock) WithDbLogs() bool {
 }
 
 type configMock struct {
-}
-
-func (m *configMock) GetDbChoice() string {
-	panic("implement me")
 }
 
 func (*configMock) GetPort() int32 {

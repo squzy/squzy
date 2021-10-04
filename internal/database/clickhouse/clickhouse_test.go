@@ -747,7 +747,7 @@ func TestGetStatRequest(t *testing.T) {
 	assert.Equal(t, count, int64(2))
 
 	//todo: move these tests
-	srsCPU, count, err := clickh.GetCPUInfoLazy(sr.AgentId, &apiPb.Pagination{
+	srsCPU, count, err := clickh.GetCPUInfo(sr.AgentId, &apiPb.Pagination{
 		Page:  1,
 		Limit: 10,
 	}, &apiPb.TimeFilter{
@@ -768,7 +768,7 @@ func TestGetStatRequest(t *testing.T) {
 	assert.Equal(t, float64(100), srsCPU[1].CpuInfo.Cpus[0].Load)
 	assert.Equal(t, count, int64(2))
 
-	srsMem, count, err := clickh.GetMemoryInfoLazy(sr.AgentId, &apiPb.Pagination{
+	srsMem, count, err := clickh.GetMemoryInfo(sr.AgentId, &apiPb.Pagination{
 		Page:  1,
 		Limit: 10,
 	}, &apiPb.TimeFilter{
@@ -791,7 +791,7 @@ func TestGetStatRequest(t *testing.T) {
 	assert.Equal(t, uint64(100), srsMem[1].MemoryInfo.Swap.Free)
 	assert.Equal(t, count, int64(2))
 
-	srsDisk, count, err := clickh.GetDiskInfoLazy(sr.AgentId, &apiPb.Pagination{
+	srsDisk, count, err := clickh.GetDiskInfo(sr.AgentId, &apiPb.Pagination{
 		Page:  1,
 		Limit: 10,
 	}, &apiPb.TimeFilter{
@@ -812,7 +812,7 @@ func TestGetStatRequest(t *testing.T) {
 	assert.Equal(t, uint64(100), srsDisk[1].DiskInfo.Disks["1"].Free)
 	assert.Equal(t, count, int64(2))
 
-	srsNet, count, err := clickh.GetNetInfoLazy(sr.AgentId, &apiPb.Pagination{
+	srsNet, count, err := clickh.GetNetInfo(sr.AgentId, &apiPb.Pagination{
 		Page:  1,
 		Limit: 10,
 	}, &apiPb.TimeFilter{
