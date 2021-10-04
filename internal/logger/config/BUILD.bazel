@@ -15,3 +15,5 @@ go_library(
     importpath = "squzy/internal/logger/config",
     visibility = ["//visibility:public"],
 )
+
+
