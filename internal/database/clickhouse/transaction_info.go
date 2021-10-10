@@ -39,17 +39,17 @@ type GroupResult struct {
 }
 
 const (
-	transactionInfoFields   = "id, created_at, updated_at, transaction_id, application_id, parent_id, meta_host, meta_path, meta_method, name, start_time, end_time, transactionStatus, transaction_type, error"
+	transactionInfoFields   = "id, created_at, updated_at, transaction_id, application_id, parent_id, meta_host, meta_path, meta_method, name, start_time, end_time, transaction_status, transaction_type, error"
 	transNameStr            = "name"
-	transMetaHostStr        = "metaHost"
-	transMetaMethodStr      = "metaMethod"
-	transMetaPathStr        = "metaPath"
-	transTransactionTypeStr = "transactionType"
+	transMetaHostStr        = "meta_host"
+	transMetaMethodStr      = "meta_method"
+	transMetaPathStr        = "meta_path"
+	transTransactionTypeStr = "transaction_type"
 )
 
 var (
-	applicationIdFilterString        = fmt.Sprintf(`"applicationId" = ?`)
-	applicationStartTimeFilterString = fmt.Sprintf(`"startTime" BETWEEN ? and ?`)
+	applicationIdFilterString        = fmt.Sprintf(`"application_id" = ?`)
+	applicationStartTimeFilterString = fmt.Sprintf(`"start_time" BETWEEN ? and ?`)
 
 	transOrderMap = map[apiPb.SortTransactionList]string{
 		apiPb.SortTransactionList_SORT_TRANSACTION_LIST_UNSPECIFIED: fmt.Sprintf(`"%s"."startTime"`, dbTransactionInfoCollection),
@@ -317,7 +317,7 @@ func (c *Clickhouse) GetTransactionGroup(request *apiPb.GetTransactionGroupReque
 	}
 
 	selection := fmt.Sprintf(
-		`%s as "groupName", COUNT(%s) as "count", COUNT(CASE WHEN "%s"."transactionStatus" = '1' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."endTime"-"%s"."startTime") as "latency", min("%s"."endTime"-"%s"."startTime") as "minTime", max("%s"."endTime"-"%s"."startTime") as "maxTime", min("%s"."endTime") as "lowTime"`,
+		`%s as "groupName", COUNT(%s) as "count", COUNT(CASE WHEN "%s"."transaction_status" = '1' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."end_time"-"%s"."start_time") as "latency", min("%s"."end_time"-"%s"."start_time") as "minTime", max("%s"."end_time"-"%s"."start_time") as "maxTime", min("%s"."end_time") as "lowTime"`,
 		getTransactionsGroupBy(request.GetGroupType()),
 		getTransactionsGroupBy(request.GetGroupType()),
 		dbTransactionInfoCollection,
@@ -330,7 +330,7 @@ func (c *Clickhouse) GetTransactionGroup(request *apiPb.GetTransactionGroupReque
 		dbTransactionInfoCollection,
 	)
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s transaction_info WHERE %s AND %s AND %s AND %s ORDER BY %s`,
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM transaction_info WHERE %s AND %s AND %s AND %s GROUP BY %s`,
 		selection,
 		applicationIdFilterString,
 		applicationStartTimeFilterString,
@@ -410,7 +410,7 @@ func getTransactionStatusWhere(transType apiPb.TransactionStatus) string {
 	if transType == apiPb.TransactionStatus_TRANSACTION_CODE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."transactionStatus" = '%d'`, dbTransactionInfoCollection, transType)
+	return fmt.Sprintf(`"%s"."transaction_status" = '%d'`, dbTransactionInfoCollection, transType)
 }
 
 func getTransactionsGroupBy(group apiPb.GroupTransaction) string {

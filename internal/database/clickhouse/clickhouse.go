@@ -168,7 +168,7 @@ func (c *Clickhouse) Migrate() error {
 					name String,
 					start_time Int64,
 					end_time Int64,
-					transactionStatus Int32,
+					transaction_status Int32,
 					transaction_type Int32,
 					error String
 				) ENGINE = MergeTree ORDER BY tuple()

@@ -834,272 +834,326 @@ func TestGetStatRequest(t *testing.T) {
 	assert.Equal(t, count, int64(2))
 }
 
+func TestInsertTransactionInfo(t *testing.T) {
+	err := clickh.InsertTransactionInfo(&apiPb.TransactionInfo{
+		Id:            "InsertTransactionInfo",
+		ApplicationId: "ApplicationId",
+		ParentId:      "ParentId",
+		Meta: &apiPb.TransactionInfo_Meta{
+			Host:   "Host",
+			Path:   "Path",
+			Method: "Method",
+		},
+		Name: "Name",
+		StartTime: &timestamp.Timestamp{
+			Seconds: 0,
+			Nanos:   0,
+		},
+		EndTime: &timestamp.Timestamp{
+			Seconds: 6789,
+			Nanos:   0,
+		},
+		Status: 1,
+		Type:   1,
+		Error: &apiPb.TransactionInfo_Error{
+			Message: "TransactionInfo_Error",
+		},
+	})
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+}
+
+func TestGetTransactionInfo(t *testing.T) {
+	tr1 := &apiPb.TransactionInfo{
+		Id:            "InsertTransactionInfo",
+		ApplicationId: "ApplicationId",
+		ParentId:      "ParentId",
+		Meta: &apiPb.TransactionInfo_Meta{
+			Host:   "Host",
+			Path:   "Path",
+			Method: "Method",
+		},
+		Name: "Name",
+		StartTime: &timestamp.Timestamp{
+			Seconds: 0,
+			Nanos:   0,
+		},
+		EndTime: &timestamp.Timestamp{
+			Seconds: 6789,
+			Nanos:   0,
+		},
+		Status: 1,
+		Type:   1,
+		Error: &apiPb.TransactionInfo_Error{
+			Message: "TransactionInfo_Error",
+		},
+	}
+
+	tr2 := &apiPb.TransactionInfo{
+		Id:            "InsertTransactionInfo2",
+		ApplicationId: "ApplicationId",
+		ParentId:      "ParentId",
+		Meta: &apiPb.TransactionInfo_Meta{
+			Host:   "Host",
+			Path:   "Path",
+			Method: "Method",
+		},
+		Name: "Name",
+		StartTime: &timestamp.Timestamp{
+			Seconds: 0,
+			Nanos:   0,
+		},
+		EndTime: &timestamp.Timestamp{
+			Seconds: 6789,
+			Nanos:   0,
+		},
+		Status: 1,
+		Type:   1,
+		Error: &apiPb.TransactionInfo_Error{
+			Message: "TransactionInfo_Error",
+		},
+	}
+
+	err := clickh.InsertTransactionInfo(tr1)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	err = clickh.InsertTransactionInfo(tr2)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	trs, count, err := clickh.GetTransactionInfo(&apiPb.GetTransactionsRequest{
+		ApplicationId: "ApplicationId",
+		Pagination:    nil,
+		TimeRange:     nil,
+		Type:          0,
+		Status:        0,
+		Host:          nil,
+		Name:          nil,
+		Path:          nil,
+		Method:        nil,
+		Sort:          nil,
+	})
+
+	assert.Equal(t, "ApplicationId", trs[0].ApplicationId)
+	assert.Equal(t, "ApplicationId", trs[1].ApplicationId)
+	assert.Equal(t, count, int64(2))
+}
+
+func TestGetTransactionChildren(t *testing.T) {
+	tr1 := &apiPb.TransactionInfo{
+		Id:            "GetTransactionChildren",
+		ApplicationId: "ApplicationId",
+		ParentId:      "ParentId",
+		Meta: &apiPb.TransactionInfo_Meta{
+			Host:   "Host",
+			Path:   "Path",
+			Method: "Method",
+		},
+		Name: "Name",
+		StartTime: &timestamp.Timestamp{
+			Seconds: 0,
+			Nanos:   0,
+		},
+		EndTime: &timestamp.Timestamp{
+			Seconds: 6789,
+			Nanos:   0,
+		},
+		Status: 1,
+		Type:   1,
+		Error: &apiPb.TransactionInfo_Error{
+			Message: "TransactionInfo_Error",
+		},
+	}
+
+	tr2 := &apiPb.TransactionInfo{
+		Id:            "GetTransactionChildren2",
+		ApplicationId: "ApplicationId",
+		ParentId:      "GetTransactionChildren",
+		Meta: &apiPb.TransactionInfo_Meta{
+			Host:   "Host",
+			Path:   "Path",
+			Method: "Method",
+		},
+		Name: "Name",
+		StartTime: &timestamp.Timestamp{
+			Seconds: 0,
+			Nanos:   0,
+		},
+		EndTime: &timestamp.Timestamp{
+			Seconds: 6789,
+			Nanos:   0,
+		},
+		Status: 1,
+		Type:   1,
+		Error: &apiPb.TransactionInfo_Error{
+			Message: "TransactionInfo_Error",
+		},
+	}
+
+	tr3 := &apiPb.TransactionInfo{
+		Id:            "GetTransactionChildren3",
+		ApplicationId: "ApplicationId",
+		ParentId:      "GetTransactionChildren",
+		Meta: &apiPb.TransactionInfo_Meta{
+			Host:   "Host",
+			Path:   "Path",
+			Method: "Method",
+		},
+		Name: "Name",
+		StartTime: &timestamp.Timestamp{
+			Seconds: 0,
+			Nanos:   0,
+		},
+		EndTime: &timestamp.Timestamp{
+			Seconds: 6789,
+			Nanos:   0,
+		},
+		Status: 1,
+		Type:   1,
+		Error: &apiPb.TransactionInfo_Error{
+			Message: "TransactionInfo_Error",
+		},
+	}
+
+	err := clickh.InsertTransactionInfo(tr1)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	err = clickh.InsertTransactionInfo(tr2)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	err = clickh.InsertTransactionInfo(tr3)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	trChildren, err := clickh.GetTransactionChildren(tr1.Id, "")
+
+	assert.Equal(t, "GetTransactionChildren2", trChildren[0].TransactionId)
+	assert.Equal(t, "GetTransactionChildren3", trChildren[1].TransactionId)
+}
+
+func TestGetTransactionGroup(t *testing.T) {
+	tr1 := &apiPb.TransactionInfo{
+		Id:            "GetTransactionGroup",
+		ApplicationId: "ApplicationId",
+		ParentId:      "ParentId",
+		Meta: &apiPb.TransactionInfo_Meta{
+			Host:   "Host",
+			Path:   "Path",
+			Method: "Method",
+		},
+		Name: "Name",
+		StartTime: &timestamp.Timestamp{
+			Seconds: 6789,
+			Nanos:   0,
+		},
+		EndTime: &timestamp.Timestamp{
+			Seconds: 6899,
+			Nanos:   0,
+		},
+		Status: 1,
+		Type:   5,
+		Error: &apiPb.TransactionInfo_Error{
+			Message: "TransactionInfo_Error",
+		},
+	}
+
+	tr2 := &apiPb.TransactionInfo{
+		Id:            "GetTransactionGroup",
+		ApplicationId: "ApplicationId",
+		ParentId:      "ParentId",
+		Meta: &apiPb.TransactionInfo_Meta{
+			Host:   "Host",
+			Path:   "Path",
+			Method: "Method",
+		},
+		Name: "Name",
+		StartTime: &timestamp.Timestamp{
+			Seconds: 6789,
+			Nanos:   0,
+		},
+		EndTime: &timestamp.Timestamp{
+			Seconds: 6899,
+			Nanos:   0,
+		},
+		Status: 1,
+		Type:   5,
+		Error: &apiPb.TransactionInfo_Error{
+			Message: "TransactionInfo_Error",
+		},
+	}
+
+	tr3 := &apiPb.TransactionInfo{
+		Id:            "GetTransactionGroup",
+		ApplicationId: "ApplicationId",
+		ParentId:      "ParentId",
+		Meta: &apiPb.TransactionInfo_Meta{
+			Host:   "Host",
+			Path:   "Path",
+			Method: "Method",
+		},
+		Name: "Name",
+		StartTime: &timestamp.Timestamp{
+			Seconds: 6789,
+			Nanos:   0,
+		},
+		EndTime: &timestamp.Timestamp{
+			Seconds: 6899,
+			Nanos:   0,
+		},
+		Status: 1,
+		Type:   5,
+		Error: &apiPb.TransactionInfo_Error{
+			Message: "TransactionInfo_Error",
+		},
+	}
+
+	err := clickh.InsertTransactionInfo(tr1)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	err = clickh.InsertTransactionInfo(tr2)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	err = clickh.InsertTransactionInfo(tr3)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
+
+	trGroup, err := clickh.GetTransactionGroup(&apiPb.GetTransactionGroupRequest{
+		ApplicationId:        "ApplicationId",
+		TimeRange:            &apiPb.TimeFilter{
+			From: &timestamp.Timestamp{
+				Seconds: 6700,
+				Nanos:   0,
+			},
+			To: &timestamp.Timestamp{
+				Seconds: 6900,
+				Nanos:   0,
+			},
+		},
+		GroupType:            apiPb.GroupTransaction_BY_PATH,
+		Type:                 apiPb.TransactionType_TRANSACTION_TYPE_GRPC,
+		Status:               1,
+	})
+
+	assert.Equal(t, 3, trGroup["Path"].Count)
+}
+
 func TestClickhouse_Migrate_error(t *testing.T) {
 	t.Run("Should: return error", func(t *testing.T) {
 		err := clickhWrong.Migrate()
-		assert.Error(t, err)
-	})
-}
-
-func TestConvertToClickhouSenapshot(t *testing.T) {
-	correctTime, _ := ptypes.TimestampProto(time.Now())
-	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertToSnapshot(&apiPb.SchedulerResponse{})
-		assert.Error(t, err)
-	})
-	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertToSnapshot(&apiPb.SchedulerResponse{
-			SchedulerId: "id",
-			Snapshot:    &apiPb.SchedulerSnapshot{},
-		})
-		assert.Error(t, err)
-	})
-	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertToSnapshot(&apiPb.SchedulerResponse{
-			SchedulerId: "id",
-			Snapshot: &apiPb.SchedulerSnapshot{
-				Code: 0,
-				Type: 0,
-				Meta: &apiPb.SchedulerSnapshot_MetaData{
-					StartTime: nil,
-				},
-			},
-		})
-		assert.Error(t, err)
-	})
-	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertToSnapshot(&apiPb.SchedulerResponse{
-			SchedulerId: "id",
-			Snapshot: &apiPb.SchedulerSnapshot{
-				Code: 0,
-				Type: 0,
-				Meta: &apiPb.SchedulerSnapshot_MetaData{
-					StartTime: correctTime,
-					EndTime:   nil,
-				},
-			},
-		})
-		assert.Error(t, err)
-	})
-	t.Run("Test: no error", func(t *testing.T) {
-		_, err := ConvertToSnapshot(&apiPb.SchedulerResponse{
-			SchedulerId: "id",
-			Snapshot: &apiPb.SchedulerSnapshot{
-				Code:  0,
-				Type:  0,
-				Error: &apiPb.SchedulerSnapshot_Error{Message: ""},
-				Meta: &apiPb.SchedulerSnapshot_MetaData{
-					StartTime: correctTime,
-					EndTime:   correctTime,
-					Value: &structpb.Value{
-						Kind: &structpb.Value_StringValue{
-							StringValue: "hey",
-						},
-					},
-				},
-			},
-		})
-		assert.NoError(t, err)
-	})
-}
-
-func TestConvertFromSnapshots(t *testing.T) {
-	wrongTime := time.Unix(-62135596888, -100000000) //Protobuf validate this seconds aas error
-	t.Run("Test: error in convertation", func(t *testing.T) {
-		res := ConvertFromSnapshots([]*Snapshot{{}})
-		assert.NotNil(t, res)
-	})
-	t.Run("Test: error in convertation", func(t *testing.T) {
-		res := ConvertFromSnapshots([]*Snapshot{
-			{
-				MetaStartTime: wrongTime.UnixNano(),
-			},
-		})
-		assert.NotNil(t, res)
-	})
-	t.Run("Test: error", func(t *testing.T) {
-		res := ConvertFromSnapshots([]*Snapshot{
-			{
-				Error: "error",
-			},
-		})
-		assert.NotNil(t, res)
-	})
-	t.Run("Test: no error", func(t *testing.T) {
-		res := ConvertFromSnapshots([]*Snapshot{
-			{
-				MetaValue: nil,
-			},
-		})
-		assert.NotNil(t, res)
-	})
-	t.Run("Test: no error", func(t *testing.T) {
-		res := ConvertFromSnapshots([]*Snapshot{
-			{
-				MetaValue: []byte(`{"stringValue":"HUY"}`),
-			},
-		})
-		assert.NotNil(t, res)
-	})
-}
-
-func TestConvertToStatRequest(t *testing.T) {
-	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertToClickhouseStatRequest(&apiPb.Metric{
-			Time: nil,
-		})
-		assert.Error(t, err)
-	})
-	t.Run("Test: no error", func(t *testing.T) {
-		_, err := ConvertToClickhouseStatRequest(&apiPb.Metric{
-			Time: ptypes.TimestampNow(),
-		})
-		assert.NoError(t, err)
-	})
-	t.Run("Test: no error", func(t *testing.T) {
-		_, err := ConvertToClickhouseStatRequest(&apiPb.Metric{
-			CpuInfo: &apiPb.CpuInfo{
-				Cpus: []*apiPb.CpuInfo_CPU{{}},
-			},
-			MemoryInfo: &apiPb.MemoryInfo{
-				Mem:  &apiPb.MemoryInfo_Memory{},
-				Swap: &apiPb.MemoryInfo_Memory{},
-			},
-			DiskInfo: &apiPb.DiskInfo{
-				Disks: map[string]*apiPb.DiskInfo_Disk{
-					"": {},
-				},
-			},
-			NetInfo: &apiPb.NetInfo{
-				Interfaces: map[string]*apiPb.NetInfo_Interface{
-					"": {},
-				},
-			},
-			Time: ptypes.TimestampNow(),
-		})
-		assert.NoError(t, err)
-	})
-}
-
-func TestConvertFromStatRequest(t *testing.T) {
-	t.Run("Test: error", func(t *testing.T) {
-		_, err := ConvertFromClickhouseStatRequest(&StatRequest{
-			Time: time.Unix(-62135596888, -100000000), //Protobuf validate this seconds aas error
-		})
-		assert.Error(t, err)
-	})
-	t.Run("Test: no error", func(t *testing.T) {
-		_, err := ConvertFromClickhouseStatRequest(&StatRequest{
-			CPUInfo:    nil,
-			MemoryInfo: nil,
-			DiskInfo:   nil,
-			NetInfo:    nil,
-			Time:       time.Time{},
-		})
-		assert.NoError(t, err)
-	})
-	t.Run("Test: no error", func(t *testing.T) {
-		_, err := ConvertFromClickhouseStatRequest(&StatRequest{
-			CPUInfo:    []*CPUInfo{{}},
-			MemoryInfo: &MemoryInfo{},
-			DiskInfo:   []*DiskInfo{{}},
-			NetInfo:    []*NetInfo{{}},
-			Time:       time.Time{},
-		})
-		assert.NoError(t, err)
-	})
-	t.Run("Test: no error", func(t *testing.T) {
-		_, err := ConvertFromClickhouseStatRequest(&StatRequest{
-			CPUInfo: []*CPUInfo{{}},
-			MemoryInfo: &MemoryInfo{
-				Mem:  &MemoryMem{},
-				Swap: &MemorySwap{},
-			},
-			DiskInfo: []*DiskInfo{{}},
-			NetInfo:  []*NetInfo{{}},
-			Time:     time.Time{},
-		})
-		assert.NoError(t, err)
-	})
-}
-
-func TestConvertFromGroupResult(t *testing.T) {
-	t.Run("Test: error", func(t *testing.T) {
-		res := convertFromGroupResult([]*GroupResult{
-			{
-				Name:  "Name",
-				Count: 0,
-			},
-		}, time.Now().UnixNano())
-		assert.NotNil(t, res)
-	})
-	t.Run("Test: no error", func(t *testing.T) {
-		res := convertFromGroupResult([]*GroupResult{
-			{
-				Name:    "Name",
-				Count:   0,
-				Latency: "10000.000",
-			},
-		}, time.Now().UnixNano())
-		assert.NotNil(t, res)
-	})
-	t.Run("Test: no error", func(t *testing.T) {
-		res := convertFromGroupResult([]*GroupResult{
-			{
-				Name:    "Name",
-				Count:   0,
-				Latency: "10000.000",
-				MinTime: "10000.000",
-			},
-		}, time.Now().UnixNano())
-		assert.NotNil(t, res)
-	})
-	t.Run("Test: no error", func(t *testing.T) {
-		res := convertFromGroupResult([]*GroupResult{
-			{
-				Name:    "Name",
-				Count:   0,
-				Latency: "10000.000",
-				MinTime: "10000.000",
-				MaxTime: "10000.000",
-			},
-		}, time.Now().UnixNano())
-		assert.NotNil(t, res)
-	})
-	t.Run("Test: no error", func(t *testing.T) {
-		res := convertFromGroupResult([]*GroupResult{
-			{
-				Name:    "Name",
-				Count:   0,
-				Latency: "10000.000",
-				MinTime: "10000.000",
-				MaxTime: "10000.000",
-				LowTime: "10000.000",
-			},
-		}, time.Now().UnixNano())
-		assert.NotNil(t, res)
-	})
-}
-
-func TestGetThroughput(t *testing.T) {
-	t.Run("Test: error", func(t *testing.T) {
-		res := getThroughput(0, 10, 10)
-		assert.NotNil(t, res)
-	})
-}
-
-func TestConvertToTransactionInfo(t *testing.T) {
-	t.Run("Test: error", func(t *testing.T) {
-		_, err := convertToTransactionInfo(&apiPb.TransactionInfo{
-			StartTime: nil,
-		})
-		assert.Error(t, err)
-	})
-	t.Run("Test: error", func(t *testing.T) {
-		_, err := convertToTransactionInfo(&apiPb.TransactionInfo{
-			StartTime: ptypes.TimestampNow(),
-			EndTime:   nil,
-		})
 		assert.Error(t, err)
 	})
 }
