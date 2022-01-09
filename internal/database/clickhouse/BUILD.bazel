@@ -1,7 +1,7 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-    name = "clickhouse",
+    name = "go_default_library",
     srcs = [
         "clickhouse.go",
         "conversion.go",
@@ -10,8 +10,8 @@ go_library(
         "stat_request.go",
         "transaction_info.go",
     ],
-    importpath = "",
-    visibility = ["//:__subpackages__"],
+    importpath = "squzy/internal/database/clickhouse",
+    visibility = ["//visibility:public"],
     deps = [
         "//internal/logger:go_default_library",
         "@com_github_clickhouse_clickhouse_go//:clickhouse-go",
@@ -25,12 +25,12 @@ go_library(
 )
 
 go_test(
-    name = "lib_test",
+    name = "go_default_test",
     srcs = [
         "clickhouse_test.go",
         "conversion_test.go",
     ],
-    embed = [":clickhouse"],
+    embed = [":go_default_library"],
     deps = [
         "//internal/logger:go_default_library",
         "@com_github_clickhouse_clickhouse_go//:clickhouse-go",
