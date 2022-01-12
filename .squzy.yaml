@@ -1,0 +1,14 @@
+# This is an example of squzy cli configuration
+# go run main.go storage --config .squzy.yaml
+
+# storage full config example
+storage:
+  PORT: 9090 #default: 9090
+  DB_HOST: localhost
+  DB_PORT: 5432
+  DB_NAME: postgreslocalhost
+  DB_USER: admin
+  DB_PASSWORD: admin
+  DB_LOGS: true #default: false
+  ENABLE_INCIDENT: false #default: false
+  INCIDENT_SERVER_HOST: test #required if ENABLE_INCIDENT

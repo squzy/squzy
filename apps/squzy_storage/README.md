@@ -20,6 +20,8 @@ Bold is required
 - **DB_NAME** - postgresSQL name
 - **DB_USER** - postgresSQL user
 - **DB_PASSWORD** - postgresSQL password
+- ENV_ENABLE_INCIDENT(false) - true if we want to have incidents
+- ENV_INCIDENT_SERVER_HOST - required, when ENV_ENABLE_INCIDENT=true
 - DB_LOGS(false) - provide logs for DB
 
 ## Docker
