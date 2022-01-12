@@ -61,6 +61,10 @@ Squzy Incident Manager  - analyze metric + create incident + manage rules
 
 Squzy Notification Manager  - create and link notifications methods
 
+# CLI
+
+Squzy provides CLI for interaction with application.
+
 # Authors
 - [Iurii Panarin](https://github.com/PxyUp)
 - [Nikita Kharitonov](https://github.com/DreamAndDrum)
