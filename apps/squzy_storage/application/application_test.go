@@ -41,11 +41,11 @@ func (*configErrorMock) GetIncidentServerAddress() string {
 	return ""
 }
 
-func (*configErrorMock) WithIncident() bool {
+func (*configErrorMock) GetWithIncident() bool {
 	return false
 }
 
-func (*configErrorMock) WithDbLogs() bool {
+func (*configErrorMock) GetWithDbLogs() bool {
 	return false
 }
 
@@ -64,11 +64,11 @@ func (*configMock) GetIncidentServerAddress() string {
 	return ""
 }
 
-func (*configMock) WithIncident() bool {
+func (*configMock) GetWithIncident() bool {
 	return false
 }
 
-func (*configMock) WithDbLogs() bool {
+func (*configMock) GetWithDbLogs() bool {
 	return false
 }
 

@@ -1,7 +1,10 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 	"os"
 	"testing"
 )
@@ -16,8 +19,8 @@ func TestNew(t *testing.T) {
 		assert.Equal(t, s.GetDbUser(), "")
 		assert.Equal(t, s.GetDbPassword(), "")
 		assert.Equal(t, s.GetIncidentServerAddress(), "")
-		assert.Equal(t, s.WithIncident(), false)
-		assert.Equal(t, s.WithDbLogs(), false)
+		assert.Equal(t, s.GetWithIncident(), false)
+		assert.Equal(t, s.GetWithDbLogs(), false)
 	})
 }
 
@@ -109,7 +112,7 @@ func TestCfg_WithIncident(t *testing.T) {
 			assert.NotNil(t, nil)
 		}
 		s := New()
-		assert.Equal(t, s.WithIncident(), true)
+		assert.Equal(t, s.GetWithIncident(), true)
 	})
 }
 
@@ -120,6 +123,118 @@ func TestCfg_WithDbLogs(t *testing.T) {
 			assert.NotNil(t, nil)
 		}
 		s := New()
-		assert.Equal(t, s.WithDbLogs(), true)
+		assert.Equal(t, s.GetWithDbLogs(), true)
 	})
+}
+
+func TestNewConfigFromYaml(t *testing.T) {
+	marshall := func(config *cfg) []byte {
+		res, err := yaml.Marshal(config)
+		if err != nil {
+			return []byte("error")
+		}
+		return res
+	}
+	testCases := []struct {
+		name          string
+		cfgByte       []byte
+		expectedError error
+	}{
+		{
+			name:          "error unmarshalling file",
+			cfgByte:       []byte("error"),
+			expectedError: fmt.Errorf("error unmarshalling cfg file: %w", errors.New("yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `error` into config.cfg")),
+		},
+		{
+			name: "error empty dbHost",
+			cfgByte: marshall(&cfg{
+			}),
+			expectedError: errors.New("empty config dbHost"),
+		},
+		{
+			name: "error empty dbPort",
+			cfgByte: marshall(&cfg{
+				DbHost: "dbHost",
+			}),
+			expectedError: errors.New("empty config dbPort"),
+		},
+		{
+			name: "error empty dbName",
+			cfgByte: marshall(&cfg{
+				DbHost: "dbHost",
+				DbPort: "dbPort",
+			}),
+			expectedError: errors.New("empty config dbName"),
+		},
+		{
+			name: "error empty dbUser",
+			cfgByte: marshall(&cfg{
+				DbHost: "dbHost",
+				DbPort: "dbPort",
+				DbName: "dbName",
+			}),
+			expectedError: errors.New("empty config dbUser"),
+		},
+		{
+			name: "error empty dbPassword",
+			cfgByte: marshall(&cfg{
+				DbHost: "dbHost",
+				DbPort: "dbPort",
+				DbName: "dbName",
+				DbUser: "dbUser",
+			}),
+			expectedError: errors.New("empty config dbPassword"),
+		},
+		{
+			name: "error empty incidentServer when withIncident = true",
+			cfgByte: marshall(&cfg{
+				DbHost:       "dbHost",
+				DbPort:       "dbPort",
+				DbName:       "dbName",
+				DbUser:       "dbUser",
+				DbPassword:   "dbPassword",
+				WithIncident: true,
+			}),
+			expectedError: errors.New("empty config incidentServer when withIncident true"),
+		},
+		{
+			name: "no error, default port",
+			cfgByte: marshall(&cfg{
+				DbHost:         "dbHost",
+				DbPort:         "dbPort",
+				DbName:         "dbName",
+				DbUser:         "dbUser",
+				DbPassword:     "dbPassword",
+				IncidentServer: "incidentServer",
+				WithIncident:   true,
+				WithDbLogs:     true,
+			}),
+		},
+		{
+			name: "no error",
+			cfgByte: marshall(&cfg{
+				Port:           3030,
+				DbHost:         "dbHost",
+				DbPort:         "dbPort",
+				DbName:         "dbName",
+				DbUser:         "dbUser",
+				DbPassword:     "dbPassword",
+				IncidentServer: "incidentServer",
+				WithIncident:   true,
+				WithDbLogs:     true,
+			}),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := NewConfigFromYaml(tc.cfgByte)
+			if err != nil && tc.expectedError != nil {
+				assert.Equal(t, tc.expectedError.Error(), err.Error())
+			} else {
+				assert.Nil(t, tc.expectedError)
+				assert.Nil(t, err)
+			}
+		})
+	}
 }
