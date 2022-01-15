@@ -19,9 +19,9 @@ go_test(
 
 filegroup(
     name = "parsers_files",
-    visibility = ["//:__subpackages__"],
     srcs = [
         "invalid.xml",
         "valid.xml",
     ],
+    visibility = ["//:__subpackages__"],
 )

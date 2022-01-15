@@ -12,6 +12,7 @@ go_library(
         "//internal/logger",
         "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@org_golang_google_protobuf//types/known/emptypb",
+        "@org_golang_x_sync//errgroup",
         "@org_mongodb_go_mongo_driver//bson/primitive",
     ],
 )
