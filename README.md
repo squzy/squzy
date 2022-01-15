@@ -64,6 +64,7 @@ Squzy Notification Manager  - create and link notifications methods
 # Authors
 - [Iurii Panarin](https://github.com/PxyUp)
 - [Nikita Kharitonov](https://github.com/DreamAndDrum)
+- [Peeter Kokk](https://github.com/peterjasc)
 
 # Want to help?
 Want to file a bug, contribute some code, or improve documentation? Excellent!
