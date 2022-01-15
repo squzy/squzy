@@ -3,7 +3,7 @@ package agent_executor
 import (
 	"errors"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/agent"
+	"github.com/squzy/squzy/internal/agent"
 	"time"
 )
 

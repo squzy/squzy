@@ -1,32 +1,37 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "go_default_library",
-     srcs = ["executor.go"],
-     importpath = "squzy/internal/job-executor",
-     visibility = ["//visibility:public"],
-     deps = [
-        "//internal/logger:go_default_library",
-        "//internal/httptools:go_default_library",
-        "//internal/storage:go_default_library",
-        "//internal/semaphore:go_default_library",
-        "//internal/job:go_default_library",
-        "//internal/sitemap-storage:go_default_library",
-        "//internal/scheduler-config-storage:go_default_library",
+    name = "job-executor",
+    srcs = ["executor.go"],
+    importpath = "github.com/squzy/squzy/internal/job-executor",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/httptools",
+        "//internal/job",
+        "//internal/logger",
+        "//internal/scheduler-config-storage",
+        "//internal/semaphore",
+        "//internal/sitemap-storage",
+        "//internal/storage",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
         "@org_golang_google_grpc//:go_default_library",
-        "@org_mongodb_go_mongo_driver//bson/primitive:go_default_library",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-     ],
-
+        "@org_mongodb_go_mongo_driver//bson/primitive",
+    ],
 )
 
 go_test(
-    name = "go_default_test",
-    srcs = [
-        "executor_test.go",
-    ],
-    embed = [":go_default_library"],
+    name = "job-executor_test",
+    srcs = ["executor_test.go"],
+    embed = [":job-executor"],
     deps = [
-        "@com_github_stretchr_testify//assert:go_default_library",
-    ]
+        "//internal/httptools",
+        "//internal/job",
+        "//internal/scheduler-config-storage",
+        "//internal/semaphore",
+        "//internal/sitemap-storage",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_stretchr_testify//assert",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_mongodb_go_mongo_driver//bson/primitive",
+    ],
 )

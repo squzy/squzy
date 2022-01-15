@@ -1,22 +1,16 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-	name = "go_default_library",
-	srcs = ["semaphore.go"],
-	importpath = "squzy/internal/semaphore",
-	visibility = ["//visibility:public"],
-	deps = [
-		"@org_golang_x_sync//semaphore:go_default_library",
-	],
+    name = "semaphore",
+    srcs = ["semaphore.go"],
+    importpath = "github.com/squzy/squzy/internal/semaphore",
+    visibility = ["//:__subpackages__"],
+    deps = ["@org_golang_x_sync//semaphore"],
 )
 
 go_test(
-	name = "go_default_test",
-	srcs = [
-		"semaphore_test.go",
-	],
-	embed = [":go_default_library"],
-	deps = [
-		"@com_github_stretchr_testify//assert:go_default_library",
-	]
+    name = "semaphore_test",
+    srcs = ["semaphore_test.go"],
+    embed = [":semaphore"],
+    deps = ["@com_github_stretchr_testify//assert"],
 )

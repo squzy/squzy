@@ -1,27 +1,22 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "go_default_library",
-     srcs = ["scheduler.go"],
-     importpath = "squzy/internal/scheduler",
-     visibility = ["//visibility:public"],
-     deps = [
-        "//internal/job:go_default_library",
-        "//internal/storage:go_default_library",
-        "//internal/job-executor:go_default_library",
-        "@com_github_google_uuid//:go_default_library",
-        "@org_mongodb_go_mongo_driver//bson/primitive:go_default_library",
-     ],
-
+    name = "scheduler",
+    srcs = ["scheduler.go"],
+    importpath = "github.com/squzy/squzy/internal/scheduler",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/job-executor",
+        "@org_mongodb_go_mongo_driver//bson/primitive",
+    ],
 )
 
 go_test(
-    name = "go_default_test",
-    srcs = [
-        "scheduler_test.go",
-    ],
-    embed = [":go_default_library"],
+    name = "scheduler_test",
+    srcs = ["scheduler_test.go"],
+    embed = [":scheduler"],
     deps = [
-        "@com_github_stretchr_testify//assert:go_default_library",
-    ]
+        "@com_github_stretchr_testify//assert",
+        "@org_mongodb_go_mongo_driver//bson/primitive",
+    ],
 )

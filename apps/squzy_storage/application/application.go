@@ -7,7 +7,7 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
 	"net"
-	"squzy/apps/squzy_storage/config"
+	"github.com/squzy/squzy/apps/squzy_storage/config"
 )
 
 type Application interface {

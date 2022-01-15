@@ -1,33 +1,30 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "go_default_library",
-     srcs = [
-     	"notification.go",
-     	"notification_methods.go",
-     ],
-     importpath = "squzy/apps/squzy_notification/database",
-     visibility = ["//visibility:public"],
-     deps = [
-        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-        "@com_github_squzy_mongo_helper//:go_default_library",
-        "@org_mongodb_go_mongo_driver//bson/primitive:go_default_library",
-        "@org_mongodb_go_mongo_driver//bson:go_default_library",
-        "@org_mongodb_go_mongo_driver//mongo:go_default_library",
-        "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
-        "@com_github_golang_protobuf//ptypes:go_default_library",
-     ]
+    name = "database",
+    srcs = [
+        "notification.go",
+        "notification_methods.go",
+    ],
+    importpath = "github.com/squzy/squzy/apps/squzy_notification/database",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_squzy_mongo_helper//:mongo_helper",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@org_mongodb_go_mongo_driver//bson",
+        "@org_mongodb_go_mongo_driver//bson/primitive",
+    ],
 )
 
 go_test(
-    name = "go_default_test",
-    embed = [":go_default_library"],
-    srcs = [
-        "notification_test.go",
+    name = "database_test",
+    srcs = ["notification_test.go"],
+    embed = [":database"],
+    deps = [
+        "@com_github_stretchr_testify//assert",
+        "@org_mongodb_go_mongo_driver//bson",
+        "@org_mongodb_go_mongo_driver//bson/primitive",
+        "@org_mongodb_go_mongo_driver//mongo",
+        "@org_mongodb_go_mongo_driver//mongo/options",
     ],
-    deps =[
-        "@com_github_stretchr_testify//assert:go_default_library",
-        "@org_mongodb_go_mongo_driver//mongo:go_default_library",
-        "@org_mongodb_go_mongo_driver//mongo/options:go_default_library",
-    ]
 )

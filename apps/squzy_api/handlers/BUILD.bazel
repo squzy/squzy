@@ -1,25 +1,25 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "go_default_library",
-     srcs = ["handlers.go"],
-     importpath = "squzy/apps/squzy_api/handlers",
-     visibility = ["//visibility:public"],
-     deps = [
-         "//internal/helpers:go_default_library",
-         "@com_github_golang_protobuf//ptypes/empty:go_default_library",
-         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-     ]
+    name = "handlers",
+    srcs = ["handlers.go"],
+    importpath = "github.com/squzy/squzy/apps/squzy_api/handlers",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal/helpers",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@io_bazel_rules_go//proto/wkt:empty_go_proto",
+    ],
 )
 
 go_test(
-    name = "go_default_test",
-    embed = [":go_default_library"],
-    srcs = [
-        "handlers_test.go",
+    name = "handlers_test",
+    srcs = ["handlers_test.go"],
+    embed = [":handlers"],
+    deps = [
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_stretchr_testify//assert",
+        "@io_bazel_rules_go//proto/wkt:empty_go_proto",
+        "@org_golang_google_grpc//:go_default_library",
     ],
-    deps =[
-    	"@org_golang_google_grpc//:go_default_library",
-        "@com_github_stretchr_testify//assert:go_default_library"
-    ]
 )

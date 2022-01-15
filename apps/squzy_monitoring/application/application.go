@@ -8,13 +8,13 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
 	"net"
-	"squzy/apps/squzy_monitoring/server"
-	"squzy/internal/helpers"
-	job_executor "squzy/internal/job-executor"
-	"squzy/internal/logger"
-	"squzy/internal/scheduler"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
-	scheduler_storage "squzy/internal/scheduler-storage"
+	"github.com/squzy/squzy/apps/squzy_monitoring/server"
+	"github.com/squzy/squzy/internal/helpers"
+	job_executor "github.com/squzy/squzy/internal/job-executor"
+	"github.com/squzy/squzy/internal/logger"
+	"github.com/squzy/squzy/internal/scheduler"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
+	scheduler_storage "github.com/squzy/squzy/internal/scheduler-storage"
 )
 
 type app struct {

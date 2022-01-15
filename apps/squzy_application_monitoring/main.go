@@ -7,14 +7,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
-	"squzy/apps/squzy_application_monitoring/application"
-	"squzy/apps/squzy_application_monitoring/config"
-	"squzy/apps/squzy_application_monitoring/database"
-	"squzy/apps/squzy_application_monitoring/server"
-	_ "squzy/apps/squzy_application_monitoring/version"
-	"squzy/internal/grpctools"
-	"squzy/internal/helpers"
-	logger "squzy/internal/logger"
+	"github.com/squzy/squzy/apps/squzy_application_monitoring/application"
+	"github.com/squzy/squzy/apps/squzy_application_monitoring/config"
+	"github.com/squzy/squzy/apps/squzy_application_monitoring/database"
+	"github.com/squzy/squzy/apps/squzy_application_monitoring/server"
+	_ "github.com/squzy/squzy/apps/squzy_application_monitoring/version"
+	"github.com/squzy/squzy/internal/grpctools"
+	"github.com/squzy/squzy/internal/helpers"
+	logger "github.com/squzy/squzy/internal/logger"
 )
 
 func main() {

@@ -7,9 +7,9 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc/codes"
 	grpcStatus "google.golang.org/grpc/status"
-	"squzy/apps/squzy_storage/config"
-	"squzy/internal/database"
-	"squzy/internal/helpers"
+	"github.com/squzy/squzy/apps/squzy_storage/config"
+	"github.com/squzy/squzy/internal/database"
+	"github.com/squzy/squzy/internal/helpers"
 	"time"
 )
 

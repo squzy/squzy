@@ -9,7 +9,7 @@ import (
 	"github.com/golang/protobuf/ptypes/wrappers"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"net/http"
-	"squzy/apps/squzy_api/handlers"
+	"github.com/squzy/squzy/apps/squzy_api/handlers"
 	"strconv"
 	"time"
 )

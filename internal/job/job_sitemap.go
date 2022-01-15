@@ -8,11 +8,11 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"golang.org/x/sync/errgroup"
 	"net/http"
-	"squzy/internal/helpers"
-	"squzy/internal/httptools"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
-	"squzy/internal/semaphore"
-	sitemap_storage "squzy/internal/sitemap-storage"
+	"github.com/squzy/squzy/internal/helpers"
+	"github.com/squzy/squzy/internal/httptools"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
+	"github.com/squzy/squzy/internal/semaphore"
+	sitemap_storage "github.com/squzy/squzy/internal/sitemap-storage"
 )
 
 type siteMapError struct {

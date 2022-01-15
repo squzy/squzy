@@ -4,7 +4,7 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"net"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	"testing"
 	"time"
 )

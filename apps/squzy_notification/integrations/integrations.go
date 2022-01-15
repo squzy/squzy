@@ -9,9 +9,9 @@ import (
 	"github.com/slack-go/slack"
 	api "github.com/squzy/squzy_generated/generated/proto/v1"
 	"net/http"
-	"squzy/apps/squzy_notification/config"
-	"squzy/apps/squzy_notification/database"
-	"squzy/internal/httptools"
+	"github.com/squzy/squzy/apps/squzy_notification/config"
+	"github.com/squzy/squzy/apps/squzy_notification/database"
+	"github.com/squzy/squzy/internal/httptools"
 	"time"
 )
 

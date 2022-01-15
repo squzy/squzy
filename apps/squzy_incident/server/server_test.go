@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
-	"squzy/apps/squzy_incident/database"
-	"squzy/apps/squzy_incident/expression"
+	"github.com/squzy/squzy/apps/squzy_incident/database"
+	"github.com/squzy/squzy/apps/squzy_incident/expression"
 	"testing"
 )
 

@@ -6,8 +6,8 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"squzy/apps/squzy_agent_server/database"
-	"squzy/internal/helpers"
+	"github.com/squzy/squzy/apps/squzy_agent_server/database"
+	"github.com/squzy/squzy/internal/helpers"
 )
 
 type server struct {

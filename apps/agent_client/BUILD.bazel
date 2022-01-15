@@ -1,29 +1,28 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
 go_library(
-    name = "go_default_library",
-    srcs = [
-        "main.go",
-    ],
-    importpath = "squzy/apps/agent_client",
+    name = "agent_client_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/squzy/squzy/apps/agent_client",
+    visibility = ["//visibility:private"],
     deps = [
-        "@com_github_shirou_gopsutil//cpu:go_default_library",
-        "@com_github_shirou_gopsutil//disk:go_default_library",
-        "@com_github_shirou_gopsutil//host:go_default_library",
-        "@com_github_shirou_gopsutil//net:go_default_library",
-        "@com_github_shirou_gopsutil//mem:go_default_library",
-        "//internal/logger:go_default_library",
-        "//apps/agent_client/config:go_default_library",
-        "//apps/agent_client/version:go_default_library",
-        "//internal/agent:go_default_library",
-        "//apps/agent_client/application:go_default_library",
-        "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
-        "//internal/agent-executor:go_default_library",
-        "@com_github_golang_protobuf//ptypes:go_default_library",
-    ]
+        "//apps/agent_client/application",
+        "//apps/agent_client/config",
+        "//apps/agent_client/version",
+        "//internal/agent",
+        "//internal/agent-executor",
+        "//internal/logger",
+        "@com_github_golang_protobuf//ptypes:go_default_library_gen",
+        "@com_github_shirou_gopsutil_v3//cpu",
+        "@com_github_shirou_gopsutil_v3//disk",
+        "@com_github_shirou_gopsutil_v3//host",
+        "@com_github_shirou_gopsutil_v3//mem",
+        "@com_github_shirou_gopsutil_v3//net",
+    ],
 )
 
 go_binary(
-    name = "squzy_agent_app",
-    embed = [":go_default_library"],
+    name = "agent_client",
+    embed = [":agent_client_lib"],
+    visibility = ["//visibility:public"],
 )

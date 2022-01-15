@@ -7,9 +7,9 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/tidwall/gjson"
-	"squzy/internal/helpers"
-	"squzy/internal/httptools"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
+	"github.com/squzy/squzy/internal/helpers"
+	"github.com/squzy/squzy/internal/httptools"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	"time"
 )
 

@@ -1,27 +1,25 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "go_default_library",
-     srcs = ["application.go"],
-     importpath = "squzy/apps/squzy_incident/application",
-     visibility = ["//visibility:public"],
-     deps = [
+    name = "application",
+    srcs = ["application.go"],
+    importpath = "github.com/squzy/squzy/apps/squzy_incident/application",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_grpc_ecosystem_go_grpc_middleware//:go-grpc-middleware",
+        "@com_github_grpc_ecosystem_go_grpc_middleware//recovery",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
         "@org_golang_google_grpc//:go_default_library",
-        "@com_github_grpc_ecosystem_go_grpc_middleware//:go_default_library",
-        "@com_github_grpc_ecosystem_go_grpc_middleware//recovery:go_default_library",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-        "//apps/squzy_incident/database:go_default_library",
-        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
-     ]
+    ],
 )
 
 go_test(
-    name = "go_default_test",
-    embed = [":go_default_library"],
-    srcs = [
-        "application_test.go",
+    name = "application_test",
+    srcs = ["application_test.go"],
+    embed = [":application"],
+    deps = [
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_stretchr_testify//assert",
+        "@io_bazel_rules_go//proto/wkt:empty_go_proto",
     ],
-    deps =[
-        "@com_github_stretchr_testify//assert:go_default_library"
-    ]
 )

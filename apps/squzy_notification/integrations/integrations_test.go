@@ -7,7 +7,7 @@ import (
 	api "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	"squzy/apps/squzy_notification/database"
+	"github.com/squzy/squzy/apps/squzy_notification/database"
 	"testing"
 	"time"
 )

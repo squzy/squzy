@@ -5,8 +5,8 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/job"
-	"squzy/internal/logger"
+	"github.com/squzy/squzy/internal/job"
+	"github.com/squzy/squzy/internal/logger"
 	"time"
 )
 

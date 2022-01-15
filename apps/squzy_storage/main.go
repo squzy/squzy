@@ -5,13 +5,13 @@ import (
 	"github.com/jinzhu/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"google.golang.org/grpc"
-	"squzy/apps/squzy_storage/application"
-	"squzy/apps/squzy_storage/config"
-	"squzy/apps/squzy_storage/server"
-	_ "squzy/apps/squzy_storage/version"
-	"squzy/internal/database"
-	"squzy/internal/grpctools"
-	"squzy/internal/logger"
+	"github.com/squzy/squzy/apps/squzy_storage/application"
+	"github.com/squzy/squzy/apps/squzy_storage/config"
+	"github.com/squzy/squzy/apps/squzy_storage/server"
+	_ "github.com/squzy/squzy/apps/squzy_storage/version"
+	"github.com/squzy/squzy/internal/database"
+	"github.com/squzy/squzy/internal/grpctools"
+	"github.com/squzy/squzy/internal/logger"
 )
 
 func main() {

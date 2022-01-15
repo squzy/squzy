@@ -1,36 +1,31 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "go_default_library",
-     srcs = ["server.go"],
-     importpath = "squzy/apps/squzy_notification/server",
-     visibility = ["//visibility:public"],
-     deps = [
-        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
-        "@org_mongodb_go_mongo_driver//bson/primitive:go_default_library",
-        "@org_mongodb_go_mongo_driver//bson:go_default_library",
-        "@com_github_squzy_mongo_helper//:go_default_library",
-        "//internal/logger:go_default_library",
-        "//apps/squzy_notification/database:go_default_library",
-        "//apps/squzy_notification/config:go_default_library",
-        "//apps/squzy_notification/integrations:go_default_library",
-        "//internal/helpers:go_default_library",
-        "@org_golang_google_grpc//:go_default_library",
-        "@com_github_golang_protobuf//ptypes:go_default_library",
-     ]
+    name = "server",
+    srcs = ["server.go"],
+    importpath = "github.com/squzy/squzy/apps/squzy_notification/server",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//apps/squzy_notification/database",
+        "//apps/squzy_notification/integrations",
+        "//internal/helpers",
+        "//internal/logger",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@io_bazel_rules_go//proto/wkt:empty_go_proto",
+        "@org_mongodb_go_mongo_driver//bson/primitive",
+    ],
 )
 
 go_test(
-    name = "go_default_test",
-    embed = [":go_default_library"],
-    srcs = [
-        "server_test.go",
+    name = "server_test",
+    srcs = ["server_test.go"],
+    embed = [":server"],
+    deps = [
+        "//apps/squzy_notification/database",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_stretchr_testify//assert",
+        "@io_bazel_rules_go//proto/wkt:empty_go_proto",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_mongodb_go_mongo_driver//bson/primitive",
     ],
-    deps =[
-        "@org_golang_google_grpc//metadata:go_default_library",
-        "@com_github_stretchr_testify//assert:go_default_library",
-        "@com_github_golang_protobuf//ptypes:go_default_library",
-        "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
-    ]
 )

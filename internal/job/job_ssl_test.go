@@ -16,7 +16,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	"strconv"
 	"strings"
 	"testing"

@@ -6,13 +6,13 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
-	"squzy/internal/httptools"
-	"squzy/internal/job"
-	"squzy/internal/logger"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
-	"squzy/internal/semaphore"
-	sitemap_storage "squzy/internal/sitemap-storage"
-	"squzy/internal/storage"
+	"github.com/squzy/squzy/internal/httptools"
+	"github.com/squzy/squzy/internal/job"
+	"github.com/squzy/squzy/internal/logger"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
+	"github.com/squzy/squzy/internal/semaphore"
+	sitemap_storage "github.com/squzy/squzy/internal/sitemap-storage"
+	"github.com/squzy/squzy/internal/storage"
 )
 
 type HTTPExecutor func(schedulerId string,

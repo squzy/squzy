@@ -7,8 +7,8 @@ import (
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"squzy/internal/scheduler"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
+	"github.com/squzy/squzy/internal/scheduler"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	"testing"
 )
 

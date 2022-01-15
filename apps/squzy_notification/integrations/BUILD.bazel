@@ -1,28 +1,28 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "go_default_library",
-     srcs = ["integrations.go"],
-     importpath = "squzy/apps/squzy_notification/integrations",
-     visibility = ["//visibility:public"],
-     deps = [
-     	"@com_github_slack_go_slack//:go_default_library",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-     	"@com_github_golang_protobuf//ptypes:go_default_library",
-     	"//internal/httptools:go_default_library",
-		"//apps/squzy_notification/database:go_default_library",
-		"//apps/squzy_notification/config:go_default_library",
-     ]
-
+    name = "integrations",
+    srcs = ["integrations.go"],
+    importpath = "github.com/squzy/squzy/apps/squzy_notification/integrations",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//apps/squzy_notification/config",
+        "//apps/squzy_notification/database",
+        "//internal/httptools",
+        "@com_github_golang_protobuf//ptypes:go_default_library_gen",
+        "@com_github_slack_go_slack//:slack",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+    ],
 )
 
 go_test(
-    name = "go_default_test",
-    srcs = [
-        "integrations_test.go",
-    ],
-    embed = [":go_default_library"],
+    name = "integrations_test",
+    srcs = ["integrations_test.go"],
+    embed = [":integrations"],
     deps = [
-        "@com_github_stretchr_testify//assert:go_default_library"
+        "//apps/squzy_notification/database",
+        "@com_github_golang_protobuf//ptypes:go_default_library_gen",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_stretchr_testify//assert",
     ],
 )

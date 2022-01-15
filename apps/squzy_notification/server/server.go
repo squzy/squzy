@@ -6,10 +6,10 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"squzy/apps/squzy_notification/database"
-	"squzy/apps/squzy_notification/integrations"
-	"squzy/internal/helpers"
-	"squzy/internal/logger"
+	"github.com/squzy/squzy/apps/squzy_notification/database"
+	"github.com/squzy/squzy/apps/squzy_notification/integrations"
+	"github.com/squzy/squzy/internal/helpers"
+	"github.com/squzy/squzy/internal/logger"
 	"time"
 )
 
@@ -279,8 +279,8 @@ func New(
 	client apiPb.StorageClient,
 	integrations integrations.Integrations) apiPb.NotificationManagerServer {
 	return &server{
-		nlDb:         nlDb,
-		nmDb:         nmDb,
+		nlDb: nlDb,
+		nmDb: nmDb,
 		client:       client,
 		integrations: integrations,
 	}

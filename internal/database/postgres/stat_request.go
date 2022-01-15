@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/logger"
+	"github.com/squzy/squzy/internal/logger"
 	"time"
 )
 

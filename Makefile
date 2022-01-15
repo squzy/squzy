@@ -1,5 +1,7 @@
 clean: .clean
 
+generate_build: .gen_build
+
 build: .build
 
 build_agent_server: .build_agent_server
@@ -38,6 +40,9 @@ default: build
 
 .lint:
 	golangci-lint run
+
+.gen_build:
+	bazel run gazelle -- fix
 
 .build_squzy:
 	bazel build //apps/squzy_monitoring:squzy_monitoring_src

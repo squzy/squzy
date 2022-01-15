@@ -9,7 +9,7 @@ import (
 	health_check "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
 	"net"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	"testing"
 	"time"
 )

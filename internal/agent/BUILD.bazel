@@ -1,29 +1,29 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "go_default_library",
-     srcs = ["agent.go"],
-     importpath = "squzy/internal/agent",
-     visibility = ["//visibility:public"],
-     deps = [
-         "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
-         "@com_github_shirou_gopsutil//cpu:go_default_library",
-         "@com_github_shirou_gopsutil//mem:go_default_library",
-         "@com_github_shirou_gopsutil//disk:go_default_library",
-         "@com_github_shirou_gopsutil//net:go_default_library",
-         "@com_github_shirou_gopsutil//host:go_default_library",
-         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-     ],
-
+    name = "agent",
+    srcs = ["agent.go"],
+    importpath = "github.com/squzy/squzy/internal/agent",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "@com_github_shirou_gopsutil_v3//disk",
+        "@com_github_shirou_gopsutil_v3//mem",
+        "@com_github_shirou_gopsutil_v3//net",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@io_bazel_rules_go//proto/wkt:timestamp_go_proto",
+    ],
 )
 
 go_test(
-    name = "go_default_test",
-    srcs = [
-        "agent_test.go",
-    ],
-    embed = [":go_default_library"],
+    name = "agent_test",
+    srcs = ["agent_test.go"],
+    embed = [":agent"],
     deps = [
-        "@com_github_stretchr_testify//assert:go_default_library",
-    ]
+        "@com_github_shirou_gopsutil_v3//disk",
+        "@com_github_shirou_gopsutil_v3//mem",
+        "@com_github_shirou_gopsutil_v3//net",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_stretchr_testify//assert",
+        "@io_bazel_rules_go//proto/wkt:timestamp_go_proto",
+    ],
 )

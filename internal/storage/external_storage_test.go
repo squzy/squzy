@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"net"
-	"squzy/internal/grpctools"
-	"squzy/internal/job"
+	"github.com/squzy/squzy/internal/grpctools"
+	"github.com/squzy/squzy/internal/job"
 	"testing"
 	"time"
 )

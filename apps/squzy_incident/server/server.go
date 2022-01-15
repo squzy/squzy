@@ -8,9 +8,9 @@ import (
 	"github.com/google/uuid"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"squzy/apps/squzy_incident/database"
-	"squzy/apps/squzy_incident/expression"
-	"squzy/internal/logger"
+	"github.com/squzy/squzy/apps/squzy_incident/database"
+	"github.com/squzy/squzy/apps/squzy_incident/expression"
+	"github.com/squzy/squzy/internal/logger"
 )
 
 type server struct {

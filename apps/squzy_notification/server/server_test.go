@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
-	"squzy/apps/squzy_notification/database"
+	"github.com/squzy/squzy/apps/squzy_notification/database"
 	"testing"
 )
 

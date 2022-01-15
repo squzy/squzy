@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc"
 	health_check "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
-	"squzy/internal/helpers"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
+	"github.com/squzy/squzy/internal/helpers"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 )
 
 const (

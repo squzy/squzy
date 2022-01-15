@@ -6,9 +6,9 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"squzy/apps/squzy_application_monitoring/config"
-	"squzy/apps/squzy_application_monitoring/database"
-	"squzy/internal/helpers"
+	"github.com/squzy/squzy/apps/squzy_application_monitoring/config"
+	"github.com/squzy/squzy/apps/squzy_application_monitoring/database"
+	"github.com/squzy/squzy/internal/helpers"
 )
 
 type server struct {
@@ -163,7 +163,7 @@ func (s *server) SaveTransaction(ctx context.Context, req *apiPb.TransactionInfo
 
 func New(db database.Database, config config.Config, storage apiPb.StorageClient) apiPb.ApplicationMonitoringServer {
 	return &server{
-		db:      db,
+		db: db,
 		config:  config,
 		storage: storage,
 	}

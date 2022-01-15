@@ -1,35 +1,33 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "go_default_library",
-     srcs = [
-         "server.go",
-     ],
-     importpath = "squzy/apps/squzy_monitoring/server",
-     visibility = ["//visibility:public"],
-     deps = [
-        "//internal/scheduler:go_default_library",
-        "//internal/scheduler-storage:go_default_library",
-        "//internal/storage:go_default_library",
-        "//internal/helpers:go_default_library",
-        "//internal/job-executor:go_default_library",
-        "//internal/scheduler-config-storage:go_default_library",
-        "@org_mongodb_go_mongo_driver//bson/primitive:go_default_library",
-        "@org_golang_google_grpc//:go_default_library",
-        "@org_golang_x_sync//errgroup:go_default_library",
-        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-     ],
-
+    name = "server",
+    srcs = ["server.go"],
+    importpath = "github.com/squzy/squzy/apps/squzy_monitoring/server",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal/helpers",
+        "//internal/job-executor",
+        "//internal/scheduler",
+        "//internal/scheduler-config-storage",
+        "//internal/scheduler-storage",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@io_bazel_rules_go//proto/wkt:empty_go_proto",
+        "@org_golang_x_sync//errgroup",
+        "@org_mongodb_go_mongo_driver//bson/primitive",
+    ],
 )
 
 go_test(
-    name = "go_default_test",
-    srcs = [
-        "server_test.go"
-    ],
-    embed = [":go_default_library"],
+    name = "server_test",
+    srcs = ["server_test.go"],
+    embed = [":server"],
     deps = [
-        "@com_github_stretchr_testify//assert:go_default_library",
-    ]
+        "//internal/scheduler",
+        "//internal/scheduler-config-storage",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_stretchr_testify//assert",
+        "@io_bazel_rules_go//proto/wkt:empty_go_proto",
+        "@org_mongodb_go_mongo_driver//bson/primitive",
+    ],
 )

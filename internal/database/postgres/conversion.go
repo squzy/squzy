@@ -7,7 +7,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	_struct "github.com/golang/protobuf/ptypes/struct"
 	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/logger"
+	"github.com/squzy/squzy/internal/logger"
 	"strconv"
 	"strings"
 	"time"

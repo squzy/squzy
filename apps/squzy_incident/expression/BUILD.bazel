@@ -1,38 +1,42 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "go_default_library",
-     srcs = [
-		"agent.go",
-		"expression.go",
-		"snapshot.go",
-		"application.go"
-     ],
-     importpath = "squzy/apps/squzy_incident/expression",
-     visibility = ["//visibility:public"],
-     deps = [
-             "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-             "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
-             "@com_github_golang_protobuf//ptypes:go_default_library",
-             "@com_github_golang_protobuf//ptypes/wrappers:go_default_library",
-             "@com_github_antonmedv_expr//:go_default_library",
-             "@com_github_araddon_dateparse//:go_default_library",
-             "@com_github_golang_protobuf//ptypes/struct:go_default_library",
-     ]
+    name = "expression",
+    srcs = [
+        "agent.go",
+        "application.go",
+        "expression.go",
+        "snapshot.go",
+    ],
+    importpath = "github.com/squzy/squzy/apps/squzy_incident/expression",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_antonmedv_expr//:expr",
+        "@com_github_araddon_dateparse//:dateparse",
+        "@com_github_golang_protobuf//ptypes:go_default_library_gen",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@io_bazel_rules_go//proto/wkt:struct_go_proto",
+        "@io_bazel_rules_go//proto/wkt:timestamp_go_proto",
+        "@io_bazel_rules_go//proto/wkt:wrappers_go_proto",
+    ],
 )
 
 go_test(
-    name = "go_default_test",
-    embed = [":go_default_library"],
+    name = "expression_test",
     srcs = [
-		"agent_test.go",
-		"expression_test.go",
-		"snapshot_test.go",
-		"application_test.go"
+        "agent_test.go",
+        "application_test.go",
+        "expression_test.go",
+        "snapshot_test.go",
     ],
-    deps =[
-        "@com_github_stretchr_testify//assert:go_default_library",
+    embed = [":expression"],
+    deps = [
+        "@com_github_araddon_dateparse//:dateparse",
+        "@com_github_golang_protobuf//ptypes:go_default_library_gen",
+        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_stretchr_testify//assert",
+        "@io_bazel_rules_go//proto/wkt:empty_go_proto",
+        "@io_bazel_rules_go//proto/wkt:struct_go_proto",
         "@org_golang_google_grpc//:go_default_library",
-        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
-    ]
+    ],
 )
