@@ -5,13 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/slack-go/slack"
-	api "github.com/squzy/squzy_generated/generated/proto/v1"
-	"net/http"
 	"github.com/squzy/squzy/apps/squzy_notification/config"
 	"github.com/squzy/squzy/apps/squzy_notification/database"
 	"github.com/squzy/squzy/internal/httptools"
+	api "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"net/http"
 	"time"
 )
 
@@ -90,12 +89,12 @@ func (i *integrations) Webhook(ctx context.Context, incident *api.Incident, conf
 
 func getIncidentTime(incident *api.Incident) (createdAt string, updatedAt string) {
 	if len(incident.Histories) > 0 {
-		createdAtTime, err := ptypes.Timestamp(incident.Histories[0].Timestamp)
-		if err == nil {
+		createdAtTime := incident.Histories[0].Timestamp.AsTime()
+		if incident.Histories[0].Timestamp.CheckValid() == nil {
 			createdAt = createdAtTime.Format(time.RFC3339)
 		}
-		updatedTime, err := ptypes.Timestamp(incident.Histories[len(incident.Histories)-1].Timestamp)
-		if err == nil {
+		updatedTime := incident.Histories[len(incident.Histories)-1].Timestamp.AsTime()
+		if incident.Histories[len(incident.Histories)-1].Timestamp.CheckValid() == nil {
 			updatedAt = updatedTime.Format(time.RFC3339)
 		}
 	}

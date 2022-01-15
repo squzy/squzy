@@ -2,11 +2,10 @@ package storage
 
 import (
 	"fmt"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/squzy/squzy/internal/job"
 	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"time"
 )
 
@@ -20,14 +19,14 @@ type memory struct {
 func (m *memory) Write(log job.CheckError) error {
 	logData := log.GetLogData()
 	logID := uuid.New().String()
-	startTime, err := ptypes.Timestamp(logData.Snapshot.Meta.StartTime)
-
+	startTime := logData.Snapshot.Meta.StartTime.AsTime()
+	err := logData.Snapshot.Meta.StartTime.CheckValid()
 	if err != nil {
 		return err
 	}
 
-	endTime, err := ptypes.Timestamp(logData.Snapshot.Meta.EndTime)
-
+	endTime := logData.Snapshot.Meta.EndTime.AsTime()
+	err = logData.Snapshot.Meta.EndTime.CheckValid()
 	if err != nil {
 		return err
 	}

@@ -3,13 +3,12 @@ package job
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/golang/protobuf/ptypes"
-	structType "github.com/golang/protobuf/ptypes/struct"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"net"
 	"github.com/squzy/squzy/internal/helpers"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	structpb "google.golang.org/protobuf/types/known/structpb"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
+	"net"
 )
 
 type sslError struct {
@@ -18,7 +17,7 @@ type sslError struct {
 	endTime     *timestamp.Timestamp
 	code        apiPb.SchedulerCode
 	description string
-	value       *structType.Value
+	value       *structpb.Value
 }
 
 func (s *sslError) GetLogData() *apiPb.SchedulerResponse {
@@ -43,7 +42,7 @@ func (s *sslError) GetLogData() *apiPb.SchedulerResponse {
 	}
 }
 
-func newSSLError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerCode, description string, value *structType.Value) CheckError {
+func newSSLError(schedulerID string, startTime *timestamp.Timestamp, endTime *timestamp.Timestamp, code apiPb.SchedulerCode, description string, value *structpb.Value) CheckError {
 	return &sslError{
 		schedulerID: schedulerID,
 		startTime:   startTime,
@@ -55,12 +54,12 @@ func newSSLError(schedulerID string, startTime *timestamp.Timestamp, endTime *ti
 }
 
 func ExecSSL(schedulerID string, timeout int32, config *scheduler_config_storage.SslExpirationConfig, cfg *tls.Config) CheckError {
-	startTime := ptypes.TimestampNow()
+	startTime := timestamp.Now()
 
 	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: helpers.DurationNotNegative(timeout)}, "tcp", net.JoinHostPort(config.Host, fmt.Sprintf("%d", config.Port)), cfg)
 
 	if err != nil {
-		return newSSLError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, err.Error(), nil)
+		return newSSLError(schedulerID, startTime, timestamp.Now(), apiPb.SchedulerCode_ERROR, err.Error(), nil)
 	}
 
 	defer func() {
@@ -69,8 +68,8 @@ func ExecSSL(schedulerID string, timeout int32, config *scheduler_config_storage
 
 	crt := conn.ConnectionState().PeerCertificates[0]
 
-	return newSSLError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_OK, "", &structType.Value{
-		Kind: &structType.Value_NumberValue{
+	return newSSLError(schedulerID, startTime, timestamp.Now(), apiPb.SchedulerCode_OK, "", &structpb.Value{
+		Kind: &structpb.Value_NumberValue{
 			NumberValue: float64(crt.NotAfter.UnixNano()),
 		},
 	})

@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/golang/protobuf/ptypes/empty"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	empty "google.golang.org/protobuf/types/known/emptypb"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/sync/errgroup"
 	"github.com/squzy/squzy/internal/helpers"

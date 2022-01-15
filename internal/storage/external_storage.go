@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"google.golang.org/grpc"
 	"github.com/squzy/squzy/internal/grpctools"
 	"github.com/squzy/squzy/internal/job"

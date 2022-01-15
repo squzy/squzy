@@ -3,14 +3,13 @@ package job
 import (
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"github.com/squzy/squzy/internal/helpers"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"google.golang.org/grpc"
 	health_check "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
-	"github.com/squzy/squzy/internal/helpers"
-	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -57,7 +56,7 @@ func newGrpcError(schedulerID string, startTime *timestamp.Timestamp, endTime *t
 }
 
 func ExecGrpc(schedulerID string, timeout int32, config *scheduler_config_storage.GrpcConfig, opts ...grpc.DialOption) CheckError {
-	startTime := ptypes.TimestampNow()
+	startTime := timestamp.Now()
 
 	ctx, cancel := helpers.TimeoutContext(context.Background(), helpers.DurationFromSecond(timeout))
 
@@ -66,7 +65,7 @@ func ExecGrpc(schedulerID string, timeout int32, config *scheduler_config_storag
 	conn, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%d", config.Host, config.Port), opts...)
 
 	if err != nil {
-		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, errWrongConnectConfigError.Error())
+		return newGrpcError(schedulerID, startTime, timestamp.Now(), apiPb.SchedulerCode_ERROR, errWrongConnectConfigError.Error())
 	}
 
 	defer func() {
@@ -82,11 +81,11 @@ func ExecGrpc(schedulerID string, timeout int32, config *scheduler_config_storag
 	res, err := client.Check(metadata.NewOutgoingContext(ctx, md), &health_check.HealthCheckRequest{Service: config.Service})
 
 	if err != nil {
-		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, errConnTimeoutError.Error())
+		return newGrpcError(schedulerID, startTime, timestamp.Now(), apiPb.SchedulerCode_ERROR, errConnTimeoutError.Error())
 	}
 
 	if res.Status != health_check.HealthCheckResponse_SERVING {
-		return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, errGrpcNotServing.Error())
+		return newGrpcError(schedulerID, startTime, timestamp.Now(), apiPb.SchedulerCode_ERROR, errGrpcNotServing.Error())
 	}
-	return newGrpcError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_OK, "")
+	return newGrpcError(schedulerID, startTime, timestamp.Now(), apiPb.SchedulerCode_OK, "")
 }

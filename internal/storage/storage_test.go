@@ -1,9 +1,9 @@
 package storage
 
 import (
-	"github.com/golang/protobuf/ptypes"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 )
 
@@ -38,7 +38,7 @@ func (m mockEndTimeErrorMock) GetLogData() *apiPb.SchedulerResponse {
 			},
 			Type: 0,
 			Meta: &apiPb.SchedulerSnapshot_MetaData{
-				StartTime: ptypes.TimestampNow(),
+				StartTime: timestamp.Now(),
 				EndTime:   nil,
 			},
 		},
@@ -57,8 +57,8 @@ func (m mockError) GetLogData() *apiPb.SchedulerResponse {
 			},
 			Type: 0,
 			Meta: &apiPb.SchedulerSnapshot_MetaData{
-				StartTime: ptypes.TimestampNow(),
-				EndTime:   ptypes.TimestampNow(),
+				StartTime: timestamp.Now(),
+				EndTime:   timestamp.Now(),
 			},
 		},
 	}
@@ -74,8 +74,8 @@ func (m mockOk) GetLogData() *apiPb.SchedulerResponse {
 			Error: nil,
 			Type:  0,
 			Meta: &apiPb.SchedulerSnapshot_MetaData{
-				StartTime: ptypes.TimestampNow(),
-				EndTime:   ptypes.TimestampNow(),
+				StartTime: timestamp.Now(),
+				EndTime:   timestamp.Now(),
 			},
 		},
 	}

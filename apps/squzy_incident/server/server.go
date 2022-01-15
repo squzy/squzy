@@ -3,14 +3,14 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/squzy/squzy/apps/squzy_incident/database"
 	"github.com/squzy/squzy/apps/squzy_incident/expression"
 	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	empty "google.golang.org/protobuf/types/known/emptypb"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type server struct {
@@ -212,7 +212,7 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 				Histories: []*apiPb.Incident_HistoryItem{
 					{
 						Status:    apiPb.IncidentStatus_INCIDENT_STATUS_OPENED,
-						Timestamp: ptypes.TimestampNow(),
+						Timestamp: timestamp.Now(),
 					},
 				},
 			}

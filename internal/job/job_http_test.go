@@ -2,7 +2,7 @@ package job
 
 import (
 	"errors"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"

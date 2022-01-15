@@ -10,6 +10,18 @@ go_library(
 go_test(
     name = "parsers_test",
     srcs = ["sitemap_test.go"],
+    data = [
+        "//internal/parsers:parsers_files",
+    ],
     embed = [":parsers"],
     deps = ["@com_github_stretchr_testify//assert"],
+)
+
+filegroup(
+    name = "parsers_files",
+    visibility = ["//:__subpackages__"],
+    srcs = [
+        "invalid.xml",
+        "valid.xml",
+    ],
 )

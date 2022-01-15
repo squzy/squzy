@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"github.com/araddon/dateparse"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/empty"
-	structpb "github.com/golang/protobuf/ptypes/struct"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
+	empty "google.golang.org/protobuf/types/known/emptypb"
+	structpb "google.golang.org/protobuf/types/known/structpb"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 )
 
@@ -35,8 +35,8 @@ func (m mockStorage) GetSchedulerInformation(ctx context.Context, in *apiPb.GetS
 				Code: apiPb.SchedulerCode_OK,
 				Type: apiPb.SchedulerType_GRPC,
 				Meta: &apiPb.SchedulerSnapshot_MetaData{
-					StartTime: ptypes.TimestampNow(),
-					EndTime:   ptypes.TimestampNow(),
+					StartTime: timestamp.Now(),
+					EndTime:   timestamp.Now(),
 					Value:     &structpb.Value{},
 				},
 			},
@@ -52,7 +52,7 @@ func (m mockStorage) GetAgentInformation(ctx context.Context, in *apiPb.GetAgent
 	return &apiPb.GetAgentInformationResponse{
 		Stats: []*apiPb.GetAgentInformationResponse_Statistic{
 			{
-				Time: ptypes.TimestampNow(),
+				Time: timestamp.Now(),
 				CpuInfo: &apiPb.CpuInfo{
 					Cpus: []*apiPb.CpuInfo_CPU{
 						{
@@ -79,8 +79,8 @@ func (m mockStorage) GetTransactions(ctx context.Context, in *apiPb.GetTransacti
 					Method: "method",
 				},
 				Name:      "name",
-				StartTime: ptypes.TimestampNow(),
-				EndTime:   ptypes.TimestampNow(),
+				StartTime: timestamp.Now(),
+				EndTime:   timestamp.Now(),
 				Status:    apiPb.TransactionStatus_TRANSACTION_SUCCESSFUL,
 				Type:      apiPb.TransactionType_TRANSACTION_TYPE_DB,
 			},
@@ -264,10 +264,10 @@ func Test_convertToTimestamp(t *testing.T) {
 		v, err := dateparse.ParseAny(str)
 		assert.Nil(t, err)
 		res := convertToTimestamp(str)
-		value, err := ptypes.TimestampProto(v)
-		assert.Nil(t, err)
-		res2, err := ptypes.Timestamp(value)
-		assert.Nil(t, err)
+		value := timestamp.New(v)
+		assert.Nil(t, value.CheckValid())
+		res2 := value.AsTime()
+		assert.Nil(t, value.CheckValid())
 		assert.EqualValues(t, res, value)
 		assert.EqualValues(t, v, res2)
 	})
@@ -288,7 +288,7 @@ func Test_getTimeRange(t *testing.T) {
 	})
 	t.Run("Should: panic", func(t *testing.T) {
 		panicFunc := func() {
-			_ = getTimeRange(ptypes.TimestampNow(), nil)
+			_ = getTimeRange(timestamp.Now(), nil)
 		}
 		assert.Equal(t, true, assert.Panics(t, panicFunc, "The code did not panic"))
 	})

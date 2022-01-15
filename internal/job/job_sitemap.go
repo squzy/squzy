@@ -3,16 +3,15 @@ package job
 import (
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"golang.org/x/sync/errgroup"
-	"net/http"
 	"github.com/squzy/squzy/internal/helpers"
 	"github.com/squzy/squzy/internal/httptools"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	"github.com/squzy/squzy/internal/semaphore"
 	sitemap_storage "github.com/squzy/squzy/internal/sitemap-storage"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"golang.org/x/sync/errgroup"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
+	"net/http"
 )
 
 type siteMapError struct {
@@ -57,16 +56,16 @@ func newSiteMapError(schedulerID string, startTime *timestamp.Timestamp, endTime
 }
 
 func ExecSiteMap(schedulerID string, timeout int32, config *scheduler_config_storage.SiteMapConfig, siteMapStorage sitemap_storage.SiteMapStorage, httpTools httptools.HTTPTool, semaphoreFactoryFn func(n int) semaphore.Semaphore) CheckError {
-	startTime := ptypes.TimestampNow()
+	startTime := timestamp.Now()
 	siteMap, err := siteMapStorage.Get(config.URL)
 	if err != nil {
-		return newSiteMapError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, err.Error(), config.URL)
+		return newSiteMapError(schedulerID, startTime, timestamp.Now(), apiPb.SchedulerCode_ERROR, err.Error(), config.URL)
 	}
 
 	count := len(siteMap.URLSet)
 
 	if count == 0 {
-		return newSiteMapError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_OK, "", "")
+		return newSiteMapError(schedulerID, startTime, timestamp.Now(), apiPb.SchedulerCode_OK, "", "")
 	}
 
 	concurrency := int(config.Concurrency)
@@ -105,7 +104,7 @@ func ExecSiteMap(schedulerID string, timeout int32, config *scheduler_config_sto
 	}
 	err = group.Wait()
 	if err != nil {
-		return newSiteMapError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_ERROR, err.Error(), config.URL)
+		return newSiteMapError(schedulerID, startTime, timestamp.Now(), apiPb.SchedulerCode_ERROR, err.Error(), config.URL)
 	}
-	return newSiteMapError(schedulerID, startTime, ptypes.TimestampNow(), apiPb.SchedulerCode_OK, "", "")
+	return newSiteMapError(schedulerID, startTime, timestamp.Now(), apiPb.SchedulerCode_OK, "", "")
 }

@@ -1,11 +1,11 @@
 package agent
 
 import (
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/net"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"sync"
 	"time"
 )

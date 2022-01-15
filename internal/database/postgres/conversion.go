@@ -1,13 +1,11 @@
 package postgres
 
 import (
-	"bytes"
 	"errors"
-	"github.com/golang/protobuf/jsonpb" //nolint:staticcheck
-	"github.com/golang/protobuf/ptypes"
-	_struct "github.com/golang/protobuf/ptypes/struct"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
 	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"google.golang.org/protobuf/types/known/structpb"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"strconv"
 	"strings"
 	"time"
@@ -30,7 +28,8 @@ func ConvertFromPostgresSnapshots(snapshots []*Snapshot) []*apiPb.SchedulerSnaps
 }
 
 func ConvertToPostgressStatRequest(request *apiPb.Metric) (*StatRequest, error) {
-	t, err := ptypes.Timestamp(request.GetTime())
+	t := request.GetTime().AsTime()
+	err := request.GetTime().CheckValid()
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +57,8 @@ func ConvertFromPostgressStatRequests(data []*StatRequest) []*apiPb.GetAgentInfo
 }
 
 func ConvertFromPostgressStatRequest(data *StatRequest) (*apiPb.GetAgentInformationResponse_Statistic, error) {
-	t, err := ptypes.TimestampProto(data.Time)
+	t := timestamp.New(data.Time)
+	err := t.CheckValid()
 	if err != nil {
 		return nil, err
 	}
@@ -78,11 +78,13 @@ func convertToSnapshot(request *apiPb.SchedulerSnapshot, schedulerID string) (*S
 	if request.GetMeta() == nil {
 		return nil, errors.New("EMPTY_META_DATA")
 	}
-	startTime, err := ptypes.Timestamp(request.GetMeta().GetStartTime())
+	startTime := request.GetMeta().GetStartTime().AsTime()
+	err := request.GetMeta().GetStartTime().CheckValid()
 	if err != nil {
 		return nil, err
 	}
-	endTime, err := ptypes.Timestamp(request.GetMeta().GetEndTime())
+	endTime := request.GetMeta().GetEndTime().AsTime()
+	err = request.GetMeta().GetEndTime().CheckValid()
 	if err != nil {
 		return nil, err
 	}
@@ -98,19 +100,18 @@ func convertToSnapshot(request *apiPb.SchedulerSnapshot, schedulerID string) (*S
 		res.Error = request.GetError().GetMessage()
 	}
 
-	var b bytes.Buffer
-	err = (&jsonpb.Marshaler{}).Marshal(&b, request.GetMeta().GetValue())
+	bValue, err := request.GetMeta().GetValue().MarshalJSON()
 	if err != nil {
 		return res, nil
 	}
-	res.MetaValue = b.Bytes()
+	res.MetaValue = bValue
 	return res, nil
 }
 
 func convertFromSnapshot(snapshot *Snapshot) (*apiPb.SchedulerSnapshot, error) {
 	//Skip error, because this convertion is always correct (snapshot.MetaStartTime < maximum possible value)
-	startTime, _ := ptypes.TimestampProto(time.Unix(0, snapshot.MetaStartTime))
-	endTime, _ := ptypes.TimestampProto(time.Unix(0, snapshot.MetaEndTime))
+	startTime := timestamp.New(time.Unix(0, snapshot.MetaStartTime))
+	endTime := timestamp.New(time.Unix(0, snapshot.MetaEndTime))
 
 	res := &apiPb.SchedulerSnapshot{
 		Code: apiPb.SchedulerCode(snapshot.Code),
@@ -126,8 +127,9 @@ func convertFromSnapshot(snapshot *Snapshot) (*apiPb.SchedulerSnapshot, error) {
 		}
 	}
 
-	str := &_struct.Value{}
-	if err := jsonpb.Unmarshal(bytes.NewReader(snapshot.MetaValue), str); err != nil {
+	str := &structpb.Value{}
+
+	if err := str.UnmarshalJSON(snapshot.MetaValue); err != nil {
 		return res, nil
 	}
 
@@ -292,11 +294,13 @@ func convertFromNetInfo(data []*NetInfo) *apiPb.NetInfo {
 }
 
 func convertToTransactionInfo(data *apiPb.TransactionInfo) (*TransactionInfo, error) {
-	startTime, err := ptypes.Timestamp(data.GetStartTime())
+	startTime := data.GetStartTime().AsTime()
+	err := data.GetStartTime().CheckValid()
 	if err != nil {
 		return nil, err
 	}
-	endTime, err := ptypes.Timestamp(data.GetEndTime())
+	endTime := data.GetEndTime().AsTime()
+	err = data.GetEndTime().CheckValid()
 	if err != nil {
 		return nil, err
 	}
@@ -330,8 +334,8 @@ func convertToTransactionInfo(data *apiPb.TransactionInfo) (*TransactionInfo, er
 
 func convertFromTransaction(data *TransactionInfo) *apiPb.TransactionInfo {
 	//Skip error, because this convertion is always correct (data.StartTime < maximum possible value)
-	startTime, _ := ptypes.TimestampProto(time.Unix(0, data.StartTime))
-	endTime, _ := ptypes.TimestampProto(time.Unix(0, data.EndTime))
+	startTime := timestamp.New(time.Unix(0, data.StartTime))
+	endTime := timestamp.New(time.Unix(0, data.EndTime))
 
 	transactionMeta := &apiPb.TransactionInfo_Meta{
 		Host:   data.MetaHost,
@@ -415,14 +419,15 @@ func convertToIncidentHistory(data *apiPb.Incident_HistoryItem) *IncidentHistory
 	if data == nil {
 		return nil
 	}
-	time, err := ptypes.Timestamp(data.GetTimestamp())
+	timeParsed := data.GetTimestamp().AsTime()
+	err := data.GetTimestamp().CheckValid()
 	if err != nil {
 		logger.Error(err.Error())
 		return nil
 	}
 	return &IncidentHistory{
 		Status:    int32(data.GetStatus()),
-		Timestamp: time.UnixNano(),
+		Timestamp: timeParsed.UnixNano(),
 	}
 }
 
@@ -458,7 +463,7 @@ func convertFromIncidentHistory(data *IncidentHistory) *apiPb.Incident_HistoryIt
 	if data == nil {
 		return nil
 	}
-	parsedTime, _ := ptypes.TimestampProto(time.Unix(0, data.Timestamp))
+	parsedTime := timestamp.New(time.Unix(0, data.Timestamp))
 	return &apiPb.Incident_HistoryItem{
 		Status:    apiPb.IncidentStatus(data.Status),
 		Timestamp: parsedTime,

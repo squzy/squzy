@@ -2,17 +2,17 @@ package application
 
 import (
 	"context"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/shirou/gopsutil/v3/host"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"google.golang.org/grpc"
-	"io"
-	"os"
-	"os/signal"
 	"github.com/squzy/squzy/apps/agent_client/config"
 	agent_executor "github.com/squzy/squzy/internal/agent-executor"
 	"github.com/squzy/squzy/internal/helpers"
 	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"google.golang.org/grpc"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
+	"io"
+	"os"
+	"os/signal"
 	"sync"
 	"syscall"
 )
@@ -58,7 +58,7 @@ func (a *application) register(hostStat *host.InfoStat) string {
 					Version: hostStat.PlatformVersion,
 				},
 			},
-			Time: ptypes.TimestampNow(),
+			Time: timestamp.Now(),
 		})
 
 		if err == nil {
@@ -134,7 +134,7 @@ func (a *application) Run() error {
 		Msg: &apiPb.SendMetricsRequest_Disconnect_{
 			Disconnect: &apiPb.SendMetricsRequest_Disconnect{
 				AgentId: agentID,
-				Time:    ptypes.TimestampNow(),
+				Time:    timestamp.Now(),
 			},
 		},
 	})
@@ -146,7 +146,7 @@ func (a *application) Run() error {
 
 	_, _ = a.client.UnRegister(ctxClose, &apiPb.UnRegisterRequest{
 		Id:   agentID,
-		Time: ptypes.TimestampNow(),
+		Time: timestamp.Now(),
 	})
 
 	return nil

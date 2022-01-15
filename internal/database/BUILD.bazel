@@ -8,7 +8,7 @@ go_library(
     deps = [
         "//internal/database/postgres",
         "@com_github_jinzhu_gorm//:gorm",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
     ],
 )
 

@@ -3,7 +3,7 @@ package postgres
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/squzy/squzy/internal/logger"
 	"time"
 )

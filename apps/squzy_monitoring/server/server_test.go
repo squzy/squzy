@@ -3,12 +3,12 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/golang/protobuf/ptypes/empty"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/squzy/squzy/internal/scheduler"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 	"testing"
 )
 
@@ -114,11 +114,8 @@ var (
 			Timeout:  0,
 			Config: &apiPb.AddRequest_Tcp{
 				Tcp: &apiPb.TcpConfig{
-					Host:                 "",
-					Port:                 0,
-					XXX_NoUnkeyedLiteral: struct{}{},
-					XXX_unrecognized:     nil,
-					XXX_sizecache:        0,
+					Host: "",
+					Port: 0,
 				},
 			},
 		},

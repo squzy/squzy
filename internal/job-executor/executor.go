@@ -3,7 +3,7 @@ package job_executor
 import (
 	"context"
 	"crypto/tls"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
 	"github.com/squzy/squzy/internal/httptools"

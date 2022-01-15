@@ -2,7 +2,7 @@ package helpers
 
 import (
 	"context"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	"strings"
 	"time"

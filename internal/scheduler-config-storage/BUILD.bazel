@@ -7,7 +7,7 @@ go_library(
     visibility = ["//:__subpackages__"],
     deps = [
         "@com_github_squzy_mongo_helper//:mongo_helper",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@org_mongodb_go_mongo_driver//bson",
         "@org_mongodb_go_mongo_driver//bson/primitive",
     ],

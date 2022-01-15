@@ -8,7 +8,7 @@ go_library(
     deps = [
         "@com_github_grpc_ecosystem_go_grpc_middleware//:go-grpc-middleware",
         "@com_github_grpc_ecosystem_go_grpc_middleware//recovery",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@org_golang_google_grpc//:go_default_library",
     ],
 )
@@ -18,8 +18,8 @@ go_test(
     srcs = ["application_test.go"],
     embed = [":application"],
     deps = [
-        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@com_github_stretchr_testify//assert",
-        "@io_bazel_rules_go//proto/wkt:empty_go_proto",
+        "@org_golang_google_protobuf//types/known/emptypb",
     ],
 )

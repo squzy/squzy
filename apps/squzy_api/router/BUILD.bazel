@@ -8,10 +8,9 @@ go_library(
     deps = [
         "//apps/squzy_api/handlers",
         "@com_github_gin_gonic_gin//:gin",
-        "@com_github_golang_protobuf//ptypes:go_default_library_gen",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
-        "@io_bazel_rules_go//proto/wkt:timestamp_go_proto",
-        "@io_bazel_rules_go//proto/wkt:wrappers_go_proto",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
+        "@org_golang_google_protobuf//types/known/timestamppb",
+        "@org_golang_google_protobuf//types/known/wrapperspb",
     ],
 )
 
@@ -20,9 +19,9 @@ go_test(
     srcs = ["router_test.go"],
     embed = [":router"],
     deps = [
-        "@com_github_golang_protobuf//ptypes:go_default_library_gen",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@com_github_stretchr_testify//assert",
-        "@io_bazel_rules_go//proto/wkt:empty_go_proto",
+        "@org_golang_google_protobuf//types/known/emptypb",
+        "@org_golang_google_protobuf//types/known/timestamppb",
     ],
 )

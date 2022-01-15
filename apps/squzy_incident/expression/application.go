@@ -2,8 +2,8 @@ package expression
 
 import (
 	"context"
-	"github.com/golang/protobuf/ptypes/wrappers"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	wrappers "google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type FilterTransaction func(req *apiPb.GetTransactionsRequest) *apiPb.GetTransactionsRequest

@@ -9,9 +9,8 @@ go_library(
         "//apps/squzy_notification/config",
         "//apps/squzy_notification/database",
         "//internal/httptools",
-        "@com_github_golang_protobuf//ptypes:go_default_library_gen",
         "@com_github_slack_go_slack//:slack",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
     ],
 )
 
@@ -21,8 +20,8 @@ go_test(
     embed = [":integrations"],
     deps = [
         "//apps/squzy_notification/database",
-        "@com_github_golang_protobuf//ptypes:go_default_library_gen",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:proto",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@com_github_stretchr_testify//assert",
+        "@org_golang_google_protobuf//types/known/timestamppb",
     ],
 )

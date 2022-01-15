@@ -1,17 +1,16 @@
 package postgres
 
 import (
-	"github.com/golang/protobuf/ptypes"
-	_struct "github.com/golang/protobuf/ptypes/struct"
-	tspb "github.com/golang/protobuf/ptypes/timestamp"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
+	structpb "google.golang.org/protobuf/types/known/structpb"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 	"time"
 )
 
 func TestConvertToPostgresSnapshot(t *testing.T) {
-	correctTime, _ := ptypes.TimestampProto(time.Now())
+	correctTime := timestamp.New(time.Now())
 	t.Run("Test: error", func(t *testing.T) {
 		_, err := ConvertToPostgresSnapshot(&apiPb.SchedulerResponse{})
 		assert.Error(t, err)
@@ -60,8 +59,8 @@ func TestConvertToPostgresSnapshot(t *testing.T) {
 				Meta: &apiPb.SchedulerSnapshot_MetaData{
 					StartTime: correctTime,
 					EndTime:   correctTime,
-					Value: &_struct.Value{
-						Kind: &_struct.Value_StringValue{
+					Value: &structpb.Value{
+						Kind: &structpb.Value_StringValue{
 							StringValue: "HUY",
 						},
 					},
@@ -121,7 +120,7 @@ func TestConvertToPostgressStatRequest(t *testing.T) {
 	})
 	t.Run("Test: no error", func(t *testing.T) {
 		_, err := ConvertToPostgressStatRequest(&apiPb.Metric{
-			Time: ptypes.TimestampNow(),
+			Time: timestamp.Now(),
 		})
 		assert.NoError(t, err)
 	})
@@ -144,7 +143,7 @@ func TestConvertToPostgressStatRequest(t *testing.T) {
 					"": {},
 				},
 			},
-			Time: ptypes.TimestampNow(),
+			Time: timestamp.Now(),
 		})
 		assert.NoError(t, err)
 	})
@@ -201,7 +200,7 @@ func TestConvertToTransactionInfo(t *testing.T) {
 	})
 	t.Run("Test: error", func(t *testing.T) {
 		_, err := convertToTransactionInfo(&apiPb.TransactionInfo{
-			StartTime: ptypes.TimestampNow(),
+			StartTime: timestamp.Now(),
 			EndTime:   nil,
 		})
 		assert.Error(t, err)
@@ -305,7 +304,7 @@ func Test_convertToIncidentHistory(t *testing.T) {
 	t.Run("Should: return nil", func(t *testing.T) {
 		maxValidSeconds := 253402300800
 		res := convertToIncidentHistory(&apiPb.Incident_HistoryItem{
-			Timestamp: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+			Timestamp: &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
 		})
 		assert.Nil(t, res)
 	})

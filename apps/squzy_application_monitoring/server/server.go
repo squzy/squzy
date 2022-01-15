@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/golang/protobuf/ptypes/empty"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	empty "google.golang.org/protobuf/types/known/emptypb"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/squzy/squzy/apps/squzy_application_monitoring/config"
 	"github.com/squzy/squzy/apps/squzy_application_monitoring/database"
@@ -163,7 +163,7 @@ func (s *server) SaveTransaction(ctx context.Context, req *apiPb.TransactionInfo
 
 func New(db database.Database, config config.Config, storage apiPb.StorageClient) apiPb.ApplicationMonitoringServer {
 	return &server{
-		db: db,
+		db:      db,
 		config:  config,
 		storage: storage,
 	}
