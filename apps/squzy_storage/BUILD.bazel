@@ -23,7 +23,7 @@ go_library(
         "@org_mongodb_go_mongo_driver//mongo/options:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
         "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-        "@gopkg.in//yaml.v2:go_default_library",
+        "@in_gopkg_yaml_v2//:go_default_library",
     ]
 )
 
