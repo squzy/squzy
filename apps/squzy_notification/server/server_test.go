@@ -3,12 +3,12 @@ package server
 import (
 	"context"
 	"errors"
-	empty "google.golang.org/protobuf/types/known/emptypb"
+	"github.com/squzy/squzy/apps/squzy_notification/database"
 	api "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
-	"github.com/squzy/squzy/apps/squzy_notification/database"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 	"testing"
 )
 
@@ -40,6 +40,42 @@ func (m mockMethodSuccessActiveWebhook) Get(ctx context.Context, id primitive.Ob
 		Status:  api.NotificationMethodStatus_NOTIFICATION_STATUS_ACTIVE,
 		Type:    api.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK,
 		WebHook: &database.WebHookConfig{Url: ""},
+	}, nil
+}
+
+type mockMethodSuccessActiveUnknown struct {
+}
+
+func (m mockMethodSuccessActiveUnknown) Create(ctx context.Context, nm *database.NotificationMethod) error {
+	return nil
+}
+
+func (m mockMethodSuccessActiveUnknown) Delete(ctx context.Context, id primitive.ObjectID) error {
+	return nil
+}
+
+func (m mockMethodSuccessActiveUnknown) Activate(ctx context.Context, id primitive.ObjectID) error {
+	return nil
+}
+
+func (m mockMethodSuccessActiveUnknown) Deactivate(ctx context.Context, id primitive.ObjectID) error {
+	return nil
+}
+
+func (m mockMethodSuccessActiveUnknown) Get(ctx context.Context, id primitive.ObjectID) (*database.NotificationMethod, error) {
+	return &database.NotificationMethod{
+		Status:  api.NotificationMethodStatus_NOTIFICATION_STATUS_ACTIVE,
+		Type:    api.NotificationMethodType_NOTIFICATION_METHOD_UNSPECIFIED,
+		WebHook: &database.WebHookConfig{Url: ""},
+	}, nil
+}
+
+func (m mockMethodSuccessActiveUnknown) GetAll(ctx context.Context) ([]*database.NotificationMethod, error) {
+	return []*database.NotificationMethod{
+		{
+			Id:   primitive.NewObjectID(),
+			Type: api.NotificationMethodType_NOTIFICATION_METHOD_UNSPECIFIED,
+		},
 	}, nil
 }
 
@@ -741,6 +777,13 @@ func TestServer_Notify(t *testing.T) {
 	})
 	t.Run("Should: return not return ", func(t *testing.T) {
 		s := New(&mockListSuccess{}, &mockMethodSuccessActiveWebhook{}, &mockStorageOk{}, &mockIntegration{})
+		_, err := s.Notify(context.Background(), &api.NotifyRequest{
+			OwnerId: primitive.NewObjectID().Hex(),
+		})
+		assert.Nil(t, err)
+	})
+	t.Run("Should: return not return ", func(t *testing.T) {
+		s := New(&mockListSuccess{}, &mockMethodSuccessActiveUnknown{}, &mockStorageOk{}, &mockIntegration{})
 		_, err := s.Notify(context.Background(), &api.NotifyRequest{
 			OwnerId: primitive.NewObjectID().Hex(),
 		})
