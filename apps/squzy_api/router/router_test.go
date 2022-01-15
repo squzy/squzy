@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/empty"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
+	empty "google.golang.org/protobuf/types/known/emptypb"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -1517,7 +1517,7 @@ func TestGetFilters(t *testing.T) {
 			DateTo:   &tim,
 		})
 		assert.Nil(t, err)
-		res, _ := ptypes.TimestampProto(tim)
+		res := timestamp.New(tim)
 		assert.Equal(t, int32(24), pag.Limit)
 		assert.Equal(t, int32(2), pag.Page)
 		assert.Equal(t, res, tF.To)

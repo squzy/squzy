@@ -3,15 +3,14 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	empty "google.golang.org/protobuf/types/known/emptypb"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"io"
 	"testing"
 )
@@ -102,7 +101,7 @@ func (m *mockStreamContinueWork) Recv() (*apiPb.SendMetricsRequest, error) {
 			Msg: &apiPb.SendMetricsRequest_Disconnect_{
 				Disconnect: &apiPb.SendMetricsRequest_Disconnect{
 					AgentId: primitive.NewObjectID().Hex(),
-					Time:    ptypes.TimestampNow(),
+					Time:    timestamp.Now(),
 				},
 			},
 		}, nil
@@ -145,7 +144,7 @@ func (m mockStreamClose) Recv() (*apiPb.SendMetricsRequest, error) {
 		Msg: &apiPb.SendMetricsRequest_Disconnect_{
 			Disconnect: &apiPb.SendMetricsRequest_Disconnect{
 				AgentId: primitive.NewObjectID().Hex(),
-				Time:    ptypes.TimestampNow(),
+				Time:    timestamp.Now(),
 			},
 		},
 	}, nil

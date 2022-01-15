@@ -2,9 +2,9 @@ package helpers
 
 import (
 	"context"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	"testing"
 	"time"
 )

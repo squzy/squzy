@@ -3,7 +3,7 @@ package grpctools
 import (
 	"context"
 	"google.golang.org/grpc"
-	"squzy/internal/helpers"
+	"github.com/squzy/squzy/internal/helpers"
 	"time"
 )
 

@@ -3,13 +3,13 @@ package database
 import (
 	"context"
 	"errors"
-	"github.com/golang/protobuf/ptypes"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"reflect"
 	"testing"
 )
@@ -98,17 +98,14 @@ func TestDb_Add(t *testing.T) {
 		s := New(&mockOk{})
 		_, err := s.Add(context.Background(), &apiPb.RegisterRequest{
 			AgentName: "",
-			Time:      ptypes.TimestampNow(),
+			Time:      timestamp.Now(),
 			HostInfo: &apiPb.HostInfo{
 				HostName: "",
 				Os:       "",
 				PlatformInfo: &apiPb.PlatformInfo{
-					Name:                 "",
-					Family:               "",
-					Version:              "",
-					XXX_NoUnkeyedLiteral: struct{}{},
-					XXX_unrecognized:     nil,
-					XXX_sizecache:        0,
+					Name:    "",
+					Family:  "",
+					Version: "",
 				},
 			},
 		})
@@ -123,12 +120,9 @@ func TestDb_Add(t *testing.T) {
 				HostName: "",
 				Os:       "",
 				PlatformInfo: &apiPb.PlatformInfo{
-					Name:                 "",
-					Family:               "",
-					Version:              "",
-					XXX_NoUnkeyedLiteral: struct{}{},
-					XXX_unrecognized:     nil,
-					XXX_sizecache:        0,
+					Name:    "",
+					Family:  "",
+					Version: "",
 				},
 			},
 		})
@@ -138,17 +132,14 @@ func TestDb_Add(t *testing.T) {
 		s := New(&mockError{})
 		_, err := s.Add(context.Background(), &apiPb.RegisterRequest{
 			AgentName: "",
-			Time:      ptypes.TimestampNow(),
+			Time:      timestamp.Now(),
 			HostInfo: &apiPb.HostInfo{
 				HostName: "",
 				Os:       "",
 				PlatformInfo: &apiPb.PlatformInfo{
-					Name:                 "",
-					Family:               "",
-					Version:              "",
-					XXX_NoUnkeyedLiteral: struct{}{},
-					XXX_unrecognized:     nil,
-					XXX_sizecache:        0,
+					Name:    "",
+					Family:  "",
+					Version: "",
 				},
 			},
 		})
@@ -159,12 +150,12 @@ func TestDb_Add(t *testing.T) {
 func TestDb_UpdateStatus(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := New(&mockOk{})
-		err := s.UpdateStatus(context.Background(), primitive.NewObjectID(), 0, ptypes.TimestampNow())
+		err := s.UpdateStatus(context.Background(), primitive.NewObjectID(), 0, timestamp.Now())
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := New(&mockOk{})
-		err := s.UpdateStatus(context.Background(), primitive.NewObjectID(), apiPb.AgentStatus_DISCONNECTED, ptypes.TimestampNow())
+		err := s.UpdateStatus(context.Background(), primitive.NewObjectID(), apiPb.AgentStatus_DISCONNECTED, timestamp.Now())
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return because time error", func(t *testing.T) {
@@ -174,7 +165,7 @@ func TestDb_UpdateStatus(t *testing.T) {
 	})
 	t.Run("Should: return error", func(t *testing.T) {
 		s := New(&mockError{})
-		err := s.UpdateStatus(context.Background(), primitive.NewObjectID(), 0, ptypes.TimestampNow())
+		err := s.UpdateStatus(context.Background(), primitive.NewObjectID(), 0, timestamp.Now())
 		assert.NotEqual(t, nil, err)
 	})
 }

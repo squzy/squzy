@@ -1,12 +1,11 @@
 package job
 
 import (
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/helpers"
-	"squzy/internal/httptools"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
+	"github.com/squzy/squzy/internal/helpers"
+	"github.com/squzy/squzy/internal/httptools"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type httpError struct {
@@ -49,7 +48,7 @@ func newHTTPError(schedulerID string, startTime *timestamp.Timestamp, endTime *t
 }
 
 func ExecHTTP(schedulerID string, timeout int32, config *scheduler_config_storage.HTTPConfig, httpTool httptools.HTTPTool) CheckError {
-	startTime := ptypes.TimestampNow()
+	startTime := timestamp.Now()
 	req := httpTool.CreateRequest(config.Method, config.URL, &config.Headers, schedulerID)
 
 	_, _, err := httpTool.SendRequestTimeoutStatusCode(req, helpers.DurationFromSecond(timeout), int(config.StatusCode))
@@ -58,7 +57,7 @@ func ExecHTTP(schedulerID string, timeout int32, config *scheduler_config_storag
 		return newHTTPError(
 			schedulerID,
 			startTime,
-			ptypes.TimestampNow(),
+			timestamp.Now(),
 			apiPb.SchedulerCode_ERROR,
 			err.Error(),
 		)
@@ -67,7 +66,7 @@ func ExecHTTP(schedulerID string, timeout int32, config *scheduler_config_storag
 	return newHTTPError(
 		schedulerID,
 		startTime,
-		ptypes.TimestampNow(),
+		timestamp.Now(),
 		apiPb.SchedulerCode_OK,
 		"",
 	)

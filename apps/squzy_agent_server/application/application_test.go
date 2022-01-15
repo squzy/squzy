@@ -2,9 +2,9 @@ package application
 
 import (
 	"context"
-	"github.com/golang/protobuf/ptypes/empty"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 	"net"
 	"testing"
 	"time"

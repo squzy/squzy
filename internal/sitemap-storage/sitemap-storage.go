@@ -2,8 +2,8 @@ package sitemap_storage
 
 import (
 	"net/http"
-	"squzy/internal/httptools"
-	"squzy/internal/parsers"
+	"github.com/squzy/squzy/internal/httptools"
+	"github.com/squzy/squzy/internal/parsers"
 	"sync"
 	"time"
 )

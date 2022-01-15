@@ -2,8 +2,8 @@ package expression
 
 import (
 	"context"
-	structpb "github.com/golang/protobuf/ptypes/struct"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	"time"
 )
 

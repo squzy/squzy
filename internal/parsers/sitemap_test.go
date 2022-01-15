@@ -18,7 +18,8 @@ func TestSiteMapParser_Parse(t *testing.T) {
 	t.Run("Test: Parse", func(t *testing.T) {
 		t.Run("Should: parse without error", func(t *testing.T) {
 			parser := NewSiteMapParser()
-			f, _ := ioutil.ReadFile("valid.xml")
+			f, errRead := ioutil.ReadFile("valid.xml")
+			assert.NoError(t, errRead)
 			res, err := parser.Parse(f)
 			assert.Equal(t, nil, err)
 			assert.Equal(t, 5, len(res.URLSet))
@@ -26,7 +27,8 @@ func TestSiteMapParser_Parse(t *testing.T) {
 		})
 		t.Run("Should: parse with error", func(t *testing.T) {
 			parser := NewSiteMapParser()
-			f, _ := ioutil.ReadFile("invalid.xml")
+			f, errRead := ioutil.ReadFile("invalid.xml")
+			assert.NoError(t, errRead)
 			_, err := parser.Parse(f)
 			assert.NotEqual(t, nil, err)
 		})

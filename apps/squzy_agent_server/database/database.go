@@ -2,12 +2,11 @@ package database
 
 import (
 	"context"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/squzy/mongo_helper"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
 
@@ -73,11 +72,12 @@ func dbToPb(agent *AgentDao) *apiPb.AgentItem {
 
 func (d *db) Add(ctx context.Context, agent *apiPb.RegisterRequest) (string, error) {
 	id := primitive.NewObjectID()
-	regtime, err := ptypes.Timestamp(agent.Time)
+	err := agent.Time.CheckValid()
 
 	if err != nil {
 		return "", err
 	}
+	regtime := agent.Time.AsTime()
 
 	agentData := &AgentDao{
 		ID:        id,
@@ -140,11 +140,11 @@ func (d *db) GetByID(ctx context.Context, id primitive.ObjectID) (*apiPb.AgentIt
 }
 
 func (d *db) UpdateStatus(ctx context.Context, agentID primitive.ObjectID, status apiPb.AgentStatus, time *timestamp.Timestamp) error {
-	agentTime, err := ptypes.Timestamp(time)
-
+	err := time.CheckValid()
 	if err != nil {
 		return err
 	}
+	agentTime := time.AsTime()
 
 	historyItems := []*HistoryItem{
 		{

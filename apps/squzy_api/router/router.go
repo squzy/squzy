@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/golang/protobuf/ptypes/wrappers"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"github.com/squzy/squzy/apps/squzy_api/handlers"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
+	wrappers "google.golang.org/protobuf/types/known/wrapperspb"
 	"net/http"
-	"squzy/apps/squzy_api/handlers"
 	"strconv"
 	"time"
 )
@@ -1059,14 +1058,16 @@ func GetFilters(paginationFilter *PaginationRequest, timeFilter *TimeFilterReque
 	if timeFilter != nil {
 		timeFilters := &apiPb.TimeFilter{}
 		if timeFilter.DateFrom != nil {
-			t, err := ptypes.TimestampProto(*timeFilter.DateFrom)
+			t := timestamp.New(*timeFilter.DateFrom)
+			err := t.CheckValid()
 			if err != nil {
 				return nil, nil, err
 			}
 			timeFilters.From = t
 		}
 		if timeFilter.DateTo != nil {
-			t, err := ptypes.TimestampProto(*timeFilter.DateTo)
+			t := timestamp.New(*timeFilter.DateTo)
+			err := t.CheckValid()
 			if err != nil {
 				return nil, nil, err
 			}

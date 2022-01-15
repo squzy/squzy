@@ -2,8 +2,8 @@ package helpers
 
 import (
 	"context"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	"strings"
 	"time"
 )
@@ -23,7 +23,7 @@ func GetPortByURL(url string) int32 {
 }
 
 func DurationNotNegative(seconds int32) time.Duration {
-	if seconds <=0 {
+	if seconds <= 0 {
 		return defaultTimeoutDuration
 	}
 	return DurationFromSecond(seconds)

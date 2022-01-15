@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"github.com/antonmedv/expr"
 	"github.com/araddon/dateparse"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"strconv"
 	"time"
 )
@@ -80,7 +79,8 @@ func convertToTimestamp(strTime string) *timestamp.Timestamp {
 	if err != nil {
 		panic(err)
 	}
-	res, err := ptypes.TimestampProto(t)
+	res := timestamp.New(t)
+	err = res.CheckValid()
 	if err != nil {
 		panic(err)
 	}
@@ -88,13 +88,16 @@ func convertToTimestamp(strTime string) *timestamp.Timestamp {
 }
 
 func getTimeRange(start, end *timestamp.Timestamp) int64 {
-	startTime, err := ptypes.Timestamp(start)
+	err := start.CheckValid()
 	if err != nil {
 		panic("No start time")
 	}
-	endTime, err := ptypes.Timestamp(end)
+	startTime := start.AsTime()
+	err = end.CheckValid()
 	if err != nil {
 		panic("No end time")
 	}
+	endTime := end.AsTime()
+
 	return (endTime.UnixNano() - startTime.UnixNano()) / int64(time.Millisecond)
 }
