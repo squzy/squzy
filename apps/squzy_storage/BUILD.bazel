@@ -15,7 +15,7 @@ go_library(
         "//internal/database",
         "//internal/grpctools",
         "//internal/logger",
-        "@com_github_jinzhu_gorm//:gorm",
+        "@com_github_clickhouse_clickhouse_go//:clickhouse-go",
         "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@org_golang_google_grpc//:go_default_library",
     ],
@@ -52,5 +52,5 @@ container_push(
     image = ":squzy_storage_container_image",
     registry = "index.docker.io",
     repository = "squzy/squzy_storage",
-    tag = "$(version)"
+    tag = "$(version)",
 )

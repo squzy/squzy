@@ -13,7 +13,6 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jinzhu/gorm v1.9.12
-	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil/v3 v3.21.12
 	github.com/slack-go/slack v0.6.5
 	github.com/squzy/mongo_helper v0.0.0-20200713232419-037a870c9d06
@@ -29,29 +28,42 @@ require (
 )
 
 require (
+	github.com/Microsoft/go-winio v0.4.11 // indirect
+	github.com/Microsoft/hcsshim v0.8.6 // indirect
+	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cloudflare/golz4 v0.0.0-20150217214814-ef862a3cdc58 // indirect
+	github.com/containerd/containerd v1.4.1 // indirect
+	github.com/containerd/continuity v0.0.0-20190426062206-aaeac12a7ffc // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/docker/distribution v2.7.1-0.20190205005809-0d3efadf0154+incompatible // indirect
+	github.com/docker/docker v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible // indirect
+	github.com/docker/go-units v0.3.3 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator/v10 v10.2.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
-	github.com/gofrs/uuid v4.2.0+incompatible // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/klauspost/compress v1.9.5 // indirect
+	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lib/pq v1.1.1 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 // indirect
+	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
+	github.com/opencontainers/image-spec v1.0.1 // indirect
+	github.com/opencontainers/runc v0.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
+	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/tidwall/match v1.0.1 // indirect
 	github.com/tidwall/pretty v1.0.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.9 // indirect

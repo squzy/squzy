@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
-	uuid "github.com/gofrs/uuid"
+	uuid "github.com/google/uuid"
 	"github.com/squzy/squzy/internal/logger"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"time"
@@ -100,7 +100,7 @@ var (
 
 func (c *Clickhouse) InsertStatRequest(data *apiPb.Metric) error {
 	now := time.Now()
-	srId := clickhouse.UUID(uuid.NewV4().String())
+	srId := clickhouse.UUID(uuid.New().String())
 	srData, err := ConvertToClickhouseStatRequest(data)
 	if err != nil {
 		return err
@@ -182,7 +182,7 @@ func (c *Clickhouse) insertStatRequestCPUInfo(now time.Time, sr_id clickhouse.UU
 
 	q := fmt.Sprintf(`INSERT INTO stat_requests_cpu_info (%s) VALUES ($0, $1, $2, $3)`, statRequestsCpuInfoFields)
 	_, err = tx.Exec(q,
-		clickhouse.UUID(uuid.NewV4().String()),
+		clickhouse.UUID(uuid.New().String()),
 		now,
 		sr_id,
 		cpuInfo.Load,
@@ -205,7 +205,7 @@ func (c *Clickhouse) insertStatRequestsMemoryInfoMem(now time.Time, sr_id clickh
 
 	q := fmt.Sprintf(`INSERT INTO stat_requests_memory_info_mem (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7)`, statRequestsMemoryInfoFields)
 	_, err = tx.Exec(q,
-		clickhouse.UUID(uuid.NewV4().String()),
+		clickhouse.UUID(uuid.New().String()),
 		now,
 		sr_id,
 		memoryInfo.Mem.MemoryInfoID,
@@ -233,7 +233,7 @@ func (c *Clickhouse) insertStatRequestsMemoryInfoSwap(now time.Time, sr_id click
 
 	q := fmt.Sprintf(`INSERT INTO stat_requests_memory_info_swap (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7)`, statRequestsMemoryInfoFields)
 	_, err = tx.Exec(q,
-		clickhouse.UUID(uuid.NewV4().String()),
+		clickhouse.UUID(uuid.New().String()),
 		now,
 		sr_id,
 		memoryInfo.Swap.MemoryInfoID,
@@ -261,7 +261,7 @@ func (c *Clickhouse) insertStatRequestsDiskInfo(now time.Time, sr_id clickhouse.
 
 	q := fmt.Sprintf(`INSERT INTO stat_requests_disk_info (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8)`, statRequestsDiskInfoFields)
 	_, err = tx.Exec(q,
-		clickhouse.UUID(uuid.NewV4().String()),
+		clickhouse.UUID(uuid.New().String()),
 		now,
 		sr_id,
 		diskInfo.Name,
@@ -288,7 +288,7 @@ func (c *Clickhouse) insertStatRequestsNetInfo(now time.Time, sr_id clickhouse.U
 
 	q := fmt.Sprintf(`INSERT INTO stat_requests_net_info (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, statRequestsNetInfoFields)
 	_, err = tx.Exec(q,
-		clickhouse.UUID(uuid.NewV4().String()),
+		clickhouse.UUID(uuid.New().String()),
 		now,
 		sr_id,
 		netInfo.Name,

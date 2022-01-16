@@ -3,7 +3,7 @@ package clickhouse
 import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
-	uuid "github.com/gofrs/uuid"
+	uuid "github.com/google/uuid"
 	"github.com/squzy/squzy/internal/logger"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"time"
@@ -75,7 +75,7 @@ func (c *Clickhouse) insertIncident(now time.Time, incident *Incident) error {
 
 	q := fmt.Sprintf(`INSERT INTO incidents (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7)`, incidentFields)
 	_, err = tx.Exec(q,
-		clickhouse.UUID(uuid.NewV4().String()),
+		clickhouse.UUID(uuid.New().String()),
 		now,
 		now,
 		incident.IncidentId,
@@ -102,7 +102,7 @@ func (c *Clickhouse) insertIncidentHistory(incidentId string, now time.Time, sta
 
 	q := fmt.Sprintf(`INSERT INTO incidents_history (%s) VALUES ($0, $1, $2, $3, $4)`, incidentHistoriesFields)
 	_, err = tx.Exec(q,
-		clickhouse.UUID(uuid.NewV4().String()),
+		clickhouse.UUID(uuid.New().String()),
 		now,
 		incidentId,
 		status,
@@ -156,7 +156,7 @@ func (c *Clickhouse) updateIncident(now time.Time, status apiPb.IncidentStatus, 
 
 	q := fmt.Sprintf(`INSERT INTO incidents (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7)`, incidentFields)
 	_, err = tx.Exec(q,
-		clickhouse.UUID(uuid.NewV4().String()),
+		clickhouse.UUID(uuid.New().String()),
 		incident.Model.CreatedAt,
 		now,
 		incident.IncidentId,

@@ -3,7 +3,7 @@ package clickhouse
 import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
-	uuid "github.com/gofrs/uuid"
+	uuid "github.com/google/uuid"
 	"github.com/squzy/squzy/internal/logger"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"time"
@@ -62,7 +62,7 @@ func (c *Clickhouse) insertSnapshot(now time.Time, snapshot *Snapshot) error {
 
 	q := fmt.Sprintf(`INSERT INTO snapshots (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9)`, snapshotFields)
 	_, err = tx.Exec(q,
-		clickhouse.UUID(uuid.NewV4().String()),
+		clickhouse.UUID(uuid.New().String()),
 		now,
 		now,
 		snapshot.SchedulerID,

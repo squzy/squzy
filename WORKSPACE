@@ -395,13 +395,6 @@ go_repository(
 )
 
 go_repository(
-    name = "com_github_satori_go_uuid",
-    importpath = "github.com/satori/go.uuid",
-    sum = "h1:0uYX9dsZ2yD7q2RtLRtPSdGDWzjeM3TbMJP9utgA0ww=",
-    version = "v1.2.0",
-)
-
-go_repository(
     name = "com_github_testcontainers_testcontainers_go",
     importpath = "github.com/testcontainers/testcontainers-go",
     sum = "h1:ZyftCfROjGrKlxk3MOUn2DAzWrUtzY/mj17iAkdUIvI=",
@@ -434,13 +427,6 @@ go_repository(
     importpath = "gotest.tools",
     sum = "h1:zpdCK+REwbk+rqjJmHhiCN6iBIigrZ39glqSF0P3KF0=",
     version = "v0.0.0-20181223230014-1083505acf35",
-)
-
-go_repository(
-    name = "com_github_gofrs_uuid",
-    importpath = "github.com/gofrs/uuid",
-    sum = "h1:yyYWMnhkhrKwwr8gAOcOCYxOOscHgDS9yZgBrnJfGa0=",
-    version = "v4.2.0+incompatible",
 )
 
 # gazelle:repository_macro repositories.bzl%go_repositories

@@ -4,8 +4,8 @@ package clickhouse
 import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
-	uuid "github.com/gofrs/uuid"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	uuid "github.com/google/uuid"
 	"github.com/squzy/squzy/internal/logger"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"strings"
@@ -82,7 +82,7 @@ func (c *Clickhouse) InsertTransactionInfo(data *apiPb.TransactionInfo) error {
 
 	q := fmt.Sprintf(`INSERT INTO transaction_info (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, transactionInfoFields)
 	_, err = tx.Exec(q,
-		clickhouse.UUID(uuid.NewV4().String()),
+		clickhouse.UUID(uuid.New().String()),
 		now,
 		now,
 		info.TransactionId,
