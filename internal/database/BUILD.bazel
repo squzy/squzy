@@ -6,16 +6,7 @@ go_library(
     importpath = "github.com/squzy/squzy/internal/database",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/database/postgres",
-        "//internal/database/clickhouse:go_default_library",
-        "@com_github_golang_protobuf//jsonpb:go_default_library",
-        "@com_github_golang_protobuf//ptypes:go_default_library",
-        "@com_github_golang_protobuf//ptypes/struct:go_default_library",
-        "@com_github_golang_protobuf//ptypes/wrappers:go_default_library",
-        "@com_github_jinzhu_gorm//:go_default_library",
-        "@com_github_jinzhu_gorm//dialects/postgres:go_default_library",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-        "@com_github_jinzhu_gorm//:gorm",
+        "//internal/database/clickhouse",
         "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
     ],
 )

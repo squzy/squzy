@@ -3,7 +3,7 @@ package clickhouse
 import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/gofrs/uuid"
 	"github.com/squzy/squzy/internal/logger"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"time"

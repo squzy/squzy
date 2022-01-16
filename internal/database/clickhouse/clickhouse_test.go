@@ -14,6 +14,8 @@ import (
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/squzy/squzy/internal/logger"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"github.com/stretchr/testify/assert"
+	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"google.golang.org/protobuf/types/known/structpb"
 	"os"
@@ -55,10 +57,15 @@ func shutdown(ctx context.Context) error {
 
 func setup(ctx context.Context) error {
 	var err error
+	nPort, err := nat.NewPort("tcp", "9000")
+	if err != nil {
+		return err
+	}
+
 	req := testcontainers.ContainerRequest{
 		Image:        "yandex/clickhouse-server",
 		ExposedPorts: []string{"9000/tcp", "8123/tcp"},
-		WaitingFor:   wait.ForListeningPort(nat.Port("9000/tcp")),
+		WaitingFor:   wait.ForListeningPort(nPort),
 	}
 	testContainer, err = testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
