@@ -137,7 +137,6 @@ func New() Config {
 }
 
 // Read config from .yaml file
-// reader & unmarshall are provided in order to easy-mock
 func NewConfigFromYaml(cfgByte []byte) (Config, error) {
 	var config cfg
 	err := yaml.Unmarshal(cfgByte, &config)
