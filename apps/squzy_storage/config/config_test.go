@@ -127,6 +127,17 @@ func TestCfg_WithDbLogs(t *testing.T) {
 	})
 }
 
+func TestCfg_DbType(t *testing.T) {
+	t.Run("Should: return from env", func(t *testing.T) {
+		err := os.Setenv(ENV_DB_TYPE, DB_TYPE_POSTGRES)
+		if err != nil {
+			assert.NotNil(t, nil)
+		}
+		s := New()
+		assert.Equal(t, s.GetWithDbLogs(), true)
+	})
+}
+
 func TestNewConfigFromYaml(t *testing.T) {
 	marshall := func(config *cfg) []byte {
 		res, err := yaml.Marshal(config)
@@ -198,7 +209,7 @@ func TestNewConfigFromYaml(t *testing.T) {
 			expectedError: errors.New("empty config incidentServer when withIncident true"),
 		},
 		{
-			name: "no error, default port",
+			name: "no error, default port and database",
 			cfgByte: marshall(&cfg{
 				DbHost:         "dbHost",
 				DbPort:         "dbPort",
@@ -219,6 +230,7 @@ func TestNewConfigFromYaml(t *testing.T) {
 				DbName:         "dbName",
 				DbUser:         "dbUser",
 				DbPassword:     "dbPassword",
+				DbType:         DB_TYPE_CLICKHOUSE,
 				IncidentServer: "incidentServer",
 				WithIncident:   true,
 				WithDbLogs:     true,

@@ -17,6 +17,10 @@ const (
 	ENV_DB_USER     = "DB_USER"
 	ENV_DB_PASSWORD = "DB_PASSWORD"
 	ENV_DB_LOGS     = "DB_LOGS"
+	ENV_DB_TYPE     = "DB_TYPE"
+
+	DB_TYPE_POSTGRES   = "postgres"
+	DB_TYPE_CLICKHOUSE = "clickhouse"
 
 	ENV_INCIDENT_SERVER_HOST = "INCIDENT_SERVER_HOST"
 	ENV_ENABLE_INCIDENT      = "ENABLE_INCIDENT"
@@ -31,6 +35,7 @@ type cfg struct {
 	DbName         string `yaml:"dbName"`
 	DbUser         string `yaml:"dbUser"`
 	DbPassword     string `yaml:"dbPassword"`
+	DbType         string `yaml:"dbType"` //default: postgres
 	IncidentServer string `yaml:"incidentServer"`
 	WithIncident   bool   `yaml:"withIncident"`
 	WithDbLogs     bool   `yaml:"withDbLogs"`
@@ -111,6 +116,12 @@ func New() Config {
 			withDbLog = value
 		}
 	}
+
+	dbType := DB_TYPE_CLICKHOUSE
+	dbTypeValue := os.Getenv(ENV_DB_LOGS)
+	if dbTypeValue != DB_TYPE_CLICKHOUSE {
+		dbType = DB_TYPE_POSTGRES //default value
+	}
 	return &cfg{
 		Port:           port,
 		DbHost:         os.Getenv(ENV_DB_HOST),
@@ -118,6 +129,7 @@ func New() Config {
 		DbName:         os.Getenv(ENV_DB_NAME),
 		DbUser:         os.Getenv(ENV_DB_USER),
 		DbPassword:     os.Getenv(ENV_DB_PASSWORD),
+		DbType:         dbType,
 		IncidentServer: os.Getenv(ENV_INCIDENT_SERVER_HOST),
 		WithIncident:   withIncident,
 		WithDbLogs:     withDbLog,
@@ -151,6 +163,9 @@ func NewConfigFromYaml(cfgByte []byte) (Config, error) {
 	}
 	if config.WithIncident && config.IncidentServer == "" {
 		return nil, errors.New("empty config incidentServer when withIncident true")
+	}
+	if config.DbType != DB_TYPE_CLICKHOUSE {
+		config.DbType = DB_TYPE_POSTGRES //default value
 	}
 	if config.Port == 0 {
 		config.Port = defaultPort
