@@ -20,16 +20,16 @@ func main() {
 	var cfg config.Config
 
 	filename := flag.String("config", "", "path to configFile")
-	if filename == nil || *filename == "" {
-		logger.Info(fmt.Sprintf("Empty config file param. Reading os env."))
-		cfg = config.New()
-	} else {
+	if filename != nil && *filename != "" {
 		// Reading config in case when flag provided
 		cfgFromFile, err := readConfigFile(filename)
 		if err != nil {
 			logger.Fatal(fmt.Sprintf("error reading env file: %s", err.Error()))
 		}
 		cfg = cfgFromFile
+	} else {
+		logger.Info(fmt.Sprintf("Empty config file param. Reading os env."))
+		cfg = config.New()
 	}
 
 	tools := grpctools.New()
