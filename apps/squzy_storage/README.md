@@ -22,6 +22,20 @@ Bold is required
 - **DB_PASSWORD** - postgresSQL password
 - DB_LOGS(false) - provide logs for DB
 
+Variables can be read from config file, which should have .yaml format:
+```yaml
+port: 3030 # 9090 is default
+dbHost: "dbHost"
+dbPort: "dbPort"
+dbName: "dbName"
+dbUser: "dbUser"
+dbPassword: "dbPassword"
+dbType: "dbType" # postgres/clickhouse. postgres is default
+incidentServer: "incidentServer"
+withIncident: true
+withDbLogs: true
+```
+
 ## Docker
 
 [HUB](https://hub.docker.com/repository/docker/squzy/squzy_monitoring)
