@@ -2,7 +2,7 @@ package config
 
 import (
 	"os"
-	"squzy/internal/helpers"
+	"github.com/squzy/squzy/internal/helpers"
 	"strconv"
 	"time"
 )

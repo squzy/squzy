@@ -2,8 +2,8 @@ package agent_executor
 
 import (
 	"errors"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/agent"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"github.com/squzy/squzy/internal/agent"
 	"time"
 )
 

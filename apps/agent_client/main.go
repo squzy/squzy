@@ -1,19 +1,19 @@
 package main
 
 import (
-	"github.com/golang/protobuf/ptypes"
-	"github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/disk"
-	"github.com/shirou/gopsutil/host"
-	"github.com/shirou/gopsutil/mem"
-	"github.com/shirou/gopsutil/net"
+	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/disk"
+	"github.com/shirou/gopsutil/v3/host"
+	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/shirou/gopsutil/v3/net"
+	"github.com/squzy/squzy/apps/agent_client/application"
+	"github.com/squzy/squzy/apps/agent_client/config"
+	_ "github.com/squzy/squzy/apps/agent_client/version"
+	"github.com/squzy/squzy/internal/agent"
+	agent_executor "github.com/squzy/squzy/internal/agent-executor"
+	"github.com/squzy/squzy/internal/logger"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"os"
-	"squzy/apps/agent_client/application"
-	"squzy/apps/agent_client/config"
-	_ "squzy/apps/agent_client/version"
-	"squzy/internal/agent"
-	agent_executor "squzy/internal/agent-executor"
-	"squzy/internal/logger"
 )
 
 func main() {
@@ -26,7 +26,7 @@ func main() {
 			disk.Partitions,
 			disk.Usage,
 			net.IOCounters,
-			ptypes.TimestampNow,
+			timestamp.Now,
 		),
 		cfg.GetInterval(),
 	)

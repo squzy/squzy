@@ -2,9 +2,9 @@ package postgres
 
 import (
 	"fmt"
-	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/jinzhu/gorm"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	wrappers "google.golang.org/protobuf/types/known/wrapperspb"
 	"strings"
 )
 

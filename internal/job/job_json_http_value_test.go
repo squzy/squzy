@@ -2,11 +2,11 @@ package job
 
 import (
 	"errors"
-	structType "github.com/golang/protobuf/ptypes/struct"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	"net/http"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
 	"testing"
 	"time"
 )
@@ -150,15 +150,15 @@ func TestExecHttpValue(t *testing.T) {
 			},
 		}}, &mockSuccess{})
 		assert.Equal(t, apiPb.SchedulerCode_OK, s.GetLogData().Snapshot.Code)
-		assert.EqualValues(t, &structType.ListValue{
-			Values: []*structType.Value{
+		assert.EqualValues(t, &structpb.ListValue{
+			Values: []*structpb.Value{
 				{
-					Kind: &structType.Value_StringValue{
+					Kind: &structpb.Value_StringValue{
 						StringValue: "2012-04-23T18:25:43Z",
 					},
 				},
 				{
-					Kind: &structType.Value_NumberValue{
+					Kind: &structpb.Value_NumberValue{
 						NumberValue: float64(31),
 					},
 				},

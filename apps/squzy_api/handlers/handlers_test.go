@@ -3,8 +3,8 @@ package handlers
 import (
 	"context"
 	"errors"
-	"github.com/golang/protobuf/ptypes/empty"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	empty "google.golang.org/protobuf/types/known/emptypb"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"testing"

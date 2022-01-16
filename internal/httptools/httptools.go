@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"squzy/internal/helpers"
+	"github.com/squzy/squzy/internal/helpers"
 	"time"
 )
 

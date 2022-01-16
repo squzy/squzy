@@ -2,22 +2,22 @@ package main
 
 import (
 	"context"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/squzy/mongo_helper"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"github.com/squzy/squzy/apps/squzy_agent_server/application"
+	"github.com/squzy/squzy/apps/squzy_agent_server/config"
+	"github.com/squzy/squzy/apps/squzy_agent_server/database"
+	"github.com/squzy/squzy/apps/squzy_agent_server/server"
+	_ "github.com/squzy/squzy/apps/squzy_agent_server/version"
+	"github.com/squzy/squzy/internal/grpctools"
+	"github.com/squzy/squzy/internal/helpers"
+	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
-	"squzy/apps/squzy_agent_server/application"
-	"squzy/apps/squzy_agent_server/config"
-	"squzy/apps/squzy_agent_server/database"
-	"squzy/apps/squzy_agent_server/server"
-	_ "squzy/apps/squzy_agent_server/version"
-	"squzy/internal/grpctools"
-	"squzy/internal/helpers"
-	"squzy/internal/logger"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
 
@@ -73,6 +73,6 @@ func unregisterAll(db database.Database) {
 		if err != nil {
 			continue
 		}
-		_ = db.UpdateStatus(rqCtx, id, apiPb.AgentStatus_UNREGISTRED, ptypes.TimestampNow())
+		_ = db.UpdateStatus(rqCtx, id, apiPb.AgentStatus_UNREGISTRED, timestamp.Now())
 	}
 }

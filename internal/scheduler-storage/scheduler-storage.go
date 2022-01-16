@@ -2,7 +2,7 @@ package scheduler_storage
 
 import (
 	"errors"
-	"squzy/internal/scheduler"
+	"github.com/squzy/squzy/internal/scheduler"
 	"sync"
 )
 

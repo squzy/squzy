@@ -2,8 +2,8 @@ package database
 
 import (
 	"github.com/jinzhu/gorm"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/database/postgres"
+	"github.com/squzy/squzy/internal/database/postgres"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 )
 
 type Database interface {

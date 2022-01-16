@@ -2,12 +2,12 @@ package server
 
 import (
 	"context"
-	"github.com/golang/protobuf/ptypes/empty"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	empty "google.golang.org/protobuf/types/known/emptypb"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"squzy/apps/squzy_agent_server/database"
-	"squzy/internal/helpers"
+	"github.com/squzy/squzy/apps/squzy_agent_server/database"
+	"github.com/squzy/squzy/internal/helpers"
 )
 
 type server struct {

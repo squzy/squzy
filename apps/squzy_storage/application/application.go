@@ -4,10 +4,10 @@ import (
 	"fmt"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"google.golang.org/grpc"
 	"net"
-	"squzy/apps/squzy_storage/config"
+	"github.com/squzy/squzy/apps/squzy_storage/config"
 )
 
 type Application interface {
