@@ -18,7 +18,6 @@ go_library(
         "@com_github_jinzhu_gorm//:gorm",
         "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@org_golang_google_grpc//:go_default_library",
-        "@in_gopkg_yaml_v2//:go_default_library",
     ],
 )
 
@@ -53,5 +52,5 @@ container_push(
     image = ":squzy_storage_container_image",
     registry = "index.docker.io",
     repository = "squzy/squzy_storage",
-    tag = "$(version)"
+    tag = "$(version)",
 )
