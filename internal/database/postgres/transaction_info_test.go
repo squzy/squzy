@@ -4,17 +4,15 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/golang/protobuf/ptypes"
-	tspb "github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/jinzhu/gorm"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
+	wrappers "google.golang.org/protobuf/types/known/wrapperspb"
 	"regexp"
 	"testing"
-	"time"
 )
 
 var (
@@ -56,11 +54,8 @@ func (s *SuiteTransInfo) Test_InsertTransactionInfo() {
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.mock.ExpectCommit()
 
-	correctTime, err := ptypes.TimestampProto(time.Now())
-	if err != nil {
-		require.NotNil(s.T(), nil)
-	}
-	err = postgrTransInfo.InsertTransactionInfo(&apiPb.TransactionInfo{
+	correctTime := timestamp.Now()
+	err := postgrTransInfo.InsertTransactionInfo(&apiPb.TransactionInfo{
 		StartTime: correctTime,
 		EndTime:   correctTime,
 	})
@@ -73,11 +68,8 @@ func TestPostgres_InsertTransactionInfo(t *testing.T) {
 		assert.Error(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		correctTime, err := ptypes.TimestampProto(time.Now())
-		if err != nil {
-			assert.NotNil(t, nil)
-		}
-		err = postgrWrongTransInfo.InsertTransactionInfo(&apiPb.TransactionInfo{
+		correctTime := timestamp.Now()
+		err := postgrWrongTransInfo.InsertTransactionInfo(&apiPb.TransactionInfo{
 			StartTime: correctTime,
 			EndTime:   correctTime,
 		})
@@ -159,8 +151,8 @@ func TestPostgres_GetTransactionInfo(t *testing.T) {
 		_, _, err := postgrWrongTransInfo.GetTransactionInfo(
 			&apiPb.GetTransactionsRequest{
 				TimeRange: &apiPb.TimeFilter{
-					From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
-					To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+					From: &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+					To:   &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
 				},
 			})
 		assert.Error(t, err)
@@ -311,8 +303,8 @@ func TestPostgres_GetTransactionGroup(t *testing.T) {
 		_, err := postgrWrongTransInfo.GetTransactionGroup(
 			&apiPb.GetTransactionGroupRequest{
 				TimeRange: &apiPb.TimeFilter{
-					From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
-					To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+					From: &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+					To:   &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
 				},
 			})
 		assert.Error(t, err)

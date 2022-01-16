@@ -4,14 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/golang/protobuf/ptypes"
-	tspb "github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/jinzhu/gorm"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
+	wrappers "google.golang.org/protobuf/types/known/wrapperspb"
 	"regexp"
 	"testing"
 )
@@ -65,7 +64,7 @@ func (s *SuiteIncident) Test_InsertIncident() {
 		Histories: []*apiPb.Incident_HistoryItem{
 			{
 				Status:    apiPb.IncidentStatus_INCIDENT_STATUS_OPENED,
-				Timestamp: ptypes.TimestampNow(),
+				Timestamp: timestamp.Now(),
 			},
 		},
 	})
@@ -233,8 +232,8 @@ func (s *SuiteIncident) Test_GetIncidents_timeError() {
 	maxValidSeconds := 253402300800
 	_, _, err := postgrIncident.GetIncidents(&apiPb.GetIncidentsListRequest{
 		TimeRange: &apiPb.TimeFilter{
-			From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
-			To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+			From: &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+			To:   &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
 		},
 	})
 	require.Error(s.T(), err)

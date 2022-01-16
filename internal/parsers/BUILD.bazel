@@ -1,31 +1,27 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "go_default_library",
-     srcs = ["sitemap.go"],
-     importpath = "squzy/internal/parsers",
-     visibility = ["//visibility:public"],
+    name = "parsers",
+    srcs = ["sitemap.go"],
+    importpath = "github.com/squzy/squzy/internal/parsers",
+    visibility = ["//:__subpackages__"],
 )
 
 go_test(
-    name = "go_default_test",
-    srcs = [
-        "sitemap_test.go",
-    ],
-    embed = [":go_default_library"],
-    deps = [
-        "@com_github_stretchr_testify//assert:go_default_library"
-    ],
+    name = "parsers_test",
+    srcs = ["sitemap_test.go"],
     data = [
-        "//internal/parsers:tests_file"
-    ]
+        "//internal/parsers:parsers_files",
+    ],
+    embed = [":parsers"],
+    deps = ["@com_github_stretchr_testify//assert"],
 )
 
 filegroup(
-    name = "tests_file",
+    name = "parsers_files",
     srcs = [
-        "valid.xml",
         "invalid.xml",
+        "valid.xml",
     ],
-    visibility = ["//visibility:public"],
+    visibility = ["//:__subpackages__"],
 )

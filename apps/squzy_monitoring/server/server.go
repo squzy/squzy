@@ -3,15 +3,15 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/golang/protobuf/ptypes/empty"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	empty "google.golang.org/protobuf/types/known/emptypb"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/sync/errgroup"
-	"squzy/internal/helpers"
-	job_executor "squzy/internal/job-executor"
-	"squzy/internal/scheduler"
-	scheduler_config_storage "squzy/internal/scheduler-config-storage"
-	scheduler_storage "squzy/internal/scheduler-storage"
+	"github.com/squzy/squzy/internal/helpers"
+	job_executor "github.com/squzy/squzy/internal/job-executor"
+	"github.com/squzy/squzy/internal/scheduler"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
+	scheduler_storage "github.com/squzy/squzy/internal/scheduler-storage"
 )
 
 var (

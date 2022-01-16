@@ -1,35 +1,30 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 load("@io_bazel_rules_docker//go:image.bzl", "go_image")
 load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 
 go_library(
-    name = "go_default_library",
-    srcs = [
-        "main.go",
-    ],
-    importpath = "squzy/apps/squzy_storage",
+    name = "squzy_storage_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/squzy/squzy/apps/squzy_storage",
+    visibility = ["//visibility:private"],
     deps = [
-        "//apps/squzy_storage/application:go_default_library",
-        "//apps/squzy_storage/config:go_default_library",
-        "//apps/squzy_storage/server:go_default_library",
-        "//apps/squzy_storage/version:go_default_library",
-        "//internal/grpctools:go_default_library",
-        "//internal/database:go_default_library",
-        "//internal/logger:go_default_library",
-        "@com_github_jinzhu_gorm//:go_default_library",
-        "@com_github_gin_gonic_gin//:go_default_library",
-        "@com_github_squzy_mongo_helper//:go_default_library",
-        "@org_mongodb_go_mongo_driver//mongo:go_default_library",
-        "@org_mongodb_go_mongo_driver//mongo/options:go_default_library",
+        "//apps/squzy_storage/application",
+        "//apps/squzy_storage/config",
+        "//apps/squzy_storage/server",
+        "//apps/squzy_storage/version",
+        "//internal/database",
+        "//internal/grpctools",
+        "//internal/logger",
+        "@com_github_jinzhu_gorm//:gorm",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@org_golang_google_grpc//:go_default_library",
-        "@com_github_squzy_squzy_generated//generated/proto/v1:go_default_library",
-    ]
+    ],
 )
 
 go_binary(
     name = "squzy_storage",
-    embed = [":go_default_library"],
-    x_defs = {"squzy/apps/squzy_storage/version.Version": "{VERSION}"},
+    embed = [":squzy_storage_lib"],
+    visibility = ["//visibility:public"],
 )
 
 go_image(
@@ -48,7 +43,7 @@ container_push(
     image = ":squzy_storage_container_image",
     registry = "index.docker.io",
     repository = "squzy/squzy_storage",
-    tag = "$(version)"
+    tag = "$(version)",
 )
 
 container_push(

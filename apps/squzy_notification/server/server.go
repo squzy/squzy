@@ -3,13 +3,14 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/golang/protobuf/ptypes/empty"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"github.com/squzy/squzy/apps/squzy_notification/database"
+	"github.com/squzy/squzy/apps/squzy_notification/integrations"
+	"github.com/squzy/squzy/internal/helpers"
+	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"squzy/apps/squzy_notification/database"
-	"squzy/apps/squzy_notification/integrations"
-	"squzy/internal/helpers"
-	"squzy/internal/logger"
+	"golang.org/x/sync/errgroup"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 	"time"
 )
 
@@ -88,28 +89,33 @@ func (s *server) Notify(ctx context.Context, request *apiPb.NotifyRequest) (*emp
 	if err != nil {
 		return nil, err
 	}
+
+	var eg errgroup.Group
 	for _, method := range methods {
-		go func(m *database.Notification) {
-			c, cancel := helpers.TimeoutContext(context.Background(), time.Second*5)
+		m := method
+		eg.Go(func() error {
+			c, cancel := helpers.TimeoutContext(ctx, time.Second*5)
 			defer cancel()
-			config, err := s.nmDb.Get(c, m.NotificationMethodId)
-			if err != nil {
-				logger.Error(err.Error())
-				return
+			config, errGet := s.nmDb.Get(c, m.NotificationMethodId)
+			if errGet != nil {
+				logger.Error(errGet.Error())
+				return nil
 			}
 			if config.Status != apiPb.NotificationMethodStatus_NOTIFICATION_STATUS_ACTIVE {
-				return
+				return nil
 			}
 			switch config.Type {
 			case apiPb.NotificationMethodType_NOTIFICATION_METHOD_SLACK:
 				s.integrations.Slack(ctx, incident, config.Slack)
-				return
+				return nil
 			case apiPb.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK:
 				s.integrations.Webhook(ctx, incident, config.WebHook)
-				return
+				return nil
 			}
-		}(method)
+			return nil
+		})
 	}
+	_ = eg.Wait()
 	return &empty.Empty{}, nil
 }
 

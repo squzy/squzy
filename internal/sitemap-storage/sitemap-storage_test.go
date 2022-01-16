@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	"squzy/internal/parsers"
+	"github.com/squzy/squzy/internal/parsers"
 	"testing"
 	"time"
 )

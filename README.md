@@ -5,6 +5,10 @@
 [![GolangCI](https://golangci.com/badges/github.com/squzy/golangci-lint.svg)](https://golangci.com)
 [![Join the chat at https://gitter.im/squzyio/community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/squzyio/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+[Join our Slack](https://join.slack.com/t/squzydev/shared_invite/zt-11x3kx7jl-W5xg9dd0zU8vxJTaoAd1uA)
+
+[Examples of incidents](https://squzydev.slack.com/archives/C02U6T27VA7)
+
 ## About
 
 Squzy - is a high-performance open-source monitoring and alerting system written in Golang with [Bazel](https://bazel.build/) and love.
@@ -64,6 +68,7 @@ Squzy Notification Manager  - create and link notifications methods
 # Authors
 - [Iurii Panarin](https://github.com/PxyUp)
 - [Nikita Kharitonov](https://github.com/DreamAndDrum)
+- [Peeter Kokk](https://github.com/peterjasc)
 
 # Want to help?
 Want to file a bug, contribute some code, or improve documentation? Excellent!

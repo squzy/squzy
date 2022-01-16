@@ -3,13 +3,13 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/golang/protobuf/ptypes/empty"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	empty "google.golang.org/protobuf/types/known/emptypb"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
-	"squzy/apps/squzy_incident/database"
-	"squzy/apps/squzy_incident/expression"
+	"github.com/squzy/squzy/apps/squzy_incident/database"
+	"github.com/squzy/squzy/apps/squzy_incident/expression"
 	"testing"
 )
 

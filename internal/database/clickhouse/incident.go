@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
 	uuid "github.com/satori/go.uuid"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/logger"
+	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"time"
 )
 
@@ -31,12 +31,12 @@ const (
 )
 
 var (
-	incidentFields                = "id, created_at, updated_at, incident_id, status, rule_id, start_time, end_time"
-	incidentHistoriesFields       = "id, created_at, incident_id, status, timestamp"
-	incidentIdString              = fmt.Sprintf(`"incident_id" = ?`)
-	incidentRuleIdString          = fmt.Sprintf(`"rule_id" = ?`)
-	incidentStatusString          = fmt.Sprintf(`"status" = ?`)
-	startTimeFilterString         = `start_time >= ? AND start_time <= ?`
+	incidentFields          = "id, created_at, updated_at, incident_id, status, rule_id, start_time, end_time"
+	incidentHistoriesFields = "id, created_at, incident_id, status, timestamp"
+	incidentIdString        = fmt.Sprintf(`"incident_id" = ?`)
+	incidentRuleIdString    = fmt.Sprintf(`"rule_id" = ?`)
+	incidentStatusString    = fmt.Sprintf(`"status" = ?`)
+	startTimeFilterString   = `start_time >= ? AND start_time <= ?`
 
 	incidentOrderMap = map[apiPb.SortIncidentList]string{
 		apiPb.SortIncidentList_SORT_INCIDENT_LIST_UNSPECIFIED: "start_time",

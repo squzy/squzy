@@ -3,11 +3,11 @@ package integrations
 import (
 	"context"
 	"errors"
-	"github.com/golang/protobuf/ptypes"
-	api "github.com/squzy/squzy_generated/generated/proto/v1"
+	"github.com/squzy/squzy/apps/squzy_notification/database"
+	api "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"net/http"
-	"squzy/apps/squzy_notification/database"
 	"testing"
 	"time"
 )
@@ -103,7 +103,7 @@ func TestIntegrations_Webhook(t *testing.T) {
 			s.Webhook(context.Background(), &api.Incident{
 				Histories: []*api.Incident_HistoryItem{
 					{
-						Timestamp: ptypes.TimestampNow(),
+						Timestamp: timestamp.Now(),
 						Status:    api.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED,
 					},
 				},
@@ -116,7 +116,7 @@ func TestIntegrations_Webhook(t *testing.T) {
 			s.Webhook(context.Background(), &api.Incident{
 				Histories: []*api.Incident_HistoryItem{
 					{
-						Timestamp: ptypes.TimestampNow(),
+						Timestamp: timestamp.Now(),
 						Status:    123,
 					},
 				},
@@ -129,7 +129,7 @@ func TestIntegrations_Webhook(t *testing.T) {
 			s.Webhook(context.Background(), &api.Incident{
 				Histories: []*api.Incident_HistoryItem{
 					{
-						Timestamp: ptypes.TimestampNow(),
+						Timestamp: timestamp.Now(),
 						Status:    api.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED,
 					},
 				},
@@ -145,7 +145,7 @@ func TestIntegrations_Slack(t *testing.T) {
 			s.Slack(context.Background(), &api.Incident{
 				Histories: []*api.Incident_HistoryItem{
 					{
-						Timestamp: ptypes.TimestampNow(),
+						Timestamp: timestamp.Now(),
 						Status:    api.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED,
 					},
 				},

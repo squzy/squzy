@@ -4,16 +4,14 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/golang/protobuf/ptypes"
-	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/jinzhu/gorm"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"regexp"
 	"testing"
-	"time"
 )
 
 var (
@@ -55,11 +53,9 @@ func (s *SuiteSnapshot) Test_Snapshots() {
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.mock.ExpectCommit()
 
-	correctTime, err := ptypes.TimestampProto(time.Now())
-	if err != nil {
-		require.NotNil(s.T(), nil)
-	}
-	err = postgrSnapshot.InsertSnapshot(&apiPb.SchedulerResponse{
+	correctTime := timestamp.Now()
+
+	err := postgrSnapshot.InsertSnapshot(&apiPb.SchedulerResponse{
 		SchedulerId: "schId",
 		Snapshot: &apiPb.SchedulerSnapshot{
 			Code: 0,
@@ -83,11 +79,8 @@ func TestPostgres_InsertSnapshots(t *testing.T) {
 		assert.Error(t, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		correctTime, err := ptypes.TimestampProto(time.Now())
-		if err != nil {
-			assert.NotNil(t, nil)
-		}
-		err = postgrWrongSnapshot.InsertSnapshot(&apiPb.SchedulerResponse{
+		correctTime := timestamp.Now()
+		err := postgrWrongSnapshot.InsertSnapshot(&apiPb.SchedulerResponse{
 			SchedulerId: "",
 			Snapshot: &apiPb.SchedulerSnapshot{
 				Code: 0,
@@ -189,8 +182,8 @@ func TestPostgres_GetSnapshots(t *testing.T) {
 				SchedulerId: "",
 				Pagination:  nil,
 				TimeRange: &apiPb.TimeFilter{
-					From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
-					To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+					From: &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+					To:   &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
 				},
 			})
 		assert.Error(t, err)
@@ -262,8 +255,8 @@ func TestPostgres_GetSnapshotsUptime(t *testing.T) {
 			&apiPb.GetSchedulerUptimeRequest{
 				SchedulerId: "",
 				TimeRange: &apiPb.TimeFilter{
-					From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
-					To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+					From: &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+					To:   &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
 				},
 			})
 		assert.Error(t, err)

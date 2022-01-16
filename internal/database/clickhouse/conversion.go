@@ -10,8 +10,8 @@ import (
 
 	//nolint:staticcheck
 	"github.com/golang/protobuf/ptypes"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/logger"
+	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"time"
 )
 
@@ -223,7 +223,6 @@ func ConvertToClickhouseStatRequest(request *apiPb.Metric) (*StatRequest, error)
 	}, nil
 }
 
-
 func ConvertFromClickhouseStatRequests(data []*StatRequest) []*apiPb.GetAgentInformationResponse_Statistic {
 	var res []*apiPb.GetAgentInformationResponse_Statistic
 	for _, request := range data {
@@ -251,7 +250,6 @@ func ConvertFromClickhouseStatRequest(data *StatRequest) (*apiPb.GetAgentInforma
 		Time:       t,
 	}, nil
 }
-
 
 func convertToCPUInfo(request *apiPb.CpuInfo) []*CPUInfo {
 	var res []*CPUInfo

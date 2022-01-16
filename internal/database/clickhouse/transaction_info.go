@@ -6,8 +6,8 @@ import (
 	"github.com/ClickHouse/clickhouse-go"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	uuid "github.com/satori/go.uuid"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/logger"
+	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"strings"
 	"time"
 )

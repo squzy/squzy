@@ -12,14 +12,12 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/golang/protobuf/ptypes/wrappers"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"github.com/stretchr/testify/assert"
-	"github.com/testcontainers/testcontainers-go"
+	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"google.golang.org/protobuf/types/known/structpb"
 	"os"
 	"sort"
-	"squzy/internal/logger"
 	"testing"
 	"time"
 )
@@ -1132,8 +1130,8 @@ func TestGetTransactionGroup(t *testing.T) {
 	}
 
 	trGroup, err := clickh.GetTransactionGroup(&apiPb.GetTransactionGroupRequest{
-		ApplicationId:        "ApplicationId",
-		TimeRange:            &apiPb.TimeFilter{
+		ApplicationId: "ApplicationId",
+		TimeRange: &apiPb.TimeFilter{
 			From: &timestamp.Timestamp{
 				Seconds: 6700,
 				Nanos:   0,
@@ -1143,9 +1141,9 @@ func TestGetTransactionGroup(t *testing.T) {
 				Nanos:   0,
 			},
 		},
-		GroupType:            apiPb.GroupTransaction_BY_PATH,
-		Type:                 apiPb.TransactionType_TRANSACTION_TYPE_GRPC,
-		Status:               1,
+		GroupType: apiPb.GroupTransaction_BY_PATH,
+		Type:      apiPb.TransactionType_TRANSACTION_TYPE_GRPC,
+		Status:    1,
 	})
 
 	assert.Equal(t, 3, trGroup["Path"].Count)

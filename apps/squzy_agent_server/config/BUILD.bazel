@@ -1,22 +1,16 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-     name = "go_default_library",
-     srcs = ["config.go"],
-     importpath = "squzy/apps/squzy_agent_server/config",
-     visibility = ["//visibility:public"],
-     deps = [
-         "//internal/helpers:go_default_library"
-     ]
+    name = "config",
+    srcs = ["config.go"],
+    importpath = "github.com/squzy/squzy/apps/squzy_agent_server/config",
+    visibility = ["//visibility:public"],
+    deps = ["//internal/helpers"],
 )
 
 go_test(
-    name = "go_default_test",
-    embed = [":go_default_library"],
-    srcs = [
-        "config_test.go",
-    ],
-    deps =[
-        "@com_github_stretchr_testify//assert:go_default_library"
-    ]
+    name = "config_test",
+    srcs = ["config_test.go"],
+    embed = [":config"],
+    deps = ["@com_github_stretchr_testify//assert"],
 )

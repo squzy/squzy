@@ -4,15 +4,15 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/ClickHouse/clickhouse-go"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"github.com/squzy/squzy/apps/squzy_storage/application"
+	"github.com/squzy/squzy/apps/squzy_storage/config"
+	"github.com/squzy/squzy/apps/squzy_storage/server"
+	_ "github.com/squzy/squzy/apps/squzy_storage/version"
+	"github.com/squzy/squzy/internal/database"
+	"github.com/squzy/squzy/internal/grpctools"
+	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"google.golang.org/grpc"
-	"squzy/apps/squzy_storage/application"
-	"squzy/apps/squzy_storage/config"
-	"squzy/apps/squzy_storage/server"
-	_ "squzy/apps/squzy_storage/version"
-	"squzy/internal/database"
-	"squzy/internal/grpctools"
-	"squzy/internal/logger"
 )
 
 func main() {

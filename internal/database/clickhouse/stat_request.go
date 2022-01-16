@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
 	uuid "github.com/satori/go.uuid"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/logger"
+	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"time"
 )
 
@@ -41,25 +41,25 @@ type MemoryInfo struct {
 }
 
 type MemoryMem struct {
-	Model        Model
+	Model         Model
 	StatRequestID string
-	MemoryInfoID string
-	Total        uint64
-	Used         uint64
-	Free         uint64
-	Shared       uint64
-	UsedPercent  float64
+	MemoryInfoID  string
+	Total         uint64
+	Used          uint64
+	Free          uint64
+	Shared        uint64
+	UsedPercent   float64
 }
 
 type MemorySwap struct {
-	Model        Model
+	Model         Model
 	StatRequestID string
-	MemoryInfoID string
-	Total        uint64
-	Used         uint64
-	Free         uint64
-	Shared       uint64
-	UsedPercent  float64
+	MemoryInfoID  string
+	Total         uint64
+	Used          uint64
+	Free          uint64
+	Shared        uint64
+	UsedPercent   float64
 }
 
 type DiskInfo struct {

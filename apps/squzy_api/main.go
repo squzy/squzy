@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	"github.com/squzy/squzy/apps/squzy_api/config"
+	"github.com/squzy/squzy/apps/squzy_api/handlers"
+	"github.com/squzy/squzy/apps/squzy_api/router"
+	_ "github.com/squzy/squzy/apps/squzy_api/version"
+	"github.com/squzy/squzy/internal/grpctools"
+	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"google.golang.org/grpc"
-	"squzy/apps/squzy_api/config"
-	"squzy/apps/squzy_api/handlers"
-	"squzy/apps/squzy_api/router"
-	_ "squzy/apps/squzy_api/version"
-	"squzy/internal/grpctools"
-	"squzy/internal/logger"
 )
 
 func main() {

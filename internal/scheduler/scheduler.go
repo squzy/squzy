@@ -3,7 +3,7 @@ package scheduler
 import (
 	"errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	job_executor "squzy/internal/job-executor"
+	job_executor "github.com/squzy/squzy/internal/job-executor"
 	"time"
 )
 

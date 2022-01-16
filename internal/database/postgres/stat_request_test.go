@@ -4,13 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/golang/protobuf/ptypes"
-	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/jinzhu/gorm"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"regexp"
 	"testing"
 )
@@ -67,7 +66,7 @@ func TestPostgres_InsertStatRequest(t *testing.T) {
 			NetInfo: &apiPb.NetInfo{
 				Interfaces: map[string]*apiPb.NetInfo_Interface{},
 			},
-			Time: ptypes.TimestampNow(),
+			Time: timestamp.Now(),
 		})
 		assert.Error(t, err)
 	})
@@ -116,7 +115,7 @@ func (s *SuiteStatRequest) Test_InsertStatRequest() {
 				"": {},
 			},
 		},
-		Time: ptypes.TimestampNow(),
+		Time: timestamp.Now(),
 	})
 	require.NoError(s.T(), err)
 }
@@ -196,8 +195,8 @@ func TestPostgres_GetStatRequest(t *testing.T) {
 	maxValidSeconds := 253402300800
 	t.Run("Should: return error", func(t *testing.T) {
 		_, _, err := postgrWrongStatRequest.GetStatRequest("", nil, &apiPb.TimeFilter{
-			From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
-			To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+			From: &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+			To:   &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
 		})
 		assert.Error(t, err)
 	})
@@ -270,8 +269,8 @@ func TestPostgres_GetCpuInfo(t *testing.T) {
 	maxValidSeconds := 253402300800
 	t.Run("Should: return error", func(t *testing.T) {
 		_, _, err := postgrWrongStatRequest.GetCPUInfo("", nil, &apiPb.TimeFilter{
-			From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
-			To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+			From: &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+			To:   &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
 		})
 		assert.Error(t, err)
 	})
@@ -327,8 +326,8 @@ func TestPostgres_GetMemoryInfo(t *testing.T) {
 	maxValidSeconds := 253402300800
 	t.Run("Should: return error", func(t *testing.T) {
 		_, _, err := postgrWrongStatRequest.GetMemoryInfo("", nil, &apiPb.TimeFilter{
-			From: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
-			To:   &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+			From: &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
+			To:   &timestamp.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
 		})
 		assert.Error(t, err)
 	})

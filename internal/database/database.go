@@ -2,8 +2,8 @@ package database
 
 import (
 	"database/sql"
-	apiPb "github.com/squzy/squzy_generated/generated/proto/v1"
-	"squzy/internal/database/clickhouse"
+	"github.com/squzy/squzy/internal/database/clickhouse"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 )
 
 type Database interface {
