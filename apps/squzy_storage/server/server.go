@@ -3,13 +3,13 @@ package server
 import (
 	"context"
 	"errors"
-	empty "google.golang.org/protobuf/types/known/emptypb"
-	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
-	"google.golang.org/grpc/codes"
-	grpcStatus "google.golang.org/grpc/status"
 	"github.com/squzy/squzy/apps/squzy_storage/config"
 	"github.com/squzy/squzy/internal/database"
 	"github.com/squzy/squzy/internal/helpers"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"google.golang.org/grpc/codes"
+	grpcStatus "google.golang.org/grpc/status"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 	"time"
 )
 
@@ -185,9 +185,7 @@ func (s *server) SendRecordToIncident(rq *apiPb.StorageRecord) {
 	if s.incidentClient == nil {
 		return
 	}
-	go func() {
-		ctx, cancel := helpers.TimeoutContext(context.Background(), incidentTimeout)
-		defer cancel()
-		_, _ = s.incidentClient.ProcessRecordFromStorage(ctx, rq)
-	}()
+	ctx, cancel := helpers.TimeoutContext(context.Background(), incidentTimeout)
+	defer cancel()
+	_, _ = s.incidentClient.ProcessRecordFromStorage(ctx, rq)
 }
