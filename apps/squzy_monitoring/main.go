@@ -3,9 +3,6 @@ package main
 import (
 	"context"
 	"github.com/squzy/mongo_helper"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"google.golang.org/grpc"
 	"github.com/squzy/squzy/apps/squzy_monitoring/application"
 	"github.com/squzy/squzy/apps/squzy_monitoring/config"
 	"github.com/squzy/squzy/apps/squzy_monitoring/version"
@@ -21,6 +18,9 @@ import (
 	"github.com/squzy/squzy/internal/semaphore"
 	sitemap_storage "github.com/squzy/squzy/internal/sitemap-storage"
 	"github.com/squzy/squzy/internal/storage"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"google.golang.org/grpc"
 	"time"
 )
 

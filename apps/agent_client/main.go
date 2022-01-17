@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
@@ -12,6 +13,8 @@ import (
 	"github.com/squzy/squzy/internal/agent"
 	agent_executor "github.com/squzy/squzy/internal/agent-executor"
 	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"google.golang.org/grpc"
 	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"os"
 )
@@ -33,8 +36,22 @@ func main() {
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
+	ctx := context.Background()
+	var connection *grpc.ClientConn
+
+	for {
+		conn, errConn := grpc.DialContext(ctx, cfg.GetAgentName(), grpc.WithInsecure(), grpc.WithBlock())
+		if errConn != nil {
+			continue
+		}
+		connection = conn
+		break
+	}
+
 	a := application.New(
+		ctx,
 		executor,
+		apiPb.NewAgentServerClient(connection),
 		cfg,
 		host.Info,
 		application.NewStream,

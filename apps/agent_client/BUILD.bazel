@@ -17,6 +17,8 @@ go_library(
         "@com_github_shirou_gopsutil_v3//host",
         "@com_github_shirou_gopsutil_v3//mem",
         "@com_github_shirou_gopsutil_v3//net",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
+        "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_protobuf//types/known/timestamppb",
     ],
 )
