@@ -26,15 +26,10 @@ jobs:
 
     - name: Install bazel
       run: |
-        curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add - 
-        echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-        sudo apt update && sudo apt install bazel-4.2.2
-        export PATH="$PATH:$HOME/bin"
-        bazel --version
-        touch ~/.netrc
+        go install github.com/bazelbuild/bazelisk@latest
         export SQUZY_VERSION=latest
 
-    - name: Tests
+    - name: Tests with cover
       run: |
         make test_cover
         bash <(curl -s https://codecov.io/bash)
@@ -44,10 +39,10 @@ jobs:
       run: |
         echo ${{ secrets.DOCKER_TOKEN }} | docker login -u squzy --password-stdin
         export SQUZY_VERSION=latest
-        bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_monitoring:squzy_push_hub_ci
-        bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_agent_server:squzy_push_hub_ci
-        bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_api:squzy_push_hub_ci
-        bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_storage:squzy_push_hub_ci
-        bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_application_monitoring:squzy_push_hub_ci
-        bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_incident:squzy_push_hub_ci
-        bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_notification:squzy_push_hub_ci
+        bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_monitoring:squzy_push_hub_ci
+        bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_agent_server:squzy_push_hub_ci
+        bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_api:squzy_push_hub_ci
+        bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_storage:squzy_push_hub_ci
+        bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_application_monitoring:squzy_push_hub_ci
+        bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_incident:squzy_push_hub_ci
+        bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=latest //apps/squzy_notification:squzy_push_hub_ci
