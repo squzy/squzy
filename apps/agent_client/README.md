@@ -34,5 +34,7 @@ Some times later we will provide our implementation
 Bold is required
 
 - **SQUZY_AGENT_SERVER_HOST** - agent server host
-- SQUZY_AGENT_INTERVAL(5s) - how offen get metric
+- SQUZY_AGENT_INTERVAL(5s) - how often get metric
 - SQUZY_AGENT_NAME - uniq name for define strict agent
+- SQUZY_AGENT_RETRY - use retry or not(default false)
+- SQUZY_AGENT_RETRY_COUNT - if we use retry mechanism, attempts count, if <=0 than infinity
