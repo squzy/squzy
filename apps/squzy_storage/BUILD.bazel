@@ -52,5 +52,5 @@ container_push(
     image = ":squzy_storage_container_image",
     registry = "index.docker.io",
     repository = "squzy/squzy_storage",
-    tag = "$(version)"
+    tag = "$(version)",
 )
