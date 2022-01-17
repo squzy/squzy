@@ -42,13 +42,13 @@ default: build
 	golangci-lint run
 
 .gen_build:
-	bazel run gazelle -- fix
+	bazelisk run gazelle -- fix
 
 .build_squzy:
-	bazel build //apps/squzy_monitoring:squzy_monitoring_src
+	bazelisk build //apps/squzy_monitoring:squzy_monitoring_src
 
 .test:
-	bazel test --cache_test_results=no --define version="local" //...
+	bazelisk test --cache_test_results=no --define version="local" //...
 
 
 .build_agent:
@@ -76,14 +76,14 @@ default: build
 	./build.bash squzy_application_monitoring squzy_application_monitoring_$(version) $(version)
 
 .test_debug:
-	bazel test --define version="local" //...:all --sandbox_debug
+	bazelisk test --define version="local" //...:all --sandbox_debug
 
 .dep:
-	bazel run //:gazelle -- update-repos -from_file=go.mod
+	bazelisk run //:gazelle -- update-repos -from_file=go.mod
 
 .build_agent_mac:
 	env CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -o bin/squzy_agent_$(version)-darwin-amd64 -ldflags "-s -w -X squzy/apps/agent_client/version.Version=$(version)"  apps/agent_client/main.go
 
 .test_cover:
-	# bazel coverage --test_arg="-test.coverprofile=c.out" //apps/...
-	go test ./... -coverprofile=c.out
+	go test ./... -coverprofile=coverage.txt
+	# bazelisk coverage --test_arg="-test.coverprofile=coverage.txt" --cache_test_results=no --define version="local" //...:all
