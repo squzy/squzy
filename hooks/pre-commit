@@ -1,0 +1,13 @@
+#!/bin/sh
+
+command_exists () {
+    type "$1" &> /dev/null ;
+}
+
+if command_exists bazelisk; then
+    bazelisk run //:gazelle -- update-repos -from_file=go.mod
+    bazelisk run gazelle -- fix
+else
+    bazel run //:gazelle -- update-repos -from_file=go.mod
+    bazel run gazelle -- fix
+fi
