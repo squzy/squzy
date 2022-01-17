@@ -34,10 +34,9 @@ jobs:
           touch ~/.netrc
           export SQUZY_VERSION=latest
 
-      - uses: codecov/codecov-action@v2
-        with:
-          files: ./c.out
-          fail_ci_if_error: true # optional (default = false)
+      - name: Tests
+        run: |
+          make test
 
       - name: Release to Docker and Github
         run: |

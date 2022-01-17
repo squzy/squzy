@@ -37,11 +37,7 @@ jobs:
     - name: Tests
       run: |
         make test_cover
-        
-    - uses: codecov/codecov-action@v2
-      with:
-        files: ./c.out
-        fail_ci_if_error: true # optional (default = false)
+        bash <(curl -s https://codecov.io/bash)
 
     - name: Upload latest image to Docker
       if: ${{ github.ref == 'refs/heads/develop'}}
