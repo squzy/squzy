@@ -85,5 +85,5 @@ default: build
 	env CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -o bin/squzy_agent_$(version)-darwin-amd64 -ldflags "-s -w -X squzy/apps/agent_client/version.Version=$(version)"  apps/agent_client/main.go
 
 .test_cover:
-	go test ./... -coverprofile=c.out
-	# bazelisk coverage --test_arg="-test.coverprofile=c.out" --cache_test_results=no --define version="local" //...:all
+	go test ./... -coverprofile=coverage.txt
+	# bazelisk coverage --test_arg="-test.coverprofile=coverage.txt" --cache_test_results=no --define version="local" //...:all
