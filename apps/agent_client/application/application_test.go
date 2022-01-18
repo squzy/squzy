@@ -494,8 +494,9 @@ func TestApplication_Run(t *testing.T) {
 		inter <- syscall.SIGTERM
 		wg.Wait()
 		// 5 msg + disconnect + unregister
-		assert.Equal(t, 7, s.count)
 		grpcServer.Stop()
+		time.Sleep(time.Second * 5)
+		assert.Equal(t, 7, s.count)
 	})
 	t.Run("Should: not throw error if all works like expected", func(t *testing.T) {
 		lis, err := net.Listen("tcp", ":0")
