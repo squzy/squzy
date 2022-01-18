@@ -201,6 +201,7 @@ func (s *server) ProcessRecordFromStorage(ctx context.Context, request *apiPb.St
 				IncidentId: incident.Id,
 				OwnerType:  rule.OwnerType,
 				OwnerId:    rule.OwnerId.Hex(),
+				RuleName:   rule.Name,
 			})
 			continue
 		}
