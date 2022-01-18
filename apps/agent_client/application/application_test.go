@@ -76,7 +76,9 @@ func (s *serverSuccess) SendMetrics(rq apiPb.AgentServer_SendMetricsServer) erro
 		}
 		if res != nil {
 			fmt.Println(res.GetMetric())
+			s.mutex.Lock()
 			s.count += 1
+			s.mutex.Unlock()
 			s.ch <- res
 		}
 	}
@@ -491,8 +493,8 @@ func TestApplication_Run(t *testing.T) {
 
 		inter <- syscall.SIGTERM
 		wg.Wait()
-		// 5 msg + disconnect
-		assert.Equal(t, 6, s.count)
+		// 5 msg + disconnect + unregister
+		assert.Equal(t, 7, s.count)
 		grpcServer.Stop()
 	})
 	t.Run("Should: not throw error if all works like expected", func(t *testing.T) {
