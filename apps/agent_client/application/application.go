@@ -47,7 +47,9 @@ type application struct {
 }
 
 func (a *application) register(hostStat *host.InfoStat) (*apiPb.RegisterResponse, error) {
-	res, err := a.client.Register(a.ctx, &apiPb.RegisterRequest{
+	ctx, cancel := helpers.TimeoutContext(a.ctx, RetryInterval)
+	defer cancel()
+	res, err := a.client.Register(ctx, &apiPb.RegisterRequest{
 		AgentName: a.config.GetAgentName(),
 		Interval:  int64(a.config.GetInterval()) / 1e9,
 		HostInfo: &apiPb.HostInfo{
@@ -116,9 +118,10 @@ func (a *application) flushBuffer(stream apiPb.AgentServer_SendMetricsClient) er
 }
 
 func (a *application) sendToStream(clientId string) {
+	input := a.executor.Execute()
 	for {
 		select {
-		case stat := <-a.executor.Execute():
+		case stat := <-input:
 			stat.AgentId = clientId
 			stat.AgentName = a.config.GetAgentName()
 			// what we should do if squzy server cant get msg
@@ -205,7 +208,7 @@ func (a *application) Run() error {
 
 	_ = a.stream.CloseSend()
 
-	ctxClose, cancelClose := helpers.TimeoutContext(context.Background(), 0)
+	ctxClose, cancelClose := helpers.TimeoutContext(a.ctx, 0)
 	defer cancelClose()
 
 	_, _ = a.client.UnRegister(ctxClose, &apiPb.UnRegisterRequest{

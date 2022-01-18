@@ -72,10 +72,13 @@ func (s *serverSuccess) SendMetrics(rq apiPb.AgentServer_SendMetricsServer) erro
 			return rq.SendAndClose(&empty.Empty{})
 		}
 		if err != nil {
-			continue
+			return rq.SendAndClose(&empty.Empty{})
 		}
-		s.count += 1
-		s.ch <- res
+		if res != nil {
+			fmt.Println(res.GetMetric())
+			s.count += 1
+			s.ch <- res
+		}
 	}
 }
 
@@ -417,26 +420,24 @@ func TestApplication_Run(t *testing.T) {
 		}()
 		ch <- &apiPb.Metric{
 			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
-				Load: 5,
+				Load: 1,
 			}}},
 		}
 		value := <-msgChan
 
-		assert.EqualValues(t, []*apiPb.CpuInfo_CPU{{
-			Load: 5,
-		}}, (value.Msg).(*apiPb.SendMetricsRequest_Metric).Metric.CpuInfo.Cpus)
+		assert.EqualValues(t, 1, (value.Msg).(*apiPb.SendMetricsRequest_Metric).Metric.CpuInfo.Cpus[0].Load)
 
 		grpcServer.Stop()
 		time.Sleep(time.Second * 2)
 		ch <- &apiPb.Metric{
 			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
-				Load: 3,
+				Load: 2,
 			}}},
 		}
 
 		ch <- &apiPb.Metric{
 			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
-				Load: 4,
+				Load: 3,
 			}}},
 		}
 
@@ -452,9 +453,7 @@ func TestApplication_Run(t *testing.T) {
 		}()
 		time.Sleep(time.Second * 2)
 		value = <-msgChan
-		assert.EqualValues(t, []*apiPb.CpuInfo_CPU{{
-			Load: 3,
-		}}, (value.Msg).(*apiPb.SendMetricsRequest_Metric).Metric.CpuInfo.Cpus)
+		assert.EqualValues(t, 2, (value.Msg).(*apiPb.SendMetricsRequest_Metric).Metric.CpuInfo.Cpus[0].Load)
 
 		// Again break
 		fmt.Println("Server broke again")
@@ -462,7 +461,7 @@ func TestApplication_Run(t *testing.T) {
 		time.Sleep(time.Second * 1)
 		ch <- &apiPb.Metric{
 			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
-				Load: 5,
+				Load: 4,
 			}}},
 		}
 		time.Sleep(time.Second * 10)
@@ -477,26 +476,23 @@ func TestApplication_Run(t *testing.T) {
 		}()
 		time.Sleep(time.Second * 2)
 		value = <-msgChan
-		assert.EqualValues(t, []*apiPb.CpuInfo_CPU{{
-			Load: 4,
-		}}, (value.Msg).(*apiPb.SendMetricsRequest_Metric).Metric.CpuInfo.Cpus)
+		assert.EqualValues(t, 3, (value.Msg).(*apiPb.SendMetricsRequest_Metric).Metric.CpuInfo.Cpus[0].Load)
+
 		value = <-msgChan
-		assert.EqualValues(t, []*apiPb.CpuInfo_CPU{{
-			Load: 5,
-		}}, (value.Msg).(*apiPb.SendMetricsRequest_Metric).Metric.CpuInfo.Cpus)
+		assert.EqualValues(t, 4, (value.Msg).(*apiPb.SendMetricsRequest_Metric).Metric.CpuInfo.Cpus[0].Load)
+
 		ch <- &apiPb.Metric{
 			CpuInfo: &apiPb.CpuInfo{Cpus: []*apiPb.CpuInfo_CPU{{
 				Load: 5,
 			}}},
 		}
 		value = <-msgChan
-		assert.EqualValues(t, []*apiPb.CpuInfo_CPU{{
-			Load: 5,
-		}}, (value.Msg).(*apiPb.SendMetricsRequest_Metric).Metric.CpuInfo.Cpus)
+		assert.EqualValues(t, 5, (value.Msg).(*apiPb.SendMetricsRequest_Metric).Metric.CpuInfo.Cpus[0].Load)
 
 		inter <- syscall.SIGTERM
 		wg.Wait()
-		assert.Equal(t, 8, s.count)
+		// 5 msg + disconnect
+		assert.Equal(t, 6, s.count)
 		grpcServer.Stop()
 	})
 	t.Run("Should: not throw error if all works like expected", func(t *testing.T) {
