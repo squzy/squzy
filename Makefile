@@ -82,7 +82,7 @@ default: build
 	bazelisk run //:gazelle -- update-repos -from_file=go.mod
 
 .build_agent_mac:
-	env CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -o bin/squzy_agent_$(version)-darwin-amd64 -ldflags "-s -w -X squzy/apps/agent_client/version.Version=$(version)"  apps/agent_client/main.go
+	env CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -o bin/squzy_agent_$(version)-darwin-amd64 -ldflags "-s -w -X github.com/squzy/squzy/apps/agent_client/version.Version=$(version)"  apps/agent_client/main.go
 
 .test_cover:
 	go test ./... -coverprofile=coverage.txt

@@ -40,8 +40,9 @@ func main() {
 	var connection *grpc.ClientConn
 
 	for {
-		conn, errConn := grpc.DialContext(ctx, cfg.GetAgentName(), grpc.WithInsecure(), grpc.WithBlock())
+		conn, errConn := grpc.DialContext(ctx, cfg.GetAgentServer(), grpc.WithInsecure(), grpc.WithBlock())
 		if errConn != nil {
+			logger.Errorf("Cant connect with error %s to %s", errConn.Error(), cfg.GetAgentServer())
 			continue
 		}
 		connection = conn
