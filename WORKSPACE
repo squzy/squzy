@@ -497,8 +497,8 @@ go_repository(
     name = "com_github_squzy_squzy_generated",
     build_file_proto_mode = "disable_global",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:uZLBy9jA8q0KALC3FGSzNecm71B3KQXeZQHGzfwPVNY=",
-    version = "v1.13.0",
+    sum = "h1:Ppj8x8rvWO9cqJ260LpmcixSpSDDB+Gh+mjut644azc=",
+    version = "v1.14.0",
 )
 
 go_repository(

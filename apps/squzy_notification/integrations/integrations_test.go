@@ -100,7 +100,7 @@ func TestIntegrations_Webhook(t *testing.T) {
 	t.Run("Should: not throw panic", func(t *testing.T) {
 		s := New(&mock{}, &mockCfg{})
 		assert.NotPanics(t, func() {
-			s.Webhook(context.Background(), &api.Incident{
+			s.Webhook(context.Background(), "", &api.Incident{
 				Histories: []*api.Incident_HistoryItem{
 					{
 						Timestamp: timestamp.Now(),
@@ -113,7 +113,7 @@ func TestIntegrations_Webhook(t *testing.T) {
 	t.Run("Should: not throw panic", func(t *testing.T) {
 		s := New(&mock{}, &mockCfg{})
 		assert.NotPanics(t, func() {
-			s.Webhook(context.Background(), &api.Incident{
+			s.Webhook(context.Background(), "", &api.Incident{
 				Histories: []*api.Incident_HistoryItem{
 					{
 						Timestamp: timestamp.Now(),
@@ -126,7 +126,7 @@ func TestIntegrations_Webhook(t *testing.T) {
 	t.Run("Should: not throw panic", func(t *testing.T) {
 		s := New(&mockError{}, &mockCfg{})
 		assert.NotPanics(t, func() {
-			s.Webhook(context.Background(), &api.Incident{
+			s.Webhook(context.Background(), "", &api.Incident{
 				Histories: []*api.Incident_HistoryItem{
 					{
 						Timestamp: timestamp.Now(),
@@ -142,7 +142,7 @@ func TestIntegrations_Slack(t *testing.T) {
 	t.Run("Should: not throw panic", func(t *testing.T) {
 		s := New(&mock{}, &mockCfg{})
 		assert.NotPanics(t, func() {
-			s.Slack(context.Background(), &api.Incident{
+			s.Slack(context.Background(), "", &api.Incident{
 				Histories: []*api.Incident_HistoryItem{
 					{
 						Timestamp: timestamp.Now(),

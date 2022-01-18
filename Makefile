@@ -48,7 +48,7 @@ default: build
 	bazelisk build //apps/squzy_monitoring:squzy_monitoring_src
 
 .test:
-	bazelisk test --cache_test_results=no --define version="local" //...
+	bazelisk test --define version="local" //...
 
 
 .build_agent:

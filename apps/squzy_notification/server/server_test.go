@@ -118,11 +118,11 @@ func (m mockMethodSuccessActiveSlack) Get(ctx context.Context, id primitive.Obje
 type mockIntegration struct {
 }
 
-func (m mockIntegration) Slack(ctx context.Context, incident *api.Incident, config *database.SlackConfig) {
+func (m mockIntegration) Slack(ctx context.Context, name string, incident *api.Incident, config *database.SlackConfig) {
 	return
 }
 
-func (m mockIntegration) Webhook(ctx context.Context, incident *api.Incident, config *database.WebHookConfig) {
+func (m mockIntegration) Webhook(ctx context.Context, name string, incident *api.Incident, config *database.WebHookConfig) {
 	return
 }
 
