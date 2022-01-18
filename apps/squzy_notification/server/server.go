@@ -106,10 +106,10 @@ func (s *server) Notify(ctx context.Context, request *apiPb.NotifyRequest) (*emp
 			}
 			switch config.Type {
 			case apiPb.NotificationMethodType_NOTIFICATION_METHOD_SLACK:
-				s.integrations.Slack(ctx, incident, config.Slack)
+				s.integrations.Slack(ctx, request.RuleName, incident, config.Slack)
 				return nil
 			case apiPb.NotificationMethodType_NOTIFICATION_METHOD_WEBHOOK:
-				s.integrations.Webhook(ctx, incident, config.WebHook)
+				s.integrations.Webhook(ctx, request.RuleName, incident, config.WebHook)
 				return nil
 			}
 			return nil
