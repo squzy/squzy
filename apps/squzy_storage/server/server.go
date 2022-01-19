@@ -179,7 +179,7 @@ func (s *server) GetIncidentsList(ctx context.Context, request *apiPb.GetInciden
 }
 
 func (s *server) SendRecordToIncident(rq *apiPb.StorageRecord) {
-	if !s.cfg.WithIncident() {
+	if !s.cfg.GetWithIncident() {
 		return
 	}
 	if s.incidentClient == nil {

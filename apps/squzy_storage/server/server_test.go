@@ -84,11 +84,11 @@ func (m mockConfigDisable) GetIncidentServerAddress() string {
 	panic("implement me")
 }
 
-func (m mockConfigDisable) WithDbLogs() bool {
+func (m mockConfigDisable) GetWithDbLogs() bool {
 	return false
 }
 
-func (m mockConfigDisable) WithIncident() bool {
+func (m mockConfigDisable) GetWithIncident() bool {
 	return false
 }
 
@@ -123,11 +123,11 @@ func (m mockConfigEnable) GetIncidentServerAddress() string {
 	panic("implement me")
 }
 
-func (m mockConfigEnable) WithIncident() bool {
+func (m mockConfigEnable) GetWithIncident() bool {
 	return true
 }
 
-func (m mockConfigEnable) WithDbLogs() bool {
+func (m mockConfigEnable) GetWithDbLogs() bool {
 	return true
 }
 
