@@ -24,7 +24,7 @@ do
     if [ $GOOS = "darwin" ] && [ $package_path = "agent_client" ]; then
       continue
     fi
-    env GOOS=$GOOS GOARCH=$GOARCH go build -o $output_name -ldflags "-s -w -X squzy/apps/$package_path/version.Version=$version_inject"  apps/$package_path/main.go
+    env GOOS=$GOOS GOARCH=$GOARCH go build -o $output_name -ldflags "-s -w -X github.com/squzy/squzy/apps/$package_path/version.Version=$version_inject"  apps/$package_path/main.go
     if [ $? -ne 0 ]; then
         echo 'An error has occurred! Aborting the script execution...'
         exit 1

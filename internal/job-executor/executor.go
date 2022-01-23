@@ -3,9 +3,6 @@ package job_executor
 import (
 	"context"
 	"crypto/tls"
-	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"google.golang.org/grpc"
 	"github.com/squzy/squzy/internal/httptools"
 	"github.com/squzy/squzy/internal/job"
 	"github.com/squzy/squzy/internal/logger"
@@ -13,6 +10,9 @@ import (
 	"github.com/squzy/squzy/internal/semaphore"
 	sitemap_storage "github.com/squzy/squzy/internal/sitemap-storage"
 	"github.com/squzy/squzy/internal/storage"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"google.golang.org/grpc"
 )
 
 type HTTPExecutor func(schedulerId string,

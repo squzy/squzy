@@ -32,6 +32,22 @@ func TestCfg_GetAgentServerTimeout(t *testing.T) {
 	})
 }
 
+func TestCfg_Retry(t *testing.T) {
+	t.Run("Should: return from env", func(t *testing.T) {
+		os.Setenv(ENV_SQUZY_AGENT_RETRY, "false")
+		s := New()
+		assert.Equal(t, s.Retry(), false)
+	})
+}
+
+func TestCfg_RetryCount(t *testing.T) {
+	t.Run("Should: return from env", func(t *testing.T) {
+		os.Setenv(ENV_SQUZY_AGENT_RETRY_COUNT, "11")
+		s := New()
+		assert.Equal(t, s.RetryCount(), int32(11))
+	})
+}
+
 func TestCfg_GetAgentName(t *testing.T) {
 	t.Run("Should: return from env", func(t *testing.T) {
 		os.Setenv(ENV_SQUZY_AGENT_NAME, "11124")

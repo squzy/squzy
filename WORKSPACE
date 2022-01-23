@@ -954,6 +954,34 @@ go_repository(
     version = "v3.0.3",
 )
 
+go_repository(
+    name = "com_github_xdg_go_pbkdf2",
+    importpath = "github.com/xdg-go/pbkdf2",
+    sum = "h1:Su7DPu48wXMwC3bs7MCNG+z4FhcyEuz5dlvchbq0B0c=",
+    version = "v1.0.0",
+)
+
+go_repository(
+    name = "com_github_xdg_go_scram",
+    importpath = "github.com/xdg-go/scram",
+    sum = "h1:akYIkZ28e6A96dkWNJQu3nmCzH3YfwMPQExUYDaRv7w=",
+    version = "v1.0.2",
+)
+
+go_repository(
+    name = "com_github_xdg_go_stringprep",
+    importpath = "github.com/xdg-go/stringprep",
+    sum = "h1:6iq84/ryjjeRmMJwxutI51F2GIPlP5BfTvXHeYjyhBc=",
+    version = "v1.0.2",
+)
+
+go_repository(
+    name = "com_github_youmark_pkcs8",
+    importpath = "github.com/youmark/pkcs8",
+    sum = "h1:splanxYIlg+5LfHAM6xpdFEAYOk8iySO56hMFq6uLyA=",
+    version = "v0.0.0-20181117223130-1be2e3e5546d",
+)
+
 # gazelle:repository_macro repositories.bzl%go_repositories
 go_repositories()
 
@@ -1131,8 +1159,8 @@ go_repository(
     name = "org_golang_x_crypto",
     build_file_proto_mode = "disable_global",
     importpath = "golang.org/x/crypto",
-    sum = "h1:hb9wdF1z5waM+dSIICn1l0DkLVDT3hqhhQsDNUmHPRE=",
-    version = "v0.0.0-20201002170205-7f63de1d35b0",
+    sum = "h1:aZp0e2vLN4MToVqnjNEYEtrEA8RH8U8FN1CU7JgqsPU=",
+    version = "v0.0.0-20201216223049-8b5274cf687f",
 )
 
 go_repository(
@@ -1211,8 +1239,8 @@ go_repository(
     name = "com_github_squzy_squzy_generated",
     build_file_proto_mode = "disable_global",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:uZLBy9jA8q0KALC3FGSzNecm71B3KQXeZQHGzfwPVNY=",
-    version = "v1.13.0",
+    sum = "h1:Ppj8x8rvWO9cqJ260LpmcixSpSDDB+Gh+mjut644azc=",
+    version = "v1.14.0",
 )
 
 go_repository(
@@ -1241,8 +1269,8 @@ go_repository(
     name = "com_github_klauspost_compress",
     build_file_proto_mode = "disable_global",
     importpath = "github.com/klauspost/compress",
-    sum = "h1:dB4Bn0tN3wdCzQxnS8r06kV74qN/TAfaIS0bVE8h3jc=",
-    version = "v1.11.3",
+    sum = "h1:P76CopJELS0TiO2mebmnzgWaajssP/EszplttgQxcgc=",
+    version = "v1.13.6",
 )
 
 go_repository(
@@ -1277,24 +1305,24 @@ go_repository(
     name = "com_github_tidwall_gjson",
     build_file_proto_mode = "disable_global",
     importpath = "github.com/tidwall/gjson",
-    sum = "h1:9VEQWz6LLMUsUl6PueE49ir4Ka6CzLymOAZDxpFsTDc=",
-    version = "v1.6.0",
+    sum = "h1:3TFY9yxOQShrvmjdM76K+jc66zJeT6D3/VFFYCGQf7M=",
+    version = "v1.13.0",
 )
 
 go_repository(
     name = "com_github_tidwall_match",
     build_file_proto_mode = "disable_global",
     importpath = "github.com/tidwall/match",
-    sum = "h1:PnKP62LPNxHKTwvHHZZzdOAOCtsJTjo6dZLCwpKm5xc=",
-    version = "v1.0.1",
+    sum = "h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=",
+    version = "v1.1.1",
 )
 
 go_repository(
     name = "com_github_tidwall_pretty",
     build_file_proto_mode = "disable_global",
     importpath = "github.com/tidwall/pretty",
-    sum = "h1:HsD+QiTn7sK6flMKIvNmpqz1qrpP3Ps6jOKIKMooyg4=",
-    version = "v1.0.0",
+    sum = "h1:RWIZEg2iJ8/g6fDDYzMpobmaoGh5OLl4AXtGUGPcqCs=",
+    version = "v1.2.0",
 )
 
 go_repository(
@@ -1580,8 +1608,8 @@ go_repository(
     name = "org_mongodb_go_mongo_driver",
     build_file_proto_mode = "disable_global",
     importpath = "go.mongodb.org/mongo-driver",
-    sum = "h1:IYppNjEV/C+/3VPbhHVxQ4t04eVW0cLp0/pNdW++6Ug=",
-    version = "v1.3.2",
+    sum = "h1:8ssUXufb90ujcIvR6MyE1SchaNj0SFxsakiZgxIyrMk=",
+    version = "v1.8.2",
 )
 
 go_repository(
@@ -1745,8 +1773,8 @@ go_repository(
     name = "com_github_gin_gonic_gin",
     build_file_proto_mode = "disable_global",
     importpath = "github.com/gin-gonic/gin",
-    sum = "h1:ahKqKTFpO5KTPHxWZjEdPScmYaGtLo8Y4DMHoEsnp14=",
-    version = "v1.6.3",
+    sum = "h1:3DoBmSbJbZAWqXJC3SLjAPfutPJJRN1U5pALB7EeTTs=",
+    version = "v1.7.7",
 )
 
 go_repository(
@@ -1777,8 +1805,8 @@ go_repository(
     name = "com_github_go_playground_validator_v10",
     build_file_proto_mode = "disable_global",
     importpath = "github.com/go-playground/validator/v10",
-    sum = "h1:KgJ0snyC2R9VXYN2rneOtQcw5aHQB1Vv0sFl1UcHBOY=",
-    version = "v10.2.0",
+    sum = "h1:pH2c5ADXtd66mxoE0Zm9SUhxE20r7aM3F26W0hOn+GE=",
+    version = "v10.4.1",
 )
 
 go_repository(

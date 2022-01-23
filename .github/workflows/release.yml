@@ -27,11 +27,7 @@ jobs:
 
       - name: Install bazel
         run: |
-          curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-          echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-          sudo apt update && sudo apt install bazel-4.2.2
-          bazel --version
-          touch ~/.netrc
+          go install github.com/bazelbuild/bazelisk@latest
           export SQUZY_VERSION=latest
 
       - name: Tests
@@ -42,13 +38,13 @@ jobs:
         run: |
           echo ${{ secrets.DOCKER_TOKEN }} | docker login -u squzy --password-stdin
           export SQUZY_VERSION=${{ steps.set_env.outputs.RELEASE_VERSION }}
-          bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_monitoring:squzy_push_hub_ci
-          bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_agent_server:squzy_push_hub_ci
-          bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_api:squzy_push_hub_ci
-          bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_storage:squzy_push_hub_ci
-          bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_application_monitoring:squzy_push_hub_ci
-          bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_incident:squzy_push_hub_ci
-          bazel run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_notification:squzy_push_hub_ci
+          bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_monitoring:squzy_push_hub_ci
+          bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_agent_server:squzy_push_hub_ci
+          bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_api:squzy_push_hub_ci
+          bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_storage:squzy_push_hub_ci
+          bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_application_monitoring:squzy_push_hub_ci
+          bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_incident:squzy_push_hub_ci
+          bazelisk run --stamp --workspace_status_command=./scripts/status.sh --define version=${{ steps.set_env.outputs.RELEASE_VERSION }} //apps/squzy_notification:squzy_push_hub_ci
           make build_agent version=${{ steps.set_env.outputs.RELEASE_VERSION }}
           ./scripts/git_release.sh github_api_token=${{ secrets.GITHUB_RELEASE }} owner=squzy repo=squzy tag=${{ steps.set_env.outputs.RELEASE_VERSION }} filename=./bin/squzy_agent_${{ steps.set_env.outputs.RELEASE_VERSION }}-linux-arm64
           ./scripts/git_release.sh github_api_token=${{ secrets.GITHUB_RELEASE }} owner=squzy repo=squzy tag=${{ steps.set_env.outputs.RELEASE_VERSION }} filename=./bin/squzy_agent_${{ steps.set_env.outputs.RELEASE_VERSION }}-windows-amd64.exe
@@ -94,10 +90,10 @@ jobs:
     runs-on: macOS-10.15
     needs: build
     steps:
-      - name: Set up Go 1.15.7
+      - name: Set up Go 1.17.3
         uses: actions/setup-go@v1
         with:
-          go-version: 1.15.7
+          go-version: 1.17.3
         id: go
 
       - name: Check out code into the Go module directory

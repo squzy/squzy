@@ -2,12 +2,13 @@ package server
 
 import (
 	"context"
-	empty "google.golang.org/protobuf/types/known/emptypb"
+	"github.com/squzy/squzy/apps/squzy_agent_server/database"
+	"github.com/squzy/squzy/internal/helpers"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"github.com/squzy/squzy/apps/squzy_agent_server/database"
-	"github.com/squzy/squzy/internal/helpers"
+	empty "google.golang.org/protobuf/types/known/emptypb"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type server struct {
@@ -98,6 +99,10 @@ func (s *server) SendMetrics(stream apiPb.AgentServer_SendMetricsServer) error {
 			incomeMsg, err := stream.Recv()
 
 			if err != nil {
+				// If error happens try to disconnect
+				ctx, cancel := helpers.TimeoutContext(context.Background(), 0)
+				defer cancel()
+				_ = s.db.UpdateStatus(ctx, id, apiPb.AgentStatus_DISCONNECTED, timestamp.Now())
 				return stream.SendAndClose(&empty.Empty{})
 			}
 

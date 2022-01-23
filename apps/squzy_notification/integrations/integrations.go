@@ -15,12 +15,13 @@ import (
 )
 
 type Integrations interface {
-	Slack(ctx context.Context, incident *api.Incident, config *database.SlackConfig)
-	Webhook(ctx context.Context, incident *api.Incident, config *database.WebHookConfig)
+	Slack(ctx context.Context, ruleName string, incident *api.Incident, config *database.SlackConfig)
+	Webhook(ctx context.Context, ruleName string, incident *api.Incident, config *database.WebHookConfig)
 }
 
 type WebhookRequest struct {
 	Id        string             `json:"id"`
+	RuleId    string             `json:"string"`
 	Status    api.IncidentStatus `json:"status"`
 	CreatedAt string             `json:"createdAt,omitempty"`
 	UpdatedAt string             `json:"updatedAt,omitempty"`
@@ -32,7 +33,7 @@ type integrations struct {
 	cfg       config.Config
 }
 
-func (i *integrations) Slack(ctx context.Context, incident *api.Incident, config *database.SlackConfig) {
+func (i *integrations) Slack(ctx context.Context, ruleName string, incident *api.Incident, config *database.SlackConfig) {
 	createdAt, updatedAt := getIncidentTime(incident)
 	msg := &slack.WebhookMessage{
 		Attachments: []slack.Attachment{
@@ -53,8 +54,11 @@ func (i *integrations) Slack(ctx context.Context, incident *api.Incident, config
 							Type: slack.MBTSection,
 							Text: &slack.TextBlockObject{
 								Type: slack.MarkdownType,
-								Text: fmt.Sprintf("CreatedAt: %s \n UpdatedAt: %s \n", createdAt, updatedAt),
+								Text: fmt.Sprintf("Rule: *%s* \nCreatedAt: *%s* \n UpdatedAt: *%s* \n", ruleName, createdAt, updatedAt),
 							},
+						},
+						slack.DividerBlock{
+							Type: slack.MBTDivider,
 						},
 						slack.SectionBlock{
 							Type: slack.MBTSection,
@@ -68,15 +72,16 @@ func (i *integrations) Slack(ctx context.Context, incident *api.Incident, config
 			},
 		},
 	}
-	_ = slack.PostWebhook(config.Url, msg)
+	_ = slack.PostWebhookContext(ctx, config.Url, msg)
 }
 
-func (i *integrations) Webhook(ctx context.Context, incident *api.Incident, config *database.WebHookConfig) {
+func (i *integrations) Webhook(ctx context.Context, ruleName string, incident *api.Incident, config *database.WebHookConfig) {
 	createdAt, updatedAt := getIncidentTime(incident)
 	webHook := &WebhookRequest{
 		Id:        incident.Id,
 		Status:    incident.Status,
 		CreatedAt: createdAt,
+		RuleId:    incident.RuleId,
 		UpdatedAt: updatedAt,
 		Link:      fmt.Sprintf("%s/incidents/%s", i.cfg.GetDashboardHost(), incident.Id),
 	}

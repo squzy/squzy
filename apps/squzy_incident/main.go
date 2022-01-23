@@ -3,10 +3,6 @@ package main
 import (
 	"context"
 	"github.com/squzy/mongo_helper"
-	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"google.golang.org/grpc"
 	"github.com/squzy/squzy/apps/squzy_incident/application"
 	"github.com/squzy/squzy/apps/squzy_incident/config"
 	"github.com/squzy/squzy/apps/squzy_incident/database"
@@ -15,6 +11,10 @@ import (
 	"github.com/squzy/squzy/internal/grpctools"
 	"github.com/squzy/squzy/internal/helpers"
 	"github.com/squzy/squzy/internal/logger"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"google.golang.org/grpc"
 )
 
 func main() {
