@@ -85,7 +85,6 @@ func setup() error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("lol", db.Ping())
 		return db.Ping()
 	}); err != nil {
 		log.Fatalf("Could not connect to clickhouse container: %s", err)
