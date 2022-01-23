@@ -1,23 +1,22 @@
 package clickhouse
 
 import (
-	"context"
 	"database/sql"
 	"database/sql/driver"
 	"errors"
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
 	_ "github.com/ClickHouse/clickhouse-go"
-	"github.com/docker/go-connections/nat"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
 	"github.com/squzy/squzy/internal/logger"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
 	"google.golang.org/protobuf/types/known/structpb"
+	"log"
 	"os"
 	"sort"
 	"testing"
@@ -25,76 +24,71 @@ import (
 )
 
 var (
-	db, _       = sql.Open("clickhouse", "tcp://user:password@lkl:00/debug=true&clicks?read_timeout=10&write_timeout=10")
+	pool        *dockertest.Pool
+	resource    *dockertest.Resource
+	wdb, _      = sql.Open("clickhouse", "tcp://user:password@lkl:00/debug=true&clicks?read_timeout=10&write_timeout=10")
 	clickhWrong = &Clickhouse{
-		db,
+		wdb,
 	}
-	clickh        *Clickhouse
-	testContainer testcontainers.Container
+	clickh *Clickhouse
 )
 
 func TestMain(m *testing.M) {
-	ctx := context.Background()
-	err := setup(ctx)
+	err := setup()
 	if err != nil {
 		logger.Fatalf("could not start test: %s", err)
 	}
 	code := m.Run()
-	err = shutdown(ctx)
+	err = shutdown()
 	if err != nil {
 		logger.Fatalf("could not stop test: %s", err)
 	}
 	os.Exit(code)
 }
 
-func shutdown(ctx context.Context) error {
-	err := testContainer.Terminate(ctx)
-	if err != nil {
-		return err
+func shutdown() error {
+	if err := pool.Purge(resource); err != nil {
+		return fmt.Errorf("could not purge resource: %w", err)
 	}
 	return nil
 }
 
-func setup(ctx context.Context) error {
+func setup() error {
+	var db *sql.DB
 	var err error
-	nPort, err := nat.NewPort("tcp", "9000")
+	pool, err = dockertest.NewPool("")
 	if err != nil {
-		return err
+		log.Fatalf("could not connect to docker: %s", err)
 	}
 
-	req := testcontainers.ContainerRequest{
-		Image:        "yandex/clickhouse-server",
+	resource, err = pool.RunWithOptions(&dockertest.RunOptions{Repository: "yandex/clickhouse-server",
+		Tag:          "20.3.11.97",
+		Cmd:          []string{"start-single-node", "--insecure"},
 		ExposedPorts: []string{"9000/tcp", "8123/tcp"},
-		WaitingFor:   wait.ForListeningPort(nPort),
-	}
-	testContainer, err = testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
+		//PortBindings: map[docker.Port][]docker.PortBinding{
+		//	"9000/tcp": {{HostIP: "", HostPort: "9000"}},
+		//	"8123/tcp": {{HostIP: "", HostPort: "8123"}},
+		//},
+	},
+		func(config *docker.HostConfig) {
+			config.AutoRemove = true
+			config.RestartPolicy = docker.RestartPolicy{
+				Name: "no",
+			}
+		})
 	if err != nil {
-		return err
+		log.Fatalf("could not start resource: %s", err)
 	}
 
-	ip, err := testContainer.Host(ctx)
-	if err != nil {
-		return err
-	}
-	port, err := testContainer.MappedPort(ctx, "9000")
-	if err != nil {
-		return err
-	}
-	db, err = sql.Open("clickhouse", fmt.Sprintf("tcp://%s:%s?debug=true", ip, port.Port()))
-
-	clientPort, err := testContainer.MappedPort(ctx, "8123")
-	if err != nil {
-		return err
-	}
-	fmt.Println("client connection string:", fmt.Sprintf("tcp://%s:%s?debug=true", ip, clientPort.Port()))
-	if err != nil {
-		return err
-	}
-	clickh = &Clickhouse{
-		db,
+	if err = pool.Retry(func() error {
+		db, err = sql.Open("clickhouse", fmt.Sprintf("tcp://%s:%s?debug=true", "localhost", resource.GetPort("9000/tcp")))
+		if err != nil {
+			return err
+		}
+		fmt.Println("lol", db.Ping())
+		return db.Ping()
+	}); err != nil {
+		log.Fatalf("Could not connect to clickhouse container: %s", err)
 	}
 
 	err = clickh.Migrate()
