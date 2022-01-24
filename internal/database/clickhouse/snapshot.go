@@ -34,7 +34,7 @@ var (
 		apiPb.SortSchedulerList_SORT_SCHEDULER_LIST_UNSPECIFIED: fmt.Sprintf(`"%s"."meta_start_time"`, dbSnapshotCollection),
 		apiPb.SortSchedulerList_BY_START_TIME:                   fmt.Sprintf(`"%s"."meta_start_time"`, dbSnapshotCollection),
 		apiPb.SortSchedulerList_BY_END_TIME:                     fmt.Sprintf(`"%s"."meta_end_time"`, dbSnapshotCollection),
-		apiPb.SortSchedulerList_BY_LATENCY:                      fmt.Sprintf(`"%s"."meta_end_time" - "%s"."metaStartTime"`, dbSnapshotCollection, dbSnapshotCollection),
+		apiPb.SortSchedulerList_BY_LATENCY:                      fmt.Sprintf(`"%s"."meta_end_time" - "%s"."meta_start_time"`, dbSnapshotCollection, dbSnapshotCollection),
 	}
 )
 

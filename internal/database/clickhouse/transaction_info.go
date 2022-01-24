@@ -52,10 +52,10 @@ var (
 	applicationStartTimeFilterString = fmt.Sprintf(`"start_time" BETWEEN ? and ?`)
 
 	transOrderMap = map[apiPb.SortTransactionList]string{
-		apiPb.SortTransactionList_SORT_TRANSACTION_LIST_UNSPECIFIED: fmt.Sprintf(`"%s"."startTime"`, dbTransactionInfoCollection),
-		apiPb.SortTransactionList_DURATION:                          fmt.Sprintf(`"%s"."endTime" - "%s"."startTime"`, dbTransactionInfoCollection, dbTransactionInfoCollection),
-		apiPb.SortTransactionList_BY_TRANSACTION_START_TIME:         fmt.Sprintf(`"%s"."startTime"`, dbTransactionInfoCollection),
-		apiPb.SortTransactionList_BY_TRANSACTION_END_TIME:           fmt.Sprintf(`"%s"."endTime"`, dbTransactionInfoCollection),
+		apiPb.SortTransactionList_SORT_TRANSACTION_LIST_UNSPECIFIED: fmt.Sprintf(`"%s"."start_time"`, dbTransactionInfoCollection),
+		apiPb.SortTransactionList_DURATION:                          fmt.Sprintf(`"%s"."end_time" - "%s"."start_time"`, dbTransactionInfoCollection, dbTransactionInfoCollection),
+		apiPb.SortTransactionList_BY_TRANSACTION_START_TIME:         fmt.Sprintf(`"%s"."start_time"`, dbTransactionInfoCollection),
+		apiPb.SortTransactionList_BY_TRANSACTION_END_TIME:           fmt.Sprintf(`"%s"."end_time"`, dbTransactionInfoCollection),
 	}
 	groupMap = map[apiPb.GroupTransaction]string{
 		apiPb.GroupTransaction_GROUP_TRANSACTION_UNSPECIFIED: transTransactionTypeStr,
@@ -122,7 +122,7 @@ func (c *Clickhouse) GetTransactionInfo(request *apiPb.GetTransactionsRequest) (
 
 	offset, limit := getOffsetAndLimit(count, request.GetPagination())
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM transaction_info WHERE (%s AND %s AND %s AND %s AND %s AND %s AND %s, AND %s) ORDER BY %s LIMIT %d OFFSET %d`,
+	q := fmt.Sprintf(`SELECT %s FROM transaction_info WHERE ( %s AND %s AND %s AND %s AND %s AND %s AND %s AND %s ) ORDER BY %s LIMIT %d OFFSET %d`,
 		transactionInfoFields,
 		applicationIdFilterString,
 		applicationStartTimeFilterString,
@@ -134,7 +134,9 @@ func (c *Clickhouse) GetTransactionInfo(request *apiPb.GetTransactionsRequest) (
 		getTransactionStatusWhere(request.GetStatus()),
 		getTransactionOrder(request.GetSort())+getTransactionDirection(request.GetSort()), // todo
 		limit,
-		offset),
+		offset)
+	q = strings.ReplaceAll(q, "AND  ", "")
+	rows, err := c.Db.Query(q,
 		request.ApplicationId,
 		timeFrom,
 		timeTo,
@@ -155,7 +157,7 @@ func (c *Clickhouse) GetTransactionInfo(request *apiPb.GetTransactionsRequest) (
 	for rows.Next() {
 		inf := &TransactionInfo{}
 		if err := rows.Scan(&inf.Model.ID, &inf.Model.CreatedAt, &inf.Model.UpdatedAt,
-			&inf.ApplicationId, &inf.ParentId, &inf.MetaHost, &inf.MetaPath,
+			&inf.TransactionId, &inf.ApplicationId, &inf.ParentId, &inf.MetaHost, &inf.MetaPath,
 			&inf.MetaMethod, &inf.Name, &inf.StartTime, &inf.EndTime,
 			&inf.TransactionStatus, &inf.TransactionType, &inf.Error); err != nil {
 			logger.Error(err.Error())
@@ -175,7 +177,7 @@ func (c *Clickhouse) GetTransactionInfo(request *apiPb.GetTransactionsRequest) (
 
 func (c *Clickhouse) countTransactions(request *apiPb.GetTransactionsRequest, timeFrom int64, timeTo int64) (int64, error) {
 	var count int64
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM transaction_info WHERE %s AND (%s) AND %s AND %s AND %s AND %s AND %s AND %s LIMIT 1`,
+	q := fmt.Sprintf(`SELECT count(*) FROM transaction_info WHERE %s AND (%s) AND %s AND %s AND %s AND %s AND %s AND %s LIMIT 1`,
 		applicationIdFilterString,
 		applicationStartTimeFilterString,
 		getTransactionsByString(transMetaHostStr, request.GetHost()),
@@ -183,7 +185,9 @@ func (c *Clickhouse) countTransactions(request *apiPb.GetTransactionsRequest, ti
 		getTransactionsByString(transMetaPathStr, request.GetPath()),
 		getTransactionsByString(transMetaMethodStr, request.GetMethod()),
 		getTransactionTypeWhere(request.GetType()),
-		getTransactionStatusWhere(request.GetStatus())),
+		getTransactionStatusWhere(request.GetStatus()))
+	q = strings.ReplaceAll(q, "AND  ", "")
+	rows, err := c.Db.Query(q,
 		request.ApplicationId,
 		timeFrom,
 		timeTo)
@@ -269,7 +273,7 @@ func (c *Clickhouse) GetTransactionChildren(transactionId, cyclicalLoopCheck str
 		return nil, nil
 	}
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM transaction_info WHERE "parentId" = ?`, transactionInfoFields), transactionId)
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM transaction_info WHERE "parent_id" = ?`, transactionInfoFields), transactionId)
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +288,8 @@ func (c *Clickhouse) GetTransactionChildren(transactionId, cyclicalLoopCheck str
 	for rows.Next() {
 		child := &TransactionInfo{}
 		if err := rows.Scan(&child.Model.ID, &child.Model.CreatedAt, &child.Model.UpdatedAt,
-			&child.ApplicationId, &child.ParentId, &child.MetaHost, &child.MetaPath,
+			&child.TransactionId, &child.ApplicationId,
+			&child.ParentId, &child.MetaHost, &child.MetaPath,
 			&child.MetaMethod, &child.Name, &child.StartTime, &child.EndTime,
 			&child.TransactionStatus, &child.TransactionType, &child.Error); err != nil {
 			logger.Error(err.Error())
@@ -374,12 +379,12 @@ func (c *Clickhouse) GetTransactionGroup(request *apiPb.GetTransactionGroupReque
 
 func getTransactionOrder(request *apiPb.SortingTransactionList) string {
 	if request == nil {
-		return fmt.Sprintf(`"%s"."startTime"`, dbTransactionInfoCollection)
+		return fmt.Sprintf(`"%s"."start_time"`, dbTransactionInfoCollection)
 	}
 	if res, ok := transOrderMap[request.GetSortBy()]; ok {
 		return res
 	}
-	return fmt.Sprintf(`"%s"."startTime"`, dbTransactionInfoCollection)
+	return fmt.Sprintf(`"%s"."start_time"`, dbTransactionInfoCollection)
 }
 
 func getTransactionDirection(request *apiPb.SortingTransactionList) string {
