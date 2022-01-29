@@ -61,6 +61,8 @@ func setup() error {
 		log.Fatalf("could not connect to docker: %s", err)
 	}
 
+	//resource, err = pool.RunWithOptions(&dockertest.RunOptions{Repository: "lunalabsltd/clickhouse-server",
+	//	Tag: "20.6.7.4-arm",
 	resource, err = pool.RunWithOptions(&dockertest.RunOptions{Repository: "yandex/clickhouse-server",
 		Tag: "20.6.7.4",
 		//Cmd:          []string{"start-single-node", "--insecure"},
@@ -83,7 +85,6 @@ func setup() error {
 	fmt.Println(resource.GetPort("9000/tcp"))
 	fmt.Println(resource.GetPort("8123/tcp"))
 	fmt.Println(resource.GetPort("8123"))
-	//select {}
 	if err = pool.Retry(func() error {
 		var err error
 		db, err = sql.Open("clickhouse", fmt.Sprintf("tcp://%s:%s?debug=true", "localhost", resource.GetPort("9000/tcp")))
@@ -1043,13 +1044,13 @@ func TestGetTransactionChildren(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	//trChildren, err := clickh.GetTransactionChildren(tr1.Id, "")
-	//if err != nil {
-	//	assert.Fail(t, err.Error())
-	//}
+	trChildren, err := clickh.GetTransactionChildren(tr1.Id, "")
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
 
-	//assert.Equal(t, "GetTransactionChildren2", trChildren[0].TransactionId)
-	//assert.Equal(t, "GetTransactionChildren3", trChildren[1].TransactionId)
+	assert.Equal(t, "GetTransactionChildren2", trChildren[0].TransactionId)
+	assert.Equal(t, "GetTransactionChildren3", trChildren[1].TransactionId)
 }
 
 func TestGetTransactionGroup(t *testing.T) {

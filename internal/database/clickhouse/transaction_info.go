@@ -295,23 +295,25 @@ func (c *Clickhouse) GetTransactionChildren(transactionId, cyclicalLoopCheck str
 			logger.Error(err.Error())
 			return nil, err
 		}
-
 		childTransactions = append(childTransactions, child)
 	}
 
+	var allChildTransactions []*TransactionInfo
 	for _, v := range childTransactions {
 		grandChildren, err := c.GetTransactionChildren(v.TransactionId, cyclicalLoopCheck+" "+v.ParentId)
 		if err != nil {
 			return nil, errorDataBase
 		}
-		childTransactions = append(grandChildren, grandChildren...)
+		allChildTransactions = append(allChildTransactions, grandChildren...)
 	}
 
 	if err := rows.Err(); err != nil {
 		logger.Error(err.Error())
 		return nil, err
 	}
-	return childTransactions, nil
+
+	allChildTransactions = append(allChildTransactions, childTransactions...)
+	return allChildTransactions, nil
 }
 
 // todo order
