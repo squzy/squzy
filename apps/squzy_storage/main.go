@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/ClickHouse/clickhouse-go"
-	"github.com/jinzhu/gorm"
 	"github.com/squzy/squzy/apps/squzy_storage/application"
 	"github.com/squzy/squzy/apps/squzy_storage/config"
 	"github.com/squzy/squzy/apps/squzy_storage/server"
@@ -14,6 +13,8 @@ import (
 	"github.com/squzy/squzy/internal/logger"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"google.golang.org/grpc"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"os"
 )
 
@@ -41,16 +42,17 @@ func main() {
 func getDatabase(cfg config.Config, db database.Database) (database.Database, error) {
 	if dt, ok := os.LookupEnv("DB_TYPE"); ok && dt == "postgres" {
 		postgresDb, err := gorm.Open(
-			"postgres",
-			fmt.Sprintf("host=%s port=%s dbname=%s user=%s  password=%s connect_timeout=10 sslmode=disable",
+			postgres.Open(fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s connect_timeout=10 sslmode=disable",
 				cfg.GetDbHost(),
 				cfg.GetDbPort(),
 				cfg.GetDbName(),
 				cfg.GetDbUser(),
 				cfg.GetDbPassword(),
-			))
+			)),
+			&gorm.Config{},
+		)
 
-		db, err = database.New(postgresDb, cfg.WithDbLogs())
+		db, err = database.New(postgresDb)
 		if err != nil {
 			logger.Fatal(err.Error())
 		}
@@ -62,7 +64,7 @@ func getDatabase(cfg config.Config, db database.Database) (database.Database, er
 		cfg.GetDbPassword(),
 		cfg.GetDbName(),
 	))
-	db, err = database.New(connect, false)
+	db, err = database.New(connect)
 
 	err = db.Migrate()
 	if err != nil {

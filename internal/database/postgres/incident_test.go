@@ -4,13 +4,14 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jinzhu/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	wrappers "google.golang.org/protobuf/types/known/wrapperspb"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"regexp"
 	"testing"
 )
@@ -18,8 +19,9 @@ import (
 var (
 	postgrIncident = &Postgres{}
 	dbIncident, _  = gorm.Open(
-		"postgres",
-		fmt.Sprintf("host=lkl port=00 user=us dbname=dbn password=ps connect_timeout=10 sslmode=disable"))
+		postgres.Open(fmt.Sprintf("host=lkl port=00 user=us dbname=dbn password=ps connect_timeout=10 sslmode=disable")),
+		&gorm.Config{DryRun: true},
+	)
 	postgrWrongIncident = &Postgres{
 		dbIncident,
 	}
@@ -40,11 +42,12 @@ func (s *SuiteIncident) SetupSuite() {
 	db, s.mock, err = sqlmock.New()
 	require.NoError(s.T(), err)
 
-	s.DB, err = gorm.Open("postgres", db)
+	s.DB, err = gorm.Open(postgres.New(postgres.Config{
+		Conn: db,
+	}))
 	require.NoError(s.T(), err)
 	postgrIncident.Db = s.DB
 
-	s.DB.LogMode(true)
 }
 
 func (s *SuiteIncident) Test_InsertIncident() {
@@ -306,13 +309,6 @@ func Test_getIncidentDirection(t *testing.T) {
 			Direction: 10,
 		})
 		assert.NotEqual(t, "", res)
-	})
-}
-
-func Test_checkNoFoundError(t *testing.T) {
-	t.Run("Should: return value from map", func(t *testing.T) {
-		_, err := checkNoFoundError(gorm.ErrRecordNotFound)
-		assert.Nil(t, err)
 	})
 }
 

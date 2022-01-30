@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	wrappers "google.golang.org/protobuf/types/known/wrapperspb"
 	"strings"

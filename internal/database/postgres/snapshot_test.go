@@ -4,12 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jinzhu/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	timestamp "google.golang.org/protobuf/types/known/timestamppb"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"regexp"
 	"testing"
 )
@@ -17,8 +18,9 @@ import (
 var (
 	postgrSnapshot = &Postgres{}
 	dbSnapshot, _  = gorm.Open(
-		"postgres",
-		fmt.Sprintf("host=lkl port=00 user=us dbname=dbn password=ps connect_timeout=10 sslmode=disable"))
+		postgres.Open(fmt.Sprintf("host=lkl port=00 user=us dbname=dbn password=ps connect_timeout=10 sslmode=disable")),
+		&gorm.Config{},
+	)
 	postgrWrongSnapshot = &Postgres{
 		dbSnapshot,
 	}
@@ -39,11 +41,11 @@ func (s *SuiteSnapshot) SetupSuite() {
 	db, s.mock, err = sqlmock.New()
 	require.NoError(s.T(), err)
 
-	s.DB, err = gorm.Open("postgres", db)
+	s.DB, err = gorm.Open(postgres.New(postgres.Config{
+		Conn: db,
+	}))
 	require.NoError(s.T(), err)
 	postgrSnapshot.Db = s.DB
-
-	s.DB.LogMode(true)
 }
 
 func (s *SuiteSnapshot) Test_Snapshots() {

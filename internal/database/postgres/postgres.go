@@ -2,9 +2,9 @@ package postgres
 
 import (
 	"errors"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -45,7 +45,7 @@ func (p *Postgres) Migrate() error {
 
 	var err error
 	for _, model := range models {
-		err = p.Db.AutoMigrate(model).Error // migrate models one-by-one
+		err = p.Db.AutoMigrate(model) // migrate models one-by-one
 	}
 
 	return err

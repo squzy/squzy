@@ -3,9 +3,9 @@ package postgres
 import (
 	"errors"
 	"fmt"
-	"github.com/jinzhu/gorm"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	wrappers "google.golang.org/protobuf/types/known/wrapperspb"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -113,8 +113,7 @@ func (p *Postgres) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, er
 			getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED),
 			getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_STUDIED))).
 		First(&incident).Error; err != nil {
-
-		return checkNoFoundError(err)
+		return nil, err
 	}
 	return convertFromIncident(&incident), nil
 }
@@ -187,12 +186,4 @@ func getIncidentDirection(request *apiPb.SortingIncidentList) string {
 		return res
 	}
 	return descPrefix
-}
-
-//Return empty incident
-func checkNoFoundError(err error) (*apiPb.Incident, error) {
-	if gorm.IsRecordNotFoundError(err) {
-		return &apiPb.Incident{}, nil
-	}
-	return nil, errorDataBase
 }
