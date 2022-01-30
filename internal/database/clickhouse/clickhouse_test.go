@@ -19,6 +19,7 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 )
@@ -1049,8 +1050,11 @@ func TestGetTransactionChildren(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	assert.Equal(t, "GetTransactionChildren2", trChildren[0].TransactionId)
-	assert.Equal(t, "GetTransactionChildren3", trChildren[1].TransactionId)
+	assert.Equal(t, 2, len(trChildren))
+	assert.Equal(t, true, strings.Contains(trChildren[0].TransactionId, "GetTransactionChildren"))
+	assert.Equal(t, true, strings.ContainsAny(trChildren[0].TransactionId, "23"))
+	assert.Equal(t, true, strings.Contains(trChildren[1].TransactionId, "GetTransactionChildren"))
+	assert.Equal(t, true, strings.ContainsAny(trChildren[0].TransactionId, "23"))
 }
 
 func TestGetTransactionGroup(t *testing.T) {
