@@ -2,8 +2,12 @@ package database
 
 import (
 	"database/sql"
+	"errors"
+	"github.com/jinzhu/gorm"
 	"github.com/squzy/squzy/internal/database/clickhouse"
+	"github.com/squzy/squzy/internal/database/postgres"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"os"
 )
 
 type Database interface {
@@ -28,8 +32,22 @@ type Database interface {
 	Migrate() error
 }
 
-func New(chDb *sql.DB) Database {
-	return &clickhouse.Clickhouse{
-		Db: chDb,
+func New(db interface{}, withLogs bool) (Database, error) {
+	if dt, ok := os.LookupEnv("DB_TYPE"); ok && dt == "postgres" {
+		postgresDb, ok := db.(*gorm.DB)
+		if !ok {
+			return nil, errors.New("cannot convert to postgres db connection")
+		}
+		postgresDb.LogMode(withLogs)
+		return &postgres.Postgres{
+			Db: postgresDb,
+		}, nil
 	}
+	clickhouseDb, ok := db.(*sql.DB)
+	if !ok {
+		return nil, errors.New("cannot convert to clickhouse db connection")
+	}
+	return &clickhouse.Clickhouse{
+		Db: clickhouseDb,
+	}, nil
 }
