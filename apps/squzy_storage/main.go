@@ -50,7 +50,7 @@ func getDatabase(cfg config.Config, db database.Database) (database.Database, er
 				cfg.GetDbPassword(),
 			))
 
-		db, err = database.New(postgresDb, cfg.WithDbLogs())
+		db, err = database.New(postgresDb)
 		if err != nil {
 			logger.Fatal(err.Error())
 		}
@@ -62,7 +62,7 @@ func getDatabase(cfg config.Config, db database.Database) (database.Database, er
 		cfg.GetDbPassword(),
 		cfg.GetDbName(),
 	))
-	db, err = database.New(connect, false)
+	db, err = database.New(connect)
 
 	err = db.Migrate()
 	if err != nil {

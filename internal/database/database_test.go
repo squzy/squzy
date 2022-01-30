@@ -7,7 +7,8 @@ import (
 
 func TestNew(t *testing.T) {
 	t.Run("Should: not return nil", func(t *testing.T) {
-		s := New(nil)
-		assert.NotNil(t, s)
+		s, err := New(nil)
+		assert.NotNil(t, err)
+		assert.Nil(t, s)
 	})
 }

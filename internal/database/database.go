@@ -32,13 +32,12 @@ type Database interface {
 	Migrate() error
 }
 
-func New(db interface{}, withLogs bool) (Database, error) {
+func New(db interface{}) (Database, error) {
 	if dt, ok := os.LookupEnv("DB_TYPE"); ok && dt == "postgres" {
 		postgresDb, ok := db.(*gorm.DB)
 		if !ok {
 			return nil, errors.New("cannot convert to postgres db connection")
 		}
-		postgresDb.LogMode(withLogs)
 		return &postgres.Postgres{
 			Db: postgresDb,
 		}, nil
