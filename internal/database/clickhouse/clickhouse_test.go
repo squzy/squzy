@@ -2,20 +2,17 @@ package clickhouse
 
 import (
 	"database/sql"
-	"database/sql/driver"
-	"errors"
 	"fmt"
-	"github.com/ClickHouse/clickhouse-go"
 	_ "github.com/ClickHouse/clickhouse-go"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/squzy/squzy/internal/logger"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/structpb"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
+	wrappers "google.golang.org/protobuf/types/known/wrapperspb"
 	"log"
 	"os"
 	"sort"
@@ -34,6 +31,7 @@ var (
 	clickh *Clickhouse
 )
 
+//
 func TestMain(m *testing.M) {
 	err := setup()
 	if err != nil {
@@ -1175,27 +1173,27 @@ func TestClickhouse_Migrate_error(t *testing.T) {
 	})
 }
 
-type CustomConverter struct{}
-
-func (s CustomConverter) ConvertValue(v interface{}) (driver.Value, error) {
-	switch v.(type) {
-	case clickhouse.UUID:
-		return v.(clickhouse.UUID), nil
-	case string:
-		return v.(string), nil
-	case []uint32:
-		return v.([]uint32), nil
-	case []int64:
-		return v.([]int64), nil
-	case int:
-		return v.(int), nil
-	case int32:
-		return v.(int32), nil
-	case int64:
-		return v.(int64), nil
-	case time.Time:
-		return v.(time.Time), nil
-	default:
-		return nil, errors.New(fmt.Sprintf("cannot convert %T with value %v", v, v))
-	}
-}
+//type CustomConverter struct{}
+//
+//func (s CustomConverter) ConvertValue(v interface{}) (driver.Value, error) {
+//	switch v.(type) {
+//	case clickhouse.UUID:
+//		return v.(clickhouse.UUID), nil
+//	case string:
+//		return v.(string), nil
+//	case []uint32:
+//		return v.([]uint32), nil
+//	case []int64:
+//		return v.([]int64), nil
+//	case int:
+//		return v.(int), nil
+//	case int32:
+//		return v.(int32), nil
+//	case int64:
+//		return v.(int64), nil
+//	case time.Time:
+//		return v.(time.Time), nil
+//	default:
+//		return nil, errors.New(fmt.Sprintf("cannot convert %T with value %v", v, v))
+//	}
+//}

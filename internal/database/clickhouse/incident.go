@@ -196,7 +196,9 @@ func (c *Clickhouse) getIncidentById(id string) (*Incident, error) {
 		return nil, err
 	}
 
-	inc.Histories = histories
+	if inc != nil {
+		inc.Histories = histories
+	}
 
 	return inc, nil
 }
@@ -211,12 +213,15 @@ func (c *Clickhouse) getIncident(id string) (*Incident, error) {
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 
 	inc := &Incident{}
 
 	if ok := rows.Next(); !ok {
-		return nil, err
+		return nil, nil
 	}
 
 	if err := rows.Scan(&inc.Model.ID, &inc.Model.CreatedAt, &inc.Model.UpdatedAt,
@@ -225,10 +230,6 @@ func (c *Clickhouse) getIncident(id string) (*Incident, error) {
 		return nil, err
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, err
-	}
 	return inc, nil
 }
 
@@ -244,6 +245,9 @@ func (c *Clickhouse) getIncidentHistories(id string) ([]*IncidentHistory, error)
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 
 	for rows.Next() {
@@ -255,10 +259,6 @@ func (c *Clickhouse) getIncidentHistories(id string) ([]*IncidentHistory, error)
 		incs = append(incs, inc)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, err
-	}
 	return incs, nil
 }
 
@@ -296,10 +296,13 @@ func (c *Clickhouse) getActiveIncident(ruleId string) (*Incident, error) {
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 
 	if ok := rows.Next(); !ok {
-		return nil, err
+		return nil, nil
 	}
 
 	if err := rows.Scan(&inc.Model.ID, &inc.Model.CreatedAt, &inc.Model.UpdatedAt,
@@ -308,10 +311,6 @@ func (c *Clickhouse) getActiveIncident(ruleId string) (*Incident, error) {
 		return nil, err
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, err
-	}
 	return inc, nil
 }
 
@@ -349,6 +348,9 @@ func (c *Clickhouse) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*ap
 	defer func() {
 		err := rows.Close()
 		if err != nil {
+			logger.Error(err.Error())
+		}
+		if err := rows.Err(); err != nil {
 			logger.Error(err.Error())
 		}
 	}()
@@ -399,6 +401,9 @@ func (c *Clickhouse) countIncidents(request *apiPb.GetIncidentsListRequest, time
 	defer func() {
 		err := rows.Close()
 		if err != nil {
+			logger.Error(err.Error())
+		}
+		if err := rows.Err(); err != nil {
 			logger.Error(err.Error())
 		}
 	}()

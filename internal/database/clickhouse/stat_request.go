@@ -331,6 +331,9 @@ func (c *Clickhouse) getStatRequests(agentID string, pagination *apiPb.Paginatio
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 
 	var statRequests []*StatRequest
@@ -437,6 +440,9 @@ func (c *Clickhouse) countStatRequests(agentID string, timeFrom time.Time, timeT
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 
 	if ok := rows.Next(); !ok {
@@ -467,6 +473,9 @@ func (c *Clickhouse) getStatRequestsCpuInfo(id string) ([]*CPUInfo, error) {
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 
 	for rows.Next() {
@@ -478,10 +487,6 @@ func (c *Clickhouse) getStatRequestsCpuInfo(id string) ([]*CPUInfo, error) {
 		cpuInfos = append(cpuInfos, cpu)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, err
-	}
 	return cpuInfos, nil
 }
 
@@ -497,6 +502,9 @@ func (c *Clickhouse) getStatRequestsMemoryInfoMem(id string) (*MemoryMem, error)
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 
 	if rows.Next() {
@@ -506,10 +514,6 @@ func (c *Clickhouse) getStatRequestsMemoryInfoMem(id string) (*MemoryMem, error)
 		}
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, err
-	}
 	return mem, nil
 }
 
@@ -525,6 +529,9 @@ func (c *Clickhouse) getStatRequestsMemoryInfoSwap(id string) (*MemorySwap, erro
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 
 	if rows.Next() {
@@ -534,10 +541,6 @@ func (c *Clickhouse) getStatRequestsMemoryInfoSwap(id string) (*MemorySwap, erro
 		}
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, err
-	}
 	return mem, nil
 }
 
@@ -553,6 +556,9 @@ func (c *Clickhouse) getStatRequestsDiskInfo(id string) ([]*DiskInfo, error) {
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 
 	for rows.Next() {
@@ -564,10 +570,6 @@ func (c *Clickhouse) getStatRequestsDiskInfo(id string) ([]*DiskInfo, error) {
 		diskInfos = append(diskInfos, dis)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, err
-	}
 	return diskInfos, nil
 }
 
@@ -583,6 +585,9 @@ func (c *Clickhouse) getStatRequestsNetInfo(id string) ([]*NetInfo, error) {
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 	for rows.Next() {
 		net := &NetInfo{}
@@ -593,10 +598,6 @@ func (c *Clickhouse) getStatRequestsNetInfo(id string) ([]*NetInfo, error) {
 		netInfos = append(netInfos, net)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, err
-	}
 	return netInfos, nil
 }
 
@@ -609,6 +610,9 @@ func (c *Clickhouse) GetCPUInfo(agentID string, pagination *apiPb.Pagination, fi
 	defer func() {
 		err := rows.Close()
 		if err != nil {
+			logger.Error(err.Error())
+		}
+		if err := rows.Err(); err != nil {
 			logger.Error(err.Error())
 		}
 	}()
@@ -646,6 +650,9 @@ func (c *Clickhouse) GetMemoryInfo(agentID string, pagination *apiPb.Pagination,
 	defer func() {
 		err := rows.Close()
 		if err != nil {
+			logger.Error(err.Error())
+		}
+		if err := rows.Err(); err != nil {
 			logger.Error(err.Error())
 		}
 	}()
@@ -698,6 +705,9 @@ func (c *Clickhouse) GetDiskInfo(agentID string, pagination *apiPb.Pagination, f
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 
 	var statRequests []*StatRequest
@@ -733,6 +743,9 @@ func (c *Clickhouse) GetNetInfo(agentID string, pagination *apiPb.Pagination, fi
 	defer func() {
 		err := rows.Close()
 		if err != nil {
+			logger.Error(err.Error())
+		}
+		if err := rows.Err(); err != nil {
 			logger.Error(err.Error())
 		}
 	}()

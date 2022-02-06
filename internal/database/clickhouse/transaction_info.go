@@ -151,6 +151,9 @@ func (c *Clickhouse) GetTransactionInfo(request *apiPb.GetTransactionsRequest) (
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 
 	var infos []*TransactionInfo
@@ -202,6 +205,9 @@ func (c *Clickhouse) countTransactions(request *apiPb.GetTransactionsRequest, ti
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 
 	if ok := rows.Next(); !ok {
@@ -245,12 +251,15 @@ func (c *Clickhouse) getTransaction(id string) (*TransactionInfo, error) {
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		if err := rows.Err(); err != nil {
+			logger.Error(err.Error())
+		}
 	}()
 
 	inf := &TransactionInfo{}
 
 	if ok := rows.Next(); !ok {
-		return nil, err
+		return nil, nil
 	}
 
 	if err := rows.Scan(&inf.Model.ID, &inf.Model.CreatedAt, &inf.Model.UpdatedAt,
@@ -261,10 +270,6 @@ func (c *Clickhouse) getTransaction(id string) (*TransactionInfo, error) {
 		return nil, err
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, err
-	}
 	return inf, nil
 }
 
@@ -280,6 +285,9 @@ func (c *Clickhouse) GetTransactionChildren(transactionId, cyclicalLoopCheck str
 	defer func() {
 		err := rows.Close()
 		if err != nil {
+			logger.Error(err.Error())
+		}
+		if err := rows.Err(); err != nil {
 			logger.Error(err.Error())
 		}
 	}()
@@ -305,11 +313,6 @@ func (c *Clickhouse) GetTransactionChildren(transactionId, cyclicalLoopCheck str
 			return nil, errorDataBase
 		}
 		allChildTransactions = append(allChildTransactions, grandChildren...)
-	}
-
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, err
 	}
 
 	allChildTransactions = append(allChildTransactions, childTransactions...)
@@ -356,6 +359,9 @@ func (c *Clickhouse) GetTransactionGroup(request *apiPb.GetTransactionGroupReque
 	defer func() {
 		err := rows.Close()
 		if err != nil {
+			logger.Error(err.Error())
+		}
+		if err := rows.Err(); err != nil {
 			logger.Error(err.Error())
 		}
 	}()
