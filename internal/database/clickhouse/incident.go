@@ -409,7 +409,7 @@ func (c *Clickhouse) countIncidents(request *apiPb.GetIncidentsListRequest, time
 	}()
 
 	if ok := rows.Next(); !ok {
-		return -1, errorDataBase
+		return 0, nil
 	}
 
 	if err := rows.Scan(&count); err != nil {

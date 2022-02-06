@@ -211,7 +211,7 @@ func (c *Clickhouse) countTransactions(request *apiPb.GetTransactionsRequest, ti
 	}()
 
 	if ok := rows.Next(); !ok {
-		return -1, errorDataBase
+		return 0, nil
 	}
 
 	if err := rows.Scan(&count); err != nil {
