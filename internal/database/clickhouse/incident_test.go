@@ -41,20 +41,12 @@ func (s *SuiteIncident) SetupSuite() {
 	clickIncident.Db = s.DB
 }
 
-type CustomStruct struct{}
-
-//Based on fact, that if request is not mocked, it will return error
-func (s *SuiteIncident) Test_UpdateIncidentStatus_InsertError_getIncidentById() {
-	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
-	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs().
-		WillReturnError(errors.New("Test_UpdateIncidentStatus_InsertError_getIncidentById"))
-
+func (s *SuiteIncident) Test_UpdateIncidentStatus_getIncidentById() {
 	_, err := clickIncident.UpdateIncidentStatus("", apiPb.IncidentStatus_INCIDENT_STATUS_OPENED)
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_UpdateIncidentStatus_InsertError_updateIncident() {
+func (s *SuiteIncident) Test_UpdateIncidentStatus_updateIncident() {
 	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "incident_id", "status", "rule_id", "start_time", "end_time"}).
 		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1", "1")
@@ -72,13 +64,13 @@ func (s *SuiteIncident) Test_UpdateIncidentStatus_InsertError_updateIncident() {
 	query = fmt.Sprintf(`INSERT INTO %s (%s)`, dbIncidentCollection, incidentFields)
 	s.mock.ExpectExec(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnError(errors.New("Test_UpdateIncidentStatus_InsertError_updateIncident"))
+		WillReturnError(errors.New("Test_UpdateIncidentStatus_updateIncident"))
 
 	_, err := clickIncident.UpdateIncidentStatus("", apiPb.IncidentStatus_INCIDENT_STATUS_OPENED)
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_UpdateIncidentStatus_InsertError_insertIncidentHistory() {
+func (s *SuiteIncident) Test_UpdateIncidentStatus_insertIncidentHistory() {
 	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "incident_id", "status", "rule_id", "start_time", "end_time"}).
 		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1", "1")
@@ -103,13 +95,13 @@ func (s *SuiteIncident) Test_UpdateIncidentStatus_InsertError_insertIncidentHist
 	query = fmt.Sprintf(`INSERT INTO %s (%s)`, dbIncidentHistoryCollection, incidentHistoriesFields)
 	s.mock.ExpectExec(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnError(errors.New("Test_UpdateIncidentStatus_InsertError_updateIncident"))
+		WillReturnError(errors.New("Test_UpdateIncidentStatus_updateIncident"))
 
 	_, err := clickIncident.UpdateIncidentStatus("", apiPb.IncidentStatus_INCIDENT_STATUS_OPENED)
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_UpdateIncidentStatus_InsertError_GetIncidentById() {
+func (s *SuiteIncident) Test_UpdateIncidentStatus_GetIncidentById() {
 	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "incident_id", "status", "rule_id", "start_time", "end_time"}).
 		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1", "1")
@@ -142,20 +134,13 @@ func (s *SuiteIncident) Test_UpdateIncidentStatus_InsertError_GetIncidentById() 
 		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1", "1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs().
-		WillReturnError(errors.New("Test_UpdateIncidentStatus_InsertError_GetIncidentById"))
+		WillReturnError(errors.New("Test_UpdateIncidentStatus_GetIncidentById"))
 
 	_, err := clickIncident.UpdateIncidentStatus("", apiPb.IncidentStatus_INCIDENT_STATUS_OPENED)
 	require.Error(s.T(), err)
 }
 
-//Based on fact, that if request is not mocked, it will return error
 func (s *SuiteIncident) Test_getIncident() {
-	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
-
-	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(sqlmock.AnyArg()).
-		WillReturnError(errors.New("Test_getIncident"))
-
 	_, err := clickIncident.getIncident("")
 	require.Error(s.T(), err)
 }
@@ -173,13 +158,19 @@ func (s *SuiteIncident) Test_getIncident_next() {
 	require.Nil(s.T(), err)
 }
 
-//Based on fact, that if request is not mocked, it will return error
-func (s *SuiteIncident) Test_UpdateIncidentStatus_Scan() {
-	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentHistoriesFields, dbIncidentHistoryCollection)
+func (s *SuiteIncident) Test_getIncident_scan() {
+	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
+	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "incident_id", "status", "rule_id", "start_time"}).
+		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg()).
-		WillReturnError(errors.New(""))
+		WillReturnRows(rows)
 
+	_, err := clickIncident.getIncident("")
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_getIncidentHistories() {
 	_, err := clickIncident.getIncidentHistories("")
 	require.Error(s.T(), err)
 }
