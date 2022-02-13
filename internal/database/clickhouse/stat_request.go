@@ -374,10 +374,6 @@ func (c *Clickhouse) getStatRequests(agentID string, pagination *apiPb.Paginatio
 		statRequests = append(statRequests, sr)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, -1, errorDataBase
-	}
 	return statRequests, count, nil
 }
 
@@ -570,10 +566,6 @@ func (c *Clickhouse) GetCPUInfo(agentID string, pagination *apiPb.Pagination, fi
 		statRequests = append(statRequests, sr)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, -1, errorDataBase
-	}
 	return ConvertFromClickhouseStatRequests(statRequests), count, nil
 }
 
@@ -615,10 +607,6 @@ func (c *Clickhouse) GetMemoryInfo(agentID string, pagination *apiPb.Pagination,
 		statRequests = append(statRequests, sr)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, -1, errorDataBase
-	}
 	return ConvertFromClickhouseStatRequests(statRequests), count, nil
 }
 
@@ -647,10 +635,6 @@ func (c *Clickhouse) GetDiskInfo(agentID string, pagination *apiPb.Pagination, f
 		statRequests = append(statRequests, sr)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, -1, errorDataBase
-	}
 	return ConvertFromClickhouseStatRequests(statRequests), count, nil
 }
 
@@ -679,9 +663,5 @@ func (c *Clickhouse) GetNetInfo(agentID string, pagination *apiPb.Pagination, fi
 		statRequests = append(statRequests, sr)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, -1, errorDataBase
-	}
 	return ConvertFromClickhouseStatRequests(statRequests), count, nil
 }

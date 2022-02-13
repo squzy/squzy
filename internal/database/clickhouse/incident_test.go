@@ -297,13 +297,70 @@ func (s *SuiteIncident) Test_getIncidentHistories_scanError() {
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_GetIncidentByIdError() {
-	_, err := clickIncident.GetIncidentById("")
+func (s *SuiteIncident) Test_GetActiveIncidentByRuleIdError() {
+	_, err := clickIncident.GetActiveIncidentByRuleId("1")
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_GetActiveIncidentByRuleIdError() {
-	_, err := clickIncident.GetActiveIncidentByRuleId("1")
+func (s *SuiteIncident) Test_GetActiveIncidentByRuleId_getIncidentHistoriesError() {
+	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
+	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "incident_id", "status", "rule_id", "start_time", "end_time"}).
+		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs().
+		WillReturnRows(rows)
+
+	_, err := clickIncident.GetActiveIncidentByRuleId("")
+	require.Error(s.T(), err)
+}
+
+//func (s *SuiteIncident) Test_getActiveIncidentError() {
+//	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
+//	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "incident_id", "status", "rule_id", "start_time", "end_time"}).
+//		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1", "1")
+//	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+//		WithArgs().
+//		WillReturnRows(rows)
+//	query = fmt.Sprintf(`SELECT %s FROM %s`, incidentHistoriesFields, dbIncidentHistoryCollection)
+//	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+//		WithArgs().
+//		WillReturnRows(nil)
+//
+//	_, err := clickIncident.getActiveIncident("")
+//	require.Error(s.T(), err)
+//}
+
+func (s *SuiteIncident) Test_getActiveIncidentError() {
+	_, err := clickIncident.getActiveIncident("")
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_getActiveIncident_nextError() {
+	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
+	rows := sqlmock.NewRows([]string{})
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs().
+		WillReturnRows(rows)
+
+	res, err := clickIncident.getActiveIncident("")
+	require.Nil(s.T(), err)
+	require.Nil(s.T(), res)
+}
+
+func (s *SuiteIncident) Test_getActiveIncident_scanError() {
+	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
+	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "incident_id", "status", "rule_id", "start_time"}).
+		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs().
+		WillReturnRows(rows)
+
+	_, err := clickIncident.getActiveIncident("")
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_GetIncidentByIdError() {
+	_, err := clickIncident.GetIncidentById("")
 	require.Error(s.T(), err)
 }
 
@@ -339,7 +396,7 @@ func (s *SuiteIncident) Test_GetIncidents_selectIncidentError() {
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_GetIncidents_selectIncidentHistoryError() {
+func (s *SuiteIncident) Test_GetIncidents_getIncidentHistoriesError() {
 	query := fmt.Sprintf(`SELECT count(*) FROM %s`, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{"id"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).

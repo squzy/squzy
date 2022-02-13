@@ -162,11 +162,6 @@ func (c *Clickhouse) GetTransactionInfo(request *apiPb.GetTransactionsRequest) (
 		infos = append(infos, inf)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, -1, errorDataBase
-	}
-
 	return convertFromTransactions(infos), count, nil
 }
 

@@ -129,11 +129,6 @@ func (c *Clickhouse) GetSnapshots(request *apiPb.GetSchedulerInformationRequest)
 		snapshots = append(snapshots, snp)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, -1, errorDataBase
-	}
-
 	return ConvertFromSnapshots(snapshots), int32(count), nil
 }
 

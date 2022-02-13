@@ -342,11 +342,6 @@ func (c *Clickhouse) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*ap
 		incs = append(incs, inc)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, -1, errorDataBase
-	}
-
 	return convertFromIncidents(incs), count, nil
 }
 
