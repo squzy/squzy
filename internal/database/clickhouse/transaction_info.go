@@ -198,11 +198,6 @@ func (c *Clickhouse) countTransactions(request *apiPb.GetTransactionsRequest, ti
 		return -1, errorDataBase
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return -1, errorDataBase
-
-	}
 	return count, nil
 }
 

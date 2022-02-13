@@ -158,11 +158,6 @@ func (c *Clickhouse) countSnapshots(request *apiPb.GetSchedulerInformationReques
 		return -1, errorDataBase
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return -1, errorDataBase
-
-	}
 	return count, nil
 }
 
@@ -209,11 +204,6 @@ func (c *Clickhouse) countAllSnapshots(request *apiPb.GetSchedulerUptimeRequest,
 		return -1, errorDataBase
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return -1, errorDataBase
-
-	}
 	return count, nil
 }
 

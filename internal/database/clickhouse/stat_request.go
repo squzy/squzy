@@ -434,11 +434,6 @@ func (c *Clickhouse) countStatRequests(agentID string, timeFrom time.Time, timeT
 		return -1, errorDataBase
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return -1, errorDataBase
-
-	}
 	return int32(count), nil
 }
 func (c *Clickhouse) getStatRequestsCpuInfo(id string) ([]*CPUInfo, error) {
