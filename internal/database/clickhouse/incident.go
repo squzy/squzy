@@ -208,15 +208,7 @@ func (c *Clickhouse) getIncident(id string) (*Incident, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	inc := &Incident{}
 
@@ -240,15 +232,7 @@ func (c *Clickhouse) getIncidentHistories(id string) ([]*IncidentHistory, error)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		inc := &IncidentHistory{}
@@ -291,15 +275,7 @@ func (c *Clickhouse) getActiveIncident(ruleId string) (*Incident, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	if ok := rows.Next(); !ok {
 		return nil, nil
@@ -345,15 +321,7 @@ func (c *Clickhouse) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*ap
 		logger.Error(err.Error())
 		return nil, -1, errorDataBase
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	var incs []*Incident
 	for rows.Next() {
@@ -398,15 +366,7 @@ func (c *Clickhouse) countIncidents(request *apiPb.GetIncidentsListRequest, time
 		return -1, errorDataBase
 	}
 
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	if ok := rows.Next(); !ok {
 		return 0, nil

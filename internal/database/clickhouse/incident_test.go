@@ -41,12 +41,47 @@ func (s *SuiteIncident) SetupSuite() {
 	clickIncident.Db = s.DB
 }
 
-func (s *SuiteIncident) Test_UpdateIncidentStatus_getIncidentById() {
+func (s *SuiteIncident) Test_InsertIncident_insertIncidentError() {
+	s.mock.ExpectBegin()
+	query := fmt.Sprintf(`INSERT INTO %s (%s)`, dbIncidentCollection, incidentFields)
+	s.mock.ExpectExec(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnError(errors.New("Test_InsertIncident_insertIncidentError"))
+
+	err := clickIncident.InsertIncident(&apiPb.Incident{})
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_InsertIncident_insertIncidentHistoryError() {
+	s.mock.ExpectBegin()
+	query := fmt.Sprintf(`INSERT INTO %s (%s)`, dbIncidentCollection, incidentFields)
+	s.mock.ExpectExec(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	s.mock.ExpectCommit()
+
+	s.mock.ExpectBegin()
+	query = fmt.Sprintf(`INSERT INTO %s (%s)`, dbIncidentHistoryCollection, incidentHistoriesFields)
+	s.mock.ExpectExec(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnError(errors.New("Test_InsertIncident_insertIncidentHistoryError"))
+
+	err := clickIncident.InsertIncident(&apiPb.Incident{
+		Histories: []*apiPb.Incident_HistoryItem{
+			{
+				Status:    0,
+				Timestamp: timestamp.Now(),
+			}},
+	})
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_UpdateIncidentStatus_getIncidentByIdError() {
 	_, err := clickIncident.UpdateIncidentStatus("", apiPb.IncidentStatus_INCIDENT_STATUS_OPENED)
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_UpdateIncidentStatus_updateIncident() {
+func (s *SuiteIncident) Test_UpdateIncidentStatus_updateIncidentError() {
 	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "incident_id", "status", "rule_id", "start_time", "end_time"}).
 		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1", "1")
@@ -70,7 +105,7 @@ func (s *SuiteIncident) Test_UpdateIncidentStatus_updateIncident() {
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_UpdateIncidentStatus_insertIncidentHistory() {
+func (s *SuiteIncident) Test_UpdateIncidentStatus_insertIncidentHistoryError() {
 	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "incident_id", "status", "rule_id", "start_time", "end_time"}).
 		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1", "1")
@@ -101,7 +136,7 @@ func (s *SuiteIncident) Test_UpdateIncidentStatus_insertIncidentHistory() {
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_UpdateIncidentStatus_GetIncidentById() {
+func (s *SuiteIncident) Test_UpdateIncidentStatus_GetIncidentByIdError() {
 	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "incident_id", "status", "rule_id", "start_time", "end_time"}).
 		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1", "1")
@@ -140,12 +175,87 @@ func (s *SuiteIncident) Test_UpdateIncidentStatus_GetIncidentById() {
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_getIncident() {
+func (s *SuiteIncident) Test_insertIncident_beginsError() {
+	s.mock.ExpectBegin().WillReturnError(errors.New("Test_insertIncident_beginsError"))
+	err := clickIncident.insertIncident(time.Now(), &Incident{})
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_insertIncident_insertError() {
+	s.mock.ExpectBegin()
+	query := fmt.Sprintf(`INSERT INTO %s (%s)`, dbIncidentCollection, incidentFields)
+	s.mock.ExpectExec(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnError(errors.New("Test_insertIncident_insertError"))
+
+	err := clickIncident.insertIncident(time.Now(), &Incident{})
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_insertIncident_commitError() {
+	s.mock.ExpectBegin()
+	query := fmt.Sprintf(`INSERT INTO %s (%s)`, dbIncidentCollection, incidentFields)
+	s.mock.ExpectExec(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	s.mock.ExpectCommit().WillReturnError(errors.New("Test_insertIncident_commitError"))
+
+	err := clickIncident.insertIncident(time.Now(), &Incident{})
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_insertIncidentHistory_beginError() {
+	s.mock.ExpectBegin().WillReturnError(errors.New("Test_insertIncidentHistory_beginError"))
+	err := clickIncident.insertIncidentHistory("", time.Now(), int32(0), int64(0))
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_insertIncidentHistory_insertError() {
+	s.mock.ExpectBegin()
+	query := fmt.Sprintf(`INSERT INTO %s (%s)`, dbIncidentHistoryCollection, incidentHistoriesFields)
+	s.mock.ExpectExec(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnError(errors.New("Test_insertIncidentHistory_insertError"))
+
+	err := clickIncident.insertIncidentHistory("", time.Now(), int32(0), int64(0))
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_insertIncidentHistory_commitError() {
+	s.mock.ExpectBegin()
+	query := fmt.Sprintf(`INSERT INTO %s (%s)`, dbIncidentHistoryCollection, incidentHistoriesFields)
+	s.mock.ExpectExec(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	s.mock.ExpectCommit().WillReturnError(errors.New("Test_insertIncident_commitError"))
+
+	err := clickIncident.insertIncidentHistory("", time.Now(), int32(0), int64(0))
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_getIncidentById_getIncidentError() {
+	_, err := clickIncident.getIncidentById("")
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_getIncidentById_getIncidentHistoriesError() {
+	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
+	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "incident_id", "status", "rule_id", "start_time", "end_time"}).
+		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs().
+		WillReturnRows(rows)
+
+	_, err := clickIncident.getIncidentById("")
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_getIncidentError() {
 	_, err := clickIncident.getIncident("")
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_getIncident_next() {
+func (s *SuiteIncident) Test_getIncident_nextError() {
 	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{})
 
@@ -158,7 +268,7 @@ func (s *SuiteIncident) Test_getIncident_next() {
 	require.Nil(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_getIncident_scan() {
+func (s *SuiteIncident) Test_getIncident_scanError() {
 	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "incident_id", "status", "rule_id", "start_time"}).
 		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1")
@@ -170,17 +280,29 @@ func (s *SuiteIncident) Test_getIncident_scan() {
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_getIncidentHistories() {
+func (s *SuiteIncident) Test_getIncidentHistoriesError() {
 	_, err := clickIncident.getIncidentHistories("")
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_GetIncidentById_Error() {
+func (s *SuiteIncident) Test_getIncidentHistories_scanError() {
+	query := fmt.Sprintf(`SELECT %s FROM %s`, incidentHistoriesFields, dbIncidentHistoryCollection)
+	rows := sqlmock.NewRows([]string{"id", "created_at", "incident_id", "status"}).
+		AddRow("1", time.Now(), time.Now(), "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs().
+		WillReturnRows(rows)
+
+	_, err := clickIncident.getIncidentHistories("")
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteIncident) Test_GetIncidentByIdError() {
 	_, err := clickIncident.GetIncidentById("")
 	require.Error(s.T(), err)
 }
 
-func (s *SuiteIncident) Test_GetActiveIncidentByRuleId_error() {
+func (s *SuiteIncident) Test_GetActiveIncidentByRuleIdError() {
 	_, err := clickIncident.GetActiveIncidentByRuleId("1")
 	require.Error(s.T(), err)
 }

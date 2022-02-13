@@ -326,15 +326,7 @@ func (c *Clickhouse) getStatRequests(agentID string, pagination *apiPb.Paginatio
 		return nil, -1, err
 	}
 
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	var statRequests []*StatRequest
 	for rows.Next() {
@@ -435,15 +427,7 @@ func (c *Clickhouse) countStatRequests(agentID string, timeFrom time.Time, timeT
 		return -1, errorDataBase
 	}
 
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	if ok := rows.Next(); !ok {
 		return 0, nil
@@ -468,15 +452,7 @@ func (c *Clickhouse) getStatRequestsCpuInfo(id string) ([]*CPUInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		cpu := &CPUInfo{}
@@ -497,15 +473,7 @@ func (c *Clickhouse) getStatRequestsMemoryInfoMem(id string) (*MemoryMem, error)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	if rows.Next() {
 		if err := rows.Scan(&mem.Model.ID, &mem.Model.CreatedAt, &mem.StatRequestID, &mem.MemoryInfoID, &mem.Total, &mem.Used, &mem.Free, &mem.Shared, &mem.UsedPercent); err != nil {
@@ -524,15 +492,7 @@ func (c *Clickhouse) getStatRequestsMemoryInfoSwap(id string) (*MemorySwap, erro
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	if rows.Next() {
 		if err := rows.Scan(&mem.Model.ID, &mem.Model.CreatedAt, &mem.StatRequestID, &mem.MemoryInfoID, &mem.Total, &mem.Used, &mem.Free, &mem.Shared, &mem.UsedPercent); err != nil {
@@ -551,15 +511,7 @@ func (c *Clickhouse) getStatRequestsDiskInfo(id string) ([]*DiskInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		dis := &DiskInfo{}
@@ -580,15 +532,7 @@ func (c *Clickhouse) getStatRequestsNetInfo(id string) ([]*NetInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 	for rows.Next() {
 		net := &NetInfo{}
 		if err := rows.Scan(&net.Model.ID, &net.Model.CreatedAt, &net.StatRequestID, &net.Name, &net.BytesSent, &net.BytesRecv, &net.PacketsSent, &net.PacketsRecv, &net.ErrIn, &net.ErrOut, &net.DropIn, &net.DropOut); err != nil {
@@ -607,15 +551,7 @@ func (c *Clickhouse) GetCPUInfo(agentID string, pagination *apiPb.Pagination, fi
 		return nil, -1, err
 	}
 
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	var statRequests []*StatRequest
 	for rows.Next() {
@@ -647,15 +583,7 @@ func (c *Clickhouse) GetMemoryInfo(agentID string, pagination *apiPb.Pagination,
 		return nil, -1, err
 	}
 
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	var statRequests []*StatRequest
 	for rows.Next() {
@@ -700,15 +628,7 @@ func (c *Clickhouse) GetDiskInfo(agentID string, pagination *apiPb.Pagination, f
 		return nil, -1, err
 	}
 
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	var statRequests []*StatRequest
 	for rows.Next() {
@@ -740,15 +660,7 @@ func (c *Clickhouse) GetNetInfo(agentID string, pagination *apiPb.Pagination, fi
 		return nil, -1, err
 	}
 
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	var statRequests []*StatRequest
 	for rows.Next() {

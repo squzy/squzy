@@ -114,15 +114,7 @@ func (c *Clickhouse) GetSnapshots(request *apiPb.GetSchedulerInformationRequest)
 		logger.Error(err.Error())
 		return nil, -1, errorDataBase
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	var snapshots []*Snapshot
 	for rows.Next() {
@@ -160,15 +152,7 @@ func (c *Clickhouse) countSnapshots(request *apiPb.GetSchedulerInformationReques
 		return -1, errorDataBase
 	}
 
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	if ok := rows.Next(); !ok {
 		return 0, nil
@@ -219,15 +203,7 @@ func (c *Clickhouse) countAllSnapshots(request *apiPb.GetSchedulerUptimeRequest,
 		return -1, errorDataBase
 	}
 
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	if ok := rows.Next(); !ok {
 		return 0, nil
@@ -264,15 +240,7 @@ func (c *Clickhouse) countSnapshotsUptime(request *apiPb.GetSchedulerUptimeReque
 		}, errorDataBase
 	}
 
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	if ok := rows.Next(); !ok {
 		return UptimeResult{

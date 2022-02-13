@@ -146,15 +146,7 @@ func (c *Clickhouse) GetTransactionInfo(request *apiPb.GetTransactionsRequest) (
 		logger.Error(err.Error())
 		return nil, -1, errorDataBase
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	var infos []*TransactionInfo
 	for rows.Next() {
@@ -200,15 +192,7 @@ func (c *Clickhouse) countTransactions(request *apiPb.GetTransactionsRequest, ti
 		return -1, errorDataBase
 	}
 
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	if ok := rows.Next(); !ok {
 		return 0, nil
@@ -246,15 +230,7 @@ func (c *Clickhouse) getTransaction(id string) (*TransactionInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	inf := &TransactionInfo{}
 
@@ -282,15 +258,7 @@ func (c *Clickhouse) GetTransactionChildren(transactionId, cyclicalLoopCheck str
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	var childTransactions []*TransactionInfo
 	for rows.Next() {
@@ -356,15 +324,7 @@ func (c *Clickhouse) GetTransactionGroup(request *apiPb.GetTransactionGroupReque
 		logger.Error(err.Error())
 		return nil, errorDataBase
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		if err := rows.Err(); err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	defer rows.Close()
 
 	var groupResults []*GroupResult
 	for rows.Next() {
