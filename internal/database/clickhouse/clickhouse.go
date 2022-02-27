@@ -13,9 +13,14 @@ type Clickhouse struct {
 }
 
 const (
-	dbSnapshotCollection        = "snapshots"
-	dbTransactionInfoCollection = "transaction_info"
-	dbStatRequestCollection     = "stat_requests"
+	dbSnapshotCollection                  = "snapshots"
+	dbTransactionInfoCollection           = "transaction_info"
+	dbStatRequestCollection               = "stat_requests"
+	dbStatRequestCpuInfoCollection        = "stat_requests_cpu_info"
+	dbStatRequestMemoryInfoMemCollection  = "stat_requests_memory_info_mem"
+	dbStatRequestMemoryInfoSwapCollection = "stat_requests_memory_info_swap"
+	dbStatRequestDiskInfoCollection       = "stat_requests_disk_info"
+	dbStatRequestNetInfoCollection        = "stat_requests_net_info"
 )
 
 var (

@@ -156,7 +156,7 @@ func (c *Clickhouse) insertStatRequest(now time.Time, sr_id clickhouse.UUID, sta
 		return err
 	}
 
-	q := fmt.Sprintf(`INSERT INTO stat_requests (%s) VALUES ($0, $1, $2, $3, $4)`, statRequestFields)
+	q := fmt.Sprintf(`INSERT INTO "%s" (%s) VALUES ($0, $1, $2, $3, $4)`, dbStatRequestCollection, statRequestFields)
 	_, err = tx.Exec(q,
 		sr_id,
 		now,
@@ -180,7 +180,7 @@ func (c *Clickhouse) insertStatRequestCPUInfo(now time.Time, sr_id clickhouse.UU
 		return err
 	}
 
-	q := fmt.Sprintf(`INSERT INTO stat_requests_cpu_info (%s) VALUES ($0, $1, $2, $3)`, statRequestsCpuInfoFields)
+	q := fmt.Sprintf(`INSERT INTO "%s" (%s) VALUES ($0, $1, $2, $3)`, dbStatRequestCpuInfoCollection, statRequestsCpuInfoFields)
 	_, err = tx.Exec(q,
 		clickhouse.UUID(uuid.New().String()),
 		now,
@@ -203,7 +203,7 @@ func (c *Clickhouse) insertStatRequestsMemoryInfoMem(now time.Time, sr_id clickh
 		return err
 	}
 
-	q := fmt.Sprintf(`INSERT INTO stat_requests_memory_info_mem (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7)`, statRequestsMemoryInfoFields)
+	q := fmt.Sprintf(`INSERT INTO "%s" (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7)`, dbStatRequestMemoryInfoMemCollection, statRequestsMemoryInfoFields)
 	_, err = tx.Exec(q,
 		clickhouse.UUID(uuid.New().String()),
 		now,
@@ -231,7 +231,7 @@ func (c *Clickhouse) insertStatRequestsMemoryInfoSwap(now time.Time, sr_id click
 		return err
 	}
 
-	q := fmt.Sprintf(`INSERT INTO stat_requests_memory_info_swap (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7)`, statRequestsMemoryInfoFields)
+	q := fmt.Sprintf(`INSERT INTO "%s" (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7)`, dbStatRequestMemoryInfoSwapCollection, statRequestsMemoryInfoFields)
 	_, err = tx.Exec(q,
 		clickhouse.UUID(uuid.New().String()),
 		now,
@@ -259,7 +259,7 @@ func (c *Clickhouse) insertStatRequestsDiskInfo(now time.Time, sr_id clickhouse.
 		return err
 	}
 
-	q := fmt.Sprintf(`INSERT INTO stat_requests_disk_info (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8)`, statRequestsDiskInfoFields)
+	q := fmt.Sprintf(`INSERT INTO "%s" (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8)`, dbStatRequestDiskInfoCollection, statRequestsDiskInfoFields)
 	_, err = tx.Exec(q,
 		clickhouse.UUID(uuid.New().String()),
 		now,
@@ -286,7 +286,7 @@ func (c *Clickhouse) insertStatRequestsNetInfo(now time.Time, sr_id clickhouse.U
 		return err
 	}
 
-	q := fmt.Sprintf(`INSERT INTO stat_requests_net_info (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, statRequestsNetInfoFields)
+	q := fmt.Sprintf(`INSERT INTO "%s" (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, dbStatRequestNetInfoCollection, statRequestsNetInfoFields)
 	_, err = tx.Exec(q,
 		clickhouse.UUID(uuid.New().String()),
 		now,
@@ -390,8 +390,9 @@ func (c *Clickhouse) getStatRequestsRows(agentID string, pagination *apiPb.Pagin
 
 	offset, limit := getOffsetAndLimit(int64(count), pagination)
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM stat_requests WHERE (%s AND %s) ORDER BY %s LIMIT %d OFFSET %d`,
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM "%s" WHERE (%s AND %s) ORDER BY %s LIMIT %d OFFSET %d`,
 		statRequestFields,
+		dbStatRequestCollection,
 		agentIdFilterString,
 		statRequestTimeFilterString,
 		statRequestTimeString,
@@ -411,7 +412,8 @@ func (c *Clickhouse) getStatRequestsRows(agentID string, pagination *apiPb.Pagin
 
 func (c *Clickhouse) countStatRequests(agentID string, timeFrom time.Time, timeTo time.Time) (int32, error) {
 	var count int64
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM stat_requests WHERE %s AND %s`,
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM "%s" WHERE %s AND %s`,
+		dbStatRequestCollection,
 		agentIdFilterString,
 		statRequestTimeFilterString),
 		agentID,
@@ -439,7 +441,7 @@ func (c *Clickhouse) countStatRequests(agentID string, timeFrom time.Time, timeT
 func (c *Clickhouse) getStatRequestsCpuInfo(id string) ([]*CPUInfo, error) {
 	var cpuInfos []*CPUInfo
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM stat_requests_cpu_info WHERE %s`, statRequestsCpuInfoFields, statRequestIdFilterString), id)
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM "%s" WHERE %s`, statRequestsCpuInfoFields, dbStatRequestCpuInfoCollection, statRequestIdFilterString), id)
 	if err != nil {
 		return nil, err
 	}
@@ -460,7 +462,7 @@ func (c *Clickhouse) getStatRequestsCpuInfo(id string) ([]*CPUInfo, error) {
 func (c *Clickhouse) getStatRequestsMemoryInfoMem(id string) (*MemoryMem, error) {
 	mem := &MemoryMem{}
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM stat_requests_memory_info_mem WHERE %s`, statRequestsMemoryInfoFields, statRequestIdFilterString), id)
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM "%s" WHERE %s`, statRequestsMemoryInfoFields, dbStatRequestMemoryInfoMemCollection, statRequestIdFilterString), id)
 	if err != nil {
 		return nil, err
 	}
@@ -479,7 +481,7 @@ func (c *Clickhouse) getStatRequestsMemoryInfoMem(id string) (*MemoryMem, error)
 func (c *Clickhouse) getStatRequestsMemoryInfoSwap(id string) (*MemorySwap, error) {
 	mem := &MemorySwap{}
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM stat_requests_memory_info_swap WHERE %s`, statRequestsMemoryInfoFields, statRequestIdFilterString), id)
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM "%s" WHERE %s`, statRequestsMemoryInfoFields, dbStatRequestMemoryInfoSwapCollection, statRequestIdFilterString), id)
 	if err != nil {
 		return nil, err
 	}
@@ -498,7 +500,7 @@ func (c *Clickhouse) getStatRequestsMemoryInfoSwap(id string) (*MemorySwap, erro
 func (c *Clickhouse) getStatRequestsDiskInfo(id string) ([]*DiskInfo, error) {
 	var diskInfos []*DiskInfo
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM stat_requests_disk_info WHERE %s`, statRequestsDiskInfoFields, statRequestIdFilterString), id)
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM "%s" WHERE %s`, statRequestsDiskInfoFields, dbStatRequestDiskInfoCollection, statRequestIdFilterString), id)
 	if err != nil {
 		return nil, err
 	}
@@ -519,7 +521,7 @@ func (c *Clickhouse) getStatRequestsDiskInfo(id string) ([]*DiskInfo, error) {
 func (c *Clickhouse) getStatRequestsNetInfo(id string) ([]*NetInfo, error) {
 	var netInfos []*NetInfo
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM stat_requests_net_info WHERE %s`, statRequestsNetInfoFields, statRequestIdFilterString), id)
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM "%s" WHERE %s`, statRequestsNetInfoFields, dbStatRequestNetInfoCollection, statRequestIdFilterString), id)
 	if err != nil {
 		return nil, err
 	}
