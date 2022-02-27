@@ -60,7 +60,7 @@ func (c *Clickhouse) insertSnapshot(now time.Time, snapshot *Snapshot) error {
 		return err
 	}
 
-	q := fmt.Sprintf(`INSERT INTO snapshots (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9)`, snapshotFields)
+	q := fmt.Sprintf(`INSERT INTO "%s" (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9)`, dbSnapshotCollection, snapshotFields)
 	_, err = tx.Exec(q,
 		clickhouse.UUID(uuid.New().String()),
 		now,
@@ -134,7 +134,13 @@ func (c *Clickhouse) GetSnapshots(request *apiPb.GetSchedulerInformationRequest)
 
 func (c *Clickhouse) countSnapshots(request *apiPb.GetSchedulerInformationRequest, timeFrom int64, timeTo int64) (int64, error) {
 	var count int64
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM snapshots WHERE %s AND (%s) AND %s LIMIT 1`,
+	fmt.Println(fmt.Sprintf(`SELECT count(*) FROM %s WHERE %s AND (%s) AND %s LIMIT 1`,
+		dbSnapshotCollection,
+		snapshotSchedulerIdString,
+		snapshotMetaStartTimeFilterString,
+		getCodeString(request.Status)))
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM "%s" WHERE %s AND (%s) AND %s LIMIT 1`,
+		dbSnapshotCollection,
 		snapshotSchedulerIdString,
 		snapshotMetaStartTimeFilterString,
 		getCodeString(request.Status)),
@@ -181,7 +187,8 @@ func (c *Clickhouse) GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest
 
 func (c *Clickhouse) countAllSnapshots(request *apiPb.GetSchedulerUptimeRequest, timeFrom int64, timeTo int64) (int64, error) {
 	var count int64
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM snapshots WHERE %s AND (%s)`,
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM "%s" WHERE %s AND (%s)`,
+		dbSnapshotCollection,
 		snapshotSchedulerIdString,
 		snapshotMetaStartTimeFilterString),
 		request.SchedulerId,
@@ -209,7 +216,8 @@ func (c *Clickhouse) countAllSnapshots(request *apiPb.GetSchedulerUptimeRequest,
 
 func (c *Clickhouse) countSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest, timeFrom int64, timeTo int64) (UptimeResult, error) {
 	var result UptimeResult
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) as "count", avg(meta_end_time-meta_start_time) as "latency" FROM snapshots WHERE %s AND (%s) AND %s`,
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) as "count", avg(meta_end_time-meta_start_time) as "latency" FROM "%s" WHERE %s AND (%s) AND %s`,
+		dbSnapshotCollection,
 		snapshotSchedulerIdString,
 		snapshotMetaStartTimeFilterString,
 		getCodeString(apiPb.SchedulerCode_OK)),

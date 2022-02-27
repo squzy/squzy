@@ -23,8 +23,8 @@ var (
 
 	directionMap = map[apiPb.SortDirection]string{
 		apiPb.SortDirection_SORT_DIRECTION_UNSPECIFIED: ``,
-		apiPb.SortDirection_ASC:                        ` asc`,
-		apiPb.SortDirection_DESC:                       ` desc`,
+		apiPb.SortDirection_ASC:                        ` ASC`,
+		apiPb.SortDirection_DESC:                       ` DESC`,
 	}
 )
 

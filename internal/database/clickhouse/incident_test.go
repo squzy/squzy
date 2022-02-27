@@ -369,7 +369,7 @@ func (s *SuiteIncident) Test_GetIncidents_countError() {
 
 func (s *SuiteIncident) Test_GetIncidents_selectIncidentError() {
 	query := fmt.Sprintf(`SELECT count(*) FROM %s`, dbIncidentCollection)
-	rows := sqlmock.NewRows([]string{"id"}).AddRow("1")
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
@@ -382,7 +382,7 @@ func (s *SuiteIncident) Test_GetIncidents_selectIncidentError() {
 
 func (s *SuiteIncident) Test_GetIncidents_scanError() {
 	query := fmt.Sprintf(`SELECT count(*) FROM %s`, dbIncidentCollection)
-	rows := sqlmock.NewRows([]string{"id"}).AddRow("1")
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
@@ -401,7 +401,7 @@ func (s *SuiteIncident) Test_GetIncidents_scanError() {
 
 func (s *SuiteIncident) Test_GetIncidents_getIncidentHistoriesError() {
 	query := fmt.Sprintf(`SELECT count(*) FROM %s`, dbIncidentCollection)
-	rows := sqlmock.NewRows([]string{"id"}).AddRow("1")
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
@@ -428,7 +428,7 @@ func (s *SuiteIncident) Test_countIncidentsError() {
 
 func (s *SuiteIncident) Test_countIncidents_scanError() {
 	query := fmt.Sprintf(`SELECT count(*) FROM %s`, dbIncidentCollection)
-	rows := sqlmock.NewRows([]string{"id", "custom"}).AddRow("1", "1")
+	rows := sqlmock.NewRows([]string{"count", "custom"}).AddRow("1", "1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
