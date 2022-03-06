@@ -62,54 +62,60 @@ func TestPostgres_InsertStatRequest(t *testing.T) {
 	})
 }
 
-//func (s *SuiteStatRequest) Test_InsertStatRequest() {
-//	s.mock.ExpectBegin()
-//	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestCollection)).
-//		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-//		WillReturnResult(sqlmock.NewResult(1, 1))
-//	s.mock.ExpectCommit()
-//	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, "cpu_infos")).
-//		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-//		WillReturnResult(sqlmock.NewResult(1, 1))
-//	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, "memory_infos")).
-//		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-//		WillReturnResult(sqlmock.NewResult(1, 1))
-//	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, "memory_mems")).
-//		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-//		WillReturnResult(sqlmock.NewResult(1, 1))
-//	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, "memory_swaps")).
-//		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-//		WillReturnResult(sqlmock.NewResult(1, 1))
-//	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, "disk_infos")).
-//		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-//		WillReturnResult(sqlmock.NewResult(1, 1))
-//	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, "net_infos")).
-//		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-//		WillReturnResult(sqlmock.NewResult(1, 1))
-//	s.mock.ExpectCommit()
-//
-//	err := clickStatRequest.InsertStatRequest(&apiPb.Metric{
-//		CpuInfo: &apiPb.CpuInfo{
-//			Cpus: []*apiPb.CpuInfo_CPU{{}},
-//		},
-//		MemoryInfo: &apiPb.MemoryInfo{
-//			Mem:  &apiPb.MemoryInfo_Memory{},
-//			Swap: &apiPb.MemoryInfo_Memory{},
-//		},
-//		DiskInfo: &apiPb.DiskInfo{
-//			Disks: map[string]*apiPb.DiskInfo_Disk{
-//				"": {},
-//			},
-//		},
-//		NetInfo: &apiPb.NetInfo{
-//			Interfaces: map[string]*apiPb.NetInfo_Interface{
-//				"": {},
-//			},
-//		},
-//		Time: timestamp.Now(),
-//	})
-//	require.NoError(s.T(), err)
-//}
+func (s *SuiteStatRequest) Test_InsertStatRequest() {
+	s.mock.ExpectBegin()
+	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestCollection)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	s.mock.ExpectCommit()
+	s.mock.ExpectBegin()
+	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestCpuInfoCollection)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	s.mock.ExpectCommit()
+	s.mock.ExpectBegin()
+	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestMemoryInfoMemCollection)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	s.mock.ExpectCommit()
+	s.mock.ExpectBegin()
+	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestMemoryInfoSwapCollection)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	s.mock.ExpectCommit()
+	s.mock.ExpectBegin()
+	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestDiskInfoCollection)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	s.mock.ExpectCommit()
+	s.mock.ExpectBegin()
+	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestNetInfoCollection)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	s.mock.ExpectCommit()
+
+	err := clickStatRequest.InsertStatRequest(&apiPb.Metric{
+		CpuInfo: &apiPb.CpuInfo{
+			Cpus: []*apiPb.CpuInfo_CPU{{}},
+		},
+		MemoryInfo: &apiPb.MemoryInfo{
+			Mem:  &apiPb.MemoryInfo_Memory{},
+			Swap: &apiPb.MemoryInfo_Memory{},
+		},
+		DiskInfo: &apiPb.DiskInfo{
+			Disks: map[string]*apiPb.DiskInfo_Disk{
+				"": {},
+			},
+		},
+		NetInfo: &apiPb.NetInfo{
+			Interfaces: map[string]*apiPb.NetInfo_Interface{
+				"": {},
+			},
+		},
+		Time: timestamp.Now(),
+	})
+	require.NoError(s.T(), err)
+}
 
 func (s *SuiteStatRequest) Test_GetStatRequest() {
 	var (
