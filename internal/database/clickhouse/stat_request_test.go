@@ -174,7 +174,6 @@ func (s *SuiteStatRequest) Test_GetStatRequest() {
 	require.NoError(s.T(), err)
 }
 
-//Based on fact, that if request is not mocked, it will return error
 func (s *SuiteStatRequest) Test_GetStatRequest_Select_Error() {
 	var (
 		id = "1"
@@ -238,7 +237,6 @@ func (s *SuiteStatRequest) Test_GetCpuInfo() {
 	require.NoError(s.T(), err)
 }
 
-//Based on fact, that if request is not mocked, it will return error
 //Is used for getSpecialRecords test
 func (s *SuiteStatRequest) Test_GetCpuInfo_Count_Error() {
 	var (
@@ -249,7 +247,6 @@ func (s *SuiteStatRequest) Test_GetCpuInfo_Count_Error() {
 	require.Error(s.T(), err)
 }
 
-//Based on fact, that if request is not mocked, it will return error
 //Is used for getSpecialRecords test
 func (s *SuiteStatRequest) Test_GetCpuInfo_Select_Error() {
 	var (
@@ -318,7 +315,6 @@ func (s *SuiteStatRequest) Test_GetMemoryInfo() {
 	require.NoError(s.T(), err)
 }
 
-//Based on fact, that if request is not mocked, it will return error
 func (s *SuiteStatRequest) Test_GetMemoryInfo_Select_Error() {
 	var (
 		id = "1"

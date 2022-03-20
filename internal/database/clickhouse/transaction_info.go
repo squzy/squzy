@@ -1,6 +1,5 @@
 package clickhouse
 
-//
 import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
@@ -8,6 +7,7 @@ import (
 	uuid "github.com/google/uuid"
 	"github.com/squzy/squzy/internal/logger"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -80,7 +80,9 @@ func (c *Clickhouse) InsertTransactionInfo(data *apiPb.TransactionInfo) error {
 		return err
 	}
 
-	q := fmt.Sprintf(`INSERT INTO transaction_info (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, transactionInfoFields)
+	q := fmt.Sprintf(`INSERT INTO "%s" (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+		dbTransactionInfoCollection,
+		transactionInfoFields)
 	_, err = tx.Exec(q,
 		clickhouse.UUID(uuid.New().String()),
 		now,
@@ -122,8 +124,9 @@ func (c *Clickhouse) GetTransactionInfo(request *apiPb.GetTransactionsRequest) (
 
 	offset, limit := getOffsetAndLimit(count, request.GetPagination())
 
-	q := fmt.Sprintf(`SELECT %s FROM transaction_info WHERE ( %s AND %s AND %s AND %s AND %s AND %s AND %s AND %s ) ORDER BY %s LIMIT %d OFFSET %d`,
+	q := fmt.Sprintf(`SELECT %s FROM "%s" WHERE ( %s AND %s AND %s AND %s AND %s AND %s AND %s AND %s ) ORDER BY %s LIMIT %d OFFSET %d`,
 		transactionInfoFields,
+		dbTransactionInfoCollection,
 		applicationIdFilterString,
 		applicationStartTimeFilterString,
 		getTransactionsByString(transMetaHostStr, request.GetHost()),
@@ -167,7 +170,8 @@ func (c *Clickhouse) GetTransactionInfo(request *apiPb.GetTransactionsRequest) (
 
 func (c *Clickhouse) countTransactions(request *apiPb.GetTransactionsRequest, timeFrom int64, timeTo int64) (int64, error) {
 	var count int64
-	q := fmt.Sprintf(`SELECT count(*) FROM transaction_info WHERE %s AND (%s) AND %s AND %s AND %s AND %s AND %s AND %s LIMIT 1`,
+	q := fmt.Sprintf(`SELECT count(*) FROM "%s" WHERE %s AND (%s) AND %s AND %s AND %s AND %s AND %s AND %s LIMIT 1`,
+		dbTransactionInfoCollection,
 		applicationIdFilterString,
 		applicationStartTimeFilterString,
 		getTransactionsByString(transMetaHostStr, request.GetHost()),
@@ -216,7 +220,9 @@ func (c *Clickhouse) GetTransactionByID(request *apiPb.GetTransactionByIdRequest
 }
 
 func (c *Clickhouse) getTransaction(id string) (*TransactionInfo, error) {
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM transaction_info WHERE "transactionId" = ? LIMIT 1`, transactionInfoFields), id)
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM "%s" WHERE "transactionId" = ? LIMIT 1`,
+		transactionInfoFields,
+		dbTransactionInfoCollection), id)
 	if err != nil {
 		return nil, err
 	}
@@ -229,6 +235,7 @@ func (c *Clickhouse) getTransaction(id string) (*TransactionInfo, error) {
 	}
 
 	if err := rows.Scan(&inf.Model.ID, &inf.Model.CreatedAt, &inf.Model.UpdatedAt,
+		&inf.TransactionId,
 		&inf.ApplicationId, &inf.ParentId, &inf.MetaHost, &inf.MetaPath,
 		&inf.MetaMethod, &inf.Name, &inf.StartTime, &inf.EndTime,
 		&inf.TransactionStatus, &inf.TransactionType, &inf.Error); err != nil {
@@ -240,11 +247,16 @@ func (c *Clickhouse) getTransaction(id string) (*TransactionInfo, error) {
 }
 
 func (c *Clickhouse) GetTransactionChildren(transactionId, cyclicalLoopCheck string) ([]*TransactionInfo, error) {
-	if strings.Contains(cyclicalLoopCheck, transactionId) {
+	fmt.Println("lol", transactionId, " ", cyclicalLoopCheck)
+	matched, err := regexp.MatchString("\\b"+transactionId+"\\b", cyclicalLoopCheck)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	if matched {
 		return nil, nil
 	}
-
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM transaction_info WHERE "parent_id" = ?`, transactionInfoFields), transactionId)
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM "%s" WHERE "parent_id" = ?`,
+		transactionInfoFields, dbTransactionInfoCollection), transactionId)
 	if err != nil {
 		return nil, err
 	}
@@ -298,8 +310,9 @@ func (c *Clickhouse) GetTransactionGroup(request *apiPb.GetTransactionGroupReque
 		dbTransactionInfoCollection,
 	)
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM transaction_info WHERE %s AND %s AND %s AND %s GROUP BY %s`,
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM "%s" WHERE %s AND %s AND %s AND %s GROUP BY %s`,
 		selection,
+		dbTransactionInfoCollection,
 		applicationIdFilterString,
 		applicationStartTimeFilterString,
 		getTransactionTypeWhere(request.GetType()),
