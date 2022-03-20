@@ -154,18 +154,13 @@ func convertToSnapshot(request *apiPb.SchedulerSnapshot, schedulerID string) (*S
 func ConvertFromSnapshots(snapshots []*Snapshot) []*apiPb.SchedulerSnapshot {
 	var res []*apiPb.SchedulerSnapshot
 	for _, v := range snapshots {
-		snap, err := convertFromSnapshot(v)
-		if err == nil {
-			res = append(res, snap)
-		}
-		if err != nil {
-			logger.Error(err.Error())
-		}
+		snap := convertFromSnapshot(v)
+		res = append(res, snap)
 	}
 	return res
 }
 
-func convertFromSnapshot(snapshot *Snapshot) (*apiPb.SchedulerSnapshot, error) {
+func convertFromSnapshot(snapshot *Snapshot) *apiPb.SchedulerSnapshot {
 	//Skip error, because this convertion is always correct (snapshot.MetaStartTime < maximum possible value)
 	startTime, _ := ptypes.TimestampProto(time.Unix(0, snapshot.MetaStartTime))
 	endTime, _ := ptypes.TimestampProto(time.Unix(0, snapshot.MetaEndTime))
@@ -186,11 +181,12 @@ func convertFromSnapshot(snapshot *Snapshot) (*apiPb.SchedulerSnapshot, error) {
 
 	str := &_struct.Value{}
 	if err := jsonpb.Unmarshal(bytes.NewReader(snapshot.MetaValue), str); err != nil {
-		return res, nil
+		logger.Error(err.Error())
+		return res
 	}
 
 	res.Meta.Value = str
-	return res, nil
+	return res
 }
 
 func convertFromUptimeResult(uptimeResult *UptimeResult, countAll int64) *apiPb.GetSchedulerUptimeResponse {

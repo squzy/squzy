@@ -10,9 +10,16 @@ import (
 	"time"
 )
 
-func Test_convertFromIncidentHistory(t *testing.T) {
+func Test_convertToIncident(t *testing.T) {
 	t.Run("Should: return nil", func(t *testing.T) {
 		res := convertToIncident(nil, time.Time{})
+		assert.Nil(t, res)
+	})
+}
+
+func Test_convertFromIncidentHistory(t *testing.T) {
+	t.Run("Should: return nil", func(t *testing.T) {
+		res := convertFromIncidentHistory(nil)
 		assert.Nil(t, res)
 	})
 }
@@ -27,6 +34,11 @@ func Test_convertToIncidentHistory(t *testing.T) {
 		res, _, _ := convertToIncidentHistories([]*apiPb.Incident_HistoryItem{{
 			Timestamp: &tspb.Timestamp{Seconds: int64(maxValidSeconds), Nanos: 0},
 		}})
+		assert.Equal(t, 0, len(res))
+	})
+	t.Run("Should: return empty res", func(t *testing.T) {
+		res, _, _ := convertToIncidentHistories(nil)
+		assert.Nil(t, res)
 		assert.Equal(t, 0, len(res))
 	})
 }
@@ -185,6 +197,18 @@ func TestConvertToClickhouseStatRequest(t *testing.T) {
 			Time: ptypes.TimestampNow(),
 		})
 		assert.NoError(t, err)
+	})
+}
+
+func TestConvertFromClickhouseStatRequests(t *testing.T) {
+	t.Run("Test: error", func(t *testing.T) {
+		res := ConvertFromClickhouseStatRequests([]*StatRequest{
+			{
+				Time: time.Date(
+					-1000, 11, 17, 20, 34, 58, 651387237, time.UTC),
+			},
+		})
+		assert.Equal(t, 0, len(res))
 	})
 }
 
@@ -474,6 +498,22 @@ func TestGetThroughput(t *testing.T) {
 	t.Run("Test: error", func(t *testing.T) {
 		res := getThroughput(0, 10, 10)
 		assert.NotNil(t, res)
+	})
+}
+
+func TestConvertFromTransaction(t *testing.T) {
+	t.Run("Test: empty meta", func(t *testing.T) {
+		res := convertFromTransaction(&TransactionInfo{})
+		assert.Nil(t, res.Meta)
+	})
+	t.Run("Test: empty error", func(t *testing.T) {
+		res := convertFromTransaction(&TransactionInfo{
+			MetaHost:   "a",
+			MetaPath:   "b",
+			MetaMethod: "c",
+			Error:      "",
+		})
+		assert.Nil(t, res.Error)
 	})
 }
 
