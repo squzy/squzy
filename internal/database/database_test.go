@@ -18,8 +18,8 @@ func TestNew(t *testing.T) {
 
 func TestNewPostgres(t *testing.T) {
 	t.Run("Should: not return nil", func(t *testing.T) {
-		db, err := gorm.Open("postgres", "user=gorm password=gorm DB.name=gorm port=9920 sslmode=disable")
-		err = os.Setenv("DB_TYPE", "postgres")
+		db, _ := gorm.Open("postgres", "user=gorm password=gorm DB.name=gorm port=9920 sslmode=disable")
+		err := os.Setenv("DB_TYPE", "postgres")
 		if err != nil {
 			assert.Fail(t, err.Error())
 		}
@@ -33,6 +33,9 @@ func TestNewPostgres(t *testing.T) {
 func TestNewPostgresErr(t *testing.T) {
 	t.Run("Should: not return nil", func(t *testing.T) {
 		db, _, err := sqlmock.New()
+		if err != nil {
+			assert.Fail(t, err.Error())
+		}
 		err = os.Setenv("DB_TYPE", "postgres")
 		if err != nil {
 			assert.Fail(t, err.Error())
@@ -49,6 +52,10 @@ func TestNewClichouse(t *testing.T) {
 		if err != nil {
 			assert.Fail(t, err.Error())
 		}
+		err = os.Setenv("DB_TYPE", "clickhouse")
+		if err != nil {
+			assert.Fail(t, err.Error())
+		}
 
 		s, err := New(db)
 		assert.Nil(t, err)
@@ -58,7 +65,9 @@ func TestNewClichouse(t *testing.T) {
 
 func TestNewClichouseErr(t *testing.T) {
 	t.Run("Should: not return nil", func(t *testing.T) {
-		db, err := gorm.Open("postgres", "user=gorm password=gorm DB.name=gorm port=9920 sslmode=disable")
+		db, _ := gorm.Open("postgres", "user=gorm password=gorm DB.name=gorm port=9920 sslmode=disable")
+
+		err := os.Setenv("DB_TYPE", "clickhouse")
 		if err != nil {
 			assert.Fail(t, err.Error())
 		}
