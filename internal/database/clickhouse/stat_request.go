@@ -259,7 +259,7 @@ func (c *Clickhouse) insertStatRequestsDiskInfo(now time.Time, sr_id clickhouse.
 		return err
 	}
 
-	q := fmt.Sprintf(`INSERT INTO "%s" (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7, $8)`, dbStatRequestDiskInfoCollection, statRequestsDiskInfoFields)
+	q := fmt.Sprintf(`INSERT INTO "%s" (%s) VALUES ($0, $1, $2, $3, $4, $5, $6, $7)`, dbStatRequestDiskInfoCollection, statRequestsDiskInfoFields)
 	_, err = tx.Exec(q,
 		clickhouse.UUID(uuid.New().String()),
 		now,
