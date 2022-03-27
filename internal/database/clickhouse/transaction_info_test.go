@@ -2,6 +2,7 @@ package clickhouse
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
@@ -42,18 +43,48 @@ func (s *SuiteTransInfo) Test_InsertTransactionInfo() {
 	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbTransactionInfoCollection)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnResult(sqlmock.NewResult(0, 1))
-	
+
 	s.mock.ExpectCommit()
 
 	correctTime := timestamp.Now()
 	err := clickTransactionInfo.InsertTransactionInfo(&apiPb.TransactionInfo{
 		StartTime: correctTime,
 		EndTime:   correctTime,
-		Error: &apiPb.TransactionInfo_Error{
-			Message: "d",
-		},
+		Error:     &apiPb.TransactionInfo_Error{},
 	})
 	require.NoError(s.T(), err)
+}
+
+func (s *SuiteTransInfo) Test_InsertTransactionInfo_insertTransactionError() {
+	s.mock.ExpectBegin()
+	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbTransactionInfoCollection)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnError(errors.New("Test_InsertTransactionInfoError"))
+
+	correctTime := timestamp.Now()
+	err := clickTransactionInfo.InsertTransactionInfo(&apiPb.TransactionInfo{
+		StartTime: correctTime,
+		EndTime:   correctTime,
+		Error:     &apiPb.TransactionInfo_Error{},
+	})
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteTransInfo) Test_InsertTransactionInfo_commitError() {
+	s.mock.ExpectBegin()
+	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbTransactionInfoCollection)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	s.mock.ExpectCommit().
+		WillReturnError(errors.New("Test_InsertTransactionInfo_commitError"))
+
+	correctTime := timestamp.Now()
+	err := clickTransactionInfo.InsertTransactionInfo(&apiPb.TransactionInfo{
+		StartTime: correctTime,
+		EndTime:   correctTime,
+		Error:     &apiPb.TransactionInfo_Error{},
+	})
+	require.Error(s.T(), err)
 }
 
 func TestClickhouse_InsertTransactionInfo(t *testing.T) {
@@ -99,6 +130,36 @@ func (s *SuiteTransInfo) Test_GetTransactionInfo() {
 			},
 		})
 	require.NoError(s.T(), err)
+}
+
+func (s *SuiteTransInfo) Test_GetTransactionInfo_scanError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbTransactionInfoCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, transactionInfoFields, dbTransactionInfoCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "updated_at", "transaction_id", "application_id", "parent_id", "meta_host", "meta_path", "meta_method", "name", "start_time", "end_time", "transaction_status", "transaction_type"}).
+		AddRow("1", time.Now(), time.Now(), "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, _, err := clickTransactionInfo.GetTransactionInfo(
+		&apiPb.GetTransactionsRequest{
+			ApplicationId: id,
+			Host:          &wrappers.StringValue{Value: "q"},
+			Sort: &apiPb.SortingTransactionList{
+				SortBy:    0,
+				Direction: 0,
+			},
+		})
+	require.Error(s.T(), err)
 }
 
 func (s *SuiteTransInfo) Test_GetTransactionInfo_CountError() {
@@ -291,7 +352,7 @@ func (s *SuiteTransInfo) Test_GetTransactionGroup_Error() {
 	require.Error(s.T(), err)
 }
 
-func TestClickhouse_GetTransactionGroup(t *testing.T) {
+func TestClickhouse_GetTransactionGroup_timeError(t *testing.T) {
 	//Time for invalid timestamp
 	maxValidSeconds := 253402300800
 	t.Run("Should: return error", func(t *testing.T) {
@@ -304,6 +365,122 @@ func TestClickhouse_GetTransactionGroup(t *testing.T) {
 			})
 		assert.Error(t, err)
 	})
+}
+
+func (s *SuiteTransInfo) Test_GetTransactionGroup_scanError() {
+	query := fmt.Sprintf(
+		`SELECT "%s"."name" as "groupName", COUNT("%s"."name") as "count", COUNT(CASE WHEN "transaction_info"."transaction_status" = '1' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."end_time"-"%s"."start_time") as "latency", min("transaction_info"."end_time"-"transaction_info"."start_time") as "minTime", max("transaction_info"."end_time"-"transaction_info"."start_time") as "maxTime", min("%s"."end_time") as "lowTime"`,
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection,
+		dbTransactionInfoCollection)
+	rows := sqlmock.NewRows([]string{"groupName", "count"}).AddRow("1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, err := clickTransactionInfo.GetTransactionGroup(&apiPb.GetTransactionGroupRequest{
+		ApplicationId: "1",
+		GroupType:     2,
+	})
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteTransInfo) Test_countTransactions_nextError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbTransactionInfoCollection)
+	rows := sqlmock.NewRows([]string{})
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	res, err := clickTransactionInfo.countTransactions(
+		&apiPb.GetTransactionsRequest{
+			ApplicationId: id,
+			Type:          1,
+			Status:        1,
+			Host:          &wrappers.StringValue{Value: "q"},
+		}, 0, 0)
+	require.Equal(s.T(), int64(0), res)
+	require.Nil(s.T(), err)
+}
+
+func (s *SuiteTransInfo) Test_countTransactions_scanError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbTransactionInfoCollection)
+	rows := sqlmock.NewRows([]string{"count", "a"}).AddRow("1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, err := clickTransactionInfo.countTransactions(
+		&apiPb.GetTransactionsRequest{
+			ApplicationId: id,
+			Type:          1,
+			Status:        1,
+			Host:          &wrappers.StringValue{Value: "q"},
+		}, 0, 0)
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteTransInfo) Test_GetTransactionChildren_scanError() {
+	var (
+		id = "1"
+	)
+
+	rows := sqlmock.NewRows([]string{"a"}).AddRow("1")
+	query := fmt.Sprintf(`SELECT %s FROM "%s"`, transactionInfoFields, dbTransactionInfoCollection)
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id).
+		WillReturnRows(rows)
+
+	_, err := clickTransactionInfo.GetTransactionChildren("1", "")
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteTransInfo) Test_GetTransactionChildren_regexError() {
+	_, err := clickTransactionInfo.GetTransactionChildren(`^\/(?!\/)(.*?)`, "")
+	fmt.Println(err)
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteTransInfo) Test_getTransaction_nextError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT %s FROM "%s"`, transactionInfoFields, dbTransactionInfoCollection)
+	rows := sqlmock.NewRows([]string{})
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id).
+		WillReturnRows(rows)
+
+	res, err := clickTransactionInfo.getTransaction("1")
+	require.Nil(s.T(), res)
+	require.Nil(s.T(), err)
+}
+
+func (s *SuiteTransInfo) Test_getTransaction_scanError() {
+	var (
+		id = "1"
+	)
+
+	rows := sqlmock.NewRows([]string{"a"}).AddRow("1")
+	query := fmt.Sprintf(`SELECT %s FROM "%s"`, transactionInfoFields, dbTransactionInfoCollection)
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id).
+		WillReturnRows(rows)
+
+	_, err := clickTransactionInfo.getTransaction("1")
+
+	require.Error(s.T(), err)
 }
 
 func Test_getTransactionDirection(t *testing.T) {

@@ -43,6 +43,13 @@ func Test_convertToIncidentHistory(t *testing.T) {
 	})
 }
 
+func Test_convertToIncidentHistoryErr(t *testing.T) {
+	t.Run("Should: return empty res", func(t *testing.T) {
+		res := convertToIncidentHistory(nil)
+		assert.Nil(t, res)
+	})
+}
+
 func TestConvertToSnapshot(t *testing.T) {
 	correctTime, _ := ptypes.TimestampProto(time.Now())
 	t.Run("Test: error", func(t *testing.T) {

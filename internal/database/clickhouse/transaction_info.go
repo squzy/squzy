@@ -339,11 +339,6 @@ func (c *Clickhouse) GetTransactionGroup(request *apiPb.GetTransactionGroupReque
 		groupResults = append(groupResults, res)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return nil, errorDataBase
-	}
-
 	return convertFromGroupResult(groupResults, timeTo), nil
 }
 

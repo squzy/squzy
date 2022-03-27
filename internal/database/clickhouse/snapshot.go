@@ -250,15 +250,6 @@ func (c *Clickhouse) countSnapshotsUptime(request *apiPb.GetSchedulerUptimeReque
 		}, errorDataBase
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.Error(err.Error())
-		return UptimeResult{
-			Count:   -1,
-			Latency: "",
-		}, errorDataBase
-
-	}
-
 	return result, nil
 }
 
