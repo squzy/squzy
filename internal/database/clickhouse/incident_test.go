@@ -17,9 +17,6 @@ import (
 )
 
 var (
-	dbIncidentCollection        = "incidents"
-	dbIncidentHistoryCollection = "incidents_history"
-
 	wdbIncident, _      = sql.Open("clickhouse", "tcp://user:password@lkl:00/debug=true&clicks?read_timeout=10&write_timeout=10")
 	clickhWrongIncident = &Clickhouse{
 		wdbIncident,

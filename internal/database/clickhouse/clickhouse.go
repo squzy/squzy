@@ -21,6 +21,8 @@ const (
 	dbStatRequestMemoryInfoSwapCollection = "stat_requests_memory_info_swap"
 	dbStatRequestDiskInfoCollection       = "stat_requests_disk_info"
 	dbStatRequestNetInfoCollection        = "stat_requests_net_info"
+	dbIncidentCollection                  = "incidents"
+	dbIncidentHistoryCollection           = "incidents_history"
 )
 
 var (
@@ -40,8 +42,7 @@ type Model struct {
 }
 
 func (c *Clickhouse) Migrate() error {
-	_, err := c.Db.Exec(`
-			CREATE TABLE IF NOT EXISTS snapshots (
+	_, err := c.Db.Exec(`CREATE TABLE IF NOT EXISTS snapshots (
 				id UUID,
 				created_at DateTime,
 				updated_at DateTime,
@@ -52,41 +53,35 @@ func (c *Clickhouse) Migrate() error {
 				meta_start_time   Int64,
 				meta_end_time   Int64,
 				meta_value  Array(UInt8)
-			) ENGINE = MergeTree ORDER BY tuple()
-		`)
+			) ENGINE = MergeTree ORDER BY tuple()`)
 	if err != nil {
 		return err
 	}
 
-	_, err = c.Db.Exec(`
-			CREATE TABLE IF NOT EXISTS stat_requests (
+	_, err = c.Db.Exec(`CREATE TABLE IF NOT EXISTS stat_requests (
 				id UUID,
 				created_at DateTime,
 				updated_at DateTime,
 				agent_id String,
 				agent_name String,
 				time DateTime
-			) ENGINE = MergeTree ORDER BY tuple()
-		`)
+			) ENGINE = MergeTree ORDER BY tuple()`)
 	if err != nil {
 		return err
 	}
 
-	_, err = c.Db.Exec(`
-			CREATE TABLE IF NOT EXISTS stat_requests_cpu_info (
+	_, err = c.Db.Exec(`CREATE TABLE IF NOT EXISTS stat_requests_cpu_info (
 				id UUID,
 				created_at DateTime,
 				updated_at DateTime,
 				stat_request_id UUID,
 				load Float64
-			) ENGINE = MergeTree ORDER BY tuple()
-		`)
+			) ENGINE = MergeTree ORDER BY tuple()`)
 	if err != nil {
 		return err
 	}
 
-	_, err = c.Db.Exec(`
-			CREATE TABLE IF NOT EXISTS stat_requests_memory_info_mem (
+	_, err = c.Db.Exec(`CREATE TABLE IF NOT EXISTS stat_requests_memory_info_mem (
 				id UUID,
 				created_at DateTime,
 				updated_at DateTime,
@@ -97,13 +92,11 @@ func (c *Clickhouse) Migrate() error {
 				free UInt64,
 				shared UInt64,
 				used_percent Float64
-			) ENGINE = MergeTree ORDER BY tuple()
-		`)
+			) ENGINE = MergeTree ORDER BY tuple()`)
 	if err != nil {
 		return err
 	}
-	_, err = c.Db.Exec(`
-			CREATE TABLE IF NOT EXISTS stat_requests_memory_info_swap (
+	_, err = c.Db.Exec(`CREATE TABLE IF NOT EXISTS stat_requests_memory_info_swap (
 				id UUID,
 				created_at DateTime,
 				updated_at DateTime,
@@ -114,14 +107,12 @@ func (c *Clickhouse) Migrate() error {
 				free UInt64,
 				shared UInt64,
 				used_percent Float64
-			) ENGINE = MergeTree ORDER BY tuple()
-		`)
+			) ENGINE = MergeTree ORDER BY tuple()`)
 	if err != nil {
 		return err
 	}
 
-	_, err = c.Db.Exec(`
-			CREATE TABLE IF NOT EXISTS stat_requests_disk_info (
+	_, err = c.Db.Exec(`CREATE TABLE IF NOT EXISTS stat_requests_disk_info (
 				id UUID,
 				created_at DateTime,
 				updated_at DateTime,
@@ -132,14 +123,12 @@ func (c *Clickhouse) Migrate() error {
 				used UInt64,
 				free UInt64,
 				used_percent Float64
-			) ENGINE = MergeTree ORDER BY tuple()
-		`)
+			) ENGINE = MergeTree ORDER BY tuple()`)
 	if err != nil {
 		return err
 	}
 
-	_, err = c.Db.Exec(`
-			CREATE TABLE IF NOT EXISTS stat_requests_net_info (
+	_, err = c.Db.Exec(`CREATE TABLE IF NOT EXISTS stat_requests_net_info (
 				id UUID,
 				created_at DateTime,
 				updated_at DateTime,
@@ -153,14 +142,12 @@ func (c *Clickhouse) Migrate() error {
 				err_out UInt64,
 				drop_in UInt64,
 				drop_out UInt64
-			) ENGINE = MergeTree ORDER BY tuple();
-		`)
+			) ENGINE = MergeTree ORDER BY tuple();`)
 	if err != nil {
 		return err
 	}
 
-	_, err = c.Db.Exec(`
-		CREATE TABLE IF NOT EXISTS transaction_info (
+	_, err = c.Db.Exec(`CREATE TABLE IF NOT EXISTS transaction_info (
 					id UUID,
 			    	created_at DateTime,
 			    	updated_at DateTime,
@@ -176,14 +163,12 @@ func (c *Clickhouse) Migrate() error {
 					transaction_status Int32,
 					transaction_type Int32,
 					error String
-				) ENGINE = MergeTree ORDER BY tuple()
-			`)
+				) ENGINE = MergeTree ORDER BY tuple()`)
 	if err != nil {
 		return err
 	}
 
-	_, err = c.Db.Exec(`
-			CREATE TABLE IF NOT EXISTS incidents (
+	_, err = c.Db.Exec(`CREATE TABLE IF NOT EXISTS incidents (
 			    id UUID,
 			    created_at DateTime,
 			    updated_at DateTime,
@@ -192,22 +177,19 @@ func (c *Clickhouse) Migrate() error {
 				rule_id String,
 				start_time Int64,
 				end_time Int64
-			) ENGINE = ReplacingMergeTree(updated_at) ORDER BY tuple(incident_id)
-		`)
+			) ENGINE = ReplacingMergeTree(updated_at) ORDER BY tuple(incident_id)`)
 	if err != nil {
 		return err
 	}
 
-	_, err = c.Db.Exec(`
-			CREATE TABLE IF NOT EXISTS incidents_history (
+	_, err = c.Db.Exec(`CREATE TABLE IF NOT EXISTS incidents_history (
 			    id UUID,
 			    created_at DateTime,
 			    updated_at DateTime,
 				timestamp Int64,
 				incident_id String,
 				status Int32
-			) ENGINE = StripeLog
-		`)
+			) ENGINE = StripeLog`)
 	if err != nil {
 		return err
 	}

@@ -247,7 +247,6 @@ func (c *Clickhouse) getTransaction(id string) (*TransactionInfo, error) {
 }
 
 func (c *Clickhouse) GetTransactionChildren(transactionId, cyclicalLoopCheck string) ([]*TransactionInfo, error) {
-	fmt.Println("lol", transactionId, " ", cyclicalLoopCheck)
 	matched, err := regexp.MatchString("\\b"+transactionId+"\\b", cyclicalLoopCheck)
 	if err != nil {
 		logger.Error(err.Error())
