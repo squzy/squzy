@@ -153,6 +153,7 @@ func (s *SuiteStatRequest) Test_InsertStatRequest_insertStatRequestCPUInfoError(
 	})
 	require.Error(s.T(), err)
 }
+
 func (s *SuiteStatRequest) Test_InsertStatRequest_insertStatRequestsMemoryInfoMemError() {
 	s.mock.ExpectBegin()
 	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestCollection)).
@@ -363,11 +364,6 @@ func (s *SuiteStatRequest) Test_insertStatRequest_commitError() {
 }
 
 func (s *SuiteStatRequest) Test_insertStatRequestCPUInfo_error() {
-	s.mock.ExpectBegin()
-	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestCpuInfoCollection)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnError(errors.New("Test_insertStatRequestCPUInfo_error"))
-
 	srId := clickhouse.UUID(uuid.New().String())
 	err := clickStatRequest.insertStatRequestCPUInfo(time.Now(), srId, &CPUInfo{})
 	require.Error(s.T(), err)
@@ -386,35 +382,12 @@ func (s *SuiteStatRequest) Test_insertStatRequestCPUInfo_commitError() {
 }
 
 func (s *SuiteStatRequest) Test_insertStatRequestsMemoryInfoMem_error() {
-	s.mock.ExpectBegin()
-	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestMemoryInfoMemCollection)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnError(errors.New("Test_insertStatRequestsMemoryInfoMem_error"))
-
 	srId := clickhouse.UUID(uuid.New().String())
 	err := clickStatRequest.insertStatRequestsMemoryInfoMem(time.Now(), srId, &MemoryInfo{
 		Model:         Model{},
 		StatRequestID: "",
-		Mem: &MemoryMem{
-			Model:         Model{},
-			StatRequestID: "",
-			MemoryInfoID:  "",
-			Total:         0,
-			Used:          0,
-			Free:          0,
-			Shared:        0,
-			UsedPercent:   0,
-		},
-		Swap: &MemorySwap{
-			Model:         Model{},
-			StatRequestID: "",
-			MemoryInfoID:  "",
-			Total:         0,
-			Used:          0,
-			Free:          0,
-			Shared:        0,
-			UsedPercent:   0,
-		},
+		Mem:           &MemoryMem{},
+		Swap:          &MemorySwap{},
 	})
 	require.Error(s.T(), err)
 }
@@ -430,60 +403,19 @@ func (s *SuiteStatRequest) Test_insertStatRequestsMemoryInfoMem_commitError() {
 	err := clickStatRequest.insertStatRequestsMemoryInfoMem(time.Now(), srId, &MemoryInfo{
 		Model:         Model{},
 		StatRequestID: "",
-		Mem: &MemoryMem{
-			Model:         Model{},
-			StatRequestID: "",
-			MemoryInfoID:  "",
-			Total:         0,
-			Used:          0,
-			Free:          0,
-			Shared:        0,
-			UsedPercent:   0,
-		},
-		Swap: &MemorySwap{
-			Model:         Model{},
-			StatRequestID: "",
-			MemoryInfoID:  "",
-			Total:         0,
-			Used:          0,
-			Free:          0,
-			Shared:        0,
-			UsedPercent:   0,
-		},
+		Mem:           &MemoryMem{},
+		Swap:          &MemorySwap{},
 	})
 	require.Error(s.T(), err)
 }
 
 func (s *SuiteStatRequest) Test_insertStatRequestsMemoryInfoSwap_error() {
-	s.mock.ExpectBegin()
-	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestMemoryInfoSwapCollection)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnError(errors.New("Test_insertStatRequestsMemoryInfoSwap_error"))
-
 	srId := clickhouse.UUID(uuid.New().String())
 	err := clickStatRequest.insertStatRequestsMemoryInfoSwap(time.Now(), srId, &MemoryInfo{
 		Model:         Model{},
 		StatRequestID: "",
-		Mem: &MemoryMem{
-			Model:         Model{},
-			StatRequestID: "",
-			MemoryInfoID:  "",
-			Total:         0,
-			Used:          0,
-			Free:          0,
-			Shared:        0,
-			UsedPercent:   0,
-		},
-		Swap: &MemorySwap{
-			Model:         Model{},
-			StatRequestID: "",
-			MemoryInfoID:  "",
-			Total:         0,
-			Used:          0,
-			Free:          0,
-			Shared:        0,
-			UsedPercent:   0,
-		},
+		Mem:           &MemoryMem{},
+		Swap:          &MemorySwap{},
 	})
 	require.Error(s.T(), err)
 }
@@ -499,36 +431,13 @@ func (s *SuiteStatRequest) Test_insertStatRequestsMemoryInfoSwap_commitError() {
 	err := clickStatRequest.insertStatRequestsMemoryInfoSwap(time.Now(), srId, &MemoryInfo{
 		Model:         Model{},
 		StatRequestID: "",
-		Mem: &MemoryMem{
-			Model:         Model{},
-			StatRequestID: "",
-			MemoryInfoID:  "",
-			Total:         0,
-			Used:          0,
-			Free:          0,
-			Shared:        0,
-			UsedPercent:   0,
-		},
-		Swap: &MemorySwap{
-			Model:         Model{},
-			StatRequestID: "",
-			MemoryInfoID:  "",
-			Total:         0,
-			Used:          0,
-			Free:          0,
-			Shared:        0,
-			UsedPercent:   0,
-		},
+		Mem:           &MemoryMem{},
+		Swap:          &MemorySwap{},
 	})
 	require.Error(s.T(), err)
 }
 
 func (s *SuiteStatRequest) Test_insertStatRequestsDiskInfo_error() {
-	s.mock.ExpectBegin()
-	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestDiskInfoCollection)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnError(errors.New("Test_insertStatRequestsDiskInfo_error"))
-
 	srId := clickhouse.UUID(uuid.New().String())
 	err := clickStatRequest.insertStatRequestsDiskInfo(time.Now(), srId, &DiskInfo{})
 	require.Error(s.T(), err)
@@ -547,11 +456,6 @@ func (s *SuiteStatRequest) Test_insertStatRequestsDiskInfo_commitError() {
 }
 
 func (s *SuiteStatRequest) Test_insertStatRequestsNetInfo_error() {
-	s.mock.ExpectBegin()
-	s.mock.ExpectExec(fmt.Sprintf(`INSERT INTO "%s"`, dbStatRequestNetInfoCollection)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnError(errors.New("Test_insertStatRequestsNetInfo_error"))
-
 	srId := clickhouse.UUID(uuid.New().String())
 	err := clickStatRequest.insertStatRequestsNetInfo(time.Now(), srId, &NetInfo{
 		Model:         Model{},
@@ -684,20 +588,263 @@ func TestClickhouse_GetStatRequest(t *testing.T) {
 	})
 }
 
-//func (s *SuiteStatRequest) Test_getStatRequest() {
-//	var (
-//		id = "1"
-//	)
-//
-//	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
-//	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
-//	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-//		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
-//		WillReturnRows(rows)
-//
-//	_, _, err := clickStatRequest.getStatRequests(id, nil, nil)
-//	require.NoError(s.T(), err)
-//}
+func (s *SuiteStatRequest) Test_GetStatRequest_StatRequestScanError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestFields, dbStatRequestCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "agent_id", "agent_name", "time", "a"}).
+		AddRow("1", time.Now(), "1", "1", time.Now(), "a")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, _, err := clickStatRequest.getStatRequests(id, nil, nil)
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteStatRequest) Test_GetStatRequest_getStatRequestsCpuInfoError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestFields, dbStatRequestCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "agent_id", "agent_name", "time"}).
+		AddRow("1", time.Now(), "1", "1", time.Now())
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsCpuInfoFields, dbStatRequestCpuInfoCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "load"}).
+		AddRow("1", time.Now(), "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnError(errors.New("Test_GetStatRequest_getStatRequestsCpuInfoError"))
+
+	_, _, err := clickStatRequest.getStatRequests(id, nil, nil)
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteStatRequest) Test_GetStatRequest_getStatRequestsMemoryInfoMem() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestFields, dbStatRequestCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "agent_id", "agent_name", "time"}).
+		AddRow("1", time.Now(), "1", "1", time.Now())
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsCpuInfoFields, dbStatRequestCpuInfoCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "load"}).
+		AddRow("1", time.Now(), "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsMemoryInfoFields, dbStatRequestMemoryInfoMemCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "memory_info_id", "total", "used", "free", "shared", "used_percent"}).
+		AddRow("1", time.Now(), "1", "1", "1", "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnError(errors.New("Test_GetStatRequest_getStatRequestsMemoryInfoMem"))
+
+	_, _, err := clickStatRequest.getStatRequests(id, nil, nil)
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteStatRequest) Test_GetStatRequest_getStatRequestsMemoryInfoSwap() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestFields, dbStatRequestCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "agent_id", "agent_name", "time"}).
+		AddRow("1", time.Now(), "1", "1", time.Now())
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsCpuInfoFields, dbStatRequestCpuInfoCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "load"}).
+		AddRow("1", time.Now(), "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsMemoryInfoFields, dbStatRequestMemoryInfoMemCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "memory_info_id", "total", "used", "free", "shared", "used_percent"}).
+		AddRow("1", time.Now(), "1", "1", "1", "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsMemoryInfoFields, dbStatRequestMemoryInfoSwapCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "memory_info_id", "total", "used", "free", "shared", "used_percent"}).
+		AddRow("1", time.Now(), "1", "1", "1", "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WillReturnError(errors.New("Test_GetStatRequest_getStatRequestsMemoryInfoSwap"))
+
+	_, _, err := clickStatRequest.getStatRequests(id, nil, nil)
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteStatRequest) Test_GetStatRequest_getStatRequestsDiskInfo() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestFields, dbStatRequestCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "agent_id", "agent_name", "time"}).
+		AddRow("1", time.Now(), "1", "1", time.Now())
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsCpuInfoFields, dbStatRequestCpuInfoCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "load"}).
+		AddRow("1", time.Now(), "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsMemoryInfoFields, dbStatRequestMemoryInfoMemCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "memory_info_id", "total", "used", "free", "shared", "used_percent"}).
+		AddRow("1", time.Now(), "1", "1", "1", "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsMemoryInfoFields, dbStatRequestMemoryInfoSwapCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "memory_info_id", "total", "used", "free", "shared", "used_percent"}).
+		AddRow("1", time.Now(), "1", "1", "1", "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsDiskInfoFields, dbStatRequestDiskInfoCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "name", "total", "used", "free", "used_percent"}).
+		AddRow("1", time.Now(), "1", "1", "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WillReturnError(errors.New("Test_GetStatRequest_getStatRequestsDiskInfo"))
+
+	_, _, err := clickStatRequest.getStatRequests(id, nil, nil)
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteStatRequest) Test_GetStatRequest_getStatRequestsNetInfo() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestFields, dbStatRequestCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "agent_id", "agent_name", "time"}).
+		AddRow("1", time.Now(), "1", "1", time.Now())
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsCpuInfoFields, dbStatRequestCpuInfoCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "load"}).
+		AddRow("1", time.Now(), "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsMemoryInfoFields, dbStatRequestMemoryInfoMemCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "memory_info_id", "total", "used", "free", "shared", "used_percent"}).
+		AddRow("1", time.Now(), "1", "1", "1", "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsMemoryInfoFields, dbStatRequestMemoryInfoSwapCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "memory_info_id", "total", "used", "free", "shared", "used_percent"}).
+		AddRow("1", time.Now(), "1", "1", "1", "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsDiskInfoFields, dbStatRequestDiskInfoCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "name", "total", "used", "free", "used_percent"}).
+		AddRow("1", time.Now(), "1", "1", "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM "%s"`, statRequestsNetInfoFields, dbStatRequestNetInfoCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "stat_request_id", "name", "bytes_sent", "bytes_recv", "packets_sent", "packets_recv", "err_in", "err_out", "drop_in", "drop_out"}).
+		AddRow("1", time.Now(), "1", "1", "1", "1", "1", "1", "1", "1", "1", "1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg()).
+		WillReturnError(errors.New("Test_GetStatRequest_getStatRequestsNetInfo"))
+
+	_, _, err := clickStatRequest.getStatRequests(id, nil, nil)
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteStatRequest) Test_countStatRequests_nextError() {
+	var (
+		id = "1"
+	)
+	_, err := clickStatRequest.countStatRequests(id, time.Now(), time.Now())
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteStatRequest) Test_countStatRequests_selectError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbStatRequestCollection)
+	rows := sqlmock.NewRows([]string{"count", "a"}).AddRow("1", "a")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, err := clickStatRequest.countStatRequests(id, time.Now(), time.Now())
+	require.Error(s.T(), err)
+}
 
 func (s *SuiteStatRequest) Test_GetCpuInfo() {
 	var (
