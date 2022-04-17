@@ -163,7 +163,6 @@ func (c *Clickhouse) countSnapshots(request *apiPb.GetSchedulerInformationReques
 		logger.Error(err.Error())
 		return -1, errorDataBase
 	}
-
 	return count, nil
 }
 

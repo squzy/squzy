@@ -2,6 +2,7 @@ package clickhouse
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
@@ -87,6 +88,28 @@ func TestClickhouse_InsertSnapshots(t *testing.T) {
 	})
 }
 
+func (s *SuiteSnapshot) Test_InsertSnapshot_Error() {
+	query := fmt.Sprintf(`INSERT INTO "%s" (%s)`, dbSnapshotCollection, snapshotFields)
+	s.mock.ExpectBegin()
+	s.mock.ExpectExec(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnError(errors.New("r"))
+
+	err := clickSnapshot.insertSnapshot(time.Now(), &Snapshot{})
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteSnapshot) Test_InsertSnapshot_commitError() {
+	query := fmt.Sprintf(`INSERT INTO "%s" (%s)`, dbSnapshotCollection, snapshotFields)
+	s.mock.ExpectBegin()
+	s.mock.ExpectExec(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	s.mock.ExpectCommit().WillReturnError(errors.New("Test_InsertSnapshot_commitError"))
+	err := clickSnapshot.insertSnapshot(time.Now(), &Snapshot{})
+	require.Error(s.T(), err)
+}
+
 func (s *SuiteSnapshot) Test_GetSnapshots() {
 	var (
 		id = "1"
@@ -114,6 +137,146 @@ func (s *SuiteSnapshot) Test_GetSnapshots() {
 	})
 	require.NotEqual(s.T(), int32(0), count)
 	require.NoError(s.T(), err)
+}
+
+func (s *SuiteSnapshot) Test_GetSnapshots_scanError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	query = fmt.Sprintf(`SELECT %s FROM %s`, snapshotFields, dbSnapshotCollection)
+	rows = sqlmock.NewRows([]string{"id", "created_at", "updated_at", "scheduler_id", "code", "type", "error", "meta_start_time", "meta_end_time", "meta_value", "a"}).
+		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "error", "1", "1", "1", "a")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	_, count, err := clickSnapshot.GetSnapshots(&apiPb.GetSchedulerInformationRequest{
+		SchedulerId: id,
+		Sort:        &apiPb.SortingSchedulerList{},
+	})
+	require.Equal(s.T(), int32(-1), count)
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteSnapshot) Test_countSnapshots_nextError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{})
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	count, err := clickSnapshot.countSnapshots(&apiPb.GetSchedulerInformationRequest{
+		SchedulerId: id,
+		Sort:        &apiPb.SortingSchedulerList{},
+	}, 0, 0)
+	require.Equal(s.T(), int64(0), count)
+	require.NoError(s.T(), err)
+}
+
+func (s *SuiteSnapshot) Test_countSnapshots_scanError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{"count", "a"}).AddRow("1", "a")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	count, err := clickSnapshot.countSnapshots(&apiPb.GetSchedulerInformationRequest{
+		SchedulerId: id,
+		Sort:        &apiPb.SortingSchedulerList{},
+	}, 0, 0)
+	require.Equal(s.T(), int64(-1), count)
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteSnapshot) Test_countAllSnapshots_nextError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{})
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	count, err := clickSnapshot.countAllSnapshots(&apiPb.GetSchedulerUptimeRequest{
+		SchedulerId: id,
+		TimeRange:   nil,
+	}, 0, 0)
+	require.Equal(s.T(), int64(0), count)
+	require.Nil(s.T(), err)
+}
+
+func (s *SuiteSnapshot) Test_countAllSnapshots_scanError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{"count", "a"}).AddRow("1", "a")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	count, err := clickSnapshot.countAllSnapshots(&apiPb.GetSchedulerUptimeRequest{
+		SchedulerId: id,
+		TimeRange:   nil,
+	}, 0, 0)
+	require.Equal(s.T(), int64(-1), count)
+	require.Error(s.T(), err)
+}
+
+func (s *SuiteSnapshot) Test_countSnapshotsUptime_nextError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{})
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	count, err := clickSnapshot.countAllSnapshots(&apiPb.GetSchedulerUptimeRequest{
+		SchedulerId: id,
+		TimeRange:   nil,
+	}, 0, 0)
+	require.Equal(s.T(), int64(0), count)
+	require.Nil(s.T(), err)
+}
+
+func (s *SuiteSnapshot) Test_countSnapshotsUptime_scanError() {
+	var (
+		id = "1"
+	)
+
+	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{"count", "a"}).AddRow("1", "a")
+	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(rows)
+
+	count, err := clickSnapshot.countAllSnapshots(&apiPb.GetSchedulerUptimeRequest{
+		SchedulerId: id,
+		TimeRange:   nil,
+	}, 0, 0)
+	require.Equal(s.T(), int64(-1), count)
+	require.Error(s.T(), err)
 }
 
 func (s *SuiteSnapshot) Test_GetSnapshots_WithStatus() {
