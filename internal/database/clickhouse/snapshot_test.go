@@ -246,17 +246,18 @@ func (s *SuiteSnapshot) Test_countSnapshotsUptime_nextError() {
 		id = "1"
 	)
 
-	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
+	query := fmt.Sprintf(`SELECT count(*) as "count", avg(meta_end_time-meta_start_time) as "latency" FROM "%s"`, dbSnapshotCollection)
 	rows := sqlmock.NewRows([]string{})
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	count, err := clickSnapshot.countAllSnapshots(&apiPb.GetSchedulerUptimeRequest{
+	res, err := clickSnapshot.countSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
 		SchedulerId: id,
 		TimeRange:   nil,
 	}, 0, 0)
-	require.Equal(s.T(), int64(0), count)
+	require.Equal(s.T(), int64(0), res.Count)
+	require.Equal(s.T(), "", res.Latency)
 	require.Nil(s.T(), err)
 }
 
@@ -265,17 +266,18 @@ func (s *SuiteSnapshot) Test_countSnapshotsUptime_scanError() {
 		id = "1"
 	)
 
-	query := fmt.Sprintf(`SELECT count(*) FROM "%s"`, dbSnapshotCollection)
-	rows := sqlmock.NewRows([]string{"count", "a"}).AddRow("1", "a")
+	query := fmt.Sprintf(`SELECT count(*) as "count", avg(meta_end_time-meta_start_time) as "latency" FROM "%s"`, dbSnapshotCollection)
+	rows := sqlmock.NewRows([]string{"count", "latency", "a"}).AddRow("1", "", "a")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(id, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
-	count, err := clickSnapshot.countAllSnapshots(&apiPb.GetSchedulerUptimeRequest{
+	res, err := clickSnapshot.countSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
 		SchedulerId: id,
 		TimeRange:   nil,
 	}, 0, 0)
-	require.Equal(s.T(), int64(-1), count)
+	require.Equal(s.T(), int64(-1), res.Count)
+	require.Equal(s.T(), "", res.Latency)
 	require.Error(s.T(), err)
 }
 
