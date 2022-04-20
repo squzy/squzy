@@ -1,0 +1,46 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "clickhouse",
+    srcs = [
+        "clickhouse.go",
+        "conversion.go",
+        "incident.go",
+        "snapshot.go",
+        "stat_request.go",
+        "transaction_info.go",
+    ],
+    importpath = "github.com/squzy/squzy/internal/database/clickhouse",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/logger",
+        "@com_github_clickhouse_clickhouse_go//:clickhouse-go",
+        "@com_github_golang_protobuf//jsonpb:go_default_library_gen",
+        "@com_github_golang_protobuf//ptypes:go_default_library_gen",
+        "@com_github_google_uuid//:uuid",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
+        "@io_bazel_rules_go//proto/wkt:struct_go_proto",
+        "@io_bazel_rules_go//proto/wkt:wrappers_go_proto",
+    ],
+)
+
+go_test(
+    name = "clickhouse_test",
+    srcs = [
+        "clickhouse_test.go",
+        "conversion_test.go",
+    ],
+    embed = [":clickhouse"],
+    deps = [
+        "//internal/logger",
+        "@com_github_clickhouse_clickhouse_go//:clickhouse-go",
+        "@com_github_golang_protobuf//ptypes:go_default_library_gen",
+        "@com_github_ory_dockertest_v3//:dockertest",
+        "@com_github_ory_dockertest_v3//docker",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
+        "@com_github_stretchr_testify//assert",
+        "@io_bazel_rules_go//proto/wkt:timestamp_go_proto",
+        "@io_bazel_rules_go//proto/wkt:wrappers_go_proto",
+        "@org_golang_google_protobuf//types/known/structpb",
+    ],
+)

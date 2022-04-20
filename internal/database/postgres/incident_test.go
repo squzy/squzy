@@ -21,7 +21,7 @@ var (
 		"postgres",
 		fmt.Sprintf("host=lkl port=00 user=us dbname=dbn password=ps connect_timeout=10 sslmode=disable"))
 	postgrWrongIncident = &Postgres{
-		dbSnapshot,
+		dbIncident,
 	}
 )
 

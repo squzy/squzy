@@ -1,14 +1,18 @@
 package database
 
 import (
+	"database/sql"
+	"errors"
 	"github.com/jinzhu/gorm"
+	"github.com/squzy/squzy/internal/database/clickhouse"
 	"github.com/squzy/squzy/internal/database/postgres"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"os"
 )
 
 type Database interface {
-	InsertSnapshot(data *apiPb.SchedulerResponse) error                                                    //TODO: fix
-	GetSnapshots(request *apiPb.GetSchedulerInformationRequest) ([]*apiPb.SchedulerSnapshot, int32, error) //TODO: fix
+	InsertSnapshot(data *apiPb.SchedulerResponse) error
+	GetSnapshots(request *apiPb.GetSchedulerInformationRequest) ([]*apiPb.SchedulerSnapshot, int32, error)
 	GetSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest) (*apiPb.GetSchedulerUptimeResponse, error)
 	InsertStatRequest(data *apiPb.Metric) error
 	GetStatRequest(id string, pagination *apiPb.Pagination, filter *apiPb.TimeFilter) ([]*apiPb.GetAgentInformationResponse_Statistic, int32, error)
@@ -28,8 +32,21 @@ type Database interface {
 	Migrate() error
 }
 
-func New(pgDb *gorm.DB) Database {
-	return &postgres.Postgres{
-		Db: pgDb,
+func New(db interface{}) (Database, error) {
+	if dt, ok := os.LookupEnv("DB_TYPE"); ok && dt == "postgres" {
+		postgresDb, ok := db.(*gorm.DB)
+		if !ok {
+			return nil, errors.New("cannot convert to postgres db connection")
+		}
+		return &postgres.Postgres{
+			Db: postgresDb,
+		}, nil
 	}
+	clickhouseDb, ok := db.(*sql.DB)
+	if !ok {
+		return nil, errors.New("cannot convert to clickhouse db connection")
+	}
+	return &clickhouse.Clickhouse{
+		Db: clickhouseDb,
+	}, nil
 }
