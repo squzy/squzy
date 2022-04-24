@@ -17,5 +17,9 @@ go_test(
     name = "database_test",
     srcs = ["database_test.go"],
     embed = [":database"],
-    deps = ["@com_github_stretchr_testify//assert"],
+    deps = [
+        "@com_github_data_dog_go_sqlmock//:go-sqlmock",
+        "@com_github_jinzhu_gorm//:gorm",
+        "@com_github_stretchr_testify//assert",
+    ],
 )
