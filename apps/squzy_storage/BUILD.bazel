@@ -18,7 +18,6 @@ go_library(
         "@com_github_clickhouse_clickhouse_go//:clickhouse-go",
         "@com_github_jinzhu_gorm//:gorm",
         "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
-        "@io_gorm_driver_postgres//:postgres",
         "@org_golang_google_grpc//:go_default_library",
     ],
 )
