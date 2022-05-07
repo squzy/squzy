@@ -97,7 +97,7 @@ func (c *Clickhouse) GetSnapshots(request *apiPb.GetSchedulerInformationRequest)
 
 	offset, limit := getOffsetAndLimit(count, request.GetPagination())
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM snapshots WHERE (%s AND %s AND %s) ORDER BY %s LIMIT %d OFFSET %d`,
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM snapshots WHERE (%s AND %s %s) ORDER BY %s LIMIT %d OFFSET %d`,
 		snapshotFields,
 		snapshotSchedulerIdString,
 		snapshotMetaStartTimeFilterString,
@@ -134,12 +134,7 @@ func (c *Clickhouse) GetSnapshots(request *apiPb.GetSchedulerInformationRequest)
 
 func (c *Clickhouse) countSnapshots(request *apiPb.GetSchedulerInformationRequest, timeFrom int64, timeTo int64) (int64, error) {
 	var count int64
-	fmt.Println(fmt.Sprintf(`SELECT count(*) FROM %s WHERE %s AND (%s) AND %s LIMIT 1`,
-		dbSnapshotCollection,
-		snapshotSchedulerIdString,
-		snapshotMetaStartTimeFilterString,
-		getCodeString(request.Status)))
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM "%s" WHERE %s AND (%s) AND %s LIMIT 1`,
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM "%s" WHERE %s AND (%s) %s LIMIT 1`,
 		dbSnapshotCollection,
 		snapshotSchedulerIdString,
 		snapshotMetaStartTimeFilterString,
@@ -215,7 +210,7 @@ func (c *Clickhouse) countAllSnapshots(request *apiPb.GetSchedulerUptimeRequest,
 
 func (c *Clickhouse) countSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest, timeFrom int64, timeTo int64) (UptimeResult, error) {
 	var result UptimeResult
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) as "count", avg(meta_end_time-meta_start_time) as "latency" FROM "%s" WHERE %s AND (%s) AND %s`,
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) as "count", avg(meta_end_time-meta_start_time) as "latency" FROM "%s" WHERE %s AND (%s) %s`,
 		dbSnapshotCollection,
 		snapshotSchedulerIdString,
 		snapshotMetaStartTimeFilterString,
@@ -256,7 +251,7 @@ func getCodeString(code apiPb.SchedulerCode) string {
 	if code == apiPb.SchedulerCode_SCHEDULER_CODE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`"code" = '%d'`, code)
+	return fmt.Sprintf(`AND "code" = '%d'`, code)
 }
 
 func getSnapshotOrder(request *apiPb.SortingSchedulerList) string {

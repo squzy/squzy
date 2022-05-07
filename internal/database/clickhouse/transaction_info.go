@@ -124,7 +124,7 @@ func (c *Clickhouse) GetTransactionInfo(request *apiPb.GetTransactionsRequest) (
 
 	offset, limit := getOffsetAndLimit(count, request.GetPagination())
 
-	q := fmt.Sprintf(`SELECT %s FROM "%s" WHERE ( %s AND %s AND %s AND %s AND %s AND %s AND %s AND %s ) ORDER BY %s LIMIT %d OFFSET %d`,
+	q := fmt.Sprintf(`SELECT %s FROM "%s" WHERE ( %s AND %s %s %s %s %s %s %s ) ORDER BY %s LIMIT %d OFFSET %d`,
 		transactionInfoFields,
 		dbTransactionInfoCollection,
 		applicationIdFilterString,
@@ -170,7 +170,7 @@ func (c *Clickhouse) GetTransactionInfo(request *apiPb.GetTransactionsRequest) (
 
 func (c *Clickhouse) countTransactions(request *apiPb.GetTransactionsRequest, timeFrom int64, timeTo int64) (int64, error) {
 	var count int64
-	q := fmt.Sprintf(`SELECT count(*) FROM "%s" WHERE %s AND (%s) AND %s AND %s AND %s AND %s AND %s AND %s LIMIT 1`,
+	q := fmt.Sprintf(`SELECT count(*) FROM "%s" WHERE %s AND (%s) %s %s %s %s %s %s LIMIT 1`,
 		dbTransactionInfoCollection,
 		applicationIdFilterString,
 		applicationStartTimeFilterString,
@@ -309,7 +309,7 @@ func (c *Clickhouse) GetTransactionGroup(request *apiPb.GetTransactionGroupReque
 		dbTransactionInfoCollection,
 	)
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM "%s" WHERE %s AND %s AND %s AND %s GROUP BY %s`,
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM "%s" WHERE %s AND %s %s %s GROUP BY %s`,
 		selection,
 		dbTransactionInfoCollection,
 		applicationIdFilterString,
@@ -366,26 +366,26 @@ func getTransactionsByString(key string, value *wrappers.StringValue) string {
 	if value == nil {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."%s" = '%s'`, dbTransactionInfoCollection, key, value.GetValue())
+	return fmt.Sprintf(`AND "%s"."%s" = '%s'`, dbTransactionInfoCollection, key, value.GetValue())
 }
 
 func getTransactionTypeWhere(transType apiPb.TransactionType) string {
 	if transType == apiPb.TransactionType_TRANSACTION_TYPE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."%s" = '%d'`, dbTransactionInfoCollection, transTransactionTypeStr, transType)
+	return fmt.Sprintf(`AND "%s"."%s" = '%d'`, dbTransactionInfoCollection, transTransactionTypeStr, transType)
 }
 
 func getTransactionStatusWhere(transType apiPb.TransactionStatus) string {
 	if transType == apiPb.TransactionStatus_TRANSACTION_CODE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`"%s"."transaction_status" = '%d'`, dbTransactionInfoCollection, transType)
+	return fmt.Sprintf(`AND "%s"."transaction_status" = '%d'`, dbTransactionInfoCollection, transType)
 }
 
 func getTransactionsGroupBy(group apiPb.GroupTransaction) string {
 	if val, ok := groupMap[group]; ok {
 		return fmt.Sprintf(`"%s"."%s"`, dbTransactionInfoCollection, val)
 	}
-	return fmt.Sprintf(`"%s"."%s"`, dbTransactionInfoCollection, transTransactionTypeStr)
+	return fmt.Sprintf(`AND "%s"."%s"`, dbTransactionInfoCollection, transTransactionTypeStr)
 }

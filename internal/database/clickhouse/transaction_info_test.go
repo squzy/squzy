@@ -447,7 +447,6 @@ func (s *SuiteTransInfo) Test_GetTransactionChildren_scanError() {
 
 func (s *SuiteTransInfo) Test_GetTransactionChildren_regexError() {
 	_, err := clickTransactionInfo.GetTransactionChildren(`^\/(?!\/)(.*?)`, "")
-	fmt.Println(err)
 	require.Error(s.T(), err)
 }
 
