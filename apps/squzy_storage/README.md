@@ -4,7 +4,7 @@
 
 ## About
 
-System allows to storage information provided by health checks and agents. It uses postgresSQL.
+System allows to storage information provided by health checks and agents. It uses clickhouse (optionally postgresSQL).
 
 ## API
 
@@ -15,11 +15,12 @@ System allows to storage information provided by health checks and agents. It us
 Bold is required
 
 - PORT(9090) - on with port run squzy_storage
-- **DB_HOST** - postgresSQL host
-- **DB_PORT** - postgresSQL port
-- **DB_NAME** - postgresSQL name
-- **DB_USER** - postgresSQL user
-- **DB_PASSWORD** - postgresSQL password
+- **DB_HOST** - db host
+- **DB_PORT** - db port
+- **DB_NAME** - db name
+- **DB_USER** - db user
+- **DB_PASSWORD** - db password
+- DB_TYPE - default clickhouse, optionally postgres
 - DB_LOGS(false) - provide logs for DB
 
 ## Docker

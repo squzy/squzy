@@ -50,7 +50,7 @@ default: build
 .test:
 	bazelisk test --define version="local" //...
 
-
+#make .build_agent .build_incident .build_notification .build_bin_squzy .build_bin_storage .build_bin_api .build_agent_server .build_application_monitoring
 .build_agent:
 	./build.bash agent_client squzy_agent_$(version) $(version)
 
