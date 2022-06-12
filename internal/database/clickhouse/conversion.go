@@ -15,6 +15,19 @@ import (
 	"time"
 )
 
+func getOffsetAndLimit(count int64, pagination *apiPb.Pagination) (int, int) {
+	if pagination != nil {
+		if pagination.Page == -1 {
+			return int(count) - int(pagination.Limit), int(pagination.Limit)
+		}
+		if pagination.Page == 0 {
+			return 0, int(pagination.Limit)
+		}
+		return int(pagination.GetLimit() * (pagination.GetPage() - 1)), int(pagination.GetLimit())
+	}
+	return 0, int(count)
+}
+
 func convertToIncident(data *apiPb.Incident, t time.Time) *Incident {
 	if data == nil {
 		return nil

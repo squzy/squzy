@@ -1,8 +1,8 @@
 package config
 
 import (
-	"os"
 	"github.com/squzy/squzy/internal/helpers"
+	"os"
 	"strconv"
 	"time"
 )
@@ -15,7 +15,7 @@ const (
 	ENV_MONGO_COLLECTION = "MONGO_COLLECTION"
 	ENV_STORAGE_HOST     = "SQUZY_STORAGE_HOST"
 
-	defaultPort           int32 = 9090
+	defaultPort           int32 = 9094
 	defaultStorageTimeout       = time.Second * 5
 	defaultMongoDb              = "squzy_monitoring"
 	defaultCollection           = "schedulers"

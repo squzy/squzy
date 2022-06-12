@@ -539,3 +539,11 @@ func TestConvertToTransactionInfo(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
+
+func Test_conversion(t *testing.T) {
+	t.Run("Should: return nil", func(t *testing.T) {
+		o, l := getOffsetAndLimit(0, &apiPb.Pagination{Page: 0, Limit: 5})
+		assert.Equal(t, 0, o)
+		assert.Equal(t, 5, l)
+	})
+}

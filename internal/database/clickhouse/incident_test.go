@@ -478,14 +478,14 @@ func (s *SuiteIncident) Test_updateIncident_commitError() {
 
 func Test_getIncidentStatusString(t *testing.T) {
 	t.Run("Should: return string", func(t *testing.T) {
-		res := getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_UNSPECIFIED)
+		res := getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_UNSPECIFIED, "")
 		assert.Equal(t, "", res)
 	})
 }
 
 func Test_getIncidentRuleString(t *testing.T) {
 	t.Run("Should: return string", func(t *testing.T) {
-		res := getIncidentRuleString("id")
+		res := getIncidentRuleString("id", noSep)
 		assert.NotEqual(t, "", res)
 	})
 }
