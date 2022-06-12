@@ -231,7 +231,8 @@ func (c *Clickhouse) getIncident(id string) (*Incident, error) {
 func (c *Clickhouse) getIncidentHistories(id string) ([]*IncidentHistory, error) {
 	var incs []*IncidentHistory
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM incidents_history WHERE %s`, incidentHistoriesFields, incidentIdString), id)
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM incidents_history WHERE %s`,
+		incidentHistoriesFields, incidentIdString), id)
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +274,7 @@ func (c *Clickhouse) getActiveIncident(ruleId string) (*Incident, error) {
 		getIncidentRuleString(ruleId, noSep),
 		getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_OPENED, orSep),
 		getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED, orSep),
-		getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_STUDIED, orSep),
+		getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_STUDIED, noSep),
 	))
 	if err != nil {
 		return nil, err
@@ -350,7 +351,7 @@ func (c *Clickhouse) countIncidents(request *apiPb.GetIncidentsListRequest, time
 	var count int64
 	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM incidents WHERE %s %s %s`,
 		getIncidentStatusString(request.Status, andSep),
-		getIncidentRuleString(unwrapRuleString(request.RuleId), noSep),
+		getIncidentRuleString(unwrapRuleString(request.RuleId), andSep),
 		startTimeFilterString),
 		timeFrom,
 		timeTo)

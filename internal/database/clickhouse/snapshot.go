@@ -100,8 +100,8 @@ func (c *Clickhouse) GetSnapshots(request *apiPb.GetSchedulerInformationRequest)
 	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM snapshots WHERE (%s AND %s %s) ORDER BY %s LIMIT %d OFFSET %d`,
 		snapshotFields,
 		snapshotSchedulerIdString,
+		getCodeString(request.GetStatus(), andSep),
 		snapshotMetaStartTimeFilterString,
-		getCodeString(request.GetStatus()),
 		getSnapshotOrder(request.GetSort())+getSnapshotDirection(request.GetSort()),
 		limit,
 		offset),
@@ -134,11 +134,16 @@ func (c *Clickhouse) GetSnapshots(request *apiPb.GetSchedulerInformationRequest)
 
 func (c *Clickhouse) countSnapshots(request *apiPb.GetSchedulerInformationRequest, timeFrom int64, timeTo int64) (int64, error) {
 	var count int64
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM "%s" WHERE %s AND (%s) %s LIMIT 1`,
+	fmt.Printf(`SELECT count(*) FROM "%s" WHERE %s AND %s %s LIMIT 1`,
 		dbSnapshotCollection,
 		snapshotSchedulerIdString,
-		snapshotMetaStartTimeFilterString,
-		getCodeString(request.Status)),
+		getCodeString(request.Status, andSep),
+		snapshotMetaStartTimeFilterString)
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM "%s" WHERE %s AND %s %s LIMIT 1`,
+		dbSnapshotCollection,
+		snapshotSchedulerIdString,
+		getCodeString(request.Status, andSep),
+		snapshotMetaStartTimeFilterString),
 		request.SchedulerId,
 		timeFrom,
 		timeTo)
@@ -210,11 +215,12 @@ func (c *Clickhouse) countAllSnapshots(request *apiPb.GetSchedulerUptimeRequest,
 
 func (c *Clickhouse) countSnapshotsUptime(request *apiPb.GetSchedulerUptimeRequest, timeFrom int64, timeTo int64) (UptimeResult, error) {
 	var result UptimeResult
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) as "count", avg(meta_end_time-meta_start_time) as "latency" FROM "%s" WHERE %s AND (%s) %s`,
+
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) as "count", avg(meta_end_time-meta_start_time) as "latency" FROM "%s" WHERE %s AND %s %s`,
 		dbSnapshotCollection,
 		snapshotSchedulerIdString,
-		snapshotMetaStartTimeFilterString,
-		getCodeString(apiPb.SchedulerCode_OK)),
+		getCodeString(apiPb.SchedulerCode_OK, andSep),
+		snapshotMetaStartTimeFilterString),
 		request.SchedulerId,
 		timeFrom,
 		timeTo)
@@ -247,11 +253,11 @@ func (c *Clickhouse) countSnapshotsUptime(request *apiPb.GetSchedulerUptimeReque
 	return result, nil
 }
 
-func getCodeString(code apiPb.SchedulerCode) string {
+func getCodeString(code apiPb.SchedulerCode, separator string) string {
 	if code == apiPb.SchedulerCode_SCHEDULER_CODE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`AND "code" = '%d'`, code)
+	return fmt.Sprintf(`"code" = '%d' %s`, code, separator)
 }
 
 func getSnapshotOrder(request *apiPb.SortingSchedulerList) string {
