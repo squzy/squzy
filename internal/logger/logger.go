@@ -2,11 +2,11 @@ package logger
 
 import (
 	"fmt"
+	"github.com/squzy/squzy/internal/logger/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log"
 	"os"
-	"github.com/squzy/squzy/internal/logger/config"
 	"time"
 )
 

@@ -550,3 +550,4 @@ func getThroughput(count int64, lowTime float64, upTime int64) float64 {
 	}
 	return float64(count) / timeDiapasonMinutes
 }
+

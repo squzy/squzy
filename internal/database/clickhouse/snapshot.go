@@ -134,11 +134,6 @@ func (c *Clickhouse) GetSnapshots(request *apiPb.GetSchedulerInformationRequest)
 
 func (c *Clickhouse) countSnapshots(request *apiPb.GetSchedulerInformationRequest, timeFrom int64, timeTo int64) (int64, error) {
 	var count int64
-	fmt.Printf(`SELECT count(*) FROM "%s" WHERE %s AND %s %s LIMIT 1`,
-		dbSnapshotCollection,
-		snapshotSchedulerIdString,
-		getCodeString(request.Status, andSep),
-		snapshotMetaStartTimeFilterString)
 	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM "%s" WHERE %s AND %s %s LIMIT 1`,
 		dbSnapshotCollection,
 		snapshotSchedulerIdString,

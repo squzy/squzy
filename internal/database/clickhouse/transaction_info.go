@@ -129,12 +129,12 @@ func (c *Clickhouse) GetTransactionInfo(request *apiPb.GetTransactionsRequest) (
 		dbTransactionInfoCollection,
 		applicationIdFilterString,
 		applicationStartTimeFilterString,
-		getTransactionsByString(transMetaHostStr, request.GetHost()),
-		getTransactionsByString(transNameStr, request.GetName()),
-		getTransactionsByString(transMetaPathStr, request.GetPath()),
-		getTransactionsByString(transMetaMethodStr, request.GetMethod()),
-		getTransactionTypeWhere(request.GetType()),
-		getTransactionStatusWhere(request.GetStatus()),
+		getTransactionsByString(transMetaHostStr, request.GetHost(), andSep),
+		getTransactionsByString(transNameStr, request.GetName(), andSep),
+		getTransactionsByString(transMetaPathStr, request.GetPath(), andSep),
+		getTransactionsByString(transMetaMethodStr, request.GetMethod(), andSep),
+		getTransactionTypeWhere(request.GetType(), andSep),
+		getTransactionStatusWhere(request.GetStatus(), andSep),
 		getTransactionOrder(request.GetSort())+getTransactionDirection(request.GetSort()), // todo
 		limit,
 		offset)
@@ -174,12 +174,12 @@ func (c *Clickhouse) countTransactions(request *apiPb.GetTransactionsRequest, ti
 		dbTransactionInfoCollection,
 		applicationIdFilterString,
 		applicationStartTimeFilterString,
-		getTransactionsByString(transMetaHostStr, request.GetHost()),
-		getTransactionsByString(transNameStr, request.GetName()),
-		getTransactionsByString(transMetaPathStr, request.GetPath()),
-		getTransactionsByString(transMetaMethodStr, request.GetMethod()),
-		getTransactionTypeWhere(request.GetType()),
-		getTransactionStatusWhere(request.GetStatus()))
+		getTransactionsByString(transMetaHostStr, request.GetHost(), andSep),
+		getTransactionsByString(transNameStr, request.GetName(), andSep),
+		getTransactionsByString(transMetaPathStr, request.GetPath(), andSep),
+		getTransactionsByString(transMetaMethodStr, request.GetMethod(), andSep),
+		getTransactionTypeWhere(request.GetType(), andSep),
+		getTransactionStatusWhere(request.GetStatus(), andSep))
 	q = strings.ReplaceAll(q, "AND  ", "")
 	rows, err := c.Db.Query(q,
 		request.ApplicationId,
@@ -297,8 +297,8 @@ func (c *Clickhouse) GetTransactionGroup(request *apiPb.GetTransactionGroupReque
 
 	selection := fmt.Sprintf(
 		`%s as "groupName", COUNT(%s) as "count", COUNT(CASE WHEN "%s"."transaction_status" = '1' THEN 1 ELSE NULL END) as "successCount", AVG("%s"."end_time"-"%s"."start_time") as "latency", min("%s"."end_time"-"%s"."start_time") as "minTime", max("%s"."end_time"-"%s"."start_time") as "maxTime", min("%s"."end_time") as "lowTime"`,
-		getTransactionsGroupBy(request.GetGroupType()),
-		getTransactionsGroupBy(request.GetGroupType()),
+		getTransactionsGroupBy(request.GetGroupType(), noSep),
+		getTransactionsGroupBy(request.GetGroupType(), noSep),
 		dbTransactionInfoCollection,
 		dbTransactionInfoCollection,
 		dbTransactionInfoCollection,
@@ -314,9 +314,9 @@ func (c *Clickhouse) GetTransactionGroup(request *apiPb.GetTransactionGroupReque
 		dbTransactionInfoCollection,
 		applicationIdFilterString,
 		applicationStartTimeFilterString,
-		getTransactionTypeWhere(request.GetType()),
-		getTransactionStatusWhere(request.GetStatus()),
-		getTransactionsGroupBy(request.GetGroupType())),
+		getTransactionTypeWhere(request.GetType(), andSep),
+		getTransactionStatusWhere(request.GetStatus(), andSep),
+		getTransactionsGroupBy(request.GetGroupType(), noSep)),
 		request.ApplicationId,
 		timeFrom,
 		timeTo,
@@ -362,30 +362,30 @@ func getTransactionDirection(request *apiPb.SortingTransactionList) string {
 	return ` desc`
 }
 
-func getTransactionsByString(key string, value *wrappers.StringValue) string {
+func getTransactionsByString(key string, value *wrappers.StringValue, sep string) string {
 	if value == nil {
 		return ""
 	}
-	return fmt.Sprintf(`AND "%s"."%s" = '%s'`, dbTransactionInfoCollection, key, value.GetValue())
+	return fmt.Sprintf(`%s "%s"."%s" = '%s'`, sep, dbTransactionInfoCollection, key, value.GetValue())
 }
 
-func getTransactionTypeWhere(transType apiPb.TransactionType) string {
+func getTransactionTypeWhere(transType apiPb.TransactionType, sep string) string {
 	if transType == apiPb.TransactionType_TRANSACTION_TYPE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`AND "%s"."%s" = '%d'`, dbTransactionInfoCollection, transTransactionTypeStr, transType)
+	return fmt.Sprintf(`%s "%s"."%s" = '%d'`, sep, dbTransactionInfoCollection, transTransactionTypeStr, transType)
 }
 
-func getTransactionStatusWhere(transType apiPb.TransactionStatus) string {
+func getTransactionStatusWhere(transType apiPb.TransactionStatus, sep string) string {
 	if transType == apiPb.TransactionStatus_TRANSACTION_CODE_UNSPECIFIED {
 		return ""
 	}
-	return fmt.Sprintf(`AND "%s"."transaction_status" = '%d'`, dbTransactionInfoCollection, transType)
+	return fmt.Sprintf(`%s "%s"."transaction_status" = '%d'`, sep, dbTransactionInfoCollection, transType)
 }
 
-func getTransactionsGroupBy(group apiPb.GroupTransaction) string {
+func getTransactionsGroupBy(group apiPb.GroupTransaction, sep string) string {
 	if val, ok := groupMap[group]; ok {
-		return fmt.Sprintf(`"%s"."%s"`, dbTransactionInfoCollection, val)
+		return fmt.Sprintf(`%s"%s"."%s"`, sep, dbTransactionInfoCollection, val)
 	}
-	return fmt.Sprintf(`AND "%s"."%s"`, dbTransactionInfoCollection, transTransactionTypeStr)
+	return fmt.Sprintf(`%s"%s"."%s"`, sep, dbTransactionInfoCollection, transTransactionTypeStr)
 }

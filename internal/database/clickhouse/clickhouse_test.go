@@ -159,14 +159,6 @@ func TestGetIncidentById(t *testing.T) {
 	assert.NotNil(t, inc)
 }
 
-func TestGetIncidentById_Empty(t *testing.T) {
-	inc, err := clickh.GetIncidentById("nonexisting")
-	if err != nil {
-		assert.Fail(t, err.Error())
-	}
-	assert.Nil(t, inc)
-}
-
 func TestUpdateIncidentStatus(t *testing.T) {
 	lo := &apiPb.Incident{
 		Id:     "update",

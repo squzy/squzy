@@ -269,13 +269,22 @@ func (c *Clickhouse) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, 
 func (c *Clickhouse) getActiveIncident(ruleId string) (*Incident, error) {
 	inc := &Incident{}
 
-	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM incidents WHERE (%s) AND (%s %s %s) LIMIT 1`,
+	rIDQuery, rIDValue := getIncidentRuleString(ruleId, andSep)
+	queryParams := createParamsWithVal(rIDValue)
+	s1Query, s1Value := getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_OPENED, orSep)
+	queryParams = addParamsWithIntVal(s1Value, queryParams)
+	s2Query, s2Value := getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED, orSep)
+	queryParams = addParamsWithIntVal(s2Value, queryParams)
+	s3Query, s3Value := getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_STUDIED, noSep)
+	queryParams = addParamsWithIntVal(s3Value, queryParams)
+
+	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM incidents WHERE %s (%s %s %s) LIMIT 1`,
 		incidentFields,
-		getIncidentRuleString(ruleId, noSep),
-		getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_OPENED, orSep),
-		getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_CAN_BE_CLOSED, orSep),
-		getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_STUDIED, noSep),
-	))
+		rIDQuery,
+		s1Query,
+		s2Query,
+		s3Query,
+	), queryParams...)
 	if err != nil {
 		return nil, err
 	}
@@ -307,16 +316,20 @@ func (c *Clickhouse) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*ap
 
 	offset, limit := getOffsetAndLimit(count, request.GetPagination())
 
+	sQuery, sValue := getIncidentStatusString(request.Status, andSep)
+	rIDQuery, rIDValue := getIncidentRuleString(unwrapRuleString(request.RuleId), andSep)
+	queryParams := createParamsWithVal(rIDValue)
+	queryParams = addParamsWithIntVal(sValue, queryParams)
+
 	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM incidents WHERE (%s %s %s) ORDER BY %s LIMIT %d OFFSET %d`,
 		incidentFields,
-		getIncidentStatusString(request.Status, andSep),
-		getIncidentRuleString(unwrapRuleString(request.RuleId), andSep),
+		rIDQuery,
+		sQuery,
 		startTimeFilterString,
 		getIncidentOrder(request.GetSort())+getIncidentDirection(request.GetSort()),
 		limit,
 		offset),
-		timeFrom,
-		timeTo,
+		append(queryParams, timeFrom, timeTo)...,
 	)
 
 	if err != nil {
@@ -347,14 +360,34 @@ func (c *Clickhouse) GetIncidents(request *apiPb.GetIncidentsListRequest) ([]*ap
 	return convertFromIncidents(incs), count, nil
 }
 
+func createParamsWithVal(val string) []interface{} {
+	queryParams := make([]interface{}, 0)
+	if val != "" {
+		queryParams = append(queryParams, val)
+	}
+	return queryParams
+}
+
+func addParamsWithIntVal(val int32, queryParams []interface{}) []interface{} {
+	if val != 0 {
+		queryParams = append(queryParams, val)
+	}
+	return queryParams
+}
+
 func (c *Clickhouse) countIncidents(request *apiPb.GetIncidentsListRequest, timeFrom int64, timeTo int64) (int64, error) {
 	var count int64
+
+	rIDQuery, rIDValue := getIncidentRuleString(unwrapRuleString(request.RuleId), andSep)
+	queryParams := createParamsWithVal(rIDValue)
+	sQuery, sValue := getIncidentStatusString(request.Status, andSep)
+	queryParams = addParamsWithIntVal(sValue, queryParams)
+
 	rows, err := c.Db.Query(fmt.Sprintf(`SELECT count(*) FROM incidents WHERE %s %s %s`,
-		getIncidentStatusString(request.Status, andSep),
-		getIncidentRuleString(unwrapRuleString(request.RuleId), andSep),
+		rIDQuery,
+		sQuery,
 		startTimeFilterString),
-		timeFrom,
-		timeTo)
+		append(queryParams, timeFrom, timeTo)...)
 
 	if err != nil {
 		logger.Error(err.Error())
@@ -375,11 +408,11 @@ func (c *Clickhouse) countIncidents(request *apiPb.GetIncidentsListRequest, time
 	return count, nil
 }
 
-func getIncidentStatusString(code apiPb.IncidentStatus, separator string) string {
+func getIncidentStatusString(code apiPb.IncidentStatus, separator string) (string, int32) {
 	if code == apiPb.IncidentStatus_INCIDENT_STATUS_UNSPECIFIED {
-		return ""
+		return "", 0
 	}
-	return fmt.Sprintf(`"status" = '%d' %s`, code, separator)
+	return fmt.Sprintf(`%s %s`, incidentStatusString, separator), int32(code)
 }
 
 func unwrapRuleString(ruleId *wrapperspb.StringValue) string {
@@ -389,11 +422,11 @@ func unwrapRuleString(ruleId *wrapperspb.StringValue) string {
 	return ruleId.Value
 }
 
-func getIncidentRuleString(ruleId string, separator string) string {
+func getIncidentRuleString(ruleId string, separator string) (string, string) {
 	if ruleId == "" {
-		return ""
+		return "", ""
 	}
-	return fmt.Sprintf(`"rule_id" = '%s' %s`, ruleId, separator)
+	return fmt.Sprintf(`%s %s`, incidentRuleIdString, separator), ruleId
 }
 
 func getIncidentOrder(request *apiPb.SortingIncidentList) string {
