@@ -206,7 +206,7 @@ func convertFromSnapshot(snapshot *Snapshot) *apiPb.SchedulerSnapshot {
 }
 
 func convertFromUptimeResult(uptimeResult *UptimeResult, countAll int64) *apiPb.GetSchedulerUptimeResponse {
-	if countAll == 0 || uptimeResult.Latency == "nan" {
+	if countAll == 0 || strings.EqualFold(uptimeResult.Latency, "nan") {
 		return &apiPb.GetSchedulerUptimeResponse{
 			Uptime:  0,
 			Latency: 0,
@@ -550,4 +550,3 @@ func getThroughput(count int64, lowTime float64, upTime int64) float64 {
 	}
 	return float64(count) / timeDiapasonMinutes
 }
-
