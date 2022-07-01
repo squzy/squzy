@@ -16,6 +16,7 @@ func (e *expressionStruct) GetAgents(
 		AgentId:    agentId,
 		Pagination: pagination,
 	}
+
 	for _, filter := range filters {
 		req = filter(req)
 	}
