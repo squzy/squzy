@@ -193,8 +193,7 @@ func convertFromSnapshot(snapshot *Snapshot) *apiPb.SchedulerSnapshot {
 	}
 
 	str := &_struct.Value{}
-	if err := jsonpb.Unmarshal(bytes.NewReader(snapshot.MetaValue), str); err != nil {
-		logger.Error(err.Error())
+	if err := str.UnmarshalJSON(snapshot.MetaValue); err != nil {
 		return res
 	}
 
