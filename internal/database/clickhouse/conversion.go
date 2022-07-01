@@ -20,10 +20,7 @@ func getOffsetAndLimit(count int64, pagination *apiPb.Pagination) (int, int) {
 		return 0, 0
 	}
 	if pagination != nil {
-		if pagination.Page == -1 {
-			return int(count) - int(pagination.Limit), int(pagination.Limit)
-		}
-		if pagination.Page == 0 {
+		if pagination.Page <= 0 {
 			return 0, int(pagination.Limit)
 		}
 		return int(pagination.GetLimit() * (pagination.GetPage() - 1)), int(pagination.GetLimit())
