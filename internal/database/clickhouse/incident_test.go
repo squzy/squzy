@@ -324,8 +324,8 @@ func (s *SuiteIncident) Test_getActiveIncident_nextError() {
 		WillReturnRows(rows)
 
 	res, err := clickIncident.getActiveIncident("")
+	require.Equal(s.T(), res, &Incident{})
 	require.Nil(s.T(), err)
-	require.Nil(s.T(), res)
 }
 
 func (s *SuiteIncident) Test_getActiveIncident_scanError() {

@@ -207,7 +207,7 @@ func (c *Clickhouse) countTransactions(request *apiPb.GetTransactionsRequest, ti
 
 func (c *Clickhouse) GetTransactionByID(request *apiPb.GetTransactionByIdRequest) (*apiPb.TransactionInfo, []*apiPb.TransactionInfo, error) {
 	transaction, err := c.getTransaction(request.TransactionId)
-	if err != nil || &transaction == nil {
+	if err != nil || transaction == nil {
 		return nil, nil, err
 	}
 
@@ -220,6 +220,7 @@ func (c *Clickhouse) GetTransactionByID(request *apiPb.GetTransactionByIdRequest
 }
 
 func (c *Clickhouse) getTransaction(id string) (*TransactionInfo, error) {
+	inf := &TransactionInfo{}
 	rows, err := c.Db.Query(fmt.Sprintf(`SELECT %s FROM "%s" WHERE "transactionId" = ? LIMIT 1`,
 		transactionInfoFields,
 		dbTransactionInfoCollection), id)
@@ -228,10 +229,8 @@ func (c *Clickhouse) getTransaction(id string) (*TransactionInfo, error) {
 	}
 	defer rows.Close()
 
-	inf := &TransactionInfo{}
-
 	if ok := rows.Next(); !ok {
-		return nil, nil
+		return inf, nil
 	}
 
 	if err := rows.Scan(&inf.Model.ID, &inf.Model.CreatedAt, &inf.Model.UpdatedAt,

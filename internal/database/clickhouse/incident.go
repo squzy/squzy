@@ -257,10 +257,6 @@ func (c *Clickhouse) GetActiveIncidentByRuleId(ruleId string) (*apiPb.Incident, 
 		return nil, errorDataBase
 	}
 
-	if inc == nil {
-		return &apiPb.Incident{}, nil
-	}
-
 	inc.Histories, err = c.getIncidentHistories(inc.IncidentId)
 	if err != nil {
 		logger.Error(err.Error())
@@ -295,7 +291,7 @@ func (c *Clickhouse) getActiveIncident(ruleId string) (*Incident, error) {
 	defer rows.Close()
 
 	if ok := rows.Next(); !ok {
-		return nil, nil
+		return inc, nil
 	}
 
 	if err := rows.Scan(&inc.Model.ID, &inc.Model.CreatedAt, &inc.Model.UpdatedAt,
