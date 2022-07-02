@@ -14,3 +14,6 @@ Bold is required
 - **AGENT_SERVER_HOST** - host for agent server
 - **MONITORING_SERVER_HOST** - host for monitoring server
 - **STORAGE_SERVER_HOST** - host for storage server
+- **INCIDENT_SERVER_HOST**
+- **APPLICATION_MONITORING_SERVER_HOST**
+- **NOTIFICATION_SERVER_HOST**

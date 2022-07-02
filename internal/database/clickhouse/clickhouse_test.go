@@ -81,9 +81,9 @@ func setup() error {
 		log.Fatalf("could not start resource: %s", err)
 	}
 
+	// for debugging
 	fmt.Println(resource.GetPort("9000/tcp"))
 	fmt.Println(resource.GetPort("8123/tcp"))
-	fmt.Println(resource.GetPort("8123"))
 	if err = pool.Retry(func() error {
 		var err error
 		db, err = sql.Open("clickhouse", fmt.Sprintf("tcp://%s:%s?debug=true", "localhost", resource.GetPort("9000/tcp")))

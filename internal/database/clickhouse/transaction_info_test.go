@@ -462,7 +462,7 @@ func (s *SuiteTransInfo) Test_getTransaction_nextError() {
 		WillReturnRows(rows)
 
 	res, err := clickTransactionInfo.getTransaction("1")
-	require.Nil(s.T(), res)
+	require.Equal(s.T(), &TransactionInfo{}, res)
 	require.Nil(s.T(), err)
 }
 

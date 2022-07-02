@@ -15,7 +15,7 @@ Provide possability for handaling users incident from storage
 Bold is required
 
 - PORT(9097) - on with port run squzy_incident
-- **MONGO_UR*I* - mongo URI for connect
+- **MONGO_URI** - mongo URI for connect
 - MONGO_DB(incident_manager) - mongo DB for connect
 - MONGO_COLLECTION(rules) - collection name
 - **STORAGE_HOST** - squzy storage host

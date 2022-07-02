@@ -15,6 +15,19 @@ import (
 	"time"
 )
 
+func getOffsetAndLimit(count int64, pagination *apiPb.Pagination) (int, int) {
+	if count == 0 {
+		return 0, 0
+	}
+	if pagination != nil {
+		if pagination.Page <= 0 {
+			return 0, int(pagination.Limit)
+		}
+		return int(pagination.GetLimit() * (pagination.GetPage() - 1)), int(pagination.GetLimit())
+	}
+	return 0, int(count)
+}
+
 func convertToIncident(data *apiPb.Incident, t time.Time) *Incident {
 	if data == nil {
 		return nil
@@ -39,7 +52,7 @@ func convertToIncidentHistories(data []*apiPb.Incident_HistoryItem) ([]*Incident
 	if data == nil {
 		return nil, 0, 0
 	}
-	var histories []*IncidentHistory
+	histories := []*IncidentHistory{}
 	minTime := int64(0)
 	maxTime := int64(0)
 	for _, v := range data {
@@ -73,7 +86,7 @@ func convertToIncidentHistory(data *apiPb.Incident_HistoryItem) *IncidentHistory
 }
 
 func convertFromIncidents(data []*Incident) []*apiPb.Incident {
-	var incidents []*apiPb.Incident
+	incidents := []*apiPb.Incident{}
 	for _, v := range data {
 		incidents = append(incidents, convertFromIncident(v))
 	}
@@ -90,7 +103,7 @@ func convertFromIncident(data *Incident) *apiPb.Incident {
 }
 
 func convertFromIncidentHistories(data []*IncidentHistory) []*apiPb.Incident_HistoryItem {
-	var histories []*apiPb.Incident_HistoryItem
+	histories := []*apiPb.Incident_HistoryItem{}
 	for _, v := range data {
 		history := convertFromIncidentHistory(v)
 		if history != nil {
@@ -152,7 +165,7 @@ func convertToSnapshot(request *apiPb.SchedulerSnapshot, schedulerID string) (*S
 }
 
 func ConvertFromSnapshots(snapshots []*Snapshot) []*apiPb.SchedulerSnapshot {
-	var res []*apiPb.SchedulerSnapshot
+	res := []*apiPb.SchedulerSnapshot{}
 	for _, v := range snapshots {
 		snap := convertFromSnapshot(v)
 		res = append(res, snap)
@@ -180,8 +193,7 @@ func convertFromSnapshot(snapshot *Snapshot) *apiPb.SchedulerSnapshot {
 	}
 
 	str := &_struct.Value{}
-	if err := jsonpb.Unmarshal(bytes.NewReader(snapshot.MetaValue), str); err != nil {
-		logger.Error(err.Error())
+	if err := str.UnmarshalJSON(snapshot.MetaValue); err != nil {
 		return res
 	}
 
@@ -190,6 +202,13 @@ func convertFromSnapshot(snapshot *Snapshot) *apiPb.SchedulerSnapshot {
 }
 
 func convertFromUptimeResult(uptimeResult *UptimeResult, countAll int64) *apiPb.GetSchedulerUptimeResponse {
+	if countAll == 0 || strings.EqualFold(uptimeResult.Latency, "nan") {
+		return &apiPb.GetSchedulerUptimeResponse{
+			Uptime:  0,
+			Latency: 0,
+		}
+	}
+
 	latency, err := strconv.ParseFloat(strings.Split(uptimeResult.Latency, ".")[0], 64)
 	if err != nil {
 		return &apiPb.GetSchedulerUptimeResponse{
@@ -220,7 +239,7 @@ func ConvertToClickhouseStatRequest(request *apiPb.Metric) (*StatRequest, error)
 }
 
 func ConvertFromClickhouseStatRequests(data []*StatRequest) []*apiPb.GetAgentInformationResponse_Statistic {
-	var res []*apiPb.GetAgentInformationResponse_Statistic
+	res := []*apiPb.GetAgentInformationResponse_Statistic{}
 	for _, request := range data {
 		stat, err := ConvertFromClickhouseStatRequest(request)
 		if err == nil {
@@ -248,7 +267,7 @@ func ConvertFromClickhouseStatRequest(data *StatRequest) (*apiPb.GetAgentInforma
 }
 
 func convertToCPUInfo(request *apiPb.CpuInfo) []*CPUInfo {
-	var res []*CPUInfo
+	res := []*CPUInfo{}
 	if request == nil {
 		return res
 	}
@@ -285,7 +304,7 @@ func convertToMemoryInfo(reqest *apiPb.MemoryInfo) *MemoryInfo {
 }
 
 func convertToDiskInfo(request *apiPb.DiskInfo) []*DiskInfo {
-	var res []*DiskInfo
+	res := []*DiskInfo{}
 	if request == nil {
 		return res
 	}
@@ -302,7 +321,7 @@ func convertToDiskInfo(request *apiPb.DiskInfo) []*DiskInfo {
 }
 
 func convertToNetInfo(request *apiPb.NetInfo) []*NetInfo {
-	var res []*NetInfo
+	res := []*NetInfo{}
 	if request == nil {
 		return res
 	}
@@ -323,7 +342,7 @@ func convertToNetInfo(request *apiPb.NetInfo) []*NetInfo {
 }
 
 func convertFromCPUInfo(data []*CPUInfo) *apiPb.CpuInfo {
-	var cpus []*apiPb.CpuInfo_CPU
+	cpus := []*apiPb.CpuInfo_CPU{}
 	for _, v := range data {
 		cpus = append(cpus, &apiPb.CpuInfo_CPU{
 			Load: v.Load,

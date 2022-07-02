@@ -153,6 +153,13 @@ func TestConvertFromClickhouseSnapshots(t *testing.T) {
 }
 
 func TestConvertFromUptimeResult(t *testing.T) {
+	t.Run("Test: no error for nan", func(t *testing.T) {
+		res := convertFromUptimeResult(&UptimeResult{
+			Count:   10,
+			Latency: "nan",
+		}, 10)
+		assert.NotNil(t, res)
+	})
 	t.Run("Test: error", func(t *testing.T) {
 		res := convertFromUptimeResult(&UptimeResult{
 			Count:   10,
@@ -537,5 +544,18 @@ func TestConvertToTransactionInfo(t *testing.T) {
 			EndTime:   nil,
 		})
 		assert.Error(t, err)
+	})
+}
+
+func Test_conversion(t *testing.T) {
+	t.Run("Should: return nil", func(t *testing.T) {
+		o, l := getOffsetAndLimit(0, &apiPb.Pagination{Page: 0, Limit: 0})
+		assert.Equal(t, 0, o)
+		assert.Equal(t, 0, l)
+	})
+	t.Run("Should: return nil", func(t *testing.T) {
+		o, l := getOffsetAndLimit(1, &apiPb.Pagination{Page: 0, Limit: 5})
+		assert.Equal(t, 0, o)
+		assert.Equal(t, 5, l)
 	})
 }

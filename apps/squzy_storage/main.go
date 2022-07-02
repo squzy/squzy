@@ -18,11 +18,10 @@ import (
 )
 
 func main() {
-	var db database.Database
 	tools := grpctools.New()
 	cfg := config.New()
 
-	db, err := getDatabase(cfg, db)
+	db, err := getDatabase(cfg)
 
 	incidentConn, err := tools.GetConnection(cfg.GetIncidentServerAddress(), 0, grpc.WithInsecure())
 	if err != nil {
@@ -38,7 +37,9 @@ func main() {
 	logger.Fatal(storageServ.Run().Error())
 }
 
-func getDatabase(cfg config.Config, db database.Database) (database.Database, error) {
+func getDatabase(cfg config.Config) (database.Database, error) {
+	var db database.Database
+
 	if dt, ok := os.LookupEnv("DB_TYPE"); ok && dt == "postgres" {
 		postgresDb, err := gorm.Open(
 			"postgres",
@@ -49,22 +50,32 @@ func getDatabase(cfg config.Config, db database.Database) (database.Database, er
 				cfg.GetDbUser(),
 				cfg.GetDbPassword(),
 			))
+		if err != nil {
+			logger.Fatal(err.Error())
+		}
 
 		db, err = database.New(postgresDb)
 		if err != nil {
 			logger.Fatal(err.Error())
 		}
+	} else {
+		connect, err := sql.Open("clickhouse", fmt.Sprintf("tcp://%s:%s?username=%s&password=%s&database=%s&read_timeout=10&write_timeout=20",
+			cfg.GetDbHost(),
+			cfg.GetDbPort(),
+			cfg.GetDbUser(),
+			cfg.GetDbPassword(),
+			cfg.GetDbName(),
+		))
+		if err != nil {
+			logger.Fatal(err.Error())
+		}
+		db, err = database.New(connect)
+		if err != nil {
+			logger.Fatal(err.Error())
+		}
 	}
-	connect, err := sql.Open("clickhouse", fmt.Sprintf("tcp://%s:%s?username=%s&password=%s&database=%s&read_timeout=10&write_timeout=20",
-		cfg.GetDbHost(),
-		cfg.GetDbPort(),
-		cfg.GetDbUser(),
-		cfg.GetDbPassword(),
-		cfg.GetDbName(),
-	))
-	db, err = database.New(connect)
 
-	err = db.Migrate()
+	err := db.Migrate()
 	if err != nil {
 		logger.Fatal(err.Error())
 	}

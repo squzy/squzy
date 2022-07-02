@@ -261,7 +261,7 @@ func (s *SuiteIncident) Test_getIncident_nextError() {
 		WillReturnRows(rows)
 
 	res, err := clickIncident.getIncident("")
-	require.Nil(s.T(), res)
+	require.NotNil(s.T(), res)
 	require.Nil(s.T(), err)
 }
 
@@ -324,8 +324,8 @@ func (s *SuiteIncident) Test_getActiveIncident_nextError() {
 		WillReturnRows(rows)
 
 	res, err := clickIncident.getActiveIncident("")
+	require.Equal(s.T(), res, &Incident{})
 	require.Nil(s.T(), err)
-	require.Nil(s.T(), res)
 }
 
 func (s *SuiteIncident) Test_getActiveIncident_scanError() {
@@ -368,7 +368,7 @@ func (s *SuiteIncident) Test_GetIncidents_selectIncidentError() {
 	query := fmt.Sprintf(`SELECT count(*) FROM %s`, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	_, _, err := clickIncident.GetIncidents(&apiPb.GetIncidentsListRequest{
@@ -381,13 +381,13 @@ func (s *SuiteIncident) Test_GetIncidents_scanError() {
 	query := fmt.Sprintf(`SELECT count(*) FROM %s`, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	query = fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
 	rows = sqlmock.NewRows([]string{"id"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	_, _, err := clickIncident.GetIncidents(&apiPb.GetIncidentsListRequest{
@@ -400,14 +400,14 @@ func (s *SuiteIncident) Test_GetIncidents_getIncidentHistoriesError() {
 	query := fmt.Sprintf(`SELECT count(*) FROM %s`, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{"count"}).AddRow("1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	query = fmt.Sprintf(`SELECT %s FROM %s`, incidentFields, dbIncidentCollection)
 	rows = sqlmock.NewRows([]string{"id", "created_at", "updated_at", "incident_id", "status", "rule_id", "start_time", "end_time"}).
 		AddRow("1", time.Now(), time.Now(), "1", "1", "1", "1", "1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	_, _, err := clickIncident.GetIncidents(&apiPb.GetIncidentsListRequest{
@@ -427,7 +427,7 @@ func (s *SuiteIncident) Test_countIncidents_scanError() {
 	query := fmt.Sprintf(`SELECT count(*) FROM %s`, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{"count", "custom"}).AddRow("1", "1")
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	_, err := clickIncident.countIncidents(&apiPb.GetIncidentsListRequest{
@@ -440,7 +440,7 @@ func (s *SuiteIncident) Test_countIncidents_nextError() {
 	query := fmt.Sprintf(`SELECT count(*) FROM %s`, dbIncidentCollection)
 	rows := sqlmock.NewRows([]string{})
 	s.mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	res, err := clickIncident.countIncidents(&apiPb.GetIncidentsListRequest{
@@ -478,15 +478,18 @@ func (s *SuiteIncident) Test_updateIncident_commitError() {
 
 func Test_getIncidentStatusString(t *testing.T) {
 	t.Run("Should: return string", func(t *testing.T) {
-		res := getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_UNSPECIFIED)
+		res, val := getIncidentStatusString(apiPb.IncidentStatus_INCIDENT_STATUS_UNSPECIFIED, "")
 		assert.Equal(t, "", res)
+		assert.NotEqual(t, "", val)
 	})
 }
 
 func Test_getIncidentRuleString(t *testing.T) {
 	t.Run("Should: return string", func(t *testing.T) {
-		res := getIncidentRuleString("id")
+		res, val := getIncidentRuleString("id", noSep)
 		assert.NotEqual(t, "", res)
+		assert.NotEqual(t, "", val)
+
 	})
 }
 
@@ -517,6 +520,13 @@ func Test_getIncidentDirection(t *testing.T) {
 			Direction: 10,
 		})
 		assert.NotEqual(t, "", res)
+	})
+}
+
+func Test_unwrapRuleString(t *testing.T) {
+	t.Run("Should: return empty value", func(t *testing.T) {
+		res := unwrapRuleString(nil)
+		assert.Equal(t, "", res)
 	})
 }
 
