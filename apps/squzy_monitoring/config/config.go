@@ -14,7 +14,11 @@ const (
 	ENV_MONGO_URI        = "MONGO_URI"
 	ENV_MONGO_COLLECTION = "MONGO_COLLECTION"
 	ENV_STORAGE_HOST     = "SQUZY_STORAGE_HOST"
+	ENV_CACHE_ADDR       = "CACHE_ADDR"
+	ENV_CACHE_PASSWORD   = "CACHE_PASSWORD"
+	ENV_CACHE_DB         = "CACHE_DB"
 
+	defaultCacheDb        int32 = 0
 	defaultPort           int32 = 9094
 	defaultStorageTimeout       = time.Second * 5
 	defaultMongoDb              = "squzy_monitoring"
@@ -28,6 +32,9 @@ type cfg struct {
 	mongoURI        string
 	mongoDb         string
 	mongoCollection string
+	cacheAddr       string
+	cachePassword   string
+	cacheDB         int32
 }
 
 func (c *cfg) GetPort() int32 {
@@ -54,6 +61,18 @@ func (c *cfg) GetMongoCollection() string {
 	return c.mongoCollection
 }
 
+func (c *cfg) GetCacheAddr() string {
+	return c.cacheAddr
+}
+
+func (c *cfg) GetCachePassword() string {
+	return c.cachePassword
+}
+
+func (c *cfg) GetCacheDB() int32 {
+	return c.cacheDB
+}
+
 type Config interface {
 	GetPort() int32
 	GetClientAddress() string
@@ -61,6 +80,9 @@ type Config interface {
 	GetMongoURI() string
 	GetMongoDb() string
 	GetMongoCollection() string
+	GetCacheAddr() string
+	GetCachePassword() string
+	GetCacheDB() int32
 }
 
 func New() Config {
@@ -90,6 +112,15 @@ func New() Config {
 	if collection == "" {
 		collection = defaultCollection
 	}
+
+	cacheDBValue := os.Getenv(ENV_CACHE_DB)
+	cacheDB := defaultCacheDb
+	if cacheDBValue != "" {
+		i, err := strconv.ParseInt(cacheDBValue, 10, 32)
+		if err == nil {
+			cacheDB = int32(i)
+		}
+	}
 	return &cfg{
 		clientAddress:   os.Getenv(ENV_STORAGE_HOST),
 		timeout:         timeoutStorage,
@@ -97,5 +128,8 @@ func New() Config {
 		mongoURI:        os.Getenv(ENV_MONGO_URI),
 		mongoDb:         mongoDb,
 		mongoCollection: collection,
+		cacheAddr:       os.Getenv(ENV_CACHE_ADDR),
+		cachePassword:   os.Getenv(ENV_CACHE_PASSWORD),
+		cacheDB:         cacheDB,
 	}
 }

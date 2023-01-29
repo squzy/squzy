@@ -3,15 +3,16 @@ package server
 import (
 	"context"
 	"errors"
-	empty "google.golang.org/protobuf/types/known/emptypb"
-	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/squzy/squzy/apps/squzy_application_monitoring/config"
 	"github.com/squzy/squzy/apps/squzy_application_monitoring/database"
 	"github.com/squzy/squzy/internal/helpers"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 type server struct {
+	apiPb.UnimplementedApplicationMonitoringServer
 	db      database.Database
 	config  config.Config
 	storage apiPb.StorageClient

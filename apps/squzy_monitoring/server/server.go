@@ -3,15 +3,16 @@ package server
 import (
 	"context"
 	"errors"
-	empty "google.golang.org/protobuf/types/known/emptypb"
-	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/sync/errgroup"
+	"github.com/squzy/squzy/internal/cache"
 	"github.com/squzy/squzy/internal/helpers"
 	job_executor "github.com/squzy/squzy/internal/job-executor"
 	"github.com/squzy/squzy/internal/scheduler"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	scheduler_storage "github.com/squzy/squzy/internal/scheduler-storage"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/sync/errgroup"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 var (
@@ -19,9 +20,12 @@ var (
 )
 
 type server struct {
+	apiPb.UnimplementedCacheServer
+	apiPb.UnimplementedSchedulersExecutorServer
 	schedulerStorage scheduler_storage.SchedulerStorage
 	jobExecutor      job_executor.JobExecutor
 	configStorage    scheduler_config_storage.Storage
+	cache            cache.Cache
 }
 
 func (s *server) GetSchedulerList(ctx context.Context, rq *empty.Empty) (*apiPb.GetSchedulerListResponse, error) {
@@ -231,6 +235,7 @@ func (s *server) Add(ctx context.Context, rq *apiPb.AddRequest) (*apiPb.AddRespo
 		primitive.NewObjectID(),
 		interval,
 		s.jobExecutor,
+		s.cache,
 	)
 	if err != nil {
 		return nil, err
@@ -341,10 +346,12 @@ func New(
 	schedulerStorage scheduler_storage.SchedulerStorage,
 	jobExecutor job_executor.JobExecutor,
 	configStorage scheduler_config_storage.Storage,
+	cache cache.Cache,
 ) apiPb.SchedulersExecutorServer {
 	return &server{
 		schedulerStorage: schedulerStorage,
 		jobExecutor:      jobExecutor,
 		configStorage:    configStorage,
+		cache:            cache,
 	}
 }

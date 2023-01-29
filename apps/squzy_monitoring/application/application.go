@@ -5,30 +5,34 @@ import (
 	"fmt"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
-	"google.golang.org/grpc"
-	"net"
 	"github.com/squzy/squzy/apps/squzy_monitoring/server"
+	"github.com/squzy/squzy/internal/cache"
 	"github.com/squzy/squzy/internal/helpers"
 	job_executor "github.com/squzy/squzy/internal/job-executor"
 	"github.com/squzy/squzy/internal/logger"
 	"github.com/squzy/squzy/internal/scheduler"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	scheduler_storage "github.com/squzy/squzy/internal/scheduler-storage"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"google.golang.org/grpc"
+	"net"
 )
 
 type app struct {
+	cache            cache.Cache
 	schedulerStorage scheduler_storage.SchedulerStorage
 	jobExecutor      job_executor.JobExecutor
 	configStorage    scheduler_config_storage.Storage
 }
 
 func New(
+	cache cache.Cache,
 	schedulerStorage scheduler_storage.SchedulerStorage,
 	jobExecutor job_executor.JobExecutor,
 	configStorage scheduler_config_storage.Storage,
 ) *app {
 	return &app{
+		cache:            cache,
 		schedulerStorage: schedulerStorage,
 		jobExecutor:      jobExecutor,
 		configStorage:    configStorage,
@@ -36,7 +40,7 @@ func New(
 }
 
 func (s *app) SyncOne(config *scheduler_config_storage.SchedulerConfig) error {
-	sched, err := scheduler.New(config.ID, helpers.DurationFromSecond(config.Interval), s.jobExecutor)
+	sched, err := scheduler.New(config.ID, helpers.DurationFromSecond(config.Interval), s.jobExecutor, s.cache)
 	if err != nil {
 		logger.Errorf("SchedulerId: %s cant synced, error in config", config.ID.Hex())
 		return err
@@ -94,6 +98,7 @@ func (s *app) Run(port int32) error {
 			s.schedulerStorage,
 			s.jobExecutor,
 			s.configStorage,
+			s.cache,
 		),
 	)
 	return grpcServer.Serve(lis)

@@ -2,8 +2,9 @@ package scheduler
 
 import (
 	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/squzy/squzy/internal/cache"
 	job_executor "github.com/squzy/squzy/internal/job-executor"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
 
@@ -31,9 +32,10 @@ type schl struct {
 	interval    time.Duration
 	id          primitive.ObjectID
 	jobExecutor job_executor.JobExecutor
+	cache       cache.Cache
 }
 
-func New(id primitive.ObjectID, interval time.Duration, jobExecutor job_executor.JobExecutor) (Scheduler, error) {
+func New(id primitive.ObjectID, interval time.Duration, jobExecutor job_executor.JobExecutor, cache cache.Cache) (Scheduler, error) {
 	if interval < time.Millisecond*500 {
 		return nil, errIntervalLessHalfSecondError
 	}
@@ -42,6 +44,7 @@ func New(id primitive.ObjectID, interval time.Duration, jobExecutor job_executor
 		interval:    interval,
 		isStopped:   true,
 		jobExecutor: jobExecutor,
+		cache:       cache,
 	}, nil
 }
 

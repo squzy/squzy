@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"github.com/go-redis/redis/v8"
 	"github.com/squzy/mongo_helper"
 	"github.com/squzy/squzy/apps/squzy_monitoring/application"
 	"github.com/squzy/squzy/apps/squzy_monitoring/config"
 	"github.com/squzy/squzy/apps/squzy_monitoring/version"
+	"github.com/squzy/squzy/internal/cache"
 	"github.com/squzy/squzy/internal/grpctools"
 	"github.com/squzy/squzy/internal/helpers"
 	"github.com/squzy/squzy/internal/httptools"
@@ -32,6 +34,8 @@ func main() {
 	cfg := config.New()
 	ctx, cancel := helpers.TimeoutContext(context.Background(), 0)
 	defer cancel()
+	cache := getCache(cfg)
+
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.GetMongoURI()))
 	if err != nil {
 		logger.Fatal(err.Error())
@@ -73,9 +77,27 @@ func main() {
 		job.ExecSSL,
 	)
 	app := application.New(
+		cache,
 		scheduler_storage.New(),
 		jobExecutor,
 		configStorage,
 	)
 	logger.Fatal(app.Run(cfg.GetPort()).Error())
+}
+
+func getCache(cfg config.Config) cache.Cache {
+	var rdb *redis.Client
+
+	rdb = redis.NewClient(&redis.Options{
+		Addr:     cfg.GetCacheAddr(),
+		Password: cfg.GetCachePassword(),
+		DB:       int(cfg.GetCacheDB()),
+	})
+
+	c, err := cache.New(rdb)
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+
+	return c
 }

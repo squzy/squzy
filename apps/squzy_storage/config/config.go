@@ -108,6 +108,7 @@ func New() Config {
 			withDbLog = value
 		}
 	}
+
 	return &cfg{
 		port:           port,
 		dbHost:         os.Getenv(ENV_DB_HOST),

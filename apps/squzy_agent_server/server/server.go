@@ -12,6 +12,7 @@ import (
 )
 
 type server struct {
+	apiPb.UnimplementedAgentServerServer
 	db     database.Database
 	client apiPb.StorageClient
 }

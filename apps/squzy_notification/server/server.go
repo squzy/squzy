@@ -15,6 +15,7 @@ import (
 )
 
 type server struct {
+	apiPb.UnimplementedNotificationManagerServer
 	nlDb         database.NotificationListDb
 	nmDb         database.NotificationMethodDb
 	client       apiPb.StorageClient

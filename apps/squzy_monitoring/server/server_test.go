@@ -335,24 +335,24 @@ func (m mockConfigStorageError) GetAllForSync(ctx context.Context) ([]*scheduler
 
 func TestNew(t *testing.T) {
 	t.Run("Should: implement interface", func(t *testing.T) {
-		s := New(nil, nil, nil)
+		s := New(nil, nil, nil, nil)
 		assert.Implements(t, (*apiPb.SchedulersExecutorServer)(nil), s)
 	})
 }
 
 func TestServer_GetSchedulerList(t *testing.T) {
 	t.Run("Should: return error because DB", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageError{})
+		s := New(nil, nil, &mockConfigStorageError{}, nil)
 		_, err := s.GetSchedulerList(context.Background(), &empty.Empty{})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because sinle DB error", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageErrorSingle{})
+		s := New(nil, nil, &mockConfigStorageErrorSingle{}, nil)
 		_, err := s.GetSchedulerList(context.Background(), &empty.Empty{})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return without error", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageOk{})
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.GetSchedulerList(context.Background(), &empty.Empty{})
 		assert.Equal(t, nil, err)
 	})
@@ -360,56 +360,56 @@ func TestServer_GetSchedulerList(t *testing.T) {
 
 func TestServer_GetSchedulerById(t *testing.T) {
 	t.Run("Should: return error because DB", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageErrorSingle{})
+		s := New(nil, nil, &mockConfigStorageErrorSingle{}, nil)
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
 			Id: "",
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return tcp config", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageOk{})
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
 			Id: successTcpConfig.ID.Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return ssl config", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageOk{})
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
 			Id: successSSLConfig.ID.Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return grpc config", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageOk{})
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
 			Id: successGrpcConfig.ID.Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return http config", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageOk{})
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
 			Id: successHttpConfig.ID.Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return sitemap config", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageOk{})
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
 			Id: successSiteMapConfig.ID.Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return httpValue config", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageOk{})
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
 			Id: successHttpValueConfig.ID.Hex(),
 		})
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return error because not correct typw", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageOk{})
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
 			Id: errorConfig.ID.Hex(),
 		})
@@ -419,28 +419,28 @@ func TestServer_GetSchedulerById(t *testing.T) {
 
 func TestServer_Run(t *testing.T) {
 	t.Run("Should: return error because id not bson", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageOk{})
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Run(context.Background(), &apiPb.RunRequest{
 			Id: "sff",
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because id not found in DB", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageErrorSingle{})
+		s := New(nil, nil, &mockConfigStorageErrorSingle{}, nil)
 		_, err := s.Run(context.Background(), &apiPb.RunRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because cant find in memory", func(t *testing.T) {
-		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{})
+		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Run(context.Background(), &apiPb.RunRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Run(context.Background(), &apiPb.RunRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
@@ -450,28 +450,28 @@ func TestServer_Run(t *testing.T) {
 
 func TestServer_Stop(t *testing.T) {
 	t.Run("Should: return error because id not bson", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageOk{})
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Stop(context.Background(), &apiPb.StopRequest{
 			Id: "sff",
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because id not found in DB", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageErrorSingle{})
+		s := New(nil, nil, &mockConfigStorageErrorSingle{}, nil)
 		_, err := s.Stop(context.Background(), &apiPb.StopRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because cant find in memory", func(t *testing.T) {
-		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{})
+		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Stop(context.Background(), &apiPb.StopRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Stop(context.Background(), &apiPb.StopRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
@@ -481,28 +481,28 @@ func TestServer_Stop(t *testing.T) {
 
 func TestServer_Remove(t *testing.T) {
 	t.Run("Should: return error because id not bson", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageOk{})
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
 			Id: "sff",
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because id not found in DB", func(t *testing.T) {
-		s := New(nil, nil, &mockConfigStorageErrorSingle{})
+		s := New(nil, nil, &mockConfigStorageErrorSingle{}, nil)
 		_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because cant find in memory", func(t *testing.T) {
-		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{})
+		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
-		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Remove(context.Background(), &apiPb.RemoveRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
@@ -512,7 +512,7 @@ func TestServer_Remove(t *testing.T) {
 
 func TestServer_Add(t *testing.T) {
 	t.Run("Should: return error because wrong interval", func(t *testing.T) {
-		s := New(nil, nil, nil)
+		s := New(nil, nil, nil, nil)
 		_, err := s.Add(context.Background(), &apiPb.AddRequest{
 			Interval: 0,
 			Timeout:  0,
@@ -521,47 +521,47 @@ func TestServer_Add(t *testing.T) {
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because wrong type", func(t *testing.T) {
-		s := New(nil, nil, nil)
+		s := New(nil, nil, nil, nil)
 		_, err := s.Add(context.Background(), rqMap[1000])
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because cant add to DB", func(t *testing.T) {
-		s := New(&mockStorageOk{}, nil, &mockConfigStorageErrorSingle{})
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageErrorSingle{}, nil)
 		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_TCP])
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because cant add to in memory", func(t *testing.T) {
-		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{})
+		s := New(&mockStorageError{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_TCP])
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: add tcp check without error", func(t *testing.T) {
-		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_TCP])
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: add ssl check without error", func(t *testing.T) {
-		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_SSL_EXPIRATION])
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: add grcp check without error", func(t *testing.T) {
-		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_GRPC])
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: add sitemap check without error", func(t *testing.T) {
-		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_SITE_MAP])
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: add httpValue check without error", func(t *testing.T) {
-		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_HTTP_JSON_VALUE])
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: add http check without error", func(t *testing.T) {
-		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{})
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_HTTP])
 		assert.Equal(t, nil, err)
 	})

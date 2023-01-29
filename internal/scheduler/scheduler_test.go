@@ -18,11 +18,11 @@ func (j *jobExecutor) Execute(schedulerId primitive.ObjectID) {
 func TestNew(t *testing.T) {
 	t.Run("Tests: Scheduler.New()", func(t *testing.T) {
 		t.Run("Should: create new app without error", func(t *testing.T) {
-			_, err := New(primitive.NewObjectID(), time.Second, nil)
+			_, err := New(primitive.NewObjectID(), time.Second, nil, nil)
 			assert.Equal(t, nil, err)
 		})
 		t.Run("Should: create new app with 'intervalLessHalfSecondError' error", func(t *testing.T) {
-			_, err := New(primitive.NewObjectID(), time.Millisecond, nil)
+			_, err := New(primitive.NewObjectID(), time.Millisecond, nil, nil)
 			assert.Equal(t, errIntervalLessHalfSecondError, err)
 		})
 	})
@@ -31,14 +31,14 @@ func TestNew(t *testing.T) {
 func TestSchl_Run(t *testing.T) {
 	t.Run("Tests: Scheduler.Run()", func(t *testing.T) {
 		t.Run("Should: run without error ", func(t *testing.T) {
-			i, _ := New(primitive.NewObjectID(), time.Second, &jobExecutor{})
+			i, _ := New(primitive.NewObjectID(), time.Second, &jobExecutor{}, nil)
 			i.Run()
 			i.Run()
 			i.Stop()
 		})
 		t.Run("Should: run job every second ", func(t *testing.T) {
 			store := &jobExecutor{}
-			i, err := New(primitive.NewObjectID(), time.Second, store)
+			i, err := New(primitive.NewObjectID(), time.Second, store, nil)
 			assert.Equal(t, nil, err)
 			i.Run()
 			assert.Equal(t, nil, err)
@@ -61,7 +61,7 @@ func TestSchl_Run(t *testing.T) {
 func TestSchl_Stop(t *testing.T) {
 	t.Run("Tests: Scheduler.Stop()", func(t *testing.T) {
 		t.Run("Should: stop without error ", func(t *testing.T) {
-			i, _ := New(primitive.NewObjectID(), time.Second, &jobExecutor{})
+			i, _ := New(primitive.NewObjectID(), time.Second, &jobExecutor{}, nil)
 			i.Run()
 			i.Stop()
 			i.Stop()
@@ -72,7 +72,7 @@ func TestSchl_Stop(t *testing.T) {
 func TestSchl_IsRun(t *testing.T) {
 	t.Run("Tests: Scheduler.IsRun()", func(t *testing.T) {
 		t.Run("Should: return true ", func(t *testing.T) {
-			i, _ := New(primitive.NewObjectID(), time.Second, &jobExecutor{})
+			i, _ := New(primitive.NewObjectID(), time.Second, &jobExecutor{}, nil)
 			i.Run()
 			assert.Equal(t, true, i.IsRun())
 			i.Stop()
@@ -80,11 +80,11 @@ func TestSchl_IsRun(t *testing.T) {
 		})
 		t.Run("Should: return false", func(t *testing.T) {
 			t.Run("Suite: after creation", func(t *testing.T) {
-				i, _ := New(primitive.NewObjectID(), time.Second, &jobExecutor{})
+				i, _ := New(primitive.NewObjectID(), time.Second, &jobExecutor{}, nil)
 				assert.Equal(t, false, i.IsRun())
 			})
 			t.Run("Suite: after stop", func(t *testing.T) {
-				i, _ := New(primitive.NewObjectID(), time.Second, &jobExecutor{})
+				i, _ := New(primitive.NewObjectID(), time.Second, &jobExecutor{}, nil)
 				i.Run()
 				i.Stop()
 				assert.Equal(t, false, i.IsRun())
@@ -96,7 +96,7 @@ func TestSchl_IsRun(t *testing.T) {
 func TestSchl_GetId(t *testing.T) {
 	t.Run("Should: return id as string", func(t *testing.T) {
 		id := primitive.NewObjectID()
-		s, err := New(id, time.Second, &jobExecutor{})
+		s, err := New(id, time.Second, &jobExecutor{}, nil)
 		assert.Equal(t, id.Hex(), s.GetID())
 		assert.IsType(t, "", s.GetID())
 		assert.Equal(t, nil, err)
@@ -106,7 +106,7 @@ func TestSchl_GetId(t *testing.T) {
 func TestSchl_GetIdBson(t *testing.T) {
 	t.Run("Should: return id as bson", func(t *testing.T) {
 		id := primitive.NewObjectID()
-		s, err := New(id, time.Second, &jobExecutor{})
+		s, err := New(id, time.Second, &jobExecutor{}, nil)
 		assert.Equal(t, id, s.GetIDBson())
 		assert.IsType(t, primitive.ObjectID{}, s.GetIDBson())
 		assert.Equal(t, nil, err)
