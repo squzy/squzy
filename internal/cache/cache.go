@@ -16,6 +16,7 @@ type Redis struct {
 type Cache interface {
 	InsertSchedule(data *apiPb.InsertScheduleWithIdRequest) error
 	GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb.GetScheduleWithIdResponse, error)
+	DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error
 }
 
 func New(ca interface{}) (Cache, error) {
@@ -45,9 +46,14 @@ func (c *Redis) GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb.Ge
 	}
 
 	return &apiPb.GetScheduleWithIdResponse{
-		ScheduleTime: &timestamppb.Timestamp{
+		ScheduledNext: &timestamppb.Timestamp{
 			Seconds: uTime,
 			Nanos:   0,
 		},
 	}, nil
+}
+
+func (c *Redis) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error {
+	res := c.Client.Del(context.Background(), data.GetId())
+	return res.Err()
 }

@@ -2,9 +2,9 @@ package application
 
 import (
 	"context"
-	empty "google.golang.org/protobuf/types/known/emptypb"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 	"net"
 	"testing"
 	"time"
@@ -18,6 +18,7 @@ func TestNewServer(t *testing.T) {
 }
 
 type mockNotification struct {
+	apiPb.UnimplementedNotificationManagerServer
 }
 
 func (m mockNotification) GetNotificationMethods(ctx context.Context, e *empty.Empty) (*apiPb.GetListResponse, error) {

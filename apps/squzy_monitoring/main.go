@@ -77,10 +77,10 @@ func main() {
 		job.ExecSSL,
 	)
 	app := application.New(
-		cache,
 		scheduler_storage.New(),
 		jobExecutor,
 		configStorage,
+		cache,
 	)
 	logger.Fatal(app.Run(cfg.GetPort()).Error())
 }

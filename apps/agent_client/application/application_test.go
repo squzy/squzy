@@ -48,6 +48,7 @@ func (c configSecondMock) GetAgentName() string {
 }
 
 type serverSuccess struct {
+	apiPb.UnimplementedAgentServerServer
 	ch    chan *apiPb.SendMetricsRequest
 	count int
 	mutex sync.Mutex

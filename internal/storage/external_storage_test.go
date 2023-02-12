@@ -16,6 +16,7 @@ import (
 )
 
 type server struct {
+	apiPb.UnimplementedStorageServer
 }
 
 func (s server) SaveIncident(context.Context, *apiPb.Incident) (*empty.Empty, error) {
@@ -71,6 +72,7 @@ func (s server) SaveResponseFromAgent(context.Context, *apiPb.Metric) (*empty.Em
 }
 
 type serverErrorThrow struct {
+	apiPb.UnimplementedStorageServer
 }
 
 func (s serverErrorThrow) SaveIncident(context.Context, *apiPb.Incident) (*empty.Empty, error) {

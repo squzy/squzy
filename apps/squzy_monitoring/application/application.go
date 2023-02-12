@@ -26,10 +26,10 @@ type app struct {
 }
 
 func New(
-	cache cache.Cache,
 	schedulerStorage scheduler_storage.SchedulerStorage,
 	jobExecutor job_executor.JobExecutor,
 	configStorage scheduler_config_storage.Storage,
+	cache cache.Cache,
 ) *app {
 	return &app{
 		cache:            cache,

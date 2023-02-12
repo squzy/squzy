@@ -52,6 +52,7 @@ func (s *schl) Run() {
 	if !s.isStopped {
 		return
 	}
+
 	s.ticker = time.NewTicker(s.interval)
 	s.isStopped = false
 	s.quitCh = make(chan bool, 1)

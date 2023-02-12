@@ -3,17 +3,21 @@ package application
 import (
 	"context"
 	"errors"
+	"github.com/squzy/squzy/internal/scheduler"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"net"
-	"github.com/squzy/squzy/internal/scheduler"
-	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	"testing"
 	"time"
 )
 
 type mockExecuter struct {
+}
+
+func (m mockExecuter) Execute(schedulerId primitive.ObjectID) {
 }
 
 type mockStorageError struct {
@@ -123,19 +127,36 @@ func (m mockStorageOk) Remove(string) error {
 	panic("implement me")
 }
 
-func (m mockExecuter) Execute(schedulerId primitive.ObjectID) {
+type mockCacheOk struct {
+}
+
+func (m mockCacheOk) InsertSchedule(data *apiPb.InsertScheduleWithIdRequest) error {
+	return nil
+}
+
+func (m mockCacheOk) GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb.GetScheduleWithIdResponse, error) {
+	return &apiPb.GetScheduleWithIdResponse{
+		ScheduledNext: &timestamppb.Timestamp{
+			Seconds: 0,
+			Nanos:   0,
+		},
+	}, nil
+}
+
+func (m mockCacheOk) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error {
+	return nil
 }
 
 func TestNew(t *testing.T) {
 	t.Run("Should: Create new application", func(t *testing.T) {
-		app := New(nil, nil, nil)
+		app := New(nil, nil, nil, mockCacheOk{})
 		assert.NotEqual(t, nil, app)
 	})
 }
 
 func TestApp_Run(t *testing.T) {
 	t.Run("Should: not return error", func(t *testing.T) {
-		app := New(&mockStorageOk{}, &mockExecuter{}, &mockConfigStorageOk{})
+		app := New(&mockStorageOk{}, &mockExecuter{}, &mockConfigStorageOk{}, mockCacheOk{})
 		go func() {
 			_ = app.Run(11111)
 		}()
@@ -144,11 +165,11 @@ func TestApp_Run(t *testing.T) {
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return error because port is wrong", func(t *testing.T) {
-		app := New(&mockStorageOk{}, &mockExecuter{}, &mockConfigStorageOk{})
+		app := New(&mockStorageOk{}, &mockExecuter{}, &mockConfigStorageOk{}, mockCacheOk{})
 		assert.NotEqual(t, nil, app.Run(1244214))
 	})
 	t.Run("Should: return err because cant sync with DB", func(t *testing.T) {
-		app := New(&mockStorageOk{}, &mockExecuter{}, &mockConfigStorageError{})
+		app := New(&mockStorageOk{}, &mockExecuter{}, &mockConfigStorageError{}, mockCacheOk{})
 		go func() {
 			_ = app.Run(11111)
 		}()
@@ -160,7 +181,7 @@ func TestApp_Run(t *testing.T) {
 
 func TestApp_SyncOne(t *testing.T) {
 	t.Run("Should: return error because config wrong", func(t *testing.T) {
-		app := New(&mockStorageOk{}, &mockExecuter{}, nil)
+		app := New(&mockStorageOk{}, &mockExecuter{}, nil, nil)
 		err := app.SyncOne(&scheduler_config_storage.SchedulerConfig{
 			ID:       primitive.ObjectID{},
 			Type:     0,
@@ -171,7 +192,7 @@ func TestApp_SyncOne(t *testing.T) {
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return error because cant set in storage", func(t *testing.T) {
-		app := New(&mockStorageError{}, &mockExecuter{}, nil)
+		app := New(&mockStorageError{}, &mockExecuter{}, nil, nil)
 		err := app.SyncOne(&scheduler_config_storage.SchedulerConfig{
 			ID:       primitive.ObjectID{},
 			Type:     0,
@@ -182,7 +203,7 @@ func TestApp_SyncOne(t *testing.T) {
 		assert.NotEqual(t, nil, err)
 	})
 	t.Run("Should: return nil because status stopped", func(t *testing.T) {
-		app := New(&mockStorageOk{}, &mockExecuter{}, nil)
+		app := New(&mockStorageOk{}, &mockExecuter{}, nil, nil)
 		err := app.SyncOne(&scheduler_config_storage.SchedulerConfig{
 			ID:       primitive.ObjectID{},
 			Type:     0,
@@ -193,7 +214,7 @@ func TestApp_SyncOne(t *testing.T) {
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return nil because status runned, ", func(t *testing.T) {
-		app := New(&mockStorageOk{}, &mockExecuter{}, nil)
+		app := New(&mockStorageOk{}, &mockExecuter{}, nil, mockCacheOk{})
 		err := app.SyncOne(&scheduler_config_storage.SchedulerConfig{
 			ID:       primitive.ObjectID{},
 			Type:     0,
