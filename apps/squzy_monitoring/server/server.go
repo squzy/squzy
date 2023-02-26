@@ -203,7 +203,10 @@ func (s *server) Run(ctx context.Context, rq *apiPb.RunRequest) (*apiPb.RunRespo
 	if err != nil {
 		return nil, err
 	}
-	schld.Run()
+	err = schld.Run()
+	if err != nil {
+		return nil, err
+	}
 	return &apiPb.RunResponse{
 		Id: id,
 	}, nil

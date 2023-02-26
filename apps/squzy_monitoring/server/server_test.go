@@ -192,7 +192,8 @@ func (s schedulerMock) GetIDBson() primitive.ObjectID {
 	panic("implement me")
 }
 
-func (s schedulerMock) Run() {
+func (s schedulerMock) Run() error {
+	return nil
 }
 
 func (s schedulerMock) Stop() {

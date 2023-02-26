@@ -25,6 +25,8 @@ const (
 	defaultCollection           = "schedulers"
 )
 
+const SmallestInterval = time.Millisecond * 500
+
 type cfg struct {
 	port            int32
 	timeout         time.Duration

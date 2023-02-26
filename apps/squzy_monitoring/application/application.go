@@ -55,7 +55,10 @@ func (s *app) SyncOne(config *scheduler_config_storage.SchedulerConfig) error {
 		return nil
 	}
 	if config.Status == apiPb.SchedulerStatus_RUNNED {
-		sched.Run()
+		err := sched.Run()
+		if err != nil {
+			return err
+		}
 		logger.Infof("SchedulerId: %s synced and RUN", config.ID.Hex())
 	}
 	return nil
