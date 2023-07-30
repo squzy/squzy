@@ -6,6 +6,7 @@ go_library(
     importpath = "github.com/squzy/squzy/apps/squzy_monitoring/server",
     visibility = ["//visibility:public"],
     deps = [
+        "//internal/cache",
         "//internal/helpers",
         "//internal/job-executor",
         "//internal/scheduler",

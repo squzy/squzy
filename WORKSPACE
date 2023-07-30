@@ -138,8 +138,8 @@ go_repository(
 go_repository(
     name = "com_github_cespare_xxhash_v2",
     importpath = "github.com/cespare/xxhash/v2",
-    sum = "h1:6MnRN8NT7+YBpUIWxHtefFZOKTAPgGjpQSxqLNn0+qY=",
-    version = "v2.1.1",
+    sum = "h1:YRXhKfTDauu4ajMg1TPgFO5jnlC2HCbmLXMcTG5cbYE=",
+    version = "v2.1.2",
 )
 
 go_repository(
@@ -1178,6 +1178,20 @@ go_repository(
     version = "v2.5.0",
 )
 
+go_repository(
+    name = "com_github_dgryski_go_rendezvous",
+    importpath = "github.com/dgryski/go-rendezvous",
+    sum = "h1:lO4WD4F/rVNCu3HqELle0jiPLLBs70cWOduZpkS1E78=",
+    version = "v0.0.0-20200823014737-9f7001d12a5f",
+)
+
+go_repository(
+    name = "com_github_go_redis_redis_v8",
+    importpath = "github.com/go-redis/redis/v8",
+    sum = "h1:AcZZR7igkdvfVmQTPnu9WE37LRrO/YrBH5zWyjDC0oI=",
+    version = "v8.11.5",
+)
+
 # gazelle:repository_macro repositories.bzl%go_repositories
 go_repositories()
 
@@ -1203,16 +1217,16 @@ go_repository(
     name = "com_github_stretchr_objx",
     build_file_proto_mode = "disable_global",
     importpath = "github.com/stretchr/objx",
-    sum = "h1:2vfRuCMp5sSVIDSqO8oNnWJq7mPa6KVP3iPIwFBuy8A=",
-    version = "v0.1.1",
+    sum = "h1:1zr/of2m5FGMsad5YfcqgdqdWrIhu+EBEJRhR1U7z/c=",
+    version = "v0.5.0",
 )
 
 go_repository(
     name = "com_github_stretchr_testify",
     build_file_proto_mode = "disable_global",
     importpath = "github.com/stretchr/testify",
-    sum = "h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=",
-    version = "v1.7.0",
+    sum = "h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=",
+    version = "v1.8.1",
 )
 
 go_repository(
@@ -1435,8 +1449,8 @@ go_repository(
     name = "com_github_squzy_squzy_generated",
     build_file_proto_mode = "disable_global",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:X90bFxpkMUFa/5a6nrFBgg4lkpfpiE6lZnbZhqO4CC4=",
-    version = "v1.14.1-0.20230115180957-f676e240cdfc",
+    sum = "h1:qs0ih/QIgu/6TQN+h2yxEYCB43I4mTz4VR9zupFZ21Q=",
+    version = "v1.14.1-0.20230212110805-be019be01559",
 )
 
 go_repository(

@@ -64,7 +64,7 @@ func (s *schl) Run() error {
 	if err != nil {
 		return fmt.Errorf("could not insert during run: %w", err)
 	}
-	s.ticker = time.NewTicker(config.SmallestInterval / 2)
+	s.ticker = time.NewTicker(config.SmallestInterval)
 	s.isStopped = false
 	s.quitCh = make(chan bool, 1)
 	s.observer()

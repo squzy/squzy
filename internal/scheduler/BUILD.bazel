@@ -6,7 +6,12 @@ go_library(
     importpath = "github.com/squzy/squzy/internal/scheduler",
     visibility = ["//:__subpackages__"],
     deps = [
+        "//apps/squzy_monitoring/config",
+        "//internal/cache",
         "//internal/job-executor",
+        "//internal/logger",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
+        "@org_golang_google_protobuf//types/known/timestamppb",
         "@org_mongodb_go_mongo_driver//bson/primitive",
     ],
 )
@@ -16,7 +21,9 @@ go_test(
     srcs = ["scheduler_test.go"],
     embed = [":scheduler"],
     deps = [
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@com_github_stretchr_testify//assert",
+        "@org_golang_google_protobuf//types/known/timestamppb",
         "@org_mongodb_go_mongo_driver//bson/primitive",
     ],
 )

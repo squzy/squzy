@@ -7,6 +7,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//apps/squzy_monitoring/server",
+        "//internal/cache",
         "//internal/helpers",
         "//internal/job-executor",
         "//internal/logger",
@@ -29,6 +30,7 @@ go_test(
         "//internal/scheduler-config-storage",
         "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@com_github_stretchr_testify//assert",
+        "@org_golang_google_protobuf//types/known/timestamppb",
         "@org_mongodb_go_mongo_driver//bson/primitive",
     ],
 )

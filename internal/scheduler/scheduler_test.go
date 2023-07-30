@@ -73,8 +73,7 @@ func TestSchl_Run(t *testing.T) {
 			})
 			<-ch
 			time.AfterFunc(time.Millisecond*1100, func() {
-				// should run 1 second after, giving it 2200 - 900 = 1300 milliseconds or 5 counts
-				assert.Equal(t, 5, store.count)
+				assert.Equal(t, 3, store.count)
 				ch <- true
 			})
 			<-ch

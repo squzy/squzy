@@ -1,25 +1,19 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-    name = "database",
-    srcs = ["database.go"],
-    importpath = "github.com/squzy/squzy/internal/database",
+    name = "cache",
+    srcs = ["cache.go"],
+    importpath = "github.com/squzy/squzy/internal/cache",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/database/clickhouse",
-        "//internal/database/postgres",
-        "@com_github_jinzhu_gorm//:gorm",
-        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto@",
+        "@com_github_go_redis_redis_v8//:redis",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
+        "@org_golang_google_protobuf//types/known/timestamppb",
     ],
 )
 
 go_test(
-    name = "database_test",
-    srcs = ["database_test.go"],
-    embed = [":database"],
-    deps = [
-        "@com_github_data_dog_go_sqlmock//:go-sqlmock",
-        "@com_github_jinzhu_gorm//:gorm",
-        "@com_github_stretchr_testify//assert",
-    ],
+    name = "cache_test",
+    srcs = ["cache_test.go"],
+    embed = [":cache"],
 )
