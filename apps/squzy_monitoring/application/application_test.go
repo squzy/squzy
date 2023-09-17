@@ -147,6 +147,21 @@ func (m mockCacheOk) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest)
 	return nil
 }
 
+type mockCacheErr struct {
+}
+
+func (m mockCacheErr) InsertSchedule(data *apiPb.InsertScheduleWithIdRequest) error {
+	return errors.New("InsertSchedule")
+}
+
+func (m mockCacheErr) GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb.GetScheduleWithIdResponse, error) {
+	return nil, errors.New("GetScheduleById")
+}
+
+func (m mockCacheErr) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error {
+	return errors.New("DeleteScheduleById")
+}
+
 func TestNew(t *testing.T) {
 	t.Run("Should: Create new application", func(t *testing.T) {
 		app := New(nil, nil, nil, mockCacheOk{})
@@ -213,7 +228,7 @@ func TestApp_SyncOne(t *testing.T) {
 		})
 		assert.Equal(t, nil, err)
 	})
-	t.Run("Should: return nil because status runned, ", func(t *testing.T) {
+	t.Run("Should: return nil because status runned", func(t *testing.T) {
 		app := New(&mockStorageOk{}, &mockExecuter{}, nil, mockCacheOk{})
 		err := app.SyncOne(&scheduler_config_storage.SchedulerConfig{
 			ID:       primitive.ObjectID{},
@@ -223,5 +238,16 @@ func TestApp_SyncOne(t *testing.T) {
 			Timeout:  1,
 		})
 		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return err because cache returns error", func(t *testing.T) {
+		app := New(&mockStorageOk{}, &mockExecuter{}, nil, mockCacheErr{})
+		err := app.SyncOne(&scheduler_config_storage.SchedulerConfig{
+			ID:       primitive.ObjectID{},
+			Type:     0,
+			Status:   apiPb.SchedulerStatus_RUNNED,
+			Interval: 1,
+			Timeout:  1,
+		})
+		assert.ErrorContains(t, err, "InsertSchedule")
 	})
 }

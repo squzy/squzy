@@ -84,9 +84,6 @@ func (s *schl) observer() {
 					logger.Error("could not get schedule" + err.Error())
 				}
 
-				if res == nil {
-					return
-				}
 				next := res.ScheduledNext.AsTime()
 				now := time.Now()
 

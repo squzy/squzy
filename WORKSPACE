@@ -24,7 +24,50 @@ http_archive(
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
+go_repository(
+    name = "com_github_chzyer_logex",
+    importpath = "github.com/chzyer/logex",
+    sum = "h1:Swpa1K6QvQznwJRcfTfQJmTE72DqScAa40E+fbHEXEE=",
+    version = "v1.1.10",
+)
+
+go_repository(
+    name = "com_github_chzyer_readline",
+    importpath = "github.com/chzyer/readline",
+    sum = "h1:fY5BOSpyZCqRo5OhCuC+XN+r/bBCmeuuJtjz+bCNIf8=",
+    version = "v0.0.0-20180603132655-2972be24d48e",
+)
+
+go_repository(
+    name = "com_github_chzyer_test",
+    importpath = "github.com/chzyer/test",
+    sum = "h1:q763qf9huN11kDQavWsoZXJNW3xEE4JJyHa5Q25/sd8=",
+    version = "v0.0.0-20180213035817-a1ea475d72b1",
+)
+
+go_repository(
+    name = "com_github_go_redis_redismock_v8",
+    importpath = "github.com/go-redis/redismock/v8",
+    sum = "h1:RJFIiua58hrBrSpXhnGX3on79AU3S271H4ZhRI1wyVo=",
+    version = "v8.11.5",
+)
+
+go_repository(
+    name = "com_github_google_pprof",
+    importpath = "github.com/google/pprof",
+    sum = "h1:yAJXTCF9TqKcTiHJAE8dj7HMvPfh66eeA2JYW7eFpSE=",
+    version = "v0.0.0-20210407192527-94a9f03dee38",
+)
+
+go_repository(
+    name = "com_github_ianlancetaylor_demangle",
+    importpath = "github.com/ianlancetaylor/demangle",
+    sum = "h1:mV02weKRL81bEnm8A0HT1/CAelMQDBuQIfLw8n+d6xI=",
+    version = "v0.0.0-20200824232613-28f6c0f3b639",
+)
+
 go_rules_dependencies()
+
 go_register_toolchains(version = "1.20.5")
 
 http_archive(
@@ -397,8 +440,8 @@ go_repository(
 go_repository(
     name = "com_github_onsi_gomega",
     importpath = "github.com/onsi/gomega",
-    sum = "h1:KORJXNNTzJXzu4ScJWssJfJMnJ+2QJqhoQSRwNlze9E=",
-    version = "v1.24.1",
+    sum = "h1:Vw7br2PCDYijJHSfBOWhov+8cAnUf8MfMaIOV323l6Y=",
+    version = "v1.25.0",
 )
 
 go_repository(
@@ -1209,8 +1252,8 @@ go_repository(
 go_repository(
     name = "com_github_onsi_ginkgo_v2",
     importpath = "github.com/onsi/ginkgo/v2",
-    sum = "h1:TRtrvv2vdQqzkwrQ1ke6vtXf7IK34RBUJafIy1wMwls=",
-    version = "v2.5.0",
+    sum = "h1:/XxtEV3I3Eif/HobnVx9YmJgk8ENdRsuUmM+fLCFNow=",
+    version = "v2.7.0",
 )
 
 go_repository(

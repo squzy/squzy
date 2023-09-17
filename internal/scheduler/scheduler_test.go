@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"errors"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -26,6 +27,36 @@ func (c cacheMock) GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb
 }
 
 func (c cacheMock) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error {
+	return nil
+}
+
+type cacheMockErr struct {
+}
+
+func (c cacheMockErr) InsertSchedule(data *apiPb.InsertScheduleWithIdRequest) error {
+	return errors.New("InsertSchedule")
+}
+
+func (c cacheMockErr) GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb.GetScheduleWithIdResponse, error) {
+	return nil, errors.New("GetScheduleById")
+}
+
+func (c cacheMockErr) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error {
+	return errors.New("DeleteScheduleById")
+}
+
+type cacheMockErrGet struct {
+}
+
+func (c cacheMockErrGet) InsertSchedule(data *apiPb.InsertScheduleWithIdRequest) error {
+	return nil
+}
+
+func (c cacheMockErrGet) GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb.GetScheduleWithIdResponse, error) {
+	return nil, errors.New("GetScheduleById")
+}
+
+func (c cacheMockErrGet) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error {
 	return nil
 }
 
@@ -64,7 +95,7 @@ func TestSchl_Run(t *testing.T) {
 				time.Now(), 900 * time.Millisecond,
 			})
 			assert.Equal(t, nil, err)
-			i.Run()
+			err = i.Run()
 			assert.Equal(t, nil, err)
 			ch := make(chan bool)
 			time.AfterFunc(time.Millisecond*1100, func() {
@@ -78,6 +109,30 @@ func TestSchl_Run(t *testing.T) {
 			})
 			<-ch
 			i.Stop()
+		})
+		t.Run("Should: observer should receive quit ch ", func(t *testing.T) {
+			store := &jobExecutor{}
+			i, err := New(primitive.NewObjectID(), time.Second, store, &cacheMock{
+				time.Now(), 900 * time.Millisecond,
+			})
+			assert.Equal(t, nil, err)
+			err = i.Run()
+			assert.Equal(t, nil, err)
+			i.Stop()
+		})
+		t.Run("Should: return err ", func(t *testing.T) {
+			store := &jobExecutor{}
+			i, err := New(primitive.NewObjectID(), time.Second, store, &cacheMockErr{})
+			assert.Equal(t, nil, err)
+			err = i.Run()
+			assert.ErrorContains(t, err, "InsertSchedule")
+		})
+		t.Run("Should: observer return err ", func(t *testing.T) {
+			store := &jobExecutor{}
+			i, err := New(primitive.NewObjectID(), time.Second, store, &cacheMockErrGet{})
+			assert.Equal(t, nil, err)
+			err = i.Run()
+			assert.Nil(t, err)
 		})
 	})
 }

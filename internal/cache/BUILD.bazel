@@ -16,4 +16,11 @@ go_test(
     name = "cache_test",
     srcs = ["cache_test.go"],
     embed = [":cache"],
+    deps = [
+        "@com_github_go_redis_redis_v8//:redis",
+        "@com_github_go_redis_redismock_v8//:redismock",
+        "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
+        "@com_github_stretchr_testify//assert",
+        "@org_golang_google_protobuf//types/known/timestamppb",
+    ],
 )

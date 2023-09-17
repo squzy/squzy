@@ -334,6 +334,21 @@ func (m mockConfigStorageError) GetAllForSync(ctx context.Context) ([]*scheduler
 	panic("implement me")
 }
 
+type mockCacheErr struct {
+}
+
+func (m mockCacheErr) InsertSchedule(data *apiPb.InsertScheduleWithIdRequest) error {
+	return errors.New("InsertSchedule")
+}
+
+func (m mockCacheErr) GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb.GetScheduleWithIdResponse, error) {
+	return nil, errors.New("GetScheduleById")
+}
+
+func (m mockCacheErr) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error {
+	return errors.New("DeleteScheduleById")
+}
+
 func TestNew(t *testing.T) {
 	t.Run("Should: implement interface", func(t *testing.T) {
 		s := New(nil, nil, nil, nil)
@@ -442,6 +457,13 @@ func TestServer_Run(t *testing.T) {
 	})
 	t.Run("Should: not return error", func(t *testing.T) {
 		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.Run(context.Background(), &apiPb.RunRequest{
+			Id: primitive.NewObjectID().Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, mockCacheErr{})
 		_, err := s.Run(context.Background(), &apiPb.RunRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
