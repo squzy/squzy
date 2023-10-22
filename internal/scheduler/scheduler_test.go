@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"errors"
+	"github.com/squzy/squzy/apps/squzy_monitoring/config"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -30,6 +31,21 @@ func (c cacheMock) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) e
 	return nil
 }
 
+type cacheMockErrDelete struct {
+}
+
+func (c cacheMockErrDelete) InsertSchedule(data *apiPb.InsertScheduleWithIdRequest) error {
+	return nil
+}
+
+func (c cacheMockErrDelete) GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb.GetScheduleWithIdResponse, error) {
+	return nil, nil
+}
+
+func (c cacheMockErrDelete) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error {
+	return errors.New("DeleteScheduleById")
+}
+
 type cacheMockErr struct {
 }
 
@@ -53,10 +69,37 @@ func (c cacheMockErrGet) InsertSchedule(data *apiPb.InsertScheduleWithIdRequest)
 }
 
 func (c cacheMockErrGet) GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb.GetScheduleWithIdResponse, error) {
-	return nil, errors.New("GetScheduleById")
+	return &apiPb.GetScheduleWithIdResponse{
+		ScheduledNext: &timestamppb.Timestamp{},
+	}, errors.New("GetScheduleById")
 }
 
 func (c cacheMockErrGet) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error {
+	return nil
+}
+
+var CacheMockErrInsertCounter = 0
+
+type cacheMockErrInsert struct {
+	nThInsert int
+}
+
+func (c cacheMockErrInsert) InsertSchedule(data *apiPb.InsertScheduleWithIdRequest) error {
+	CacheMockErrInsertCounter++
+	if CacheMockErrInsertCounter >= c.nThInsert {
+		return errors.New("InsertSchedule")
+
+	}
+	return nil
+}
+
+func (c cacheMockErrInsert) GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb.GetScheduleWithIdResponse, error) {
+	return &apiPb.GetScheduleWithIdResponse{
+		ScheduledNext: &timestamppb.Timestamp{},
+	}, nil
+}
+
+func (c cacheMockErrInsert) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error {
 	return nil
 }
 
@@ -127,12 +170,22 @@ func TestSchl_Run(t *testing.T) {
 			err = i.Run()
 			assert.ErrorContains(t, err, "InsertSchedule")
 		})
-		t.Run("Should: observer return err ", func(t *testing.T) {
+		t.Run("Should: observer return err", func(t *testing.T) {
 			store := &jobExecutor{}
 			i, err := New(primitive.NewObjectID(), time.Second, store, &cacheMockErrGet{})
 			assert.Equal(t, nil, err)
 			err = i.Run()
 			assert.Nil(t, err)
+			time.Sleep(config.SmallestInterval * 2)
+		})
+		t.Run("Should: observer return err for insert", func(t *testing.T) {
+			store := &jobExecutor{}
+			i, err := New(primitive.NewObjectID(), time.Second, store,
+				&cacheMockErrInsert{nThInsert: 2})
+			assert.Equal(t, nil, err)
+			err = i.Run()
+			assert.Nil(t, err)
+			time.Sleep(config.SmallestInterval * 2)
 		})
 	})
 }
@@ -143,6 +196,11 @@ func TestSchl_Stop(t *testing.T) {
 			i, _ := New(primitive.NewObjectID(), time.Second, &jobExecutor{}, &cacheMock{})
 			i.Run()
 			i.Stop()
+			i.Stop()
+		})
+		t.Run("Should: stop without error ", func(t *testing.T) {
+			i, _ := New(primitive.NewObjectID(), time.Second, &jobExecutor{}, &cacheMockErrDelete{})
+			i.Run()
 			i.Stop()
 		})
 	})

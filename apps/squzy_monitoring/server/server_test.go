@@ -182,6 +182,7 @@ var (
 )
 
 type schedulerMock struct {
+	schedulerRunErr error
 }
 
 func (s schedulerMock) GetID() string {
@@ -193,6 +194,9 @@ func (s schedulerMock) GetIDBson() primitive.ObjectID {
 }
 
 func (s schedulerMock) Run() error {
+	if s.schedulerRunErr != nil {
+		return s.schedulerRunErr
+	}
 	return nil
 }
 
@@ -204,10 +208,11 @@ func (s schedulerMock) IsRun() bool {
 }
 
 type mockStorageOk struct {
+	schedulerRunErr error
 }
 
 func (m mockStorageOk) Get(string) (scheduler.Scheduler, error) {
-	return &schedulerMock{}, nil
+	return &schedulerMock{schedulerRunErr: m.schedulerRunErr}, nil
 }
 
 func (m mockStorageOk) Set(scheduler.Scheduler) error {
@@ -463,11 +468,12 @@ func TestServer_Run(t *testing.T) {
 		assert.Equal(t, nil, err)
 	})
 	t.Run("Should: return error", func(t *testing.T) {
-		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, mockCacheErr{})
+		s := New(&mockStorageOk{schedulerRunErr: errors.New("schedulerRunErr")},
+			nil, &mockConfigStorageOk{}, mockCacheErr{})
 		_, err := s.Run(context.Background(), &apiPb.RunRequest{
 			Id: primitive.NewObjectID().Hex(),
 		})
-		assert.Equal(t, nil, err)
+		assert.ErrorContains(t, err, "schedulerRunErr")
 	})
 }
 
