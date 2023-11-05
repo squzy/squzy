@@ -248,6 +248,6 @@ func TestApp_SyncOne(t *testing.T) {
 			Interval: 1,
 			Timeout:  1,
 		})
-		assert.ErrorContains(t, err, "InsertSchedule")
+		assert.ErrorContains(t, err, "GetScheduleById")
 	})
 }

@@ -31,7 +31,7 @@ func TestRedis_InsertSchedule(t *testing.T) {
 
 	data := &apiPb.InsertScheduleWithIdRequest{
 		Id:            "id",
-		ScheduledNext: nil,
+		ScheduledNext: timestamp.New(time.Now()),
 	}
 
 	mock.Regexp().ExpectSet(data.Id, "^[0-9]{10}$", time.Duration(0)).SetVal("")
@@ -67,7 +67,7 @@ func TestRedis_InsertScheduleError(t *testing.T) {
 
 	data := &apiPb.InsertScheduleWithIdRequest{
 		Id:            "id",
-		ScheduledNext: nil,
+		ScheduledNext: timestamp.New(time.Now()),
 	}
 
 	mock.Regexp().ExpectSet(

@@ -3,6 +3,7 @@ package scheduler
 import (
 	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/squzy/squzy/apps/squzy_monitoring/config"
 	"github.com/squzy/squzy/internal/cache"
 	job_executor "github.com/squzy/squzy/internal/job-executor"
@@ -57,12 +58,21 @@ func (s *schl) Run() error {
 	if !s.isStopped {
 		return nil
 	}
-	err := s.cache.InsertSchedule(&apiPb.InsertScheduleWithIdRequest{
-		Id:            s.id.Hex(),
-		ScheduledNext: timestamppb.New(time.Now().Add(s.interval)),
+	next, err := s.cache.GetScheduleById(&apiPb.GetScheduleWithIdRequest{
+		Id: s.id.Hex(),
 	})
-	if err != nil {
+	if err != redis.Nil && err != nil {
 		return fmt.Errorf("could not insert during run: %w", err)
+	}
+
+	if next.GetScheduledNext() == nil {
+		err := s.cache.InsertSchedule(&apiPb.InsertScheduleWithIdRequest{
+			Id:            s.id.Hex(),
+			ScheduledNext: timestamppb.New(time.Now().Add(s.interval)),
+		})
+		if err != nil {
+			return fmt.Errorf("could not insert during run: %w", err)
+		}
 	}
 	s.ticker = time.NewTicker(config.SmallestInterval)
 	s.isStopped = false
@@ -82,15 +92,15 @@ func (s *schl) observer() {
 				})
 				if err != nil {
 					logger.Error("could not get schedule" + err.Error())
+					continue
 				}
 
 				next := res.ScheduledNext.AsTime()
 				now := time.Now()
 
-				if now.After(next) {
+				if now.In(time.UTC).After(next) {
 					s.jobExecutor.Execute(s.id)
-
-					err := s.cache.InsertSchedule(&apiPb.InsertScheduleWithIdRequest{
+					err = s.cache.InsertSchedule(&apiPb.InsertScheduleWithIdRequest{
 						Id:            s.id.Hex(),
 						ScheduledNext: timestamppb.New(now.Add(s.interval)),
 					})

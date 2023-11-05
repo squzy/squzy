@@ -30,7 +30,7 @@ func New(ca interface{}) (Cache, error) {
 }
 
 func (c *Redis) InsertSchedule(data *apiPb.InsertScheduleWithIdRequest) error {
-	return c.Client.Set(context.Background(), data.GetId(), time.Now().Unix(), time.Duration(0)).Err()
+	return c.Client.Set(context.Background(), data.GetId(), data.GetScheduledNext().Seconds, time.Duration(0)).Err()
 }
 
 func (c *Redis) GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb.GetScheduleWithIdResponse, error) {

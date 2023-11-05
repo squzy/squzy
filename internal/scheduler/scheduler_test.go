@@ -61,7 +61,10 @@ func (c cacheMockErr) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest
 	return errors.New("DeleteScheduleById")
 }
 
+var CacheMockErrGetCounter = 0
+
 type cacheMockErrGet struct {
+	nThInsert int
 }
 
 func (c cacheMockErrGet) InsertSchedule(data *apiPb.InsertScheduleWithIdRequest) error {
@@ -69,9 +72,13 @@ func (c cacheMockErrGet) InsertSchedule(data *apiPb.InsertScheduleWithIdRequest)
 }
 
 func (c cacheMockErrGet) GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb.GetScheduleWithIdResponse, error) {
-	return &apiPb.GetScheduleWithIdResponse{
-		ScheduledNext: &timestamppb.Timestamp{},
-	}, errors.New("GetScheduleById")
+	CacheMockErrGetCounter++
+	if CacheMockErrGetCounter >= c.nThInsert {
+		return &apiPb.GetScheduleWithIdResponse{
+			ScheduledNext: &timestamppb.Timestamp{},
+		}, errors.New("GetScheduleById")
+	}
+	return nil, nil
 }
 
 func (c cacheMockErrGet) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error {
@@ -100,6 +107,29 @@ func (c cacheMockErrInsert) GetScheduleById(data *apiPb.GetScheduleWithIdRequest
 }
 
 func (c cacheMockErrInsert) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error {
+	return nil
+}
+
+type cacheMockErrInsertEmptyGet struct {
+	nThInsert int
+}
+
+func (c cacheMockErrInsertEmptyGet) InsertSchedule(data *apiPb.InsertScheduleWithIdRequest) error {
+	CacheMockErrInsertCounter++
+	if CacheMockErrInsertCounter >= c.nThInsert {
+		return errors.New("InsertSchedule")
+
+	}
+	return nil
+}
+
+func (c cacheMockErrInsertEmptyGet) GetScheduleById(data *apiPb.GetScheduleWithIdRequest) (*apiPb.GetScheduleWithIdResponse, error) {
+	return &apiPb.GetScheduleWithIdResponse{
+		ScheduledNext: nil,
+	}, nil
+}
+
+func (c cacheMockErrInsertEmptyGet) DeleteScheduleById(data *apiPb.DeleteScheduleWithIdRequest) error {
 	return nil
 }
 
@@ -168,11 +198,19 @@ func TestSchl_Run(t *testing.T) {
 			i, err := New(primitive.NewObjectID(), time.Second, store, &cacheMockErr{})
 			assert.Equal(t, nil, err)
 			err = i.Run()
+			assert.ErrorContains(t, err, "GetScheduleById")
+		})
+		t.Run("Should: return err", func(t *testing.T) {
+			store := &jobExecutor{}
+			i, err := New(primitive.NewObjectID(), time.Second, store,
+				&cacheMockErrInsertEmptyGet{})
+			assert.Equal(t, nil, err)
+			err = i.Run()
 			assert.ErrorContains(t, err, "InsertSchedule")
 		})
 		t.Run("Should: observer return err", func(t *testing.T) {
 			store := &jobExecutor{}
-			i, err := New(primitive.NewObjectID(), time.Second, store, &cacheMockErrGet{})
+			i, err := New(primitive.NewObjectID(), time.Second, store, &cacheMockErrGet{2})
 			assert.Equal(t, nil, err)
 			err = i.Run()
 			assert.Nil(t, err)
