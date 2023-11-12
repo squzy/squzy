@@ -1,6 +1,6 @@
 module github.com/squzy/squzy
 
-go 1.20
+go 1.21
 
 require (
 	github.com/ClickHouse/clickhouse-go v1.4.5
