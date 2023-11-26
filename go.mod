@@ -18,7 +18,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.21.12
 	github.com/slack-go/slack v0.6.5
 	github.com/squzy/mongo_helper v0.0.0-20200713232419-037a870c9d06
-	github.com/squzy/squzy_generated v1.14.1-0.20230212110805-be019be01559
+	github.com/squzy/squzy_generated v1.15.0
 	github.com/stretchr/testify v1.8.1
 	github.com/tidwall/gjson v1.13.0
 	go.mongodb.org/mongo-driver v1.8.2
