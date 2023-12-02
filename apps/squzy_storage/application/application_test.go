@@ -2,9 +2,9 @@ package application
 
 import (
 	"context"
-	empty "google.golang.org/protobuf/types/known/emptypb"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 	"net"
 	"testing"
 	"time"
@@ -89,6 +89,7 @@ func (*configMock) GetDbPassword() string {
 }
 
 type mockApiStorage struct {
+	apiPb.UnimplementedStorageServer
 }
 
 func (s mockApiStorage) SaveIncident(context.Context, *apiPb.Incident) (*empty.Empty, error) {

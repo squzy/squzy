@@ -17,7 +17,7 @@ func (s schedulerMock) GetID() string {
 	return "1"
 }
 
-func (s schedulerMock) Run() {
+func (s schedulerMock) Run() error {
 	panic("implement me")
 }
 

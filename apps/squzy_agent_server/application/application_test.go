@@ -11,6 +11,7 @@ import (
 )
 
 type mock struct {
+	apiPb.UnimplementedAgentServerServer
 }
 
 func (m mock) Register(ctx context.Context, request *apiPb.RegisterRequest) (*apiPb.RegisterResponse, error) {

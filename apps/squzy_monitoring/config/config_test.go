@@ -8,7 +8,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	t.Run("Shoud: return default value", func(t *testing.T) {
+	t.Run("Should: return default value", func(t *testing.T) {
 		s := New()
 		assert.Equal(t, s.GetPort(), defaultPort)
 		assert.Equal(t, s.GetClientAddress(), "")
@@ -16,6 +16,10 @@ func TestNew(t *testing.T) {
 		assert.Equal(t, s.GetMongoDb(), defaultMongoDb)
 		assert.Equal(t, s.GetStorageTimeout(), defaultStorageTimeout)
 		assert.Equal(t, s.GetMongoCollection(), defaultCollection)
+		assert.Equal(t, s.GetCacheAddr(), "")
+		assert.Equal(t, s.GetCachePassword(), "")
+		assert.Equal(t, s.GetCacheDB(), int32(0))
+
 	})
 }
 
@@ -59,5 +63,29 @@ func TestCfg_GetMongoUri(t *testing.T) {
 		os.Setenv(ENV_MONGO_URI, "11124")
 		s := New()
 		assert.Equal(t, s.GetMongoURI(), "11124")
+	})
+}
+
+func TestCfg_GetCacheAddr(t *testing.T) {
+	t.Run("Should: return from env", func(t *testing.T) {
+		os.Setenv(ENV_CACHE_ADDR, "11124")
+		s := New()
+		assert.Equal(t, s.GetCacheAddr(), "11124")
+	})
+}
+
+func TestCfg_GetCachePassword(t *testing.T) {
+	t.Run("Should: return from env", func(t *testing.T) {
+		os.Setenv(ENV_CACHE_PASSWORD, "11124")
+		s := New()
+		assert.Equal(t, s.GetCachePassword(), "11124")
+	})
+}
+
+func TestCfg_GetCacheDB(t *testing.T) {
+	t.Run("Should: return from env", func(t *testing.T) {
+		os.Setenv(ENV_CACHE_DB, "11124")
+		s := New()
+		assert.Equal(t, s.GetCacheDB(), int32(11124))
 	})
 }

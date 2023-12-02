@@ -154,7 +154,9 @@ Bold is required
 - **MONGO_URI** - mongo url for save data
 - MONGO_DB(squzy_monitoring) - mongo db name
 - MONGO_COLLECTION(schedulers) - in which collection we should save data
-
+- CACHE_ADDR - redis url
+- CACHE_PASSWORD - redis password
+- CACHE_DB - redis db
 ## Docker
 
 [HUB](https://hub.docker.com/repository/docker/squzy/squzy_monitoring)

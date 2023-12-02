@@ -2,15 +2,16 @@ package application
 
 import (
 	"context"
-	empty "google.golang.org/protobuf/types/known/emptypb"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 	"net"
 	"testing"
 	"time"
 )
 
 type mock struct {
+	apiPb.UnimplementedApplicationMonitoringServer
 }
 
 func (m mock) GetApplicationListByAgentId(ctx context.Context, request *apiPb.AgentIdRequest) (*apiPb.GetApplicationListResponse, error) {

@@ -14,6 +14,7 @@ import (
 )
 
 type server struct {
+	apiPb.UnimplementedIncidentServerServer
 	ruleDb             database.Database
 	storage            apiPb.StorageClient
 	notificationClient apiPb.NotificationManagerClient

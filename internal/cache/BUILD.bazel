@@ -1,29 +1,26 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-    name = "scheduler",
-    srcs = ["scheduler.go"],
-    importpath = "github.com/squzy/squzy/internal/scheduler",
+    name = "cache",
+    srcs = ["cache.go"],
+    importpath = "github.com/squzy/squzy/internal/cache",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//apps/squzy_monitoring/config",
-        "//internal/cache",
-        "//internal/job-executor",
-        "//internal/logger",
+        "@com_github_go_redis_redis_v8//:redis",
         "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@org_golang_google_protobuf//types/known/timestamppb",
-        "@org_mongodb_go_mongo_driver//bson/primitive",
     ],
 )
 
 go_test(
-    name = "scheduler_test",
-    srcs = ["scheduler_test.go"],
-    embed = [":scheduler"],
+    name = "cache_test",
+    srcs = ["cache_test.go"],
+    embed = [":cache"],
     deps = [
+        "@com_github_go_redis_redis_v8//:redis",
+        "@com_github_go_redis_redismock_v8//:redismock",
         "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@com_github_stretchr_testify//assert",
         "@org_golang_google_protobuf//types/known/timestamppb",
-        "@org_mongodb_go_mongo_driver//bson/primitive",
     ],
 )

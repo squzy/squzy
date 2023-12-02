@@ -18,6 +18,7 @@ const (
 )
 
 type server struct {
+	apiPb.UnimplementedStorageServer
 	database       database.Database
 	incidentClient apiPb.IncidentServerClient
 	cfg            config.Config
