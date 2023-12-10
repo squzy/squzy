@@ -87,7 +87,7 @@ jobs:
 
   build_mac_agent:
     name: Build mac agent with cgo
-    runs-on: macOS-10.15
+    runs-on: macos-latest
     needs: build
     steps:
       - name: Set up Go 1.21.0
