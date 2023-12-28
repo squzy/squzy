@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"github.com/squzy/squzy/internal/cache"
 	"github.com/squzy/squzy/internal/helpers"
@@ -26,6 +27,7 @@ type server struct {
 	jobExecutor      job_executor.JobExecutor
 	configStorage    scheduler_config_storage.Storage
 	cache            cache.Cache
+	mySqlPing        func(db *sql.DB) error
 }
 
 func (s *server) GetSchedulerList(ctx context.Context, rq *empty.Empty) (*apiPb.GetSchedulerListResponse, error) {
@@ -162,6 +164,75 @@ func (s *server) GetSchedulerById(ctx context.Context, rq *apiPb.GetSchedulerByI
 					Url:       config.HTTPValueConfig.URL,
 					Headers:   config.HTTPValueConfig.Headers,
 					Selectors: helpers.SelectorsToProto(config.HTTPValueConfig.Selectors),
+				},
+			},
+		}, nil
+	case apiPb.SchedulerType_MONGO:
+		return &apiPb.Scheduler{
+			Id:       id,
+			Name:     config.Name,
+			Type:     apiPb.SchedulerType_MONGO,
+			Status:   config.Status,
+			Interval: config.Interval,
+			Timeout:  config.Timeout,
+			Config: &apiPb.Scheduler_Mongo{
+				Mongo: &apiPb.DbConfig{
+					Host: config.Db.Host,
+					Port: config.Db.Port,
+				},
+			},
+		}, nil
+	case apiPb.SchedulerType_POSTGRES:
+		return &apiPb.Scheduler{
+			Id:       id,
+			Name:     config.Name,
+			Type:     apiPb.SchedulerType_POSTGRES,
+			Status:   config.Status,
+			Interval: config.Interval,
+			Timeout:  config.Timeout,
+			Config: &apiPb.Scheduler_Postgres{
+				Postgres: &apiPb.DbConfig{
+					Host:     config.Db.Host,
+					Port:     config.Db.Port,
+					User:     config.Db.User,
+					Password: config.Db.Password,
+					DbName:   config.Db.DbName,
+				},
+			},
+		}, nil
+	case apiPb.SchedulerType_CASSANDRA:
+		return &apiPb.Scheduler{
+			Id:       id,
+			Name:     config.Name,
+			Type:     apiPb.SchedulerType_POSTGRES,
+			Status:   config.Status,
+			Interval: config.Interval,
+			Timeout:  config.Timeout,
+			Config: &apiPb.Scheduler_Cassandra{
+				Cassandra: &apiPb.DbConfig{
+					Host:     config.Db.Host,
+					Port:     config.Db.Port,
+					User:     config.Db.User,
+					Password: config.Db.Password,
+					DbName:   config.Db.Cluster,
+				},
+			},
+		}, nil
+	case apiPb.SchedulerType_MYSQL:
+		return &apiPb.Scheduler{
+			Id:       id,
+			Name:     config.Name,
+			Type:     apiPb.SchedulerType_POSTGRES,
+			Status:   config.Status,
+			Interval: config.Interval,
+			Timeout:  config.Timeout,
+			Config: &apiPb.Scheduler_Mysql{
+				Mysql: &apiPb.DbConfig{
+					Host:     config.Db.Host,
+					Port:     config.Db.Port,
+					User:     config.Db.User,
+					Password: config.Db.Password,
+					DbName:   config.Db.DbName,
 				},
 			},
 		}, nil
@@ -328,7 +399,67 @@ func (s *server) Add(ctx context.Context, rq *apiPb.AddRequest) (*apiPb.AddRespo
 				Port: config.SslExpiration.Port,
 			},
 		}
-
+	case *apiPb.AddRequest_Mongo:
+		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
+			ID:       schld.GetIDBson(),
+			Name:     rq.Name,
+			Type:     apiPb.SchedulerType_MONGO,
+			Status:   apiPb.SchedulerStatus_STOPPED,
+			Interval: rq.Interval,
+			Timeout:  rq.Timeout,
+			Db: &scheduler_config_storage.DbConfig{
+				Host: config.Mongo.Host,
+				Port: config.Mongo.Port,
+			},
+		}
+	case *apiPb.AddRequest_Postgres:
+		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
+			ID:       schld.GetIDBson(),
+			Name:     rq.Name,
+			Type:     apiPb.SchedulerType_POSTGRES,
+			Status:   apiPb.SchedulerStatus_STOPPED,
+			Interval: rq.Interval,
+			Timeout:  rq.Timeout,
+			Db: &scheduler_config_storage.DbConfig{
+				Host:     config.Postgres.Host,
+				Port:     config.Postgres.Port,
+				User:     config.Postgres.User,
+				Password: config.Postgres.Password,
+				DbName:   config.Postgres.DbName,
+			},
+		}
+	case *apiPb.AddRequest_Cassandra:
+		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
+			ID:       schld.GetIDBson(),
+			Name:     rq.Name,
+			Type:     apiPb.SchedulerType_POSTGRES,
+			Status:   apiPb.SchedulerStatus_STOPPED,
+			Interval: rq.Interval,
+			Timeout:  rq.Timeout,
+			Db: &scheduler_config_storage.DbConfig{
+				Host:     config.Cassandra.Host,
+				Port:     config.Cassandra.Port,
+				User:     config.Cassandra.User,
+				Password: config.Cassandra.Password,
+				Cluster:  config.Cassandra.Cluster,
+			},
+		}
+	case *apiPb.AddRequest_Mysql:
+		schedulerConfig = &scheduler_config_storage.SchedulerConfig{
+			ID:       schld.GetIDBson(),
+			Name:     rq.Name,
+			Type:     apiPb.SchedulerType_POSTGRES,
+			Status:   apiPb.SchedulerStatus_STOPPED,
+			Interval: rq.Interval,
+			Timeout:  rq.Timeout,
+			Db: &scheduler_config_storage.DbConfig{
+				Host:     config.Mysql.Host,
+				Port:     config.Mysql.Port,
+				User:     config.Mysql.User,
+				Password: config.Mysql.Password,
+				DbName:   config.Mysql.DbName,
+			},
+		}
 	default:
 		return nil, errInvalidTypeError
 	}
