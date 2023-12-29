@@ -4,6 +4,7 @@ go_library(
     name = "job",
     srcs = [
         "job.go",
+        "job_cassandra.go",
         "job_grpc.go",
         "job_http.go",
         "job_json_http_value.go",
@@ -14,11 +15,13 @@ go_library(
     importpath = "github.com/squzy/squzy/internal/job",
     visibility = ["//:__subpackages__"],
     deps = [
+        "//internal/cassandra-tools",
         "//internal/helpers",
         "//internal/httptools",
         "//internal/scheduler-config-storage",
         "//internal/semaphore",
         "//internal/sitemap-storage",
+        "@com_github_golang_protobuf//ptypes/timestamp",
         "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@com_github_tidwall_gjson//:gjson",
         "@org_golang_google_grpc//:go_default_library",
@@ -33,6 +36,7 @@ go_library(
 go_test(
     name = "job_test",
     srcs = [
+        "job_cassandra_test.go",
         "job_grpc_test.go",
         "job_http_test.go",
         "job_json_http_value_test.go",
@@ -46,6 +50,7 @@ go_test(
         "//internal/parsers",
         "//internal/scheduler-config-storage",
         "//internal/semaphore",
+        "@com_github_gocql_gocql//:go_default_library",
         "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
         "@com_github_stretchr_testify//assert",
         "@org_golang_google_grpc//:go_default_library",

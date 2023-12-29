@@ -3,6 +3,7 @@ package job_executor
 import (
 	"context"
 	"crypto/tls"
+	cassandra_tools "github.com/squzy/squzy/internal/cassandra-tools"
 	"github.com/squzy/squzy/internal/httptools"
 	"github.com/squzy/squzy/internal/job"
 	"github.com/squzy/squzy/internal/logger"
@@ -47,6 +48,10 @@ type HTTPValueExecutor func(
 	config *scheduler_config_storage.HTTPValueConfig,
 	httpTool httptools.HTTPTool) job.CheckError
 
+type CassandraExecutor func(schedulerId string,
+	config *scheduler_config_storage.DbConfig,
+	cTools cassandra_tools.CassandraTools) job.CheckError
+
 type executor struct {
 	externalStorage    storage.Storage
 	siteMapStorage     sitemap_storage.SiteMapStorage
@@ -59,6 +64,7 @@ type executor struct {
 	execSiteMap        SiteMapExecutor
 	execHTTPValue      HTTPValueExecutor
 	execSSLExpiration  SSLExpirationExecutor
+	execCassandra      CassandraExecutor
 }
 
 func (e *executor) Execute(schedulerID primitive.ObjectID) {
@@ -91,6 +97,11 @@ func (e *executor) Execute(schedulerID primitive.ObjectID) {
 	case apiPb.SchedulerType_SSL_EXPIRATION:
 		_ = e.externalStorage.Write(e.execSSLExpiration(id, config.Timeout, config.SslExpirationConfig, nil))
 		logger.Infof("SSL Expiration job executed is used for scheduler id %s", schedulerID)
+	case apiPb.SchedulerType_CASSANDRA:
+		cTools := cassandra_tools.NewCassandraTools(config.Db.Cluster, config.Db.User, config.Db.Password, config.Timeout)
+
+		_ = e.externalStorage.Write(e.execCassandra(id, config.Db, cTools))
+		logger.Infof("Cassandra job executed is used for scheduler id %s", schedulerID)
 	default:
 		logger.Errorf("Incorrect config type passed to job executor: %s", config.Type)
 	}
@@ -112,6 +123,7 @@ func NewExecutor(
 	execSiteMap SiteMapExecutor,
 	execHTTPValue HTTPValueExecutor,
 	execSSLExpiration SSLExpirationExecutor,
+	cassandraExecutor CassandraExecutor,
 ) JobExecutor {
 	return &executor{
 		externalStorage:    externalStorage,
@@ -125,5 +137,6 @@ func NewExecutor(
 		execSiteMap:        execSiteMap,
 		execHTTPValue:      execHTTPValue,
 		execSSLExpiration:  execSSLExpiration,
+		execCassandra:      cassandraExecutor,
 	}
 }

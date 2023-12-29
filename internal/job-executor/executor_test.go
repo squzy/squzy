@@ -4,15 +4,15 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
-	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
-	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"google.golang.org/grpc"
 	"github.com/squzy/squzy/internal/httptools"
 	"github.com/squzy/squzy/internal/job"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	"github.com/squzy/squzy/internal/semaphore"
 	sitemap_storage "github.com/squzy/squzy/internal/sitemap-storage"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"google.golang.org/grpc"
 	"testing"
 )
 
@@ -142,6 +142,7 @@ func TestNewExecutor(t *testing.T) {
 			nil,
 			nil,
 			nil,
+			nil,
 		)
 		assert.Implements(t, (*JobExecutor)(nil), s)
 	})
@@ -162,6 +163,7 @@ func TestExecutor_Execute(t *testing.T) {
 			fnMock.SiteMapMock,
 			fnMock.HttpValueMock,
 			fnMock.SSLExpirationMock,
+			nil,
 		)
 		s.Execute(primitive.NewObjectID())
 		assert.Equal(t, false, fnMock.executed)
@@ -177,6 +179,7 @@ func TestExecutor_Execute(t *testing.T) {
 				apiPb.SchedulerType_TCP,
 			},
 			fnMock.TcpMock,
+			nil,
 			nil,
 			nil,
 			nil,
@@ -202,6 +205,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			nil,
+			nil,
 		)
 		s.Execute(primitive.NewObjectID())
 		assert.Equal(t, true, fnMock.executed)
@@ -219,6 +223,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			fnMock.HttpMock,
+			nil,
 			nil,
 			nil,
 			nil,
@@ -242,6 +247,7 @@ func TestExecutor_Execute(t *testing.T) {
 			fnMock.SiteMapMock,
 			nil,
 			nil,
+			nil,
 		)
 		s.Execute(primitive.NewObjectID())
 		assert.Equal(t, true, fnMock.executed)
@@ -262,6 +268,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			fnMock.SSLExpirationMock,
+			nil,
 		)
 		s.Execute(primitive.NewObjectID())
 		assert.Equal(t, true, fnMock.executed)
@@ -282,6 +289,7 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			fnMock.HttpValueMock,
 			nil,
+			nil,
 		)
 		s.Execute(primitive.NewObjectID())
 		assert.Equal(t, true, fnMock.executed)
@@ -296,6 +304,7 @@ func TestExecutor_Execute(t *testing.T) {
 			&configStorageMockOk{
 				11111,
 			},
+			nil,
 			nil,
 			nil,
 			nil,

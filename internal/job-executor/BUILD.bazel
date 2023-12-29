@@ -6,6 +6,7 @@ go_library(
     importpath = "github.com/squzy/squzy/internal/job-executor",
     visibility = ["//:__subpackages__"],
     deps = [
+        "//internal/cassandra-tools",
         "//internal/httptools",
         "//internal/job",
         "//internal/logger",
