@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"github.com/squzy/squzy/internal/cache"
 	"github.com/squzy/squzy/internal/helpers"
@@ -27,7 +26,6 @@ type server struct {
 	jobExecutor      job_executor.JobExecutor
 	configStorage    scheduler_config_storage.Storage
 	cache            cache.Cache
-	mySqlPing        func(db *sql.DB) error
 }
 
 func (s *server) GetSchedulerList(ctx context.Context, rq *empty.Empty) (*apiPb.GetSchedulerListResponse, error) {

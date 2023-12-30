@@ -52,6 +52,12 @@ type CassandraExecutor func(schedulerId string,
 	config *scheduler_config_storage.DbConfig,
 	cTools cassandra_tools.CassandraTools) job.CheckError
 
+type MongoExecutor func(config *scheduler_config_storage.DbConfig, mongo job.MongoConnector) job.CheckError
+
+type MysqlExecutor func(config *scheduler_config_storage.DbConfig, dbC job.DBConnector) job.CheckError
+
+type PostgresExecutor func(config *scheduler_config_storage.DbConfig, dbC job.DBConnector) job.CheckError
+
 type executor struct {
 	externalStorage    storage.Storage
 	siteMapStorage     sitemap_storage.SiteMapStorage
@@ -65,6 +71,9 @@ type executor struct {
 	execHTTPValue      HTTPValueExecutor
 	execSSLExpiration  SSLExpirationExecutor
 	execCassandra      CassandraExecutor
+	execMongo          MongoExecutor
+	execMysql          MysqlExecutor
+	execPostgres       PostgresExecutor
 }
 
 func (e *executor) Execute(schedulerID primitive.ObjectID) {
@@ -99,9 +108,17 @@ func (e *executor) Execute(schedulerID primitive.ObjectID) {
 		logger.Infof("SSL Expiration job executed is used for scheduler id %s", schedulerID)
 	case apiPb.SchedulerType_CASSANDRA:
 		cTools := cassandra_tools.NewCassandraTools(config.Db.Cluster, config.Db.User, config.Db.Password, config.Timeout)
-
 		_ = e.externalStorage.Write(e.execCassandra(id, config.Db, cTools))
-		logger.Infof("Cassandra job executed is used for scheduler id %s", schedulerID)
+		logger.Infof("CASSANDRA job executed is used for scheduler id %s", schedulerID)
+	case apiPb.SchedulerType_MONGO:
+		_ = e.externalStorage.Write(e.execMongo(config.Db, job.MongoConnection{}))
+		logger.Infof("MONGO job executed is used for scheduler id %s", schedulerID)
+	case apiPb.SchedulerType_MYSQL:
+		_ = e.externalStorage.Write(e.execMysql(config.Db, job.DBConnection{}))
+		logger.Infof("MYSQL job executed is used for scheduler id %s", schedulerID)
+	case apiPb.SchedulerType_POSTGRES:
+		_ = e.externalStorage.Write(e.execPostgres(config.Db, job.DBConnection{}))
+		logger.Infof("POSTGRES job executed is used for scheduler id %s", schedulerID)
 	default:
 		logger.Errorf("Incorrect config type passed to job executor: %s", config.Type)
 	}
