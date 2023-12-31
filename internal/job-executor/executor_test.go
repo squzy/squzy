@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	cassandra_tools "github.com/squzy/squzy/internal/cassandra-tools"
 	"github.com/squzy/squzy/internal/httptools"
 	"github.com/squzy/squzy/internal/job"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
@@ -31,6 +32,7 @@ func (c configStorageMockOk) Get(ctx context.Context, schedulerId primitive.Obje
 	return &scheduler_config_storage.SchedulerConfig{
 		ID:   primitive.NewObjectID(),
 		Type: c.typeOfChecker,
+		Db:   &scheduler_config_storage.DbConfig{},
 	}, nil
 }
 
@@ -128,9 +130,40 @@ func (m *fnMock) SSLExpirationMock(
 	return nil
 }
 
+func (m *fnMock) CassandraMock(schedulerId string,
+	config *scheduler_config_storage.DbConfig,
+	cTools cassandra_tools.CassandraTools) job.CheckError {
+	m.executed = true
+	return nil
+}
+
+func (m *fnMock) MongoMock(schedulerId string,
+	config *scheduler_config_storage.DbConfig,
+	mongo job.MongoConnector) job.CheckError {
+	m.executed = true
+	return nil
+}
+
+func (m *fnMock) MysqlMock(schedulerId string,
+	config *scheduler_config_storage.DbConfig,
+	dbC job.DBConnector) job.CheckError {
+	m.executed = true
+	return nil
+}
+
+func (m *fnMock) PostgresMock(schedulerId string,
+	config *scheduler_config_storage.DbConfig,
+	dbC job.DBConnector) job.CheckError {
+	m.executed = true
+	return nil
+}
+
 func TestNewExecutor(t *testing.T) {
 	t.Run("Should: implement interface", func(t *testing.T) {
 		s := NewExecutor(
+			nil,
+			nil,
+			nil,
 			nil,
 			nil,
 			nil,
@@ -163,7 +196,10 @@ func TestExecutor_Execute(t *testing.T) {
 			fnMock.SiteMapMock,
 			fnMock.HttpValueMock,
 			fnMock.SSLExpirationMock,
-			nil,
+			fnMock.CassandraMock,
+			fnMock.MongoMock,
+			fnMock.MysqlMock,
+			fnMock.PostgresMock,
 		)
 		s.Execute(primitive.NewObjectID())
 		assert.Equal(t, false, fnMock.executed)
@@ -179,6 +215,9 @@ func TestExecutor_Execute(t *testing.T) {
 				apiPb.SchedulerType_TCP,
 			},
 			fnMock.TcpMock,
+			nil,
+			nil,
+			nil,
 			nil,
 			nil,
 			nil,
@@ -206,6 +245,9 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			nil,
+			nil,
+			nil,
+			nil,
 		)
 		s.Execute(primitive.NewObjectID())
 		assert.Equal(t, true, fnMock.executed)
@@ -223,6 +265,9 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			fnMock.HttpMock,
+			nil,
+			nil,
+			nil,
 			nil,
 			nil,
 			nil,
@@ -248,11 +293,14 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			nil,
+			nil,
+			nil,
+			nil,
 		)
 		s.Execute(primitive.NewObjectID())
 		assert.Equal(t, true, fnMock.executed)
 	})
-	t.Run("Should: execute sslexpirztion mock", func(t *testing.T) {
+	t.Run("Should: execute sslexpiration mock", func(t *testing.T) {
 		fnMock := &fnMock{}
 		s := NewExecutor(
 			&externalStorageMock{},
@@ -268,6 +316,9 @@ func TestExecutor_Execute(t *testing.T) {
 			nil,
 			nil,
 			fnMock.SSLExpirationMock,
+			nil,
+			nil,
+			nil,
 			nil,
 		)
 		s.Execute(primitive.NewObjectID())
@@ -290,6 +341,105 @@ func TestExecutor_Execute(t *testing.T) {
 			fnMock.HttpValueMock,
 			nil,
 			nil,
+			nil,
+			nil,
+			nil,
+		)
+		s.Execute(primitive.NewObjectID())
+		assert.Equal(t, true, fnMock.executed)
+	})
+	t.Run("Should: execute CASSANDRA mock", func(t *testing.T) {
+		fnMock := &fnMock{}
+		s := NewExecutor(
+			&externalStorageMock{},
+			nil,
+			nil,
+			nil,
+			&configStorageMockOk{
+				apiPb.SchedulerType_CASSANDRA,
+			},
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			fnMock.CassandraMock,
+			nil,
+			nil,
+			nil,
+		)
+		s.Execute(primitive.NewObjectID())
+		assert.Equal(t, true, fnMock.executed)
+	})
+	t.Run("Should: execute MONGO mock", func(t *testing.T) {
+		fnMock := &fnMock{}
+		s := NewExecutor(
+			&externalStorageMock{},
+			nil,
+			nil,
+			nil,
+			&configStorageMockOk{
+				apiPb.SchedulerType_MONGO,
+			},
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			fnMock.MongoMock,
+			nil,
+			nil,
+		)
+		s.Execute(primitive.NewObjectID())
+		assert.Equal(t, true, fnMock.executed)
+	})
+	t.Run("Should: execute MYSQL mock", func(t *testing.T) {
+		fnMock := &fnMock{}
+		s := NewExecutor(
+			&externalStorageMock{},
+			nil,
+			nil,
+			nil,
+			&configStorageMockOk{
+				apiPb.SchedulerType_MYSQL,
+			},
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			fnMock.MysqlMock,
+			nil,
+		)
+		s.Execute(primitive.NewObjectID())
+		assert.Equal(t, true, fnMock.executed)
+	})
+	t.Run("Should: execute POSTGRES mock", func(t *testing.T) {
+		fnMock := &fnMock{}
+		s := NewExecutor(
+			&externalStorageMock{},
+			nil,
+			nil,
+			nil,
+			&configStorageMockOk{
+				apiPb.SchedulerType_POSTGRES,
+			},
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			fnMock.PostgresMock,
 		)
 		s.Execute(primitive.NewObjectID())
 		assert.Equal(t, true, fnMock.executed)
@@ -304,6 +454,9 @@ func TestExecutor_Execute(t *testing.T) {
 			&configStorageMockOk{
 				11111,
 			},
+			nil,
+			nil,
+			nil,
 			nil,
 			nil,
 			nil,

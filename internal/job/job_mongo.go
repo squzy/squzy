@@ -3,7 +3,6 @@ package job
 import (
 	"context"
 	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/google/uuid"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,8 +17,9 @@ var (
 )
 
 type mongoJob struct {
-	dbConfig *scheduler_config_storage.DbConfig
-	mongo    MongoConnector
+	schedulerID string
+	dbConfig    *scheduler_config_storage.DbConfig
+	mongo       MongoConnector
 }
 
 type mongoError struct {
@@ -63,8 +63,7 @@ func (s *mongoError) GetLogData() *apiPb.SchedulerResponse {
 	}
 }
 
-func ExecMongo(config *scheduler_config_storage.DbConfig, mongo MongoConnector) CheckError {
-	logId := uuid.New().String()
+func ExecMongo(schedulerId string, config *scheduler_config_storage.DbConfig, mongo MongoConnector) CheckError {
 	startTime := timestamppb.Now()
 
 	clientOptions := options.Client().ApplyURI(config.Host)
@@ -72,15 +71,15 @@ func ExecMongo(config *scheduler_config_storage.DbConfig, mongo MongoConnector) 
 	defer cancel()
 	err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		return newMongoError(logId, startTime, timestamppb.Now(), apiPb.SchedulerCode_ERROR, mongoConnectionError.Error(), config.Host)
+		return newMongoError(schedulerId, startTime, timestamppb.Now(), apiPb.SchedulerCode_ERROR, mongoConnectionError.Error(), config.Host)
 	}
 
 	err = mongo.Ping(context.TODO(), nil)
 	if err != nil {
-		return newMongoError(logId, startTime, timestamppb.Now(), apiPb.SchedulerCode_ERROR, mongoPingError.Error(), config.Host)
+		return newMongoError(schedulerId, startTime, timestamppb.Now(), apiPb.SchedulerCode_ERROR, mongoPingError.Error(), config.Host)
 	}
 
-	return newMongoError(logId, startTime, timestamppb.Now(), apiPb.SchedulerCode_OK, "", config.Host)
+	return newMongoError(schedulerId, startTime, timestamppb.Now(), apiPb.SchedulerCode_OK, "", config.Host)
 }
 
 type MongoConnector interface {
@@ -89,11 +88,18 @@ type MongoConnector interface {
 }
 
 type MongoConnection struct {
-	Client *mongo.Client
+	Client   *mongo.Client
+	Connect_ func(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error)
+}
+
+func NewMongoConnection() MongoConnection {
+	return MongoConnection{
+		Connect_: mongo.Connect,
+	}
 }
 
 func (m MongoConnection) Connect(ctx context.Context, opts ...*options.ClientOptions) error {
-	if client, err := mongo.Connect(ctx, opts...); err == nil {
+	if client, err := m.Connect_(ctx, opts...); err == nil {
 		m.Client = client
 		return err
 	} else {

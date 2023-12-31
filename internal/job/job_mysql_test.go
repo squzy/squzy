@@ -1,7 +1,9 @@
 package job
 
 import (
+	"database/sql"
 	"errors"
+	"fmt"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
@@ -43,9 +45,9 @@ func TestMysqlJob_Do(t *testing.T) {
 		t.Run("Should: return error connecting", func(t *testing.T) {
 			j := mysqlJob{
 				dbConfig: &scheduler_config_storage.DbConfig{},
-				db:       &DBConnection{},
+				db:       NewDBConnection(),
 			}
-			err := ExecMysql(j.dbConfig, j.db)
+			err := ExecMysql(j.schedulerID, j.dbConfig, j.db)
 			expected := apiPb.SchedulerCode_ERROR
 			actual := err.GetLogData().Snapshot.Code
 			assert.EqualValues(t, expected, actual)
@@ -55,7 +57,7 @@ func TestMysqlJob_Do(t *testing.T) {
 				dbConfig: &scheduler_config_storage.DbConfig{},
 				db:       &dbMockErr{},
 			}
-			err := ExecMysql(j.dbConfig, j.db)
+			err := ExecMysql(j.schedulerID, j.dbConfig, j.db)
 			expected := apiPb.SchedulerCode_ERROR
 			actual := err.GetLogData().Snapshot.Code
 			assert.EqualValues(t, expected, actual)
@@ -65,10 +67,27 @@ func TestMysqlJob_Do(t *testing.T) {
 				dbConfig: &scheduler_config_storage.DbConfig{},
 				db:       &dbMockOk{},
 			}
-			err := ExecMysql(j.dbConfig, j.db)
+			err := ExecMysql(j.schedulerID, j.dbConfig, j.db)
 			expected := apiPb.SchedulerCode_OK
 			actual := err.GetLogData().Snapshot.Code
 			assert.EqualValues(t, expected, actual)
 		})
+	})
+}
+
+var openMock = func(driverName, dataSourceName string) (*sql.DB, error) {
+	return &sql.DB{}, nil
+}
+
+func TestDBConnection_Connect(t *testing.T) {
+	t.Run("Should: get connection", func(t *testing.T) {
+		config := &scheduler_config_storage.DbConfig{}
+		m := DBConnection{Open: openMock}
+		args := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+			config.Host, config.Port, config.User, config.Password, config.DbName)
+
+		err := m.Connect("mysql", args)
+		assert.Nil(t, err)
+		assert.NotNil(t, t, m.Client)
 	})
 }

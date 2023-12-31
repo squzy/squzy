@@ -52,11 +52,11 @@ type CassandraExecutor func(schedulerId string,
 	config *scheduler_config_storage.DbConfig,
 	cTools cassandra_tools.CassandraTools) job.CheckError
 
-type MongoExecutor func(config *scheduler_config_storage.DbConfig, mongo job.MongoConnector) job.CheckError
+type MongoExecutor func(schedulerId string, config *scheduler_config_storage.DbConfig, mongo job.MongoConnector) job.CheckError
 
-type MysqlExecutor func(config *scheduler_config_storage.DbConfig, dbC job.DBConnector) job.CheckError
+type MysqlExecutor func(schedulerId string, config *scheduler_config_storage.DbConfig, dbC job.DBConnector) job.CheckError
 
-type PostgresExecutor func(config *scheduler_config_storage.DbConfig, dbC job.DBConnector) job.CheckError
+type PostgresExecutor func(schedulerId string, config *scheduler_config_storage.DbConfig, dbC job.DBConnector) job.CheckError
 
 type executor struct {
 	externalStorage    storage.Storage
@@ -111,13 +111,13 @@ func (e *executor) Execute(schedulerID primitive.ObjectID) {
 		_ = e.externalStorage.Write(e.execCassandra(id, config.Db, cTools))
 		logger.Infof("CASSANDRA job executed is used for scheduler id %s", schedulerID)
 	case apiPb.SchedulerType_MONGO:
-		_ = e.externalStorage.Write(e.execMongo(config.Db, job.MongoConnection{}))
+		_ = e.externalStorage.Write(e.execMongo(id, config.Db, job.NewMongoConnection()))
 		logger.Infof("MONGO job executed is used for scheduler id %s", schedulerID)
 	case apiPb.SchedulerType_MYSQL:
-		_ = e.externalStorage.Write(e.execMysql(config.Db, job.DBConnection{}))
+		_ = e.externalStorage.Write(e.execMysql(id, config.Db, job.NewDBConnection()))
 		logger.Infof("MYSQL job executed is used for scheduler id %s", schedulerID)
 	case apiPb.SchedulerType_POSTGRES:
-		_ = e.externalStorage.Write(e.execPostgres(config.Db, job.DBConnection{}))
+		_ = e.externalStorage.Write(e.execPostgres(id, config.Db, job.NewDBConnection()))
 		logger.Infof("POSTGRES job executed is used for scheduler id %s", schedulerID)
 	default:
 		logger.Errorf("Incorrect config type passed to job executor: %s", config.Type)
@@ -140,7 +140,10 @@ func NewExecutor(
 	execSiteMap SiteMapExecutor,
 	execHTTPValue HTTPValueExecutor,
 	execSSLExpiration SSLExpirationExecutor,
-	cassandraExecutor CassandraExecutor,
+	execCassandra CassandraExecutor,
+	execMongo MongoExecutor,
+	execMysql MysqlExecutor,
+	execPostgres PostgresExecutor,
 ) JobExecutor {
 	return &executor{
 		externalStorage:    externalStorage,
@@ -154,6 +157,9 @@ func NewExecutor(
 		execSiteMap:        execSiteMap,
 		execHTTPValue:      execHTTPValue,
 		execSSLExpiration:  execSSLExpiration,
-		execCassandra:      cassandraExecutor,
+		execCassandra:      execCassandra,
+		execMongo:          execMongo,
+		execMysql:          execMysql,
+		execPostgres:       execPostgres,
 	}
 }

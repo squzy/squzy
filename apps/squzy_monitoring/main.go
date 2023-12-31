@@ -76,6 +76,9 @@ func main() {
 		job.ExecHTTPValue,
 		job.ExecSSL,
 		job.ExecCassandra,
+		job.ExecMongo,
+		job.ExecMysql,
+		job.ExecPostgres,
 	)
 	app := application.New(
 		scheduler_storage.New(),
