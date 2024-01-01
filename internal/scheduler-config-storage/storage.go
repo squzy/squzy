@@ -8,6 +8,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type DbConfig struct {
+	Host     string `bson:"host"`
+	Port     int32  `bson:"port"`
+	User     string `bson:"user"`
+	Password string `bson:"password"`
+	DbName   string `bson:"dbName"`
+	Cluster  string `bson:"cluster"`
+}
+
 type GrpcConfig struct {
 	Service string `bson:"service"`
 	Host    string `bson:"host"`
@@ -61,6 +70,7 @@ type SchedulerConfig struct {
 	HTTPConfig          *HTTPConfig           `bson:"httpConfig,omitempty"`
 	HTTPValueConfig     *HTTPValueConfig      `bson:"httpValueConfig,omitempty"`
 	SslExpirationConfig *SslExpirationConfig  `bson:"sslExpirationConfig,omitempty"`
+	Db                  *DbConfig             `bson:"db"`
 }
 
 type Storage interface {
