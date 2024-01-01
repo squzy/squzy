@@ -379,8 +379,8 @@ github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnIn
 github.com/spf13/viper v1.4.0/go.mod h1:PTJ7Z/lr49W6bUbkmS1V3by4uWynFiR9p7+dSq/yZzE=
 github.com/squzy/mongo_helper v0.0.0-20200713232419-037a870c9d06 h1:NL6hCxYRb9Y24COaTkwklWcQjZTlsPoGKw/yd60KFiM=
 github.com/squzy/mongo_helper v0.0.0-20200713232419-037a870c9d06/go.mod h1:huDC/gEH+DyCTxygdxFmrdnbBSG7XiB2/fAhTelX0ro=
-github.com/squzy/squzy_generated v1.14.1-0.20231227142833-f4d58fa8fb6f h1:iLA2vnDSwXAMorXkzl3WRvDsAGt0wPucMh0J0K8zS+c=
-github.com/squzy/squzy_generated v1.14.1-0.20231227142833-f4d58fa8fb6f/go.mod h1:WAXqvoGTJ2XFhfc8AgxiGJkfx0IE0m2Zo0YSA0BSWaA=
+github.com/squzy/squzy_generated v1.16.0 h1:pDnjW1SNfUpil9RpdVatK30V5B+FQYDctzfGMtswsCg=
+github.com/squzy/squzy_generated v1.16.0/go.mod h1:WAXqvoGTJ2XFhfc8AgxiGJkfx0IE0m2Zo0YSA0BSWaA=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
