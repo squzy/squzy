@@ -75,19 +75,48 @@ func TestMysqlJob_Do(t *testing.T) {
 	})
 }
 
+type dbConnectionOk struct {
+}
+
+func (d dbConnectionOk) Ping() error {
+	return nil
+}
+
+func (d dbConnectionOk) Close() error {
+	return nil
+}
+
 var openMock = func(driverName, dataSourceName string) (*sql.DB, error) {
 	return &sql.DB{}, nil
 }
 
-func TestDBConnection_Connect(t *testing.T) {
-	t.Run("Should: get connection", func(t *testing.T) {
-		config := &scheduler_config_storage.DbConfig{}
-		m := DBConnection{Open: openMock}
-		args := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-			config.Host, config.Port, config.User, config.Password, config.DbName)
+func TestDBConnection(t *testing.T) {
+	t.Run("Test: DBConnection", func(t *testing.T) {
+		t.Run("Should: get Connect", func(t *testing.T) {
+			config := &scheduler_config_storage.DbConfig{}
+			m := DBConnection{Open: openMock}
+			args := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+				config.Host, config.Port, config.User, config.Password, config.DbName)
 
-		err := m.Connect("mysql", args)
-		assert.Nil(t, err)
-		assert.NotNil(t, t, m.Client)
+			err := m.Connect("mysql", args)
+			assert.Nil(t, err)
+			assert.NotNil(t, t, m.Client)
+		})
+		t.Run("Should: Ping", func(t *testing.T) {
+			m := DBConnection{
+				Client: &dbConnectionOk{},
+			}
+
+			err := m.Ping()
+			assert.Nil(t, err)
+		})
+		t.Run("Should: Close", func(t *testing.T) {
+			m := DBConnection{
+				Client: &dbConnectionOk{},
+			}
+
+			err := m.Close()
+			assert.Nil(t, err)
+		})
 	})
 }

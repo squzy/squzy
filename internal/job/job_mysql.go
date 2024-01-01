@@ -83,8 +83,13 @@ type DBConnector interface {
 	Close() error
 }
 
+type DbClient interface {
+	Ping() error
+	Close() error
+}
+
 type DBConnection struct {
-	Client *sql.DB
+	Client DbClient
 	Open   func(driverName, dataSourceName string) (*sql.DB, error)
 }
 

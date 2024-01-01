@@ -87,8 +87,12 @@ type MongoConnector interface {
 	Ping(ctx context.Context, rp *readpref.ReadPref) error
 }
 
+type MongoClient interface {
+	Ping(ctx context.Context, rp *readpref.ReadPref) error
+}
+
 type MongoConnection struct {
-	Client   *mongo.Client
+	Client   MongoClient
 	Connect_ func(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error)
 }
 

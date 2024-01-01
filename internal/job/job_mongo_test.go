@@ -73,14 +73,31 @@ var connectMock = func(ctx context.Context, opts ...*options.ClientOptions) (*mo
 	return &mongo.Client{}, nil
 }
 
-func TestMongoConnection_Connect(t *testing.T) {
-	t.Run("Should: get connection", func(t *testing.T) {
-		config := &scheduler_config_storage.DbConfig{}
-		m := MongoConnection{Connect_: connectMock}
+type mongoConnectionOk struct {
+}
 
-		clientOptions := options.Client().ApplyURI(config.Host)
-		err := m.Connect(context.Background(), clientOptions)
-		assert.Nil(t, err)
-		assert.NotNil(t, t, m.Client)
+func (m mongoConnectionOk) Ping(ctx context.Context, rp *readpref.ReadPref) error {
+	return nil
+}
+
+func TestMongoConnection(t *testing.T) {
+	t.Run("Test: MongoConnection", func(t *testing.T) {
+		t.Run("Should: Connect", func(t *testing.T) {
+			config := &scheduler_config_storage.DbConfig{}
+			m := MongoConnection{Connect_: connectMock}
+
+			clientOptions := options.Client().ApplyURI(config.Host)
+			err := m.Connect(context.Background(), clientOptions)
+			assert.Nil(t, err)
+			assert.NotNil(t, t, m.Client)
+		})
+		t.Run("Should: Ping", func(t *testing.T) {
+			m := MongoConnection{
+				Client: &mongoConnectionOk{},
+			}
+
+			err := m.Ping(context.Background(), &readpref.ReadPref{})
+			assert.Nil(t, err)
+		})
 	})
 }

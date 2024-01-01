@@ -560,6 +560,34 @@ func TestServer_GetSchedulerById(t *testing.T) {
 		})
 		assert.NotEqual(t, nil, err)
 	})
+	t.Run("Should: return Cassandra config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successCassandraConfig.ID.Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return Mongo config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successMongoConfig.ID.Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return Mysql config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successMysqlConfig.ID.Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return Postgres config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successPostgresConfig.ID.Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
 }
 
 func TestServer_Run(t *testing.T) {
@@ -716,6 +744,26 @@ func TestServer_Add(t *testing.T) {
 	t.Run("Should: add http check without error", func(t *testing.T) {
 		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_HTTP])
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: add CASSANDRA check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_CASSANDRA])
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: add MONGO check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_MONGO])
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: add MYSQL check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_MYSQL])
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: add POSTGRES check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_POSTGRES])
 		assert.Equal(t, nil, err)
 	})
 }
