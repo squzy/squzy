@@ -39,10 +39,10 @@ type HTMLValueConfig struct {
 	URL     string            `bson:"url"`
 	Headers map[string]string `bson:"headers"`
 
-	Fields []*Field `bson:"fields"`
+	Selectors []*Selector `bson:"fields"`
 }
 
-type Field struct {
+type Selector struct {
 	Type apiPb.HtmlValueConfig_HtmlValueParseType `bson:"type"`
 	Path string                                   `bson:"path"`
 }
@@ -87,6 +87,7 @@ type SchedulerConfig struct {
 	HTTPConfig          *HTTPConfig           `bson:"httpConfig,omitempty"`
 	HTTPValueConfig     *HTTPValueConfig      `bson:"httpValueConfig,omitempty"`
 	SslExpirationConfig *SslExpirationConfig  `bson:"sslExpirationConfig,omitempty"`
+	HTMLValueConfig     *HTMLValueConfig      `bson:"htmlValueConfig,omitempty"`
 }
 
 type Storage interface {

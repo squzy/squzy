@@ -51,7 +51,7 @@ func ExecHTML(schedulerID string, timeout int32, config *scheduler_config_storag
 	startTime := timestamp.Now()
 
 	var fields map[string]*fconfig.Field
-	for i, f := range config.Fields {
+	for i, f := range config.Selectors {
 		fields[strconv.Itoa(i)] = &fconfig.Field{
 			BaseField: &fconfig.BaseField{
 				Type: scheduler_config_storage.FieldToHtml[f.Type],
@@ -67,6 +67,7 @@ func ExecHTML(schedulerID string, timeout int32, config *scheduler_config_storag
 			ServerConfig: &fconfig.ServerConnectorConfig{
 				Method:  config.Method,
 				Headers: config.Headers,
+				Timeout: uint32(timeout),
 			},
 		},
 		Model: &fconfig.Model{

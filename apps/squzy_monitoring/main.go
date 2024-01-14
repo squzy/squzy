@@ -75,6 +75,7 @@ func main() {
 		job.ExecSiteMap,
 		job.ExecHTTPValue,
 		job.ExecSSL,
+		job.ExecHTML,
 	)
 	app := application.New(
 		scheduler_storage.New(),
