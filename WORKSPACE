@@ -66,6 +66,41 @@ go_repository(
     version = "v0.0.0-20200824232613-28f6c0f3b639",
 )
 
+go_repository(
+    name = "com_github_bitly_go_hostpool",
+    importpath = "github.com/bitly/go-hostpool",
+    sum = "h1:mXoPYz/Ul5HYEDvkta6I8/rnYM5gSdSV2tJ6XbZuEtY=",
+    version = "v0.0.0-20171023180738-a3a6125de932",
+)
+
+go_repository(
+    name = "com_github_bmizerany_assert",
+    importpath = "github.com/bmizerany/assert",
+    sum = "h1:DDGfHa7BWjL4YnC6+E63dPcxHo2sUxDIu8g3QgEJdRY=",
+    version = "v0.0.0-20160611221934-b7ed37b82869",
+)
+
+go_repository(
+    name = "com_github_gocql_gocql",
+    importpath = "github.com/gocql/gocql",
+    sum = "h1:IdFdOTbnpbd0pDhl4REKQDM+Q0SzKXQ1Yh+YZZ8T/qU=",
+    version = "v1.6.0",
+)
+
+go_repository(
+    name = "com_github_hailocab_go_hostpool",
+    importpath = "github.com/hailocab/go-hostpool",
+    sum = "h1:5upAirOpQc1Q53c0bnx2ufif5kANL7bfZWcc6VJWJd8=",
+    version = "v0.0.0-20160125115350-e80d13ce29ed",
+)
+
+go_repository(
+    name = "in_gopkg_inf_v0",
+    importpath = "gopkg.in/inf.v0",
+    sum = "h1:73M5CoZyi3ZLMOyDlQh031Cx6N9NDJ2Vvfl76EDAgDc=",
+    version = "v0.9.1",
+)
+
 go_rules_dependencies()
 
 go_register_toolchains(version = "1.20.5")
@@ -1527,8 +1562,8 @@ go_repository(
     name = "com_github_squzy_squzy_generated",
     build_file_proto_mode = "disable_global",
     importpath = "github.com/squzy/squzy_generated",
-    sum = "h1:YJ1vCh3q4usMOLS4o/0TOenb5GpNZRBxDXCzDn+IOQc=",
-    version = "v1.15.0",
+    sum = "h1:iLA2vnDSwXAMorXkzl3WRvDsAGt0wPucMh0J0K8zS+c=",
+    version = "v1.14.1-0.20231227142833-f4d58fa8fb6f",
 )
 
 go_repository(
@@ -1728,8 +1763,8 @@ go_repository(
     name = "com_github_golang_snappy",
     build_file_proto_mode = "disable_global",
     importpath = "github.com/golang/snappy",
-    sum = "h1:Qgr9rKW7uDUkrbSmQeiDsGa8SjGyCOGtuasMWwvp2P4=",
-    version = "v0.0.1",
+    sum = "h1:fHPg5GQYlCeLIPB9BZqMVR5nR9A+IM5zcgeTdjMYmLA=",
+    version = "v0.0.3",
 )
 
 go_repository(

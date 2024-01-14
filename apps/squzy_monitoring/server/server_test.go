@@ -90,6 +90,70 @@ var (
 		},
 	}
 
+	successCassandraConfig = &scheduler_config_storage.SchedulerConfig{
+		ID:       primitive.NewObjectID(),
+		Type:     apiPb.SchedulerType_CASSANDRA,
+		Status:   0,
+		Interval: 0,
+		Timeout:  0,
+		Db: &scheduler_config_storage.DbConfig{
+			Host:     "",
+			Port:     0,
+			User:     "",
+			Password: "",
+			DbName:   "",
+			Cluster:  "",
+		},
+	}
+
+	successMongoConfig = &scheduler_config_storage.SchedulerConfig{
+		ID:       primitive.NewObjectID(),
+		Type:     apiPb.SchedulerType_MONGO,
+		Status:   0,
+		Interval: 0,
+		Timeout:  0,
+		Db: &scheduler_config_storage.DbConfig{
+			Host:     "",
+			Port:     0,
+			User:     "",
+			Password: "",
+			DbName:   "",
+			Cluster:  "",
+		},
+	}
+
+	successMysqlConfig = &scheduler_config_storage.SchedulerConfig{
+		ID:       primitive.NewObjectID(),
+		Type:     apiPb.SchedulerType_MYSQL,
+		Status:   0,
+		Interval: 0,
+		Timeout:  0,
+		Db: &scheduler_config_storage.DbConfig{
+			Host:     "",
+			Port:     0,
+			User:     "",
+			Password: "",
+			DbName:   "",
+			Cluster:  "",
+		},
+	}
+
+	successPostgresConfig = &scheduler_config_storage.SchedulerConfig{
+		ID:       primitive.NewObjectID(),
+		Type:     apiPb.SchedulerType_POSTGRES,
+		Status:   0,
+		Interval: 0,
+		Timeout:  0,
+		Db: &scheduler_config_storage.DbConfig{
+			Host:     "",
+			Port:     0,
+			User:     "",
+			Password: "",
+			DbName:   "",
+			Cluster:  "",
+		},
+	}
+
 	errorConfig = &scheduler_config_storage.SchedulerConfig{
 		ID:       primitive.NewObjectID(),
 		Type:     11111,
@@ -105,6 +169,10 @@ var (
 		successHttpValueConfig.ID: successHttpValueConfig,
 		successSiteMapConfig.ID:   successSiteMapConfig,
 		successSSLConfig.ID:       successSSLConfig,
+		successCassandraConfig.ID: successCassandraConfig,
+		successMongoConfig.ID:     successMongoConfig,
+		successMysqlConfig.ID:     successMysqlConfig,
+		successPostgresConfig.ID:  successPostgresConfig,
 		errorConfig.ID:            errorConfig,
 	}
 
@@ -171,6 +239,62 @@ var (
 				SslExpiration: &apiPb.SslExpirationConfig{
 					Host: "",
 					Port: 0,
+				},
+			},
+		},
+		apiPb.SchedulerType_CASSANDRA: {
+			Interval: 10,
+			Timeout:  0,
+			Config: &apiPb.AddRequest_Cassandra{
+				Cassandra: &apiPb.DbConfig{
+					Host:     "",
+					Port:     0,
+					User:     "",
+					Password: "",
+					DbName:   "",
+					Cluster:  "",
+				},
+			},
+		},
+		apiPb.SchedulerType_MONGO: {
+			Interval: 10,
+			Timeout:  0,
+			Config: &apiPb.AddRequest_Mongo{
+				Mongo: &apiPb.DbConfig{
+					Host:     "",
+					Port:     0,
+					User:     "",
+					Password: "",
+					DbName:   "",
+					Cluster:  "",
+				},
+			},
+		},
+		apiPb.SchedulerType_MYSQL: {
+			Interval: 10,
+			Timeout:  0,
+			Config: &apiPb.AddRequest_Mysql{
+				Mysql: &apiPb.DbConfig{
+					Host:     "",
+					Port:     0,
+					User:     "",
+					Password: "",
+					DbName:   "",
+					Cluster:  "",
+				},
+			},
+		},
+		apiPb.SchedulerType_POSTGRES: {
+			Interval: 10,
+			Timeout:  0,
+			Config: &apiPb.AddRequest_Postgres{
+				Postgres: &apiPb.DbConfig{
+					Host:     "",
+					Port:     0,
+					User:     "",
+					Password: "",
+					DbName:   "",
+					Cluster:  "",
 				},
 			},
 		},
@@ -367,7 +491,7 @@ func TestServer_GetSchedulerList(t *testing.T) {
 		_, err := s.GetSchedulerList(context.Background(), &empty.Empty{})
 		assert.NotEqual(t, nil, err)
 	})
-	t.Run("Should: return error because sinle DB error", func(t *testing.T) {
+	t.Run("Should: return error because single DB error", func(t *testing.T) {
 		s := New(nil, nil, &mockConfigStorageErrorSingle{}, nil)
 		_, err := s.GetSchedulerList(context.Background(), &empty.Empty{})
 		assert.NotEqual(t, nil, err)
@@ -435,6 +559,34 @@ func TestServer_GetSchedulerById(t *testing.T) {
 			Id: errorConfig.ID.Hex(),
 		})
 		assert.NotEqual(t, nil, err)
+	})
+	t.Run("Should: return Cassandra config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successCassandraConfig.ID.Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return Mongo config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successMongoConfig.ID.Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return Mysql config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successMysqlConfig.ID.Hex(),
+		})
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: return Postgres config", func(t *testing.T) {
+		s := New(nil, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.GetSchedulerById(context.Background(), &apiPb.GetSchedulerByIdRequest{
+			Id: successPostgresConfig.ID.Hex(),
+		})
+		assert.Equal(t, nil, err)
 	})
 }
 
@@ -592,6 +744,26 @@ func TestServer_Add(t *testing.T) {
 	t.Run("Should: add http check without error", func(t *testing.T) {
 		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
 		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_HTTP])
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: add CASSANDRA check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_CASSANDRA])
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: add MONGO check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_MONGO])
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: add MYSQL check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_MYSQL])
+		assert.Equal(t, nil, err)
+	})
+	t.Run("Should: add POSTGRES check without error", func(t *testing.T) {
+		s := New(&mockStorageOk{}, nil, &mockConfigStorageOk{}, nil)
+		_, err := s.Add(context.Background(), rqMap[apiPb.SchedulerType_POSTGRES])
 		assert.Equal(t, nil, err)
 	})
 }

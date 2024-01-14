@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "cassandra-tools",
+    srcs = ["cassandraTools.go"],
+    importpath = "github.com/squzy/squzy/internal/cassandra-tools",
+    visibility = ["//:__subpackages__"],
+    deps = ["@com_github_gocql_gocql//:gocql"],
+)
+
+go_test(
+    name = "cassandra-tools_test",
+    srcs = ["cassandraTools_test.go"],
+    embed = [":cassandra-tools"],
+    deps = [
+        "@com_github_gocql_gocql//:gocql",
+        "@com_github_stretchr_testify//assert",
+    ],
+)
