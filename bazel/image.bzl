@@ -1,4 +1,4 @@
-"""OCI image + Docker Hub push macro (replaces legacy rules_docker go_image/container_push)."""
+"""OCI image + Docker Hub push macro"""
 
 load("@io_bazel_rules_go//go:def.bzl", "go_cross_binary")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push")
