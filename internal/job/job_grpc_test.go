@@ -3,18 +3,23 @@ package job
 import (
 	"context"
 	"errors"
+	"net"
+	"testing"
+	"time"
+
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	health_check "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
-	"net"
-	"testing"
-	"time"
 )
 
 type serverLong struct {
+}
+
+func (s *serverLong) List(context.Context, *health_check.HealthListRequest) (*health_check.HealthListResponse, error) {
+	panic("implement me")
 }
 
 func (s serverLong) Check(ctx context.Context, rq *health_check.HealthCheckRequest) (*health_check.HealthCheckResponse, error) {
@@ -41,7 +46,15 @@ func (s serverLong) Watch(*health_check.HealthCheckRequest, health_check.Health_
 type server struct {
 }
 
+func (s *server) List(context.Context, *health_check.HealthListRequest) (*health_check.HealthListResponse, error) {
+	panic("implement me")
+}
+
 type errorServer struct {
+}
+
+func (e *errorServer) List(context.Context, *health_check.HealthListRequest) (*health_check.HealthListResponse, error) {
+	panic("implement me")
 }
 
 func (e errorServer) Check(ctx context.Context, r *health_check.HealthCheckRequest) (*health_check.HealthCheckResponse, error) {

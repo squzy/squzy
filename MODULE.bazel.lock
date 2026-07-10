@@ -646,7 +646,7 @@
     "@@rules_oci+//oci:extensions.bzl%oci": {
       "general": {
         "bzlTransitiveDigest": "cxV4X2zNlwdVp+Fypb29N+SXzWs4M4ZSqFlvUuoT7Mg=",
-        "usagesDigest": "/r2S0E0smZ/YPdd83E5kFjsbReD6KPGs+TUr5mH1K+E=",
+        "usagesDigest": "5I28MheavJUbzJGQGLPsO6OWsilb/6hEyukSp6ETnqE=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
