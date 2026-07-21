@@ -258,6 +258,9 @@ func ConvertFromClickhouseStatRequests(data []*StatRequest) []*apiPb.GetAgentInf
 
 func ConvertFromClickhouseStatRequest(data *StatRequest) (*apiPb.GetAgentInformationResponse_Statistic, error) {
 	t := timestamppb.New(data.Time)
+	if err := t.CheckValid(); err != nil {
+		return nil, err
+	}
 	return &apiPb.GetAgentInformationResponse_Statistic{
 		CpuInfo:    convertFromCPUInfo(data.CPUInfo),
 		MemoryInfo: convertFromMemoryInfo(data.MemoryInfo),
