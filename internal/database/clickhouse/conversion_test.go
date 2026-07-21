@@ -1,11 +1,10 @@
 package clickhouse
 
 import (
-	"github.com/golang/protobuf/ptypes"
-	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/structpb"
+	tspb "google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 	"time"
 )
@@ -51,7 +50,7 @@ func Test_convertToIncidentHistoryErr(t *testing.T) {
 }
 
 func TestConvertToSnapshot(t *testing.T) {
-	correctTime, _ := ptypes.TimestampProto(time.Now())
+	correctTime := tspb.New(time.Now())
 	t.Run("Test: error", func(t *testing.T) {
 		_, err := ConvertToSnapshot(&apiPb.SchedulerResponse{})
 		assert.Error(t, err)
@@ -185,7 +184,7 @@ func TestConvertToClickhouseStatRequest(t *testing.T) {
 	})
 	t.Run("Test: no error", func(t *testing.T) {
 		_, err := ConvertToClickhouseStatRequest(&apiPb.Metric{
-			Time: ptypes.TimestampNow(),
+			Time: tspb.Now(),
 		})
 		assert.NoError(t, err)
 	})
@@ -208,7 +207,7 @@ func TestConvertToClickhouseStatRequest(t *testing.T) {
 					"": {},
 				},
 			},
-			Time: ptypes.TimestampNow(),
+			Time: tspb.Now(),
 		})
 		assert.NoError(t, err)
 	})
@@ -269,7 +268,7 @@ func TestConvertFromClickhouseStatRequest(t *testing.T) {
 }
 
 func TestConvertToClickhouseSnapshot(t *testing.T) {
-	correctTime, _ := ptypes.TimestampProto(time.Now())
+	correctTime := tspb.New(time.Now())
 	t.Run("Test: error", func(t *testing.T) {
 		_, err := ConvertToSnapshot(&apiPb.SchedulerResponse{})
 		assert.Error(t, err)
@@ -379,7 +378,7 @@ func TestConvertToStatRequest(t *testing.T) {
 	})
 	t.Run("Test: no error", func(t *testing.T) {
 		_, err := ConvertToClickhouseStatRequest(&apiPb.Metric{
-			Time: ptypes.TimestampNow(),
+			Time: tspb.Now(),
 		})
 		assert.NoError(t, err)
 	})
@@ -402,7 +401,7 @@ func TestConvertToStatRequest(t *testing.T) {
 					"": {},
 				},
 			},
-			Time: ptypes.TimestampNow(),
+			Time: tspb.Now(),
 		})
 		assert.NoError(t, err)
 	})
@@ -540,7 +539,7 @@ func TestConvertToTransactionInfo(t *testing.T) {
 	})
 	t.Run("Test: error", func(t *testing.T) {
 		_, err := convertToTransactionInfo(&apiPb.TransactionInfo{
-			StartTime: ptypes.TimestampNow(),
+			StartTime: tspb.Now(),
 			EndTime:   nil,
 		})
 		assert.Error(t, err)

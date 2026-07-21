@@ -2,9 +2,10 @@ package expression
 
 import (
 	"context"
+	"time"
+
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	structpb "google.golang.org/protobuf/types/known/structpb"
-	"time"
 )
 
 type FilterSnapshot func(req *apiPb.GetSchedulerInformationRequest) *apiPb.GetSchedulerInformationRequest

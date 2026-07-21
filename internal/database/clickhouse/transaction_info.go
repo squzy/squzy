@@ -3,10 +3,10 @@ package clickhouse
 import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
-	"github.com/golang/protobuf/ptypes/wrappers"
 	uuid "github.com/google/uuid"
 	"github.com/squzy/squzy/internal/logger"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	wrappers "google.golang.org/protobuf/types/known/wrapperspb"
 	"regexp"
 	"strings"
 	"time"
