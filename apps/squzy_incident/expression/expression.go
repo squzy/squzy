@@ -3,7 +3,7 @@ package expression
 import (
 	"errors"
 	"fmt"
-	"github.com/antonmedv/expr"
+	"github.com/expr-lang/expr"
 	"github.com/araddon/dateparse"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	timestamp "google.golang.org/protobuf/types/known/timestamppb"

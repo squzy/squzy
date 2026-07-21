@@ -3,7 +3,6 @@ package clickhouse
 import (
 	"database/sql"
 	"errors"
-	"github.com/golang/protobuf/ptypes"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"time"
 )
@@ -202,26 +201,26 @@ func getTime(filter *apiPb.TimeFilter) (time.Time, time.Time, error) {
 	var err error
 	if filter != nil {
 		if filter.GetFrom() != nil {
-			timeFrom, err = ptypes.Timestamp(filter.From)
+			timeFrom, err = filter.From.AsTime(), filter.From.CheckValid()
 		}
 		if filter.GetTo() != nil {
-			timeTo, err = ptypes.Timestamp(filter.To)
+			timeTo, err = filter.To.AsTime(), filter.To.CheckValid()
 		}
 	}
 	return timeFrom, timeTo, err
 }
 
-//Return time unixNanos
+// Return time unixNanos
 func getTimeInt64(filter *apiPb.TimeFilter) (int64, int64, error) {
 	timeFrom := time.Unix(0, 0)
 	timeTo := time.Now()
 	var err error
 	if filter != nil {
 		if filter.GetFrom() != nil {
-			timeFrom, err = ptypes.Timestamp(filter.From)
+			timeFrom, err = filter.From.AsTime(), filter.From.CheckValid()
 		}
 		if filter.GetTo() != nil {
-			timeTo, err = ptypes.Timestamp(filter.To)
+			timeTo, err = filter.To.AsTime(), filter.To.CheckValid()
 		}
 	}
 	if err != nil {

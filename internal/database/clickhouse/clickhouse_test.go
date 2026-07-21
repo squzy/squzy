@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/ClickHouse/clickhouse-go"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/squzy/squzy/internal/logger"
@@ -31,7 +30,6 @@ var (
 	clickh *Clickhouse
 )
 
-//
 func TestMain(m *testing.M) {
 	err := setup()
 	if err != nil {
@@ -263,10 +261,7 @@ func TestGetIncidents(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	timeTo, err := ptypes.TimestampProto(time.Now().Add(time.Second * 5))
-	if err != nil {
-		assert.Fail(t, err.Error())
-	}
+	timeTo := timestamp.New(time.Now().Add(time.Second * 5))
 	incs, count, err := clickh.GetIncidents(&apiPb.GetIncidentsListRequest{
 		Status: 1,
 		RuleId: &wrappers.StringValue{Value: "999"},
@@ -420,10 +415,7 @@ func TestGetSnapshots(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	timeTo, err := ptypes.TimestampProto(time.Now().Add(time.Second * 5))
-	if err != nil {
-		assert.Fail(t, err.Error())
-	}
+	timeTo := timestamp.New(time.Now().Add(time.Second * 5))
 	snaps, count, err := clickh.GetSnapshots(&apiPb.GetSchedulerInformationRequest{
 		SchedulerId: "GetSnapshots",
 		Pagination: &apiPb.Pagination{
@@ -544,10 +536,7 @@ func TestGetSnapshotsUptime(t *testing.T) {
 		assert.Fail(t, err.Error())
 	}
 
-	timeTo, err := ptypes.TimestampProto(time.Now().Add(time.Second * 5))
-	if err != nil {
-		assert.Fail(t, err.Error())
-	}
+	timeTo := timestamp.New(time.Now().Add(time.Second * 5))
 	resp, err := clickh.GetSnapshotsUptime(&apiPb.GetSchedulerUptimeRequest{
 		SchedulerId: "GetSnapshotsUptime",
 		TimeRange: &apiPb.TimeFilter{

@@ -3,12 +3,12 @@ package job
 import (
 	"context"
 	"errors"
-	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
-	"github.com/stretchr/testify/assert"
-	"net/http"
 	"github.com/squzy/squzy/internal/parsers"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	"github.com/squzy/squzy/internal/semaphore"
+	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
+	"github.com/stretchr/testify/assert"
+	"net/http"
 	"testing"
 	"time"
 )

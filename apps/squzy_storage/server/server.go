@@ -48,7 +48,7 @@ func (s *server) SaveResponseFromScheduler(ctx context.Context, request *apiPb.S
 		})
 	}()
 	if err != nil {
-		return nil, grpcStatus.Errorf(codes.Internal, err.Error())
+		return nil, grpcStatus.Error(codes.Internal, err.Error())
 	}
 	return &empty.Empty{}, nil
 }
@@ -66,7 +66,7 @@ func (s *server) SaveResponseFromAgent(ctx context.Context, request *apiPb.Metri
 		})
 	}()
 	if err != nil {
-		return nil, grpcStatus.Errorf(codes.Internal, err.Error())
+		return nil, grpcStatus.Error(codes.Internal, err.Error())
 	}
 	return &empty.Empty{}, nil
 }
@@ -147,7 +147,7 @@ func (s *server) GetTransactionsGroup(ctx context.Context, request *apiPb.GetTra
 
 func wrapError(err error) error {
 	if err != nil {
-		return grpcStatus.Errorf(codes.Internal, err.Error())
+		return grpcStatus.Error(codes.Internal, err.Error())
 	}
 	return nil
 }

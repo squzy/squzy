@@ -17,7 +17,7 @@ go_library(
         "@com_github_clickhouse_clickhouse_go//:clickhouse-go",
         "@com_github_jinzhu_gorm//:gorm",
         "@com_github_squzy_squzy_generated//generated/github.com/squzy/squzy_proto",
-        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//:grpc",
     ],
 )
 
@@ -28,7 +28,6 @@ go_binary(
 )
 
 squzy_image(
-    name = "squzy_storage",
     binary = ":squzy_storage",
     repository = "squzy/squzy_storage",
 )

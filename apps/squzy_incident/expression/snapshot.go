@@ -2,9 +2,10 @@ package expression
 
 import (
 	"context"
+	"time"
+
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	structpb "google.golang.org/protobuf/types/known/structpb"
-	"time"
 )
 
 type FilterSnapshot func(req *apiPb.GetSchedulerInformationRequest) *apiPb.GetSchedulerInformationRequest
@@ -118,11 +119,11 @@ func (e *expressionStruct) getSnapshotEnv(schedulerId string) map[string]interfa
 		"getValue": func(snapshot *apiPb.SchedulerSnapshot) *structpb.Value {
 			return snapshot.GetMeta().GetValue()
 		},
-		"unixToTime": func(unix int64) time.Time {
-			return time.Unix(unix, 0)
+		"unixToTime": func(unix int) time.Time {
+			return time.Unix(int64(unix), 0)
 		},
-		"unixNanoToTime": func(unixNano int64) time.Time {
-			return time.Unix(0, unixNano)
+		"unixNanoToTime": func(unixNano int) time.Time {
+			return time.Unix(0, int64(unixNano))
 		},
 		"null": nil,
 		"mulDuration": func(f int, t time.Duration) time.Duration {

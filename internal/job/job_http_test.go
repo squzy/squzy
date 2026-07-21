@@ -2,10 +2,10 @@ package job
 
 import (
 	"errors"
+	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	"testing"
 	"time"
 )

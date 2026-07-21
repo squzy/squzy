@@ -2,13 +2,13 @@ package job
 
 import (
 	"context"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
 

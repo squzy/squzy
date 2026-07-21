@@ -1012,7 +1012,7 @@ func (s *SuiteStatRequest) Test_GetCpuInfo_getStatRequestsCpuInfoError() {
 	require.Error(s.T(), err)
 }
 
-//Is used for getSpecialRecords test
+// Is used for getSpecialRecords test
 func (s *SuiteStatRequest) Test_GetCpuInfo_Count_Error() {
 	var (
 		id = "1"
@@ -1022,7 +1022,7 @@ func (s *SuiteStatRequest) Test_GetCpuInfo_Count_Error() {
 	require.Error(s.T(), err)
 }
 
-//Is used for getSpecialRecords test
+// Is used for getSpecialRecords test
 func (s *SuiteStatRequest) Test_GetCpuInfo_Select_Error() {
 	var (
 		id = "1"
@@ -1041,7 +1041,7 @@ func (s *SuiteStatRequest) Test_GetCpuInfo_Select_Error() {
 	require.Error(s.T(), err)
 }
 
-//Time errors in getSpecialRecords
+// Time errors in getSpecialRecords
 func TestClickhouse_GetCpuInfo(t *testing.T) {
 	//Time for invalid timestamp
 	maxValidSeconds := 253402300800

@@ -1,11 +1,11 @@
 package job
 
 import (
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/squzy/squzy/internal/cassandra-tools"
 	scheduler_config_storage "github.com/squzy/squzy/internal/scheduler-config-storage"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type cassandraJob struct {

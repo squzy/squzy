@@ -8,14 +8,13 @@ load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 # make variable (`--define version=...`), defaulting to `dev` via .bazelrc.
 _PUSH_NAMES = ["squzy_push_hub", "squzy_push_hub_ci"]
 
-def squzy_image(name, binary, repository):
+def squzy_image(binary, repository):
     """Builds a linux/amd64 OCI image for `binary` and Docker Hub push targets.
-
     Args:
-        name: app name; produces `<name>_image` and the push targets.
-        binary: the `go_binary` label to containerize.
+        binary: the `go_binary` label to containerize, e.g. ":squzy_monitoring".
         repository: Docker Hub repository, e.g. "squzy/squzy_monitoring".
     """
+    name = binary.split(":")[-1]
     linux_bin = name + "_linux"
 
     # Force linux/amd64 so the image is correct regardless of host platform.

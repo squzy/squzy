@@ -25,7 +25,7 @@ go_library(
         "//internal/storage",
         "@com_github_go_redis_redis_v8//:redis",
         "@com_github_squzy_mongo_helper//:mongo_helper",
-        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//:grpc",
         "@org_mongodb_go_mongo_driver//mongo",
         "@org_mongodb_go_mongo_driver//mongo/options",
     ],
@@ -38,7 +38,6 @@ go_binary(
 )
 
 squzy_image(
-    name = "squzy_monitoring",
     binary = ":squzy_monitoring",
     repository = "squzy/squzy_monitoring",
 )
