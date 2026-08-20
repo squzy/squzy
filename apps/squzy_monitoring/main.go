@@ -75,6 +75,7 @@ func main() {
 		job.ExecSiteMap,
 		job.ExecHTTPValue,
 		job.ExecSSL,
+		job.ExecHTML,
 		job.ExecCassandra,
 		job.ExecMongo,
 		job.ExecMysql,

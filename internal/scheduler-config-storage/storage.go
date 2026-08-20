@@ -2,6 +2,7 @@ package scheduler_config_storage
 
 import (
 	"context"
+	fconfig "github.com/PxyUp/fitter/pkg/config"
 	"github.com/squzy/mongo_helper"
 	apiPb "github.com/squzy/squzy_generated/generated/github.com/squzy/squzy_proto"
 	"go.mongodb.org/mongo-driver/bson"
@@ -42,6 +43,31 @@ type HTTPValueConfig struct {
 	Selectors []*Selectors      `bson:"selectors"`
 }
 
+type HTMLValueConfig struct {
+	Method  string            `bson:"method"`
+	URL     string            `bson:"url"`
+	Headers map[string]string `bson:"headers"`
+
+	Selectors []*Selector `bson:"fields"`
+}
+
+type Selector struct {
+	Type apiPb.HtmlValueConfig_HtmlValueParseType `bson:"type"`
+	Path string                                   `bson:"path"`
+}
+
+var FieldToHtml = map[apiPb.HtmlValueConfig_HtmlValueParseType]fconfig.FieldType{
+	apiPb.HtmlValueConfig_HTML_PARSE_VALUE_UNSPECIFIED: fconfig.Null,
+	apiPb.HtmlValueConfig_BOOL:                         fconfig.Bool,
+	apiPb.HtmlValueConfig_STRING:                       fconfig.String,
+	apiPb.HtmlValueConfig_INT:                          fconfig.Int,
+	apiPb.HtmlValueConfig_INT64:                        fconfig.Int64,
+	apiPb.HtmlValueConfig_FLOAT:                        fconfig.Float,
+	apiPb.HtmlValueConfig_FLOAT64:                      fconfig.Float64,
+	apiPb.HtmlValueConfig_ARRAY:                        fconfig.Array,
+	apiPb.HtmlValueConfig_OBJECT:                       fconfig.Object,
+}
+
 type Selectors struct {
 	Type apiPb.HttpJsonValueConfig_JsonValueParseType `bson:"type"`
 	Path string                                       `bson:"path"`
@@ -70,6 +96,7 @@ type SchedulerConfig struct {
 	HTTPConfig          *HTTPConfig           `bson:"httpConfig,omitempty"`
 	HTTPValueConfig     *HTTPValueConfig      `bson:"httpValueConfig,omitempty"`
 	SslExpirationConfig *SslExpirationConfig  `bson:"sslExpirationConfig,omitempty"`
+	HTMLValueConfig     *HTMLValueConfig      `bson:"htmlValueConfig,omitempty"`
 	Db                  *DbConfig             `bson:"db"`
 }
 
